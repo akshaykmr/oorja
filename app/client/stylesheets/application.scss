@@ -1,0 +1,14 @@
+@import "base/animations";
+@import "module/Loading";
+// pages
+@import "./pages/_landing";
+
+* {
+  box-sizing: border-box !important;
+}
+
+body {
+  margin: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
