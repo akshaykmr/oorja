@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { browserHistory } from 'react-router';
 import { Intent } from '@blueprintjs/core';
 
 import { createRoom } from '../actions/roomConfiguration';
@@ -41,19 +42,20 @@ class RoomSetup extends Component {
     const { roomName, passwordEnabled, password } = this.state;
     this.setWaitState(true);
     this.props.createRoom(roomName, passwordEnabled, password).then(
-      () => {
+      (createdRoomName) => {
         this.setWaitState(false);
         SupremeToaster.show({
           intent: Intent.SUCCESS,
           message: 'Room Created ヾ(⌐■_■)ノ♪',
           timeout: 3000,
         });
+        browserHistory.push(`/room/${createdRoomName}`);
       },
       (error) => {
         this.setWaitState(false);
         SupremeToaster.show({
-          intent: Intent.DANGER,
-          message: 'Could not create room (ಥ﹏ಥ)',
+          intent: Intent.WARNING,
+          message: error.reason,
           timeout: 4000,
         });
       }

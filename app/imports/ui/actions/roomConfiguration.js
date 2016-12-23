@@ -13,7 +13,13 @@ export const createRoom = (roomName, passwordEnabled, password = '') =>
     };
     return Meteor.callPromise('createRoom', roomInfo).then(
       (response) => {
-        return Promise.resolve(response);
+        const { createdRoomName, creatorToken, shareToken } = response;
+        // its called createdRoomName because some minor changes may be done to
+        // the name send by the client above.
+        // store token and shareToken in localStorage
+        localStorage.setItem(`roomToken:${createdRoomName}`, creatorToken);
+        localStorage.setItem(`roomShareToken:${createdRoomName}`, shareToken);
+        return Promise.resolve(createdRoomName);
       },
       error => Promise.reject(error)
     );

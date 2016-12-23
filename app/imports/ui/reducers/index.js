@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux';
+import { routerReducer } from 'react-router-redux';
 
 import roomConfigurationReducer from './roomConfiguration';
 
@@ -24,6 +25,11 @@ const rootReducer = combineReducers({
   eg.  layout adjustment etc.
   */
 
+  routing: routerReducer,
+  /*
+    Keep the router in sync with application state
+    https://www.npmjs.com/package/react-router-redux
+  */
 });
 
 export default rootReducer;
