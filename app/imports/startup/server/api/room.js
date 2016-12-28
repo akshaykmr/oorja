@@ -4,7 +4,11 @@ import bcrypt from 'bcrypt';
 import _ from 'lodash';
 import { moment as Moment } from 'meteor/momentjs:moment';
 
-import jwt from 'jwt-simple';
+// import jwt from 'jwt-simple';
+// use a jwt? currently all members of the room will have same secret.
+// maybe not for now as room will be archived after 7 days.
+// but should problably use them for permission based opertation if I add some later. hmm...
+
 import { Random } from 'meteor/random';
 
 import { Rooms } from '../../../collections/common';
@@ -12,7 +16,7 @@ import { Rooms } from '../../../collections/common';
 const hashPassword = Meteor.wrapAsync(bcrypt.hash);
 const comparePassword = Meteor.wrapAsync(bcrypt.compare);
 
-const { private: { saltRounds, JWTsecret } } = Meteor.settings;
+const { private: { saltRounds } } = Meteor.settings;
 
 // Common error handling
 const PASS_TO_CLIENT = 'PASS_TO_CLIENT';
@@ -47,11 +51,13 @@ Meteor.methods({
 
       const now = new Moment();
       const validTill = now.add(7, 'days').toDate().getTime();
+      const roomSecret = Random.secret(14);
 
       const roomDocument = {
         owner: Meteor.userId() || null,
         ...roomInfo,
         roomName,
+        roomSecret,
         password,
         createdAt: now.toDate().getTime(),
         validTill,
@@ -65,27 +71,11 @@ Meteor.methods({
         throw new Meteor.Error(errorTopic, 'Failed to create Room');
       }
 
-      // jwt for room creator
-      const jwtPayload = {
-        roomId,
-        roomCreator: true,
-        iat: now.toDate().getTime(),
-        jti: Random.id(),
-        validTill,
-      };
-      const creatorToken = jwt.encode(jwtPayload, JWTsecret);
-      jwtPayload.roomCreator = false;
-
-      // creator boolean in case I need to add some room permissions later.
-      const shareToken = jwt.encode(jwtPayload, JWTsecret);
-
       return {
         createdRoomName: roomName,
-        creatorToken,
-        shareToken,
+        roomSecret,
       };
     } catch (exception) {
-      console.log(exception);
       const { details, reason } = exception;
       throw new Meteor.Error(
         errorTopic,
@@ -94,40 +84,42 @@ Meteor.methods({
     }
   },
 
-  loginRoom(roomName, password) {
-    check(roomName, String);
-    check(password, String);
-  },
-
   getRoomInfo(roomName) {
     check(roomName, String);
     const room = Rooms.findOne({ roomName });
     if (!room) {
       return null;
     }
+    // be sure to filter for only relevent fields. dont send the whole doc lol.
     return _.pick(room, ['passwordEnabled']);
   },
 
+  // returns null or roomSecret(string)
   authenticatePassword(roomName, password) {
     check(roomName, String);
     check(password, String);
 
-    let token = null;
-    const room = Rooms.findOne(roomName);
+    const room = Rooms.findOne({ roomName });
     if (!room) {
       throw new Meteor.Error('Room not found');
     } else if (comparePassword(password, room.password)) {
-      // jwt for room creator
-      const jwtPayload = {
-        roomId: room._id,
-        iat: new Date().getTime(),
-        jti: Random.id(),
-        validTill: room.validTill,
-      };
-      token = jwt.encode(jwtPayload, JWTsecret);
+      return room.roomSecret;
     }
-    return {
-      token,
-    };
+    return null;
   },
+});
+
+
+Meteor.publish('room.info', (roomName, roomSecret) => {
+  check(roomName, String);
+  check(roomSecret, String);
+
+  return Rooms.find({ roomName, roomSecret }, {
+    fields: {
+      roomName: 1,
+      users: 1,
+      createdAt: 1,
+    },
+    limit: 1,
+  });
 });

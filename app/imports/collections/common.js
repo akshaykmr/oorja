@@ -8,9 +8,9 @@ export const Rooms = new Mongo.Collection('room');
 /*
   {
     roomName,
-    owner,
     passwordEnabled,
     password,
+    users,
     createdAt
   }
 

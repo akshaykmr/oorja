@@ -8,8 +8,11 @@ import { Intent } from '@blueprintjs/core';
 import SupremeToaster from '../components/Toaster';
 
 import Loading from '../components/Loading';
+import PasswordPrompt from './PasswordPrompt';
 
-import { deleteTokens, getRoomInfo, authenticatePassword } from '../actions/roomConfiguration';
+import { Rooms as MongoRoom } from '../../collections/common';
+
+import { deleteSecret, getRoomInfo, storeSecret } from '../actions/roomConfiguration';
 
 class Room extends Component {
 
@@ -18,18 +21,18 @@ class Room extends Component {
 
     const roomName = this.props.params.roomName;
     this.roomName = roomName;
-    this.localStorageToken = localStorage.getItem(`roomToken:${roomName}`);
-    this.urlToken = props.location.query.token;
+    this.roomSecret = localStorage.getItem(`roomSecret:${roomName}`);
+    this.urlRoomSecret = props.location.query.secret;
 
-    // if token exists in url then clear stored tokens if any
-    if (this.urlToken) {
-      this.props.deleteTokens(roomName);
+    // if secret exists in url delete storedSecret
+    if (this.urlRoomSecret) {
+      this.props.deleteSecret(roomName);
     }
 
     this.stages = {
-      LOADING: 'LOADING', // show a loader or something
+      LOADING: 'LOADING', // get some room info
       PASSWORD_PROMPT: 'PASSWORD_PROMPT',
-      AUTHENTICATING: 'AUTHENTICATING',
+      INITIALIZING: 'INITIALIZING',
       GETTING_READY: 'GETTING_READY',
       SHOW_TIME: 'SHOW_TIME',
     };
@@ -41,37 +44,43 @@ class Room extends Component {
     };
   }
 
+  passwordSuccess() {
+    this.roomSecret = localStorage.getItem(`roomSecret:${this.roomName}`);
+    this.gotoStage(this.stages.INITIALIZING);
+  }
+
   componentWillMount() {
     // get room info
     const self = this;
     (async function setRoomInfo() {
       const response = await self.props.getRoomInfo(self.roomName);
-      self.setState({
-        ...self.state,
-        roomInfo: response.payload,
-      });
-
-      const { roomInfo } = self.state;
+      const roomInfo = response.payload;
       if (!roomInfo) {
         // room not found
         SupremeToaster.show({
-          message: 'Room not found',
-          intent: Intent.DANGER,
+          message: (
+            <div>
+              ( ⚆ _ ⚆ ) Room not found.
+              <br />
+              Please check the link or create a new room.
+            </div>
+          ),
+          intent: Intent.WARNING,
           timeout: 6000,
         });
         browserHistory.push('/');
-        // check tokens
-      } else if (!self.localStorageToken && !self.urlToken) {
-        // no tokens found, check if passwordEnabled,
-        // else room can be only opened with token,
-        // either user can create a new room or get a new shareLink.
+      } else if (!self.urlRoomSecret && !self.roomSecret) {
+        // secret not found: check if passwordEnabled and fetch secret through password.
+        // room can be only opened with secret,
+        // fail? either user can create a new room or get a new shareLink.
         if (roomInfo.passwordEnabled) {
           SupremeToaster.show({
             message: 'This room is password protected (°ロ°)☝',
             intent: Intent.PRIMARY,
-            timeout: 4000,
+            timeout: 3000,
           });
           // set state for password prompt.
+          self.gotoStage(self.stages.PASSWORD_PROMPT);
         } else {
           SupremeToaster.show({
             message: `Please enter the complete link to enter the room.
@@ -81,32 +90,89 @@ class Room extends Component {
           });
           browserHistory.push('/');
         }
+      } else {
+        self.gotoStage(self.stages.INITIALIZING);
       }
     }());
   }
 
+  gotoStage(stage) {
+    // const previousStage = this.state.stage;
+    this.setState({
+      ...this.state,
+      stage,
+    });
+
+    const { INITIALIZING } = this.stages;
+    const { roomName, roomSecret } = this;
+    const self = this;
+    // custom action when switching between stages.
+    switch (stage) {
+      case INITIALIZING :
+        (async function subscribeToRoomInfo() {
+          self.gotoStage(self.stages.LOADING);
+          self.roomInfoSubscriptionHandle = Meteor.subscribe(
+            'room.info',
+            roomName,
+            roomSecret
+          );
+          await self.roomInfoSubscriptionHandle.readyPromise();
+          const updateRoomInfo = (roomInfo) => {
+            self.setState({
+              ...this.state,
+              roomInfo,
+            });
+          };
+          // set an observer to sync roomInfo changes to the state.
+          self.observeRoomInfo = MongoRoom.find({ roomName }).observe({
+            added: (roomInfo) => {
+              updateRoomInfo(roomInfo);
+            },
+            changed: (latestRoomInfo) => {
+              updateRoomInfo(latestRoomInfo);
+            },
+            removed: () => {
+              console.error('INFO-ERROR');
+              browserHistory.push('/');
+            },
+          });
+          self.gotoStage(self.stages.GETTING_READY);
+        }());
+        break;
+      default: break;
+    }
+  }
+
   componentWillUnmount() {
     // cleanup
+    this.roomInfoSubscriptionHandle.stop();
+    this.observeRoomInfo.stop();
   }
 
   render() {
-    if (this.state.stage === this.stages.LOADING) {
-      return <Loading />;
+    const { LOADING, PASSWORD_PROMPT, GETTING_READY } = this.stages;
+    switch (this.state.stage) {
+      case LOADING: return <Loading />;
+      case PASSWORD_PROMPT:
+        return <PasswordPrompt
+                  roomName = {this.roomName}
+                  onSuccess = {this.passwordSuccess.bind(this)}
+                />;
+      case GETTING_READY:
+        return <div> GET READY </div>;
+      default : return (
+        <div> Say what?! </div>
+      );
     }
-
-    return (
-      <div>
-        Lel
-      </div>
-    );
   }
 }
 
 Room.propTypes = {
   params: React.PropTypes.object,
   location: React.PropTypes.object,
-  deleteTokens: React.PropTypes.func.isRequired,
+  deleteSecret: React.PropTypes.func.isRequired,
   getRoomInfo: React.PropTypes.func.isRequired,
+  storeSecret: React.PropTypes.func.isRequired,
 };
 
-export default connect(null, { deleteTokens, getRoomInfo, authenticatePassword })(Room);
+export default connect(null, { deleteSecret, getRoomInfo, storeSecret })(Room);

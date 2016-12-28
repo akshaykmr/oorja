@@ -42,14 +42,15 @@ class RoomSetup extends Component {
     const { roomName, passwordEnabled, password } = this.state;
     this.setWaitState(true);
     this.props.createRoom(roomName, passwordEnabled, password).then(
-      (createdRoomName) => {
+      ({ createdRoomName, roomSecret }) => {
         this.setWaitState(false);
         SupremeToaster.show({
           intent: Intent.SUCCESS,
           message: 'Room Created ヾ(⌐■_■)ノ♪',
           timeout: 3000,
         });
-        browserHistory.push(`/room/${createdRoomName}`);
+        const queryString = passwordEnabled ? '' : `?secret=${roomSecret}`;
+        browserHistory.push(`/room/${createdRoomName}${queryString}`);
       },
       (error) => {
         this.setWaitState(false);
