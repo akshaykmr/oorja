@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 import { HTTP } from 'meteor/http';
 import { Accounts } from 'meteor/accounts-base';
 
@@ -11,13 +10,13 @@ Accounts.onCreateUser((options, user) => {
   if (user.services.facebook) {
     // user.emails=[];
     user.loginService = 'facebook';
-    options.profile.loginService = 'facebook';
+    options.profile.loginService = 'Facebook';
     const facebookId = user.services.facebook.id;
     options.profile.picture = `https://graph.facebook.com/${facebookId}/picture?width=500`;
     options.profile.gender = user.services.facebook.gender;
   } else if (user.services.google) {
     user.loginService = 'google';
-    options.profile.loginService = 'google';
+    options.profile.loginService = 'Google';
     const pictureLink = user.services.google.picture;
     delete user.services.google.picture;
     options.profile.picture = pictureLink;
@@ -25,7 +24,7 @@ Accounts.onCreateUser((options, user) => {
     options.profile.gender = user.services.google.gender;
   } else if (user.services.twitter) {
     user.loginService = 'twitter';
-    options.profile.loginService = 'twitter';
+    options.profile.loginService = 'Twitter';
     options.profile.picture = `https://twitter.com/${options.profile.name}/profile_image?size=original`;
     options.profile.firstName = user.services.twitter.screenName;
     user.profile = options.profile;
@@ -35,7 +34,7 @@ Accounts.onCreateUser((options, user) => {
     user.profile = {
       firstName: github.username,
       lastName: null,
-      loginService: 'github',
+      loginService: 'Github',
       picture: `https://github.com/${github.username}.png?size=500`,
     };
   } else if (user.services.linkedin) {
@@ -57,8 +56,8 @@ Accounts.onCreateUser((options, user) => {
     user.profile = {
       firstName: linkedin.firstName,
       lastName: linkedin.lastName,
-      loginService: 'linkedin',
-      picture: data.values? data.values[0] : '/public/resources/dummy_picture',
+      loginService: 'LinkedIn',
+      picture: data.values ? data.values[0] : '/public/resources/dummy_picture',
       publicProfile: linkedin.publicProfileUrl,
       headline: linkedin.headline,
     };

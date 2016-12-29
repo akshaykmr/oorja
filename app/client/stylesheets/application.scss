@@ -12,3 +12,19 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+
+
+/* login container */
+.login-container {
+  height: 60px;
+  width: 100%;
+  margin: 0 auto;
+
+}
+
+.loginButton {
+  display: inline-block;
+  height: 60px;
+  width: 60px;
+}
