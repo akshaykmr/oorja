@@ -65,7 +65,6 @@ class LoginWithService extends Component {
     };
 
     return this.services.map(({ service, login }, index) => {
-      const imagePath = `/images/${service}.svg`;
       let classes = 'example loginButton';
       if (loggedIn && loginService === service) {
         classes += ' active';
@@ -93,10 +92,10 @@ class LoginWithService extends Component {
     if (!this.state.loggedIn) {
       let text;
       if (this.state.hasLoggedOutOnce) {
+        text = 'You have successfully logged out. you may login again with an account of your choice.';
+      } else {
         text = `Alternatively, You may sign in with any of these online accounts to meet
           people with a username and/or a picture familiar to them.`;
-      } else {
-        text = 'You have successfully logged out. you may login again account of your choice.';
       }
       return (
         <div className="login-info">
