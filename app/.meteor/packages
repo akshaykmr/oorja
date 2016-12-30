@@ -23,6 +23,7 @@ accounts-meetup
 accounts-twitter
 accounts-weibo
 pauli:accounts-linkedin
+pandawhisperer:accounts-reddit
 service-configuration
 check@1.2.4
 audit-argument-checks@1.0.7

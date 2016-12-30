@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { ServiceConfiguration } from 'meteor/service-configuration';
 
-const { github, google, facebook, twitter, linkedin, weibo } = Meteor.settings.private;
+const { github, google, facebook, twitter, linkedin, weibo, reddit } = Meteor.settings.private;
 
 ServiceConfiguration.configurations.upsert(
   { service: 'github' },
@@ -9,6 +9,16 @@ ServiceConfiguration.configurations.upsert(
     $set: {
       clientId: github.clientId,
       secret: github.secret,
+    },
+  }
+);
+
+ServiceConfiguration.configurations.upsert(
+  { service: 'reddit' },
+  {
+    $set: {
+      appId: reddit.clientId,
+      secret: reddit.secret,
     },
   }
 );
