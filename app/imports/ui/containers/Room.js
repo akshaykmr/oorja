@@ -9,6 +9,7 @@ import SupremeToaster from '../components/Toaster';
 
 import Loading from '../components/Loading';
 import PasswordPrompt from './PasswordPrompt';
+import GettingReady from '../components/room/GettingReady';
 
 import { Rooms as MongoRoom } from '../../collections/common';
 
@@ -159,7 +160,7 @@ class Room extends Component {
                   onSuccess = {this.passwordSuccess.bind(this)}
                 />;
       case GETTING_READY:
-        return <div> GET READY </div>;
+        return <GettingReady />;
       default : return (
         <div> Say what?! </div>
       );

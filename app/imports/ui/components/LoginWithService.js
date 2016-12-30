@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 
-import HorizontalLoading from '../components/HorizontalLoading';
-
+// TODO css stuff.
 class LoginWithService extends Component {
   constructor(props) {
     super(props);
@@ -15,19 +15,29 @@ class LoginWithService extends Component {
       waitingFor: '', // waiting for the service with 'name'
     };
 
+    const loginCallback = this.loginCallback.bind(this);
+
     this.services = [
-      { name: 'Google', login: Meteor.loginWithGoogle },
-      { name: 'Facebook', login: Meteor.loginWithFacebook },
-      { name: 'Twitter', login: Meteor.loginWithTwitter },
-      { name: 'LinkedIn', login: Meteor.loginWithLinkedIn },
-      { name: 'Github', login: Meteor.loginWithGithub },
+      { service: 'Google', login: () => Meteor.loginWithGoogle({}, loginCallback) },
+      { service: 'Facebook', login: () => Meteor.loginWithFacebook({}, loginCallback) },
+      { service: 'Twitter', login: () => Meteor.loginWithTwitter({}, loginCallback) },
+      { service: 'LinkedIn', login: () => Meteor.loginWithLinkedIn({}, loginCallback) },
+      { service: 'Github', login: () => Meteor.loginWithGithub({}, loginCallback) },
     ];
   }
-  updateState(user = Meteor.user()) {
+
+  loginCallback() {
+    this.setState({
+      ...this.state,
+      waitingFor: '',
+    });
+  }
+
+  updateState(user) {
     this.setState({
       ...this.state,
       loggedIn: !!user,
-      loginService: user ? user.profile.loginService : null,
+      loginService: user ? user.profile.loginService : '',
     });
   }
 
@@ -45,41 +55,55 @@ class LoginWithService extends Component {
 
   loginButtons() {
     const { loggedIn, waitingFor, loginService } = this.state;
-    const getButton = () => (
-      <div key={index} className="loginButton">
-        <img src={imagePath} alt={service}/>
-      </div>
-    );
-    return this.services.map((service, index) => {
+
+    const setWaiting = (service) => {
+      this.setState({
+        ...this.state,
+        waitingFor: service,
+      });
+    };
+
+    return this.services.map(({ service, login }, index) => {
       const imagePath = `/images/${service}.svg`;
-
-      if (!loggedIn) {
-        return (
-
-        );
+      let classes = 'example loginButton';
+      if (loggedIn && loginService === service) {
+        classes += ' active';
       }
+      if (waitingFor === service) {
+        classes += ' waiting';
+      }
+      const button = (
+        <div key={index} className={classes}
+          onClick={ loggedIn && loginService === service ? null : () => {
+            setWaiting(service);
+            login();
+          }}>
+       <img src={imagePath} alt={service}/>
+        </div>
+      );
+
+      if (loggedIn) {
+        return loginService === service ? button : null;
+      }
+      return button;
     });
   }
 
   loginInfo() {
-    let text;
     if (!this.state.loggedIn) {
-      text = [
-        <span>Alternatively, You may sign in with any of these online accounts and meet
-        people with a picture and username familiar to them.</span>,
-      ];
-    } else {
-      const service = this.state.loginService;
-      const greet = `Welcome, you are logged in with ${service}`;
-      text = [
-        <span>{greet}</span>,
-        <span><button>logout</button></span>,
-      ];
+      return (
+        <div className="login-info">
+          <span>Alternatively, You may sign in with any of these online accounts and meet
+          people with a picture and username familiar to them.</span>
+        </div>
+      );
     }
-
+    const service = this.state.loginService;
+    const greet = `Welcome, you are logged in with ${service}`;
     return (
       <div className="login-info">
-        {text}
+        <span>{greet}</span>,
+        <span><button onClick={() => { Meteor.logout(); }}>logout</button></span>
       </div>
     );
   }
@@ -87,7 +111,13 @@ class LoginWithService extends Component {
   render() {
     return (
       <div className='login-container'>
-      { this.loginInfo() }
+      <ReactCSSTransitionGroup
+        transitionName="example"
+        transitionEnterTimeout={500}
+        transitionLeaveTimeout={300}>
+        {this.loginButtons()}
+        {this.loginInfo()}
+      </ReactCSSTransitionGroup>
       </div>
     );
   }

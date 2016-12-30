@@ -1,0 +1,55 @@
+/* login container */
+.login-container {
+  height: 50px;
+  padding: 8px;
+  width: 100%;
+  margin: 0 auto;
+
+}
+
+.loginButton {
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 10px;
+  height: 34px;
+  width: 34px;
+  transition-property: all;
+  transition-timing-function: ease-out;
+  transition-duration: 0.3s;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  div,img {
+    display: inline-block;
+    height: 100%;
+    width: 100%;
+  }
+
+  &.active {
+    transform: scale(1.4);
+  }
+
+  &.waiting {
+    opacity: 0.6;
+  }
+}
+
+.example-enter {
+  opacity: 0.01;
+}
+
+.example-enter.example-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.example-leave {
+  opacity: 1;
+}
+
+.example-leave.example-leave-active {
+  opacity: 0.01;
+  transition: opacity 500ms ease-in;
+}
