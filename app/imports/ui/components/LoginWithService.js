@@ -91,20 +91,23 @@ class LoginWithService extends Component {
   loginInfo() {
     if (!this.state.loggedIn) {
       let text;
+      let detailText;
+
       if (this.state.hasLoggedOutOnce) {
-        text = 'You have successfully logged out. you may login again with an account of your choice.';
+        text = 'You have successfully logged out.';
+        detailText = `You may login again with an account of your choice to meet
+         people with a username and/or a picture familiar to them.`;
       } else {
         text = `Alternatively, You may sign in with any of these online accounts to meet
           people with a username and/or a picture familiar to them.`;
       }
       return (
-        <div className="login-info">
-          <span>{text}</span>
-        </div>
+        <span className='animate fade-in'>{text} {detailText ? <br /> : null } {detailText}</span>
       );
     }
     const service = this.state.loginService;
-    const greet = `Welcome, you are logged in with ${service}`;
+    const greet = `Welcome, you are logged in with ${service}.`;
+    const message = 'If you wish to use a different account of yours, you may logout.';
     const logoutHandler = () => {
       Meteor.logout();
       this.setState({
@@ -113,9 +116,10 @@ class LoginWithService extends Component {
       });
     };
     return (
-      <div className="login-info">
-        <span>{greet}</span>,
-        <span><button onClick={logoutHandler}>logout</button></span>
+      <div className="animate fade-in">
+        <div>{greet}</div>
+        <div className='animate fade-in'>{message}</div>
+        <div><button onClick={logoutHandler}>logout</button></div>
       </div>
     );
   }
@@ -131,7 +135,9 @@ class LoginWithService extends Component {
               {this.loginButtons()}
           </ReactCSSTransitionGroup>
         </div>
-      {this.loginInfo()}
+        <div className="login-info">
+          {this.loginInfo()}
+        </div>
       </div>
     );
   }
