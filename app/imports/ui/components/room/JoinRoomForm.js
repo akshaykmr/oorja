@@ -13,10 +13,19 @@ class JoinRoomForm extends Component {
 
   constructor(props) {
     super(props);
+
+    // a set of colors used to style avatar.
+    this.colors = ['#c78ae1', '#f4d448', '#66aee3', '#ffaf51', '#7bcd52', '#23bfb0',
+      '#e5176f', '#d784a6'];
+
     this.state = this.initialState();
 
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  getRandomColor() {
+    return this.colors[Math.floor(Math.random() * this.colors.length)];
   }
 
   initialState(user = Meteor.user()) {
@@ -26,7 +35,7 @@ class JoinRoomForm extends Component {
     return {
       loggedIn: !!user,
       name: user ? `${user.profile.firstName} ${user.profile.lastName}` : '',
-      textAvatarColor: '',
+      textAvatarColor: this.getRandomColor(),
       picture: user ? user.profile.picture : null,
     };
   }
@@ -61,13 +70,10 @@ class JoinRoomForm extends Component {
   }
 
   handleNameChange(event) {
-    const colors = ['#c78ae1', '#f4d448', '#66aee3', '#ffaf51', '#7bcd52', '#23bfb0',
-      '#e5176f', '#d784a6'];
-    const bgColor = colors[Math.floor(Math.random() * colors.length)];
     this.setState({
       ...this.state,
       name: event.target.value,
-      textAvatarColor: bgColor,
+      textAvatarColor: this.getRandomColor(),
     });
   }
 
