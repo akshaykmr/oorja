@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import LoginWithService from '../LoginWithService';
+
 import JoinRoomForm from './JoinRoomForm';
 
 export default class GettingReady extends Component {
@@ -7,7 +7,6 @@ export default class GettingReady extends Component {
     return (
       <div>
         <JoinRoomForm />
-        <LoginWithService />
       </div>
     );
   }

@@ -42,6 +42,7 @@ class Room extends Component {
       roomName,
       roomInfo: null,
       stage: this.stages.LOADING,
+      initialized: false,
     };
   }
 
@@ -133,9 +134,12 @@ class Room extends Component {
               updateRoomInfo(latestRoomInfo);
             },
             removed: () => {
-              console.error('INFO-ERROR');
               browserHistory.push('/');
             },
+          });
+          self.setState({
+            ...self.state,
+            initialized: true,
           });
           self.gotoStage(self.stages.GETTING_READY);
         }());
@@ -146,8 +150,10 @@ class Room extends Component {
 
   componentWillUnmount() {
     // cleanup
-    this.roomInfoSubscriptionHandle.stop();
-    this.observeRoomInfo.stop();
+    if (this.state.initialized) {
+      this.roomInfoSubscriptionHandle.stop();
+      this.observeRoomInfo.stop();
+    }
   }
 
   render() {

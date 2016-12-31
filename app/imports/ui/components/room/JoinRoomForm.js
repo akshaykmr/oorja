@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import ImageLoader from 'react-imageloader';
+// import ImageLoader from 'react-imageloader';
 
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
+
+import LoginWithService from '../LoginWithService';
 
 // inputs user name and joins the room.
 class JoinRoomForm extends Component {
@@ -24,6 +26,7 @@ class JoinRoomForm extends Component {
     return {
       loggedIn: !!user,
       name: user ? `${user.profile.firstName} ${user.profile.lastName}` : '',
+      textAvatarColor: '',
       picture: user ? user.profile.picture : null,
     };
   }
@@ -58,9 +61,13 @@ class JoinRoomForm extends Component {
   }
 
   handleNameChange(event) {
+    const colors = ['#c78ae1', '#f4d448', '#66aee3', '#ffaf51', '#7bcd52', '#23bfb0',
+      '#e5176f', '#d784a6'];
+    const bgColor = colors[Math.floor(Math.random() * colors.length)];
     this.setState({
       ...this.state,
       name: event.target.value,
+      textAvatarColor: bgColor,
     });
   }
 
@@ -70,10 +77,12 @@ class JoinRoomForm extends Component {
 
   render() {
     const { name, loggedIn, picture } = this.state;
-    const attr = {
+    const inputAttr = {
       disabled: loggedIn,
       value: name,
       onChange: this.handleNameChange,
+      className: `nameInput ${name ? 'active' : ''}`,
+      placeholder: 'Your Name...',
     };
 
     const textAvatar = () => {
@@ -87,8 +96,10 @@ class JoinRoomForm extends Component {
         initials = words[0][0];
         if (words[0][1]) initials += words[0][1];
       }
+
       return (
-        <div className='textAvatar'>
+        <div className='textAvatar'
+        style={{ backgroundColor: this.state.textAvatarColor }}>
           {initials}
         </div>
       );
@@ -104,6 +115,7 @@ class JoinRoomForm extends Component {
     return (
       <div className='JoinRoomForm'>
       <form onSubmit={this.handleSubmit}>
+        <div className="interactiveInput">
           <ReactCSSTransitionGroup
             transitionName="avatar"
             transitionAppear={true}
@@ -118,8 +130,14 @@ class JoinRoomForm extends Component {
             transitionLeaveTimeout={100}>
             {textAvatar()}
           </ReactCSSTransitionGroup>
-        <div className='nameInput'> <input type="text" {...attr}/> </div>
-        <button {...buttonAttr} type="submit">Join the Room !</button>
+
+          <input type="text" {...inputAttr}/>
+        </div>
+
+        <LoginWithService />
+        <div className="joinButtonWrapper">
+          <button {...buttonAttr} type="submit">Join the Room !</button>
+        </div>
       </form>
       </div>
     );

@@ -1,16 +1,22 @@
-$form-height: 100px;
-$input-size: 30px;
-$form-spacing: 30px;
+$preview-height: 70px;
+$preview-width: 300px;
+$input-height: 30px;
+$input-width: 180px;
+$preview-spacing: 30px;
 
 .JoinRoomForm {
-
-  height: $form-height;
-  position: relative;
-
   form {
     height: 100%;
     width: 100%;
   }
+}
+
+.interactiveInput {
+
+  height: $preview-height;
+  position: relative;
+  width: $preview-width;
+  margin: 0 auto;
 
   div {
     display: inline-block;
@@ -18,20 +24,31 @@ $form-spacing: 30px;
 
   .avatar, .textAvatar {
     position: absolute;
-    height: $form-height;
-    width: $form-height;
+    height: $preview-height;
+    width: $preview-height;
     border-radius: 50%;
-    line-height: $form-height; // vertical align text in a div :D
+  }
+
+  .textAvatar {
+    line-height: $preview-height; // vertical align text in a div :D
     text-align: center;
-    font-size: 2.3em;
-    box-shadow: 0px 5px 15px -6px rgba(0, 0, 0, 0.81);
+    font-size: 2.0em;
+    color: #ffffff;
+    transition: background-color 0.5s ease;
    }
 
    .nameInput {
      position: absolute;
-     height: $input-size;
-     left: $form-height + $form-spacing;
-     top: ($form-height - $input-size)/2;
+     top: ($preview-height - $input-height)/2;
+     left:0;
+     height: $input-height;    
+     width: $input-width;
+     transform: translate3d(($preview-width - $input-width)/2,0,0);
+     transition: transform 500ms ease;
+   }
+
+   .nameInput.active {
+     transform: translate3d($preview-height + $preview-spacing,0,0);
    }
 
    input {
@@ -39,6 +56,10 @@ $form-spacing: 30px;
      height: 100%;
      width: 100%;
    }
+}
+
+.joinButtonWrapper {
+  text-align: center;
 }
 
 .avatar-enter, .avatar-appear {
