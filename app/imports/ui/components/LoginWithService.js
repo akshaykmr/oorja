@@ -19,11 +19,14 @@ class LoginWithService extends Component {
     const loginCallback = this.loginCallback.bind(this);
 
     this.services = [
+      // comment the service if not needed.
+      // make changes to LoginWithService.scss as well to align the buttons.
       { service: 'Google', login: () => Meteor.loginWithGoogle({}, loginCallback) },
       { service: 'Facebook', login: () => Meteor.loginWithFacebook({}, loginCallback) },
       { service: 'Twitter', login: () => Meteor.loginWithTwitter({}, loginCallback) },
       { service: 'LinkedIn', login: () => Meteor.loginWithLinkedIn({}, loginCallback) },
       { service: 'Github', login: () => Meteor.loginWithGithub({}, loginCallback) },
+      { service: 'Twitch', login: () => Meteor.loginWithTwitch({}, loginCallback) },
     ];
   }
 

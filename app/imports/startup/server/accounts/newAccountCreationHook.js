@@ -6,7 +6,7 @@ import { Accounts } from 'meteor/accounts-base';
 // modifies user document before creating it.
 // http://docs.meteor.com/api/accounts-multi.html#AccountsServer-onCreateUser
 Accounts.onCreateUser((options, user) => {
-  /* eslint-disable no-param-reassign*/
+  /* eslint-disable */
   if (user.services.facebook) {
     // user.emails=[];
     user.loginService = 'facebook';
@@ -57,9 +57,19 @@ Accounts.onCreateUser((options, user) => {
       firstName: linkedin.firstName,
       lastName: linkedin.lastName,
       loginService: 'LinkedIn',
-      picture: data.values ? data.values[0] : '/public/resources/dummy_picture',
+      picture: data.values ? data.values[0] : null,
       publicProfile: linkedin.publicProfileUrl,
-      headline: linkedin.headline,
+      bio: linkedin.headline,
+    };
+  } else if (user.services.twitch) {
+    user.loginService = 'twitch';
+    const { twitch } = user.services;
+    user.profile = {
+      firstName: twitch.display_name,
+      bio: twitch.bio,
+      loginService: 'Twitch',
+      publicProfile: twitch._links.self,
+      picture: twitch.logo,
     };
   }
 

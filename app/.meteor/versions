@@ -8,6 +8,7 @@ accounts-twitter@1.1.12
 accounts-weibo@1.0.11
 alanning:roles@1.2.15
 aldeed:simple-schema@1.5.3
+alexbeauchemin:accounts-twitch@1.0.3
 allow-deny@1.0.5
 audit-argument-checks@1.0.7
 autoupdate@1.3.12
@@ -75,8 +76,6 @@ oauth1@1.1.11
 oauth2@1.1.11
 observe-sequence@1.0.14
 ordered-dict@1.0.9
-pandawhisperer:accounts-reddit@0.0.9
-pandawhisperer:reddit-oauth@0.0.9
 pauli:accounts-linkedin@1.3.1
 pauli:linkedin@1.3.1
 promise@0.8.8

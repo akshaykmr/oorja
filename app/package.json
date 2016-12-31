@@ -71,6 +71,7 @@
     "react-addons-css-transition-group": "^15.4.1",
     "react-addons-pure-render-mixin": "^15.3.2",
     "react-dom": "^15.3.2",
+    "react-imageloader": "^2.1.0",
     "react-redux": "^5.0.0",
     "react-router": "^3.0.0",
     "react-router-redux": "^4.0.7",
