@@ -140,7 +140,7 @@ class JoinRoomForm extends Component {
           <input type="text" {...inputAttr}/>
         </div>
 
-        <LoginWithService />
+        <LoginWithService extraClasses={!loggedIn && name ? 'blur' : '' } />
         <div className="joinButtonWrapper">
           <button {...buttonAttr} type="submit">Join the Room !</button>
         </div>

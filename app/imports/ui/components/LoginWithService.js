@@ -127,7 +127,7 @@ class LoginWithService extends Component {
 
   render() {
     return (
-      <div className='login-container'>
+      <div className={`login-container ${this.props.extraClasses}`}>
         <div className="login-info">
           {this.loginInfo()}
         </div>
@@ -143,5 +143,9 @@ class LoginWithService extends Component {
     );
   }
 }
+
+LoginWithService.propTypes = {
+  extraClasses: React.PropTypes.string,
+};
 
 export default LoginWithService;

@@ -5,13 +5,22 @@ $icon-spacing: 10px;
   max-width: 400px;
   width: 95%;
   margin: 0 auto;
+  transition: opacity 500ms ease;
+
+  &.blur {
+    opacity: 0.8;
+  }
+
+  &.blur:focus, &.blur:hover {
+    opacity: 1;
+  }
 }
 
 .button-container {
   position: relative;
   height: 50px;
   padding: 8px;
-  width: 100%;
+  width: 6 * ($icon-size + $icon-spacing) ;
   margin: 0 auto;
 }
 
