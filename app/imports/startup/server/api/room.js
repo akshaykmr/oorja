@@ -3,15 +3,14 @@ import { check, Match } from 'meteor/check';
 import bcrypt from 'bcrypt';
 import _ from 'lodash';
 import { moment as Moment } from 'meteor/momentjs:moment';
-
 // import jwt from 'jwt-simple';
 // use a jwt? currently all members of the room will have same secret.
 // maybe not for now as room will be archived after 7 days.
 // but should problably use them for permission based opertation if I add some later. hmm...
-
 import { Random } from 'meteor/random';
 
 import { Rooms } from '../../../collections/common';
+import N from '../../../modules/NuveClient/';
 
 const hashPassword = Meteor.wrapAsync(bcrypt.hash);
 const comparePassword = Meteor.wrapAsync(bcrypt.compare);
