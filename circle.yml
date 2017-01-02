@@ -9,12 +9,8 @@ checkout:
   post:
     - git submodule update --init
 dependencies:
-  cache_directories:
-    - "node_modules"
-    - "~/.npm"
-    - "~/.meteor"
   override:
-    - if [ ! -e $HOME/.meteor/meteor ]; then curl https://install.meteor.com | sh; fi
+    curl https://install.meteor.com | sh;
     # - npm install -g chimp
     # - npm install -g selenium-standalone
     - npm install
