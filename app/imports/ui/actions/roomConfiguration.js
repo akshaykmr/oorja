@@ -9,6 +9,7 @@ export const STORE_SECRET = 'STORE_SECRET';
 export const DELETE_SECRET = 'DELETE_SECRET';
 export const GOT_ROOM_INFO = 'GOT_ROOM_INFO';
 export const CHECK_PASSWORD = 'CHECK_PASSWORD';
+export const JOIN_ROOM = 'JOIN_ROOM';
 export const UNEXPECTED_AUTHENTICATION_ERROR = 'UNEXPECTED_AUTHENTICATION_ERROR';
 
 const GENERIC_ERROR_MESSAGE = 'Something went wrong... ¯\\(°_o)/¯';

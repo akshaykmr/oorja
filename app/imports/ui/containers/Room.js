@@ -157,7 +157,7 @@ class Room extends Component {
   }
 
   render() {
-    const { LOADING, PASSWORD_PROMPT, GETTING_READY } = this.stages;
+    const { LOADING, PASSWORD_PROMPT, GETTING_READY, SHOW_TIME } = this.stages;
     switch (this.state.stage) {
       case LOADING: return <Loading />;
       case PASSWORD_PROMPT:
@@ -166,7 +166,7 @@ class Room extends Component {
                   onSuccess = {this.passwordSuccess.bind(this)}
                 />;
       case GETTING_READY:
-        return <GettingReady />;
+        return <GettingReady onReady={() => { this.gotoStage(SHOW_TIME); }}/>;
       default : return (
         <div> Say what?! </div>
       );

@@ -6,7 +6,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 
-import LoginWithService from '../LoginWithService';
+import LoginWithService from '../components/LoginWithService';
 
 // inputs user name and joins the room.
 class JoinRoomForm extends Component {
@@ -79,6 +79,7 @@ class JoinRoomForm extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    this.props.processComplete();
   }
 
   render() {
@@ -116,6 +117,7 @@ class JoinRoomForm extends Component {
     const buttonAttr = {
       disabled: !name,
       className: 'joinButton',
+      onSubmit: this.handleSubmit,
     };
 
     return (
@@ -149,5 +151,10 @@ class JoinRoomForm extends Component {
     );
   }
 }
+
+JoinRoomForm.propTypes = {
+  processComplete: React.PropTypes.func.isRequired,
+};
+
 
 export default connect(null, null)(JoinRoomForm);

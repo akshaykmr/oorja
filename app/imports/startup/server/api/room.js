@@ -4,18 +4,17 @@ import bcrypt from 'bcrypt';
 import _ from 'lodash';
 import { moment as Moment } from 'meteor/momentjs:moment';
 // import jwt from 'jwt-simple';
-// use a jwt? currently all members of the room will have same secret.
-// maybe not for now as room will be archived after 7 days.
-// but should problably use them for permission based opertation if I add some later. hmm...
 import { Random } from 'meteor/random';
 
 import { Rooms } from '../../../collections/common';
 import N from '../../../modules/NuveClient/';
 
+const { private: { saltRounds, Nuve } } = Meteor.settings;
+
+N.API.init(Nuve.serviceId, Nuve.serviceKey, Nuve.host);
+
 const hashPassword = Meteor.wrapAsync(bcrypt.hash);
 const comparePassword = Meteor.wrapAsync(bcrypt.compare);
-
-const { private: { saltRounds } } = Meteor.settings;
 
 // Common error handling
 const PASS_TO_CLIENT = 'PASS_TO_CLIENT';
@@ -52,7 +51,11 @@ Meteor.methods({
       const validTill = now.add(7, 'days').toDate().getTime();
       const roomSecret = Random.secret(14);
 
+      const response = N.API.createRoom(roomName);
+
       const roomDocument = {
+        _id: response.data._id,
+        NuveServiceName: Nuve.serviceName,
         owner: Meteor.userId() || null,
         ...roomInfo,
         roomName,
@@ -75,7 +78,9 @@ Meteor.methods({
         roomSecret,
       };
     } catch (exception) {
+      console.log(exception);
       const { details, reason } = exception;
+      // add logging.
       throw new Meteor.Error(
         errorTopic,
         details === PASS_TO_CLIENT ? reason : GENERIC_ERROR_MESSAGE

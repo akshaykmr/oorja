@@ -6,7 +6,7 @@ import base64 from './base64';
 import CryptoJS from './hmac_sha1';
 
 const N = {};
-N.base64 = base64(); // base64 encode decode
+N.Base64 = base64(); // base64 encode decode
 
 /* eslint-disable */ // :( sorry
 N.API = (function (N) {
