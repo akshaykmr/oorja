@@ -17,5 +17,9 @@ dependencies:
     - if [ ! -e $HOME/.meteor/meteor ]; then curl https://install.meteor.com | sh; fi
     # - npm install -g chimp
     # - npm install -g selenium-standalone
+    - npm install ./app
+
+test:
+  override:
     - cd app
-    - npm install
+    - meteor npm run lint # its a start...

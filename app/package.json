@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Application description.",
   "scripts": {
-    "start": "meteor --settings settings-development.json"
+    "start": "meteor --settings settings-development.json",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "eslint": "^3.8.1",

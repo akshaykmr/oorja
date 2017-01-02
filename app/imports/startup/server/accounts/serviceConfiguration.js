@@ -1,7 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { ServiceConfiguration } from 'meteor/service-configuration';
 
-const { github, google, facebook, twitter, linkedin, weibo, reddit, twitch } = Meteor.settings.private;
+const { github, google, facebook, twitter,
+  linkedin, weibo, reddit, twitch } = Meteor.settings.private;
 
 ServiceConfiguration.configurations.upsert(
   { service: 'github' },

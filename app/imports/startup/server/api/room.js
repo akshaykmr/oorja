@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-import { check, Match } from 'meteor/check';
+import { check } from 'meteor/check'; // use Match later
 import bcrypt from 'bcrypt';
 import _ from 'lodash';
 import { moment as Moment } from 'meteor/momentjs:moment';
