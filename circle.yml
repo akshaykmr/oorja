@@ -10,7 +10,7 @@ checkout:
     - git submodule update --init
 dependencies:
   override:
-    curl https://install.meteor.com | sh;
+    - curl https://install.meteor.com | sh;
     # - npm install -g chimp
     # - npm install -g selenium-standalone
     - npm install
