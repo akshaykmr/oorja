@@ -7,6 +7,7 @@ import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 
 import LoginWithService from '../components/LoginWithService';
+import { joinRoom } from '../actions/roomConfiguration';
 
 // inputs user name and joins the room.
 class JoinRoomForm extends Component {
@@ -33,6 +34,7 @@ class JoinRoomForm extends Component {
     // on the server. no need to get them here.
     // just need their name if logged out.
     return {
+      waiting: false,
       loggedIn: !!user,
       name: user ? `${user.profile.firstName} ${user.profile.lastName}` : '',
       textAvatarColor: this.getRandomColor(),
@@ -79,7 +81,21 @@ class JoinRoomForm extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    this.props.processComplete();
+    const { name, textAvatarColor } = this.state;
+    this.setState({
+      ...this.state,
+      waiting: true,
+    });
+    this.props.joinRoom(name, textAvatarColor).then(
+      (response) => {
+        this.setState({
+          ...this.state,
+          waiting: false,
+        });
+        console.log(response);
+        this.props.processComplete();
+      },
+    );
   }
 
   render() {
@@ -154,7 +170,8 @@ class JoinRoomForm extends Component {
 
 JoinRoomForm.propTypes = {
   processComplete: React.PropTypes.func.isRequired,
+  joinRoom: React.PropTypes.func.isRequired,
 };
 
 
-export default connect(null, null)(JoinRoomForm);
+export default connect(null, { joinRoom })(JoinRoomForm);

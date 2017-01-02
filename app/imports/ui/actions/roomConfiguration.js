@@ -4,6 +4,8 @@ import { browserHistory } from 'react-router';
 import { Intent } from '@blueprintjs/core';
 import SupremeToaster from '../components/Toaster';
 
+import { Rooms } from '../../collections/common';
+
 export const CREATE_ROOM = 'CREATE_ROOM';
 export const STORE_SECRET = 'STORE_SECRET';
 export const DELETE_SECRET = 'DELETE_SECRET';
@@ -14,6 +16,17 @@ export const UNEXPECTED_AUTHENTICATION_ERROR = 'UNEXPECTED_AUTHENTICATION_ERROR'
 
 const GENERIC_ERROR_MESSAGE = 'Something went wrong... ¯\\(°_o)/¯';
 
+const unexpectedError = ({ dispatch, message, error }) => {
+  console.error(error);
+  browserHistory.push('/');
+  dispatch({
+    type: UNEXPECTED_AUTHENTICATION_ERROR,
+  });
+  SupremeToaster.show({
+    message: message || GENERIC_ERROR_MESSAGE,
+    intent: Intent.DANGER,
+  });
+};
 
 export const deleteSecret = (roomName) => {
   localStorage.removeItem(`roomSecret:${roomName}`);
@@ -78,14 +91,21 @@ export const checkPassword = (roomName, password) =>
         }
         return Promise.resolve(roomSecret);
       },
-      () => {
-        browserHistory.push('/');
-        dispatch({
-          type: UNEXPECTED_AUTHENTICATION_ERROR,
-        });
-        SupremeToaster.show({
-          message: GENERIC_ERROR_MESSAGE,
-          intent: Intent.DANGER,
-        });
-      }
+      (error) => { unexpectedError({ dispatch, error }); },
     );
+
+export const joinRoom = (name, textAvatarColor) =>
+  (dispatch) => {
+    const room = Rooms.findOne();
+    if (!room) {
+      unexpectedError(dispatch);
+      return Promise.resolve();
+    }
+    const roomName = room.roomName;
+    const roomSecret = localStorage.getItem(`roomSecret:${roomName}`);
+    return Meteor.callPromise('joinRoom', roomName, roomSecret, name, textAvatarColor).then(
+      response => Promise.resolve(response),
+      (error) => { unexpectedError({ dispatch, error }); },
+    );
+  };
+

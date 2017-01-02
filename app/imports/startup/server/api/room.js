@@ -61,6 +61,7 @@ Meteor.methods({
         roomName,
         roomSecret,
         password,
+        participants: [],
         createdAt: now.toDate().getTime(),
         validTill,
       };
@@ -111,6 +112,60 @@ Meteor.methods({
     }
     return null;
   },
+
+  joinRoom(roomName, roomSecret, name, textAvatarColor) {
+    check(roomName, String);
+    check(roomSecret, String);
+    check(name, String);
+    check(textAvatarColor, String); // add check for allowed colors
+
+    const room = Rooms.findOne({
+      roomName,
+      roomSecret,
+    });
+    const errorTopic = 'Failed to join Room';
+    if (!room) {
+      throw new Meteor.Error(errorTopic, 'Room not found');
+    }
+
+    const user = Meteor.user();
+    let userId = Meteor.userId();
+
+    const computeInitials = (fullName) => {
+      // first two letters of the name or first letters of first and last word.
+      const words = fullName.toUpperCase().trim().split(' ');
+      let initials = '';
+      if (words.length > 1) {
+        initials = words[0][0] + words[words.length - 1][0];
+      } else if (words.length === 1 && words[0] !== '') {
+        initials = words[0][0];
+        if (words[0][1]) initials += words[0][1];
+      }
+      return initials;
+    };
+
+    let profile = {};
+    if (user) {
+      profile = user.profile;
+      profile.initials = computeInitials(user.profile.firstName + user.profile.LastName);
+    } else {
+      userId = userId || Random.id(8);
+      this.setUserId(userId);
+      profile.loginService = '';
+      profile.picture = '';
+      profile.textAvatarColor = textAvatarColor;
+      profile.initials = computeInitials(name);
+    }
+    profile.userId = userId;
+
+    if (!_.find(room.participants, { userId })) {
+      Rooms.update(room._id, { $push: { participants: profile } });
+    }
+    const result = N.API.createToken(room._id, userId, 'presenter');
+    return {
+      token: result.content,
+    };
+  },
 });
 
 
@@ -121,7 +176,7 @@ Meteor.publish('room.info', (roomName, roomSecret) => {
   return Rooms.find({ roomName, roomSecret }, {
     fields: {
       roomName: 1,
-      users: 1,
+      participants: 1,
       createdAt: 1,
     },
     limit: 1,
