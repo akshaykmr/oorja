@@ -1,1 +1,1 @@
-[![Circle CI](https://circleci.com/gh/akshayKMR/peery/tree/master.svg?style=svg)](https://circleci.com/gh/akshayKMR/peery/tree/master)
+[![CircleCI](https://circleci.com/gh/akshayKMR/peery/tree/master.svg?style=svg&circle-token=63c0059bc29c377c4e04ed8c8e1409f1d019f594)](https://circleci.com/gh/akshayKMR/peery/tree/master)
