@@ -26,14 +26,14 @@ Meteor.methods({
     check(roomInfo, Object); // matches any object recieved for now. add validation later
 
     let { roomName } = roomInfo;
-    roomName = roomName.trim().toLowerCase();
+    roomName = roomName.trim();
 
-    roomName.split('').map((char) => {
+    roomName = roomName.split('').map((char) => {
       if (char === ' ') {
         return '-';
       }
       return char;
-    });
+    }).join('');
 
     // error format : throw new Meteor.Error(errorTopic,reason, passToClient)
     const errorTopic = 'Failed to create Room';
@@ -151,6 +151,7 @@ Meteor.methods({
     } else {
       userId = userId || Random.id(8);
       this.setUserId(userId);
+      profile.firstName = name.trim();
       profile.loginService = '';
       profile.picture = '';
       profile.textAvatarColor = textAvatarColor;
@@ -161,9 +162,10 @@ Meteor.methods({
     if (!_.find(room.participants, { userId })) {
       Rooms.update(room._id, { $push: { participants: profile } });
     }
-    const result = N.API.createToken(room._id, userId, 'presenter');
+    const result = N.API.createToken(room._id, userId, 'presenterRecord');
     return {
       token: result.content,
+      userId,
     };
   },
 });
