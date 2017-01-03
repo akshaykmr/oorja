@@ -81,18 +81,21 @@ class JoinRoomForm extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    if (!Meteor.user() && !this.state.name) {
+      return;
+    }
+
     const { name, textAvatarColor } = this.state;
     this.setState({
       ...this.state,
       waiting: true,
     });
     this.props.joinRoom(name, textAvatarColor).then(
-      (response) => {
+      () => {
         this.setState({
           ...this.state,
           waiting: false,
         });
-        console.log(response);
         this.props.processComplete();
       },
     );

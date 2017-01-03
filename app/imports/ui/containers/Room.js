@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { browserHistory } from 'react-router';
 import { connect } from 'react-redux';
+import _ from 'lodash';
 
 import { Meteor } from 'meteor/meteor';
 
@@ -10,10 +11,12 @@ import SupremeToaster from '../components/Toaster';
 import Loading from '../components/Loading';
 import PasswordPrompt from './PasswordPrompt';
 import GettingReady from '../components/room/GettingReady';
+import TestErizo from '../components/room/TestErizo';
 
 import { Rooms as MongoRoom } from '../../collections/common';
 
-import { deleteSecret, getRoomInfo, storeSecret } from '../actions/roomConfiguration';
+import { deleteSecret, getRoomInfo, storeSecret,
+  deleteRoomUserId, deleteRoomToken } from '../actions/roomConfiguration';
 
 class Room extends Component {
 
@@ -23,6 +26,9 @@ class Room extends Component {
     const roomName = this.props.params.roomName;
     this.roomName = roomName;
     this.roomSecret = localStorage.getItem(`roomSecret:${roomName}`);
+    this.roomUserId = localStorage.getItem(`roomUserId:${roomName}`);
+    this.roomToken = localStorage.getItem(`roomToken:${roomName}`);
+    // TODO add last active.
     this.urlRoomSecret = props.location.query.secret;
 
     // if secret exists in url delete storedSecret
@@ -99,16 +105,38 @@ class Room extends Component {
   }
 
   gotoStage(stage) {
+    const { INITIALIZING, GETTING_READY, SHOW_TIME } = this.stages;
+    const { roomName, roomSecret, roomUserId, roomToken } = this;
     // const previousStage = this.state.stage;
+    // custom action before switching to stage
+    switch (stage) {
+      case GETTING_READY:
+        if (roomUserId && roomToken) {
+          const room = MongoRoom.findOne();
+          if (_.find(room.participants, { userId: roomUserId })) {
+            this.gotoStage(SHOW_TIME);
+            // If I implement last active, the user may want to 'get ready' again
+            // after some interval period.
+            return;
+          }
+          this.props.deleteRoomToken();
+          this.props.deleteRoomUserId();
+        }
+        break;
+      case SHOW_TIME:
+        this.roomUserId = localStorage.getItem(`roomUserId:${roomName}`);
+        this.roomToken = localStorage.getItem(`roomToken:${roomName}`);
+        break;
+      default: break;
+    }
+
     this.setState({
       ...this.state,
       stage,
     });
 
-    const { INITIALIZING } = this.stages;
-    const { roomName, roomSecret } = this;
     const self = this;
-    // custom action when switching between stages.
+    // custom action after switching to stage.
     switch (stage) {
       case INITIALIZING :
         (async function subscribeToRoomInfo() {
@@ -167,9 +195,14 @@ class Room extends Component {
                 />;
       case GETTING_READY:
         return <GettingReady onReady={() => { this.gotoStage(SHOW_TIME); }}/>;
-      default : return (
-        <div> Say what?! </div>
-      );
+      case SHOW_TIME:
+        return (
+          <div> Say what?!
+          <br/>
+          <TestErizo roomToken={this.roomToken}/>
+          </div>
+        );
+      default: return null;
     }
   }
 }
@@ -180,6 +213,9 @@ Room.propTypes = {
   deleteSecret: React.PropTypes.func.isRequired,
   getRoomInfo: React.PropTypes.func.isRequired,
   storeSecret: React.PropTypes.func.isRequired,
+  deleteRoomUserId: React.PropTypes.func.isRequired,
+  deleteRoomToken: React.PropTypes.func.isRequired,
 };
 
-export default connect(null, { deleteSecret, getRoomInfo, storeSecret })(Room);
+export default connect(null,
+  { deleteSecret, getRoomInfo, storeSecret, deleteRoomUserId, deleteRoomToken })(Room);

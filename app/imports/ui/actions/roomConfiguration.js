@@ -7,26 +7,24 @@ import SupremeToaster from '../components/Toaster';
 import { Rooms } from '../../collections/common';
 
 export const CREATE_ROOM = 'CREATE_ROOM';
+export const JOINED_ROOM = 'JOINED_ROOM';
+
 export const STORE_SECRET = 'STORE_SECRET';
 export const DELETE_SECRET = 'DELETE_SECRET';
+
+export const STORE_TOKEN = 'STORE_TOKEN';
+export const DELETE_TOKEN = 'DELETE_TOKEN';
+
+export const STORE_ROOM_USERID = 'STORE_ROOM_USERID';
+export const DELETE_ROOM_USERID = 'STORE_ROOM_USERID';
+
+
 export const GOT_ROOM_INFO = 'GOT_ROOM_INFO';
 export const CHECK_PASSWORD = 'CHECK_PASSWORD';
 export const JOIN_ROOM = 'JOIN_ROOM';
 export const UNEXPECTED_AUTHENTICATION_ERROR = 'UNEXPECTED_AUTHENTICATION_ERROR';
 
 const GENERIC_ERROR_MESSAGE = 'Something went wrong... ¯\\(°_o)/¯';
-
-const unexpectedError = ({ dispatch, message, error }) => {
-  console.error(error);
-  browserHistory.push('/');
-  dispatch({
-    type: UNEXPECTED_AUTHENTICATION_ERROR,
-  });
-  SupremeToaster.show({
-    message: message || GENERIC_ERROR_MESSAGE,
-    intent: Intent.DANGER,
-  });
-};
 
 export const deleteSecret = (roomName) => {
   localStorage.removeItem(`roomSecret:${roomName}`);
@@ -41,6 +39,52 @@ export const storeSecret = (roomName, roomSecret) => {
   return {
     type: STORE_SECRET,
   };
+};
+
+export const storeRoomToken = (roomName, token) => {
+  localStorage.setItem(`roomToken:${roomName}`, token);
+  return {
+    type: STORE_TOKEN,
+  };
+};
+
+export const deleteRoomToken = (roomName) => {
+  localStorage.removeItem(`roomToken:${roomName}`);
+  return {
+    type: DELETE_TOKEN,
+  };
+};
+
+export const storeRoomUserId = (roomName, userId) => {
+  localStorage.setItem(`roomUserId:${roomName}`, userId);
+  return {
+    type: STORE_ROOM_USERID,
+  };
+};
+
+export const deleteRoomUserId = (roomName) => {
+  localStorage.removeItem(`roomUserId:${roomName}`);
+  return {
+    type: DELETE_ROOM_USERID,
+  };
+};
+
+const unexpectedError = ({ dispatch, message, error, roomName }) => {
+  console.error(error);
+  browserHistory.push('/');
+  dispatch({
+    type: UNEXPECTED_AUTHENTICATION_ERROR,
+  });
+
+  if (roomName) {
+    deleteSecret(roomName);
+    deleteRoomToken(roomName);
+    deleteRoomUserId(roomName);
+  }
+  SupremeToaster.show({
+    message: message || GENERIC_ERROR_MESSAGE,
+    intent: Intent.DANGER,
+  });
 };
 
 // this action relies redux-thunk middleware.
@@ -91,7 +135,7 @@ export const checkPassword = (roomName, password) =>
         }
         return Promise.resolve(roomSecret);
       },
-      (error) => { unexpectedError({ dispatch, error }); },
+      (error) => { unexpectedError({ dispatch, error, roomName }); },
     );
 
 export const joinRoom = (name, textAvatarColor) =>
@@ -104,8 +148,17 @@ export const joinRoom = (name, textAvatarColor) =>
     const roomName = room.roomName;
     const roomSecret = localStorage.getItem(`roomSecret:${roomName}`);
     return Meteor.callPromise('joinRoom', roomName, roomSecret, name, textAvatarColor).then(
-      response => Promise.resolve(response),
-      (error) => { unexpectedError({ dispatch, error }); },
+      ({ token, userId }) => {
+        const action = storeRoomToken(roomName, token);
+        Meteor.connection.setUserId(userId);
+        dispatch(storeRoomUserId(roomName, userId));
+        Promise.resolve();
+        dispatch(action);
+        dispatch({
+          type: JOINED_ROOM,
+        });
+      },
+      (error) => { unexpectedError({ dispatch, error, roomName }); },
     );
   };
 
