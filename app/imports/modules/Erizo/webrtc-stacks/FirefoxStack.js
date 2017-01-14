@@ -1,8 +1,6 @@
-/*global L, mozRTCIceCandidate, mozRTCSessionDescription, mozRTCPeerConnection*/
-'use strict';
-var Erizo = Erizo || {};
-
-Erizo.FirefoxStack = function (spec) {
+/* global L, mozRTCIceCandidate, mozRTCSessionDescription, mozRTCPeerConnection*/
+/* eslint-disable*/
+export default function FirefoxStack (spec) {
     var that = {},
         WebkitRTCPeerConnection = mozRTCPeerConnection,
         RTCSessionDescription = mozRTCSessionDescription,
@@ -265,3 +263,4 @@ Erizo.FirefoxStack = function (spec) {
     };
     return that;
 };
+/* eslint-enable */

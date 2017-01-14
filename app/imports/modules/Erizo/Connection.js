@@ -1,10 +1,9 @@
-/*global L, window, chrome, navigator*/
-'use strict';
-var Erizo = Erizo || {};
+/* global L, window, chrome, navigator*/
+/* eslint-disable */
 
-Erizo.sessionId = 103;
+export const sessionId = 103;
 
-Erizo.Connection = function (spec) {
+export function Connection (spec) {
     var that = {};
 
     spec.sessionId = (Erizo.sessionId += 1);
@@ -38,12 +37,13 @@ Erizo.Connection = function (spec) {
     return that;
 };
 
-Erizo.getBrowser = function () {
+export function getBrowser () {
     var browser = 'none';
 
-    if (typeof module!=='undefined' && module.exports){
-        browser = 'fake';
-    }else if (window.navigator.userAgent.match('Firefox') !== null) {
+    // if (typeof module!=='undefined' && module.exports){
+    //     browser = 'fake';
+    // }else 
+    if (window.navigator.userAgent.match('Firefox') !== null) {
         // Firefox
         browser = 'mozilla';
     } else if (window.navigator.userAgent.match('Bowser') !== null){
@@ -61,7 +61,7 @@ Erizo.getBrowser = function () {
 };
 
 
-Erizo.GetUserMedia = function (config, callback, error) {
+export function GetUserMedia (config, callback, error) {
     var promise;
     navigator.getMedia = ( navigator.getUserMedia ||
                        navigator.webkitGetUserMedia ||
@@ -136,9 +136,9 @@ Erizo.GetUserMedia = function (config, callback, error) {
                 L.Logger.error('This browser does not support ScreenSharing');
         }
     } else {
-        if (typeof module !== 'undefined' && module.exports) {
-            L.Logger.error('Video/audio streams not supported in erizofc yet');
-        } else {
+        // if (typeof module !== 'undefined' && module.exports) {
+        //     L.Logger.error('Video/audio streams not supported in erizofc yet');
+        // } else {
             if (config.video && Erizo.getBrowser() === 'mozilla') {
                 if (config.video.mandatory !== undefined) {
                     var videoCfg = config.video.mandatory;
@@ -155,6 +155,6 @@ Erizo.GetUserMedia = function (config, callback, error) {
                 }
             }
             navigator.getMedia(config, callback, error);
-        }
+        //}
     }
 };

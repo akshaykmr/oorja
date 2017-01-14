@@ -1,13 +1,14 @@
-/*global document */
-'use strict';
+/* global document */
+/* eslint-disable */
+
 /*
  * Speaker represents the volume icon that will be shown in the mediaPlayer, for example.
  * It manages the volume level of the media tag given in the constructor.
  * Every Speaker is a View.
  * Ex.: var speaker = Speaker({elementID: element, media: mediaTag, id: id});
  */
-var Erizo = Erizo || {};
-Erizo.Speaker = function (spec) {
+
+export default function Speaker (spec) {
     var that = Erizo.View({}),
         show,
         mute,
@@ -138,3 +139,5 @@ Erizo.Speaker = function (spec) {
     document.getElementById(that.elementID).appendChild(that.div);
     return that;
 };
+
+/* eslint-enable */

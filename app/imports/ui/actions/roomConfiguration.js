@@ -104,7 +104,7 @@ export const createRoom = (roomName, passwordEnabled, password = '') =>
         // store secret in localStorage
         dispatch({
           type: CREATE_ROOM,
-          payload: createdRoomName,
+          payload: { createdRoomName },
         });
         storeSecret(createdRoomName, roomSecret);
         return Promise.resolve(response);

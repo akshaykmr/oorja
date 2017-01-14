@@ -1,9 +1,7 @@
-/*global L, RTCSessionDescription, webkitRTCPeerConnection, RTCIceCandidate*/
-'use strict';
+/* global L, RTCSessionDescription, webkitRTCPeerConnection, RTCIceCandidate*/
+/* eslint-disable */
 
-var Erizo = Erizo || {};
-
-Erizo.ChromeStableStack = function (spec) {
+export default function ChromeStableStack (spec) {
     var that = {},
         WebkitRTCPeerConnection = webkitRTCPeerConnection;
 
@@ -292,3 +290,4 @@ Erizo.ChromeStableStack = function (spec) {
 
     return that;
 };
+/* eslint-enable */

@@ -1,10 +1,10 @@
-'use strict';
+/* eslint-disable */
 /*
  * View class represents a HTML component
  * Every view is an EventDispatcher.
  */
-var Erizo = Erizo || {};
-Erizo.View = function () {
+
+export default View = function () {
     var that = Erizo.EventDispatcher({});
 
     // Variables
@@ -13,3 +13,5 @@ Erizo.View = function () {
     that.url = '';
     return that;
 };
+
+/* eslint-enable */

@@ -1,8 +1,7 @@
-/*global L, window, RTCSessionDescription, webkitRTCPeerConnection*/
-'use strict';
-var Erizo = Erizo || {};
+/* global L, window, RTCSessionDescription, webkitRTCPeerConnection*/
+/* eslint-disable */
 
-Erizo.ChromeRoapStack = function (spec) {
+export default function ChromeRoadStack (spec) {
     var that = {},
         WebkitRTCPeerConnection = webkitRTCPeerConnection;
 
@@ -382,3 +381,5 @@ Erizo.ChromeRoapStack = function (spec) {
     that.markActionNeeded();
     return that;
 };
+
+/* eslint-enable*/

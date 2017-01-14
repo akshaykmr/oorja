@@ -1,8 +1,7 @@
-/*global console*/
-'use strict';
-var Erizo = Erizo || {};
+/* global console*/
+/* eslint-disable */
 
-Erizo.FcStack = function (spec) {
+export default function FcStack (spec) {
 /*
         spec.callback({
             type: sessionDescription.type,
@@ -46,3 +45,4 @@ Erizo.FcStack = function (spec) {
     };
     return that;
 };
+/* eslint-enable */

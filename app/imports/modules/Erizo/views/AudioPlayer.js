@@ -1,12 +1,12 @@
-/*global window, document, L, webkitURL*/
-'use strict';
+/* global window, document, L, webkitURL*/
+/* eslint-disable */
 /*
  * AudioPlayer represents a Licode Audio component that shows either a local or a remote Audio.
  * Ex.: var player = AudioPlayer({id: id, stream: stream, elementID: elementID});
  * A AudioPlayer is also a View component.
  */
-var Erizo = Erizo || {};
-Erizo.AudioPlayer = function (spec) {
+
+export default function AudioPlayer (spec) {
     var that = Erizo.View({}),
         onmouseover,
         onmouseout;
@@ -109,3 +109,4 @@ Erizo.AudioPlayer = function (spec) {
 
     return that;
 };
+/* eslint-enable */

@@ -1,9 +1,8 @@
-/*global L, window, RTCSessionDescription, webkitRTCPeerConnection*/
+/* global L, window, RTCSessionDescription, webkitRTCPeerConnection*/
+/* eslint-disable */
 'use strict';
 
-var Erizo = Erizo || {};
-
-Erizo.ChromeCanaryStack = function (spec) {
+export default function ChromeCanaryStack (spec) {
     var that = {},
         WebkitRTCPeerConnection = webkitRTCPeerConnection;
 
@@ -386,3 +385,5 @@ Erizo.ChromeCanaryStack = function (spec) {
     that.markActionNeeded();
     return that;
 };
+
+/* eslint-enable */

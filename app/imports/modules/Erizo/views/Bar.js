@@ -1,13 +1,14 @@
-/*global document, clearTimeout, setTimeout */
-'use strict';
+/* global document, clearTimeout, setTimeout */
+/* eslint-disable */
+
 /*
  * Bar represents the bottom menu bar of every mediaPlayer.
  * It contains a Speaker and an icon.
  * Every Bar is a View.
  * Ex.: var bar = Bar({elementID: element, id: id});
  */
-var Erizo = Erizo || {};
-Erizo.Bar = function (spec) {
+
+export default function Bar (spec) {
     var that = Erizo.View({}),
         waiting,
         show;
@@ -88,3 +89,4 @@ Erizo.Bar = function (spec) {
 
     return that;
 };
+/* eslint-enable */

@@ -8,6 +8,7 @@ export default class testErizo extends Component {
     var obj = { token: this.props.roomToken };
     console.log(obj);
     var room = Erizo.Room(obj);
+    window.room = room;
 
     localStream.addEventListener("access-accepted", function () {
 

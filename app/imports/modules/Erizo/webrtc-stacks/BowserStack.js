@@ -1,8 +1,8 @@
-/*global L, console, RTCSessionDescription, webkitRTCPeerConnection, RTCIceCandidate*/
+/* global L, console, RTCSessionDescription, webkitRTCPeerConnection, RTCIceCandidate*/
+/* eslint-disable */
 'use strict';
-var Erizo = Erizo || {};
 
-Erizo.BowserStack = function (spec) {
+export default function BowserStack (spec) {
     var that = {},
         WebkitRTCPeerConnection = webkitRTCPeerConnection;
 
@@ -213,3 +213,4 @@ Erizo.BowserStack = function (spec) {
 
     return that;
 };
+/* eslint-enable */

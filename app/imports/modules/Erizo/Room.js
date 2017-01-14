@@ -1,5 +1,5 @@
-/*global L, io*/
-'use strict';
+/* global L, io*/
+/* eslint-disable */
 /*
  * Class Room represents a Licode Room. It will handle the connection, local stream publication and
  * remote stream subscription.
@@ -11,9 +11,8 @@
  * Event 'stream-added' indicates that there is a new stream available in the room.
  * Event 'stream-removed' shows that a previous available stream has been removed from the room.
  */
-var Erizo = Erizo || {};
 
-Erizo.Room = function (spec) {
+export default function Room (spec) {
     var that = Erizo.EventDispatcher(spec),
         connectSocket,
         sendMessageSocket,
@@ -875,3 +874,4 @@ Erizo.Room = function (spec) {
 
     return that;
 };
+/* eslint-enable */

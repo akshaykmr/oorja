@@ -1,11 +1,11 @@
-/*global L*/
-'use strict';
+/* global L*/
+/* eslint-disable */
 /*
  * Class EventDispatcher provides event handling to sub-classes.
  * It is inherited from Publisher, Room, etc.
  */
-var Erizo = Erizo || {};
-Erizo.EventDispatcher = function (spec) {
+
+export function EventDispatcher (spec) {
     var that = {};
     // Private vars
     spec.dispatcher = {};
@@ -54,7 +54,7 @@ Erizo.EventDispatcher = function (spec) {
  * A LicodeEvent can be initialized this way:
  * var event = LicodeEvent({type: "room-connected"});
  */
-Erizo.LicodeEvent = function (spec) {
+export function LicodeEvent (spec) {
     var that = {};
 
     // Event type. Examples are: 'room-connected', 'stream-added', etc.
@@ -72,7 +72,7 @@ Erizo.LicodeEvent = function (spec) {
  * 'room-connected' - points out that the user has been successfully connected to the room.
  * 'room-disconnected' - shows that the user has been already disconnected.
  */
-Erizo.RoomEvent = function (spec) {
+export function RoomEvent (spec) {
     var that = Erizo.LicodeEvent(spec);
 
     // A list with the streams that are published in the room.
@@ -90,7 +90,7 @@ Erizo.RoomEvent = function (spec) {
  * 'stream-added' - indicates that there is a new stream available in the room.
  * 'stream-removed' - shows that a previous available stream has been removed from the room.
  */
-Erizo.StreamEvent = function (spec) {
+export function StreamEvent (spec) {
     var that = Erizo.LicodeEvent(spec);
 
     // The stream related to this event.
@@ -109,8 +109,9 @@ Erizo.StreamEvent = function (spec) {
  * Event types:
  * 'access-accepted' - indicates that the user has accepted to share his camera and microphone
  */
-Erizo.PublisherEvent = function (spec) {
+export function PublisherEvent  (spec) {
     var that = Erizo.LicodeEvent(spec);
 
     return that;
 };
+/* eslint-enable */

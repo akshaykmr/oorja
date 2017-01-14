@@ -1,12 +1,12 @@
-/*global window, document, L, webkitURL*/
-'use strict';
+/* global window, document, L, webkitURL*/
+/* eslint-disable */
 /*
  * VideoPlayer represents a Licode video component that shows either a local or a remote video.
  * Ex.: var player = VideoPlayer({id: id, stream: stream, elementID: elementID});
  * A VideoPlayer is also a View component.
  */
-var Erizo = Erizo || {};
-Erizo.VideoPlayer = function (spec) {
+
+export default function VideoPlayer (spec) {
     var that = Erizo.View({}),
         onmouseover,
         onmouseout;
@@ -177,3 +177,5 @@ Erizo.VideoPlayer = function (spec) {
 
     return that;
 };
+
+/* eslint-enable */

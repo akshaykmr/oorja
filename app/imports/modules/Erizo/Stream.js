@@ -1,11 +1,11 @@
-/*global L, document*/
-'use strict';
+/* global L, document*/
+/* eslint-disable */
 /*
  * Class Stream represents a local or a remote Stream in the Room. It will handle the WebRTC stream
  * and identify the stream and where it should be drawn.
  */
-var Erizo = Erizo || {};
-Erizo.Stream = function (spec) {
+
+export default function Stream (spec) {
     var that = Erizo.EventDispatcher(spec),
         getFrame;
 
@@ -320,3 +320,4 @@ Erizo.Stream = function (spec) {
 
     return that;
 };
+/* eslint-enable */
