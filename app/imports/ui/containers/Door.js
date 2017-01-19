@@ -19,7 +19,7 @@ import { Rooms as MongoRoom } from '../../collections/common';
 import { deleteSecret, getRoomInfo, storeSecret,
   deleteRoomUserId, deleteRoomToken, joinRoom } from '../actions/roomConfiguration';
 
-class Room extends Component {
+class Door extends Component {
 
   constructor(props) {
     super(props);
@@ -222,7 +222,9 @@ class Room extends Component {
         return (
           <div> Say what?!
           <br/>
-          <TestErizo roomToken={this.roomToken}/>
+          <TestErizo
+            roomToken={this.roomToken}
+            roomUserId={this.roomUserId}/>
           </div>
         );
       default: return null;
@@ -230,7 +232,7 @@ class Room extends Component {
   }
 }
 
-Room.propTypes = {
+Door.propTypes = {
   params: React.PropTypes.object,
   location: React.PropTypes.object,
   deleteSecret: React.PropTypes.func.isRequired,
@@ -251,4 +253,4 @@ export default connect(
     deleteRoomToken,
     joinRoom,
   }
-)(Room);
+)(Door);

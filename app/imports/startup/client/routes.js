@@ -16,7 +16,7 @@ import { Meteor } from 'meteor/meteor';
 // components
 import App from '../../ui/layouts/App.js';
 import Landing from '../../ui/pages/Landing.js';
-import Room from '../../ui/containers/Room';
+import Door from '../../ui/containers/Door';
 import NotFound from '../../ui/pages/NotFound.js';
 
 // root reducer
@@ -39,8 +39,8 @@ Meteor.startup(() => {
       <Router history={ history }>
         <Route path="/" component={ App }>
           <IndexRoute name="Landing" component={ Landing } />
-          <Route path="/room/:roomName" component={ Room } />
-          <Route path="*" component={ NotFound } />
+          <Route path="/kek" component={ NotFound }/>
+          <Route path="/:roomName" component={ Door } />
         </Route>
       </Router>
     </Provider>,

@@ -50,7 +50,7 @@ class RoomSetup extends Component {
           timeout: 3000,
         });
         const queryString = passwordEnabled ? '' : `?secret=${roomSecret}`;
-        browserHistory.push(`/room/${createdRoomName}${queryString}`);
+        browserHistory.push(`/${createdRoomName}${queryString}`);
       },
       (error) => {
         this.setWaitState(false);
