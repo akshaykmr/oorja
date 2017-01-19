@@ -15,8 +15,14 @@ export const Rooms = new Mongo.Collection('room');
     password,
     participants: [
       {
-        id,
-        profile
+        userId,
+        ...profile
+      }
+    ],
+    userTokens: [
+      {
+        token:,
+        userId
       }
     ]
     createdAt

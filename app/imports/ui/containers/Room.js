@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { browserHistory } from 'react-router';
 import { connect } from 'react-redux';
 import _ from 'lodash';
+import { moment } from 'meteor/momentjs:moment';
 
 import { Meteor } from 'meteor/meteor';
 
@@ -26,9 +27,9 @@ class Room extends Component {
     const roomName = this.props.params.roomName;
     this.roomName = roomName;
     this.roomSecret = localStorage.getItem(`roomSecret:${roomName}`);
+    this.roomUserToken = localStorage.getItem(`roomUserToken:${roomName}`);
     this.roomUserId = localStorage.getItem(`roomUserId:${roomName}`);
-    this.roomToken = localStorage.getItem(`roomToken:${roomName}`);
-    // TODO add last active.
+    this.props.deleteRoomToken();
     this.urlRoomSecret = props.location.query.secret;
 
     // if secret exists in url delete storedSecret
@@ -61,7 +62,7 @@ class Room extends Component {
     // get room info
     const self = this;
     (async function setRoomInfo() {
-      const response = await self.props.getRoomInfo(self.roomName);
+      const response = await self.props.getRoomInfo(self.roomName, self.roomUserToken);
       const roomInfo = response.payload;
       if (!roomInfo) {
         // room not found
@@ -99,32 +100,46 @@ class Room extends Component {
           browserHistory.push('/');
         }
       } else {
+        if (!roomInfo.existingUser) {
+          self.roomUserToken = null;
+          self.roomUserId = null;
+          self.props.deleteRoomToken();
+          self.props.deleteRoomUserId();
+        }
         self.gotoStage(self.stages.INITIALIZING);
       }
     }());
   }
 
+  isRoomReady() {
+    const lastReadyTime = localStorage.getItem(`roomReady:${this.roomName}`);
+    if (!lastReadyTime) return false;
+    return moment().isBefore(moment(lastReadyTime).add(4, 'seconds'));
+  }
+
   gotoStage(stage) {
     const { INITIALIZING, GETTING_READY, SHOW_TIME } = this.stages;
-    const { roomName, roomSecret, roomUserId, roomToken } = this;
+    const { roomName, roomSecret, roomUserId } = this;
     // const previousStage = this.state.stage;
     // custom action before switching to stage
     switch (stage) {
       case GETTING_READY:
-        if (roomUserId && roomToken) {
+        if (roomUserId) {
           const room = MongoRoom.findOne();
           if (_.find(room.participants, { userId: roomUserId })) {
-            this.gotoStage(SHOW_TIME);
-            // If I implement last active, the user may want to 'get ready' again
-            // after some interval period.
-            return;
+            if (this.isRoomReady()) {
+              this.gotoStage(SHOW_TIME);
+              return;
+            }
+          } else {
+            this.props.deleteRoomUserId();
           }
-          this.props.deleteRoomToken();
-          this.props.deleteRoomUserId();
         }
         break;
       case SHOW_TIME:
+        localStorage.setItem(`roomReady:${roomName}`, moment().toISOString());
         this.roomUserId = localStorage.getItem(`roomUserId:${roomName}`);
+        this.roomUserToken = localStorage.getItem(`roomUserToken:${roomName}`);
         this.roomToken = localStorage.getItem(`roomToken:${roomName}`);
         break;
       default: break;
@@ -156,6 +171,7 @@ class Room extends Component {
           // set an observer to sync roomInfo changes to the state.
           self.observeRoomInfo = MongoRoom.find({ roomName }).observe({
             added: (roomInfo) => {
+              // should run only once
               updateRoomInfo(roomInfo);
             },
             changed: (latestRoomInfo) => {
@@ -194,7 +210,10 @@ class Room extends Component {
                   onSuccess = {this.passwordSuccess.bind(this)}
                 />;
       case GETTING_READY:
-        return <GettingReady onReady={() => { this.gotoStage(SHOW_TIME); }}/>;
+        return <GettingReady
+        onReady={() => { this.gotoStage(SHOW_TIME); }}
+        isRoomReady={this.isRoomReady()}
+        roomUserId={this.roomUserId}/>;
       case SHOW_TIME:
         return (
           <div> Say what?!

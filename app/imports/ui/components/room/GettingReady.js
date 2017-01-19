@@ -6,7 +6,10 @@ export default class GettingReady extends Component {
   render() {
     return (
       <div>
-        <JoinRoomForm processComplete={this.props.onReady} />
+        <JoinRoomForm
+          processComplete={this.props.onReady}
+          isRoomReady={this.props.isRoomReady}
+          roomUserId={this.props.roomUserId}/>
       </div>
     );
   }
@@ -14,4 +17,6 @@ export default class GettingReady extends Component {
 
 GettingReady.propTypes = {
   onReady: React.PropTypes.func.isRequired,
+  isRoomReady: React.PropTypes.bool,
+  roomUserId: React.PropTypes.string,
 };

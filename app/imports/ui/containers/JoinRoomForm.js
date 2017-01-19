@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import _ from 'lodash';
 // import ImageLoader from 'react-imageloader';
 
 import { Meteor } from 'meteor/meteor';
@@ -8,6 +9,8 @@ import { Tracker } from 'meteor/tracker';
 
 import LoginWithService from '../components/LoginWithService';
 import { joinRoom } from '../actions/roomConfiguration';
+
+import { Rooms as MongoRoom } from '../../collections/common';
 
 // inputs user name and joins the room.
 class JoinRoomForm extends Component {
@@ -19,20 +22,33 @@ class JoinRoomForm extends Component {
     this.colors = ['#c78ae1', '#f4d448', '#66aee3', '#ffaf51', '#7bcd52', '#23bfb0',
       '#e5176f', '#d784a6'];
 
-    this.state = this.initialState();
-
+    this.initialState = this.initialState.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.room = MongoRoom.findOne();
+    this.state = this.initialState();
+    this.existingUser = _.find(this.room.participants, { userId: this.props.roomUserId });
   }
 
   getRandomColor() {
     return this.colors[Math.floor(Math.random() * this.colors.length)];
   }
 
-  initialState(user = Meteor.user()) {
+  initialState() {
     // if user is already logged in I can get their profile info
     // on the server. no need to get them here.
     // just need their name if logged out.
+    const user = Meteor.user();
+    if (this.existingUser) {
+      const { firstName, picture, textAvatarColor } = this.existingUser;
+      return {
+        waiting: false,
+        loggedIn: !!user,
+        name: firstName,
+        textAvatarColor: textAvatarColor || this.getRandomColor(),
+        picture,
+      };
+    }
     return {
       waiting: false,
       loggedIn: !!user,
@@ -60,6 +76,7 @@ class JoinRoomForm extends Component {
       name += ` ${lastName}`;
     }
     this.setState({
+      ...this.state,
       loggedIn: true,
       name,
       picture,
@@ -81,6 +98,7 @@ class JoinRoomForm extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    if (this.state.waiting) return;
     if (!Meteor.user() && !this.state.name) {
       return;
     }
@@ -104,7 +122,7 @@ class JoinRoomForm extends Component {
   render() {
     const { name, loggedIn, picture } = this.state;
     const inputAttr = {
-      disabled: loggedIn,
+      disabled: loggedIn || !!this.existingUser,
       value: name,
       onChange: this.handleNameChange,
       className: `nameInput ${name ? 'active' : ''}`,
@@ -139,6 +157,12 @@ class JoinRoomForm extends Component {
       onSubmit: this.handleSubmit,
     };
 
+    const loginContainerClasses = () => {
+      let classes = '';
+      if (!loggedIn && name) classes += ' blur';
+      if (this.existingUser) classes += ' hidden';
+      return classes;
+    };
     return (
       <div className='JoinRoomForm'>
       <form onSubmit={this.handleSubmit}>
@@ -161,7 +185,8 @@ class JoinRoomForm extends Component {
           <input type="text" {...inputAttr}/>
         </div>
 
-        <LoginWithService extraClasses={!loggedIn && name ? 'blur' : '' } />
+        <LoginWithService
+          extraClasses={loginContainerClasses()} />
         <div className="joinButtonWrapper">
           <button {...buttonAttr} type="submit">Join the Room !</button>
         </div>
@@ -174,6 +199,7 @@ class JoinRoomForm extends Component {
 JoinRoomForm.propTypes = {
   processComplete: React.PropTypes.func.isRequired,
   joinRoom: React.PropTypes.func.isRequired,
+  roomUserId: React.PropTypes.string,
 };
 
 

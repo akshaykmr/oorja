@@ -14,6 +14,10 @@ $icon-spacing: 10px;
   &.blur:focus, &.blur:hover {
     opacity: 1;
   }
+
+  &.hidden {
+    display: none;
+  }
 }
 
 .button-container {

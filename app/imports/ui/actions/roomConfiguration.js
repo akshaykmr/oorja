@@ -55,8 +55,11 @@ export const deleteRoomToken = (roomName) => {
   };
 };
 
-export const storeRoomUserId = (roomName, userId) => {
+export const storeRoomUserId = (roomName, userId, userToken) => {
   localStorage.setItem(`roomUserId:${roomName}`, userId);
+  if (userToken) {
+    localStorage.setItem(`roomUserToken:${roomName}`, userToken);
+  }
   return {
     type: STORE_ROOM_USERID,
   };
@@ -64,6 +67,7 @@ export const storeRoomUserId = (roomName, userId) => {
 
 export const deleteRoomUserId = (roomName) => {
   localStorage.removeItem(`roomUserId:${roomName}`);
+  localStorage.removeItem(`roomUserToken:${roomName}`);
   return {
     type: DELETE_ROOM_USERID,
   };
@@ -114,9 +118,9 @@ export const createRoom = (roomName, passwordEnabled, password = '') =>
   };
 
 
-export const getRoomInfo = roomName => ({
+export const getRoomInfo = (roomName, userToken = null) => ({
   type: GOT_ROOM_INFO,
-  payload: Meteor.callPromise('getRoomInfo', roomName),
+  payload: Meteor.callPromise('getRoomInfo', roomName, userToken),
 });
 
 
@@ -147,11 +151,12 @@ export const joinRoom = (name, textAvatarColor) =>
     }
     const roomName = room.roomName;
     const roomSecret = localStorage.getItem(`roomSecret:${roomName}`);
-    return Meteor.callPromise('joinRoom', roomName, roomSecret, name, textAvatarColor).then(
-      ({ token, userId }) => {
-        const action = storeRoomToken(roomName, token);
+    const userToken = localStorage.getItem(`roomUserToken:${roomName}`);
+    return Meteor.callPromise('joinRoom', roomName, roomSecret, name, textAvatarColor, userToken).then(
+      ({ roomToken, userId, newUserToken }) => {
+        const action = storeRoomToken(roomName, roomToken);
         Meteor.connection.setUserId(userId);
-        dispatch(storeRoomUserId(roomName, userId));
+        dispatch(storeRoomUserId(roomName, userId, newUserToken));
         Promise.resolve();
         dispatch(action);
         dispatch({

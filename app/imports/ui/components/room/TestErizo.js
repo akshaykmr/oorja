@@ -40,6 +40,7 @@ export default class testErizo extends Component {
         room.addEventListener("stream-added", function (streamEvent) {
             var streams = [];
             streams.push(streamEvent.stream);
+            console.log(streamEvent.stream);
             subscribeToStreams(streams);
         });
 
