@@ -12,7 +12,8 @@ import SupremeToaster from '../components/Toaster';
 import Loading from '../components/Loading';
 import PasswordPrompt from './PasswordPrompt';
 import GettingReady from '../components/room/GettingReady';
-import TestErizo from '../components/room/TestErizo';
+import Room from './Room';
+// import TestErizo from '../components/room/TestErizo';
 
 import { Rooms as MongoRoom } from '../../collections/common';
 
@@ -219,14 +220,10 @@ class Door extends Component {
         isRoomReady={this.isRoomReady()}
         roomUserId={this.roomUserId}/>;
       case SHOW_TIME:
-        return (
-          <div> Say what?!
-          <br/>
-          <TestErizo
-            roomToken={this.roomToken}
-            roomUserId={this.roomUserId}/>
-          </div>
-        );
+        return <Room
+        roomInfo={this.state.roomInfo}
+        roomToken={this.roomToken}
+        roomUserId={this.roomUserId} />;
       default: return null;
     }
   }
