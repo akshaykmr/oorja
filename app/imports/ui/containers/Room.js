@@ -17,7 +17,7 @@ import TestErizo from '../components/room/TestErizo';
 import { Rooms as MongoRoom } from '../../collections/common';
 
 import { deleteSecret, getRoomInfo, storeSecret,
-  deleteRoomUserId, deleteRoomToken } from '../actions/roomConfiguration';
+  deleteRoomUserId, deleteRoomToken, joinRoom } from '../actions/roomConfiguration';
 
 class Room extends Component {
 
@@ -114,7 +114,7 @@ class Room extends Component {
   isRoomReady() {
     const lastReadyTime = localStorage.getItem(`roomReady:${this.roomName}`);
     if (!lastReadyTime) return false;
-    return moment().isBefore(moment(lastReadyTime).add(4, 'seconds'));
+    return moment().isBefore(moment(lastReadyTime).add(4, 'hours'));
   }
 
   gotoStage(stage) {
@@ -128,7 +128,11 @@ class Room extends Component {
           const room = MongoRoom.findOne();
           if (_.find(room.participants, { userId: roomUserId })) {
             if (this.isRoomReady()) {
-              this.gotoStage(SHOW_TIME);
+              this.gotoStage(this.stages.LOADING);
+              this.props.joinRoom()
+                .then(() => {
+                  this.gotoStage(SHOW_TIME);
+                });
               return;
             }
           } else {
@@ -234,7 +238,17 @@ Room.propTypes = {
   storeSecret: React.PropTypes.func.isRequired,
   deleteRoomUserId: React.PropTypes.func.isRequired,
   deleteRoomToken: React.PropTypes.func.isRequired,
+  joinRoom: React.PropTypes.func.isRequired,
 };
 
-export default connect(null,
-  { deleteSecret, getRoomInfo, storeSecret, deleteRoomUserId, deleteRoomToken })(Room);
+export default connect(
+  null,
+  {
+    deleteSecret,
+    getRoomInfo,
+    storeSecret,
+    deleteRoomUserId,
+    deleteRoomToken,
+    joinRoom,
+  }
+)(Room);

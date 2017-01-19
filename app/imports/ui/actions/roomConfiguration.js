@@ -68,6 +68,7 @@ export const storeRoomUserId = (roomName, userId, userToken) => {
 export const deleteRoomUserId = (roomName) => {
   localStorage.removeItem(`roomUserId:${roomName}`);
   localStorage.removeItem(`roomUserToken:${roomName}`);
+  localStorage.removeItem(`roomReady:${roomName}`);
   return {
     type: DELETE_ROOM_USERID,
   };
@@ -142,7 +143,7 @@ export const checkPassword = (roomName, password) =>
       (error) => { unexpectedError({ dispatch, error, roomName }); },
     );
 
-export const joinRoom = (name, textAvatarColor) =>
+export const joinRoom = (name = '', textAvatarColor = '') =>
   (dispatch) => {
     const room = Rooms.findOne();
     if (!room) {

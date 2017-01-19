@@ -1,4 +1,4 @@
-/* global Erizo */
+/* global Erizo window */
 import React, { Component } from 'react';
 
 /* eslint-disable */
@@ -6,7 +6,6 @@ export default class testErizo extends Component {
   componentDidMount() {
     var localStream = Erizo.Stream({ audio: true, video: true, data: true });
     var obj = { token: this.props.roomToken };
-    console.log(obj);
     var room = Erizo.Room(obj);
     window.room = room;
 
@@ -40,7 +39,6 @@ export default class testErizo extends Component {
         room.addEventListener("stream-added", function (streamEvent) {
             var streams = [];
             streams.push(streamEvent.stream);
-            console.log(streamEvent.stream);
             subscribeToStreams(streams);
         });
 

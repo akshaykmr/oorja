@@ -127,11 +127,17 @@ Meteor.methods({
   joinRoom(roomName, roomSecret, name, textAvatarColor, userToken) {
     check(roomName, String);
     check(roomSecret, String);
-    check(name, String);
-    check(textAvatarColor, String); // add check for allowed colors
     /* eslint-disable new-cap*/
+    check(name, Match.Maybe(String));
+    check(textAvatarColor, Match.Maybe(String)); // add check for allowed colors
     check(userToken, Match.Maybe(String));
     /* eslint-enable new-cap */
+
+    if (!userToken) {
+      if (!name || !textAvatarColor) {
+        throw new Meteor.Error('missing user name');
+      }
+    }
 
     const room = Rooms.findOne({
       roomName,
