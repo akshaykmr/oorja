@@ -222,7 +222,7 @@ class Door extends Component {
       case SHOW_TIME:
         return <Room
         roomInfo={this.state.roomInfo}
-        roomToken={this.roomToken}
+        joinRoom={this.props.joinRoom}
         roomUserId={this.roomUserId} />;
       default: return null;
     }

@@ -4,6 +4,7 @@
  * Class Stream represents a local or a remote Stream in the Room. It will handle the WebRTC stream
  * and identify the stream and where it should be drawn.
  */
+import Erizo from './index';
 
 export default function Stream (spec) {
     var that = Erizo.EventDispatcher(spec),

@@ -5,6 +5,7 @@
  * Ex.: var player = VideoPlayer({id: id, stream: stream, elementID: elementID});
  * A VideoPlayer is also a View component.
  */
+import Erizo from '../index';
 
 export default function VideoPlayer (spec) {
     var that = Erizo.View({}),

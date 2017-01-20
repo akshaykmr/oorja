@@ -7,6 +7,7 @@
  * Every Bar is a View.
  * Ex.: var bar = Bar({elementID: element, id: id});
  */
+import Erizo from '../index';
 
 export default function Bar (spec) {
     var that = Erizo.View({}),

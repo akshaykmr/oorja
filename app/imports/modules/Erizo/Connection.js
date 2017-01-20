@@ -1,5 +1,6 @@
 /* global L, window, chrome, navigator*/
 /* eslint-disable */
+import Erizo from './index';
 
 export const sessionId = 103;
 

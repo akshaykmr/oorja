@@ -5,7 +5,7 @@
  * Ex.: var player = AudioPlayer({id: id, stream: stream, elementID: elementID});
  * A AudioPlayer is also a View component.
  */
-
+import Erizo from '../index';
 export default function AudioPlayer (spec) {
     var that = Erizo.View({}),
         onmouseover,

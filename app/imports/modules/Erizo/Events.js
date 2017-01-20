@@ -4,6 +4,7 @@
  * Class EventDispatcher provides event handling to sub-classes.
  * It is inherited from Publisher, Room, etc.
  */
+import Erizo from './index';
 
 export function EventDispatcher (spec) {
     var that = {};

@@ -3,6 +3,7 @@
  * View class represents a HTML component
  * Every view is an EventDispatcher.
  */
+import Erizo from '../index';
 
 export default View = function () {
     var that = Erizo.EventDispatcher({});

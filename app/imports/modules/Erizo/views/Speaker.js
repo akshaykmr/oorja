@@ -7,6 +7,7 @@
  * Every Speaker is a View.
  * Ex.: var speaker = Speaker({elementID: element, media: mediaTag, id: id});
  */
+import Erizo from '../index';
 
 export default function Speaker (spec) {
     var that = Erizo.View({}),
