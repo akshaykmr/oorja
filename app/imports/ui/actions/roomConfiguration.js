@@ -158,11 +158,11 @@ export const joinRoom = (name = '', textAvatarColor = '') =>
         const action = storeRoomToken(roomName, roomToken);
         Meteor.connection.setUserId(userId);
         dispatch(storeRoomUserId(roomName, userId, newUserToken));
-        Promise.resolve();
         dispatch(action);
         dispatch({
           type: JOINED_ROOM,
         });
+        return Promise.resolve({ roomToken });
       },
       (error) => { unexpectedError({ dispatch, error, roomName }); },
     );

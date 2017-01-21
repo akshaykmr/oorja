@@ -27,14 +27,14 @@ class Room extends Component {
     if (this.state.connected || this.state.tryingToConnect) return;
     this.setState({ ...this.state, tryingToConnect: true });
     this.props.joinRoom()
-      .catch(() => { window.reload(); })
-      .then(() => {
-        this.roomToken = localStorage.getItem(`roomToken:${this.roomName}`);
+      .then(({ roomToken }) => {
+        this.roomToken = roomToken;
         this.room = Erizo.Room({ token: this.roomToken });
         this.setRoomConnectionListeners();
         console.log('got new token, reconnecting');
         this.room.connect();
-      });
+      })
+      .catch(() => { location.reload(); });
   }
 
   setRoomConnectionListeners(room = this.room) {
