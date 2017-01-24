@@ -1,3 +1,5 @@
+/* global document */
+
 import React, { Component } from 'react';
 import { browserHistory } from 'react-router';
 import { connect } from 'react-redux';
@@ -60,6 +62,7 @@ class Door extends Component {
   }
 
   componentWillMount() {
+    document.body.classList.add('room-container');
     // get room info
     const self = this;
     (async function setRoomInfo() {
@@ -198,6 +201,7 @@ class Door extends Component {
   }
 
   componentWillUnmount() {
+    document.body.classList.remove('room-container');
     // cleanup
     if (this.state.initialized) {
       this.roomInfoSubscriptionHandle.stop();

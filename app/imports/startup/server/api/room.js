@@ -26,6 +26,8 @@ Meteor.methods({
     check(roomInfo, Object); // matches any object recieved for now. add validation later
 
     let { roomName } = roomInfo;
+    const { private: { roomConfig: { defaultComms } } } = Meteor.settings;
+    const { comms } = roomInfo;
     roomName = roomName.trim();
 
     roomName = roomName.split('').map((char) => {
@@ -59,6 +61,7 @@ Meteor.methods({
         owner: Meteor.userId() || null,
         ...roomInfo,
         roomName,
+        comms: comms || defaultComms,
         roomSecret,
         userTokens: [],
         password,
@@ -254,6 +257,7 @@ Meteor.publish('room.info', (roomName, roomSecret) => {
     fields: {
       roomName: 1,
       participants: 1,
+      comms: 1,
       createdAt: 1,
     },
     limit: 1,

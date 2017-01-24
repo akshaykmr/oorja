@@ -1,10 +1,11 @@
-/* global window */
+/* global location window */
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import Erizo from '../../modules/Erizo';
 
-/* eslint-disable new-cap */
+import CommsBar from './CommsBar';
+import Sidebar from '../components/room/Sidebar';
 
 class Room extends Component {
 
@@ -13,23 +14,35 @@ class Room extends Component {
     this.roomUserId = props.roomUserId;
     this.roomName = props.roomInfo.roomName;
     this.roomToken = localStorage.getItem(`roomToken:${this.roomName}`);
+    /* eslint-disable new-cap */
     this.room = Erizo.Room({ token: this.roomToken });
+    /* eslint-enable new-cap */
 
     this.state = {
       roomInfo: props.roomInfo,
       connected: false,
       tryingToConnect: true,
+      roomHeight: window.innerHeight,
+      roomWidth: window.innerWidth,
+      settings: {
+
+      }, // user preferences such as room component sizes, position etc.
     };
+
+    this.unmountInProgress = false;
+    this.onWindowResize = this.onWindowResize.bind(this);
   }
 
   tryToReconnect() {
+    if (this.state.connected || this.state.tryingToConnect || this.unmountInProgress) return;
     console.log('trying to reconnect');
-    if (this.state.connected || this.state.tryingToConnect) return;
     this.setState({ ...this.state, tryingToConnect: true });
     this.props.joinRoom()
       .then(({ roomToken }) => {
         this.roomToken = roomToken;
+        /* eslint-disable new-cap */
         this.room = Erizo.Room({ token: this.roomToken });
+        /* eslint-enable new-cap */
         this.setRoomConnectionListeners();
         console.log('got new token, reconnecting');
         this.room.connect();
@@ -38,18 +51,28 @@ class Room extends Component {
   }
 
   setRoomConnectionListeners(room = this.room) {
-    room.addEventListener('room-connected', () => {
+    room.addEventListener('room-connected', (roomEvent) => {
+      console.log(roomEvent);
       this.setState({ ...this.state, connected: true, tryingToConnect: false });
     });
 
     room.addEventListener('room-disconnected', () => {
       this.setState({ ...this.state, connected: false });
-      this.tryToReconnect(); // debounce this later.
+      this.tryToReconnect();
+    });
+  }
+
+  onWindowResize(event) {
+    const { innerHeight, innerWidth } = event.target.window;
+    this.setState({
+      ...this.state,
+      roomWidth: innerWidth,
+      roomHeight: innerHeight,
     });
   }
 
   componentWillMount() {
-
+    window.addEventListener('resize', this.onWindowResize);
   }
 
   componentDidMount() {
@@ -59,15 +82,24 @@ class Room extends Component {
   }
 
   componentWillUnmount() {
+    this.unmountInProgress = true;
+    window.removeEventListener('resize', this.onWindowResize);
     this.room.disconnect();
   }
 
   render() {
+    const renderComms = () => {
+      const { comms } = this.state.roomInfo;
+      if (comms === 'text') return null;
+
+      return <CommsBar comms={comms}/>;
+    };
+
     return (
-      <div>
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officia ab deserunt
-       tempore consequuntur, sunt saepe eaque obcaecati ad consequatur quisquam sit
-      vitae minus voluptate non amet eum cumque ea veritatis.
+      <div className='room'>
+        { renderComms() }
+
+        <Sidebar />
       </div>
     );
   }
@@ -81,4 +113,3 @@ Room.propTypes = {
 
 export default connect(null, {})(Room);
 
-/* eslint-enable new-cap */
