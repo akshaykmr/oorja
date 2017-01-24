@@ -1,13 +1,18 @@
 import React, { Component } from 'react';
 
-class SpotlightSwitcher extends Component {
+class Spotlight extends Component {
   render() {
     return (
+      <div className="spotlight-container">
       <div className="spotlight-switcher">
+      </div>
+
+      <div className="spotlight">
+      </div>
 
       </div>
     );
   }
 }
 
-export default SpotlightSwitcher;
+export default Spotlight;

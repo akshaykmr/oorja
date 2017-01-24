@@ -6,6 +6,7 @@ import Erizo from '../../modules/Erizo';
 
 import CommsBar from './CommsBar';
 import Sidebar from '../components/room/Sidebar';
+import Spotlight from '../components/room/Spotlight';
 
 class Room extends Component {
 
@@ -98,7 +99,7 @@ class Room extends Component {
     return (
       <div className='room'>
         { renderComms() }
-
+        <Spotlight />
         <Sidebar />
       </div>
     );
