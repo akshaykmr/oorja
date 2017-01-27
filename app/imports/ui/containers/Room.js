@@ -4,6 +4,9 @@ import { connect } from 'react-redux';
 
 import Erizo from '../../modules/Erizo';
 
+import uiSize from '../components/room/constants/uiSize';
+
+// room components
 import CommsBar from './CommsBar';
 import Sidebar from '../components/room/Sidebar';
 import Spotlight from '../components/room/Spotlight';
@@ -19,19 +22,44 @@ class Room extends Component {
     this.room = Erizo.Room({ token: this.roomToken });
     /* eslint-enable new-cap */
 
+    this.calculateUISize = this.calculateUISize.bind(this);
+    this.onWindowResize = this.onWindowResize.bind(this);
+
     this.state = {
       roomInfo: props.roomInfo,
       connected: false,
       tryingToConnect: true,
-      roomHeight: window.innerHeight,
-      roomWidth: window.innerWidth,
+      uiSize: this.calculateUISize(),
+      roomHeight: innerHeight,
+      roomWidth: innerWidth,
       settings: {
-
+        uiBreakRatio: uiSize.defaultBreakRatio,
+        uiBreakWidth: uiSize.defaultBreakWidth,
       }, // user preferences such as room component sizes, position etc.
     };
-
     this.unmountInProgress = false;
-    this.onWindowResize = this.onWindowResize.bind(this);
+  }
+
+  calculateUISize() {
+    const { innerWidth, innerHeight } = window;
+    let breakWidth = uiSize.defaultBreakWidth;
+    let breakRatio = uiSize.defaultBreakRatio;
+
+    if (this.state) { // component has initialized
+      const settings = this.state.settings;
+      breakRatio = settings.uiBreakRatio;
+      breakWidth = settings.uiBreakWidth;
+    }
+
+    if (innerWidth < breakWidth) {
+      return uiSize.COMPACT;
+    }
+    const ratio = innerWidth / innerHeight;
+    return ratio < breakRatio ? uiSize.COMPACT : uiSize.LARGE;
+  }
+
+  applyRommPreferences() {
+    // override room settings with user's preferences if any
   }
 
   tryToReconnect() {
@@ -67,6 +95,7 @@ class Room extends Component {
     const { innerHeight, innerWidth } = event.target.window;
     this.setState({
       ...this.state,
+      uiSize: this.calculateUISize(),
       roomWidth: innerWidth,
       roomHeight: innerHeight,
     });
