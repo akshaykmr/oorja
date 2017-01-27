@@ -3,7 +3,8 @@
 export default {
   COMPACT: 'COMPACT',
   LARGE: 'LARGE',
-  defaultBreakWidth: 500, // px
-  defaultBreakRatio: 1.0,
+  // play with these settings when there is actually something rendering on the screen :D
+  defaultBreakWidth: 660, // px
+  defaultBreakRatio: 8 / 7,
 };
 

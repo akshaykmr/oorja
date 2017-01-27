@@ -163,18 +163,12 @@ $disconnect:  #e74c3c;
 
 .sidebar{
       min-width: 360px;
-      width: 100%;
       background-color: $sidebar-content;
-      
-      @media only screen and (min-width: 700px) { 
-          width: 360px;
-          background-color: transparent;
-      }
-      
-      
+
       //todo :box shadow
       height: 100%;
       position: absolute;
+      z-index: 500;
       top:0;
       right:0;
       bottom: 0;
@@ -183,7 +177,11 @@ $disconnect:  #e74c3c;
       transition-duration: 0.2s;
       transition-timing-function: linear;
       transition-delay: 0ms;
-      transform: translate3d(100%,0,0);
+      transform: translate3d(0%,0,0); //100
+
+      &.compact {
+        width: 100%;
+      }
       
       &.visible{
           transform: translate3d(0,0,0);
