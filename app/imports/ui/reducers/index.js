@@ -6,7 +6,7 @@ import roomConfigurationReducer from './roomConfiguration';
 const rootReducer = combineReducers({
   roomConfiguration: roomConfigurationReducer,
   /*
-    rethink this
+    do I really need this?
   */
 
   routing: routerReducer,

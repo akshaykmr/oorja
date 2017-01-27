@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import Erizo from '../../modules/Erizo';
 
-import uiSize from '../components/room/constants/uiSize';
+import uiConfig from '../components/room/constants/uiConfig';
 
 // room components
 import CommsBar from './CommsBar';
@@ -33,8 +33,8 @@ class Room extends Component {
       roomHeight: innerHeight,
       roomWidth: innerWidth,
       settings: {
-        uiBreakRatio: uiSize.defaultBreakRatio,
-        uiBreakWidth: uiSize.defaultBreakWidth,
+        uiBreakRatio: uiConfig.defaultBreakRatio,
+        uiBreakWidth: uiConfig.defaultBreakWidth,
       }, // user preferences such as room component sizes, position etc.
     };
     this.unmountInProgress = false;
@@ -42,8 +42,8 @@ class Room extends Component {
 
   calculateUISize() {
     const { innerWidth, innerHeight } = window;
-    let breakWidth = uiSize.defaultBreakWidth;
-    let breakRatio = uiSize.defaultBreakRatio;
+    let breakWidth = uiConfig.defaultBreakWidth;
+    let breakRatio = uiConfig.defaultBreakRatio;
 
     if (this.state) { // component has initialized
       const settings = this.state.settings;
@@ -52,10 +52,10 @@ class Room extends Component {
     }
 
     if (innerWidth < breakWidth) {
-      return uiSize.COMPACT;
+      return uiConfig.COMPACT;
     }
     const ratio = innerWidth / innerHeight;
-    return ratio < breakRatio ? uiSize.COMPACT : uiSize.LARGE;
+    return ratio < breakRatio ? uiConfig.COMPACT : uiConfig.LARGE;
   }
 
   applyRommPreferences() {
@@ -118,18 +118,20 @@ class Room extends Component {
   }
 
   render() {
+    const uiSize = this.state.uiSize;
+
     const renderComms = () => {
       const { comms } = this.state.roomInfo;
-      if (comms === 'text') return null;
+      if (comms === 'text') return null; // text communication in sidebar
 
-      return <CommsBar comms={comms}/>;
+      return <CommsBar comms={comms} uiSize={uiSize}/>;
     };
 
     return (
       <div className='room'>
         { renderComms() }
-        <Spotlight />
-        <Sidebar />
+        <Spotlight uiSize={uiSize}/>
+        <Sidebar uiSize={uiSize}/>
       </div>
     );
   }
