@@ -5,19 +5,24 @@ import uiConfig from '../constants/uiConfig';
 
 import './sidebar.scss';
 
+// tabs
+import Info from './tabs/Info';
+import Settings from './tabs/Settings';
+
 class Sidebar extends Component {
 
   constructor(props) {
     super(props);
     this.tabs = [
       {
-        name: 'info',
-      },
-      {
-        name: 'messages',
+        name: 'information',
+        component: Info,
+        bgColor: '#c2e078',
       },
       {
         name: 'settings',
+        component: Settings,
+        bgColor: '#45b29d',
       },
     ];
 
@@ -25,12 +30,23 @@ class Sidebar extends Component {
       isVisible: false,
       activeTab: this.tabs[0],
     };
+
+    this.closeSidebar = this.closeSidebar.bind(this);
+  }
+
+  closeSidebar() {
+    // implement
+    this.setState({
+      ...this.state,
+      isVisible: false,
+    });
   }
 
   switchToTab(tab) {
     this.setState({
       ...this.state,
       activeTab: tab,
+      isVisible: true,
     });
   }
 
@@ -45,6 +61,10 @@ class Sidebar extends Component {
       visible: this.state.isVisible,
     };
 
+    const sidebarStyling = {
+      boxShadow: `inset 5px -5px 0px ${activeTab.bgColor}`,
+    };
+
     const renderSwitch = (tab) => {
       const switchClassNames = {
         'anchor-button': true,
@@ -54,15 +74,25 @@ class Sidebar extends Component {
         <div
           key={tab.name}
           onClick={() => { this.switchToTab(tab); }}
-          className={classNames(switchClassNames)}>
+          className={classNames(switchClassNames)}
+          id={tab.name}>
         </div>
       );
     };
+
+    const renderTabContent = (tab) => {
+      const isOnTop = tab.name === activeTab.name;
+      return <tab.component key={tab.name} onTop={isOnTop}/>;
+    };
+
     return (
-      <div className={classNames(sidebarClassNames)}>
-        <div id="close-sidebar">
+      <div
+        className={classNames(sidebarClassNames)}
+        style={sidebarStyling} >
+        <div id="close-sidebar" onClick={this.closeSidebar}>
         </div>
         <div className="content">
+          {this.tabs.map(renderTabContent)}
         </div>
         <div className="content-switcher">
           {this.tabs.map(renderSwitch)}

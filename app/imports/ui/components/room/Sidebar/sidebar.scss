@@ -2,7 +2,7 @@ $background: #13171f; //also change on template html for safari
 
 //anchor : have to calculate offsets manually for icons !
 $anchor-width: 50px;
-$anchor-height: 150px;
+$anchor-height: 100px;
 $anchor-icon-size: 30px;
 $anchor-icon-top: 10px;
 $anchor-icon-left: 10px;
@@ -161,30 +161,38 @@ $disconnect:  #e74c3c;
   width: 100vw;
 }
 
-.sidebar{
-      min-width: 360px;
+.sidebar {
+ 
       background-color: $sidebar-content;
-
-      //todo :box shadow
       height: 100%;
       position: absolute;
       z-index: 500;
       top:0;
       right:0;
-      bottom: 0;
+      #close-sidebar {
+        height: 20px;
+        width: 20px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: orange;
+        cursor: pointer;
+      }
 
-      transition-property: transform;
-      transition-duration: 0.2s;
-      transition-timing-function: linear;
-      transition-delay: 0ms;
-      transform: translate3d(0%,0,0); //100
+      transition: transform 400ms ease;
+
+      &.default {
+        width: 340px;
+        transform: translate3d(100%,0,0);
+      }
 
       &.compact {
         width: 100%;
+        transform: translate3d(0,0,0);
       }
       
-      &.visible{
-          transform: translate3d(0,0,0);
+      &.visible {
+          transform: translate3d(0,0,0) !important;
           .anchor{
               opacity: 1;
           }
@@ -204,34 +212,21 @@ $disconnect:  #e74c3c;
       }
       
       .content{
-          padding-top: 5px;
-          float: right;
-          height: 100%;
-          width: calc(100% - 50px);
+          margin-left: 5px;
+          padding: 10px 8px;
+          height: calc(100% - 5px);
+          width: calc(100% - 5px);
           overflow-y: auto;
           background-color: $sidebar-content;
           color: $sidebar-content-text;
-          
-          #close-sidebar{
-              position: absolute;
-              right: 0;
-              top: 0;
-              width: 30px;
-              height: 30px;
-              background-color: #f23c55;
-              cursor: pointer;
-              
-          }
       }
       
       
-      .anchor{
-          perspective: 2000px;
-          opacity: 0;
+      .content-switcher {
+          opacity: 1;
           position: absolute;
           top: 0;
           right:100%;            
-          background-color: transparent;
           width: $anchor-width;
           height: $anchor-height;
           transition: opacity 0.3s ease-in-out;
@@ -239,22 +234,6 @@ $disconnect:  #e74c3c;
           &.visible{
               opacity: 1;
           }
-          
-          &.anchor-in{
-              animation-name: anchor-in;
-              animation-duration: 0.2s;
-              animation-fill-mode:forwards;
-              animation-timing-function: linear;
-          }
-          
-          &.anchor-out{
-              animation-name: anchor-out;
-              animation-duration: 0.2s;
-              animation-fill-mode: forwards;
-              animation-timing-function: linear;
-              
-          }
-          
           
           .anchor-button{
               position: absolute;
@@ -264,7 +243,7 @@ $disconnect:  #e74c3c;
               border-bottom-left-radius: 45%;
               
               @media only screen and (min-width: 700px) { 
-                  box-shadow: inset -1px 0px 2px $sidebar-content;
+                  box-shadow: inset -1px 0px 3px gray;
               }
               
               cursor: pointer;
@@ -277,33 +256,19 @@ $disconnect:  #e74c3c;
                   
               }
               
-              &#messages{
-                  top: 0px;
-                  background-color: $messages;
-                  /* background-image:
-                      linear-gradient(to right, $messages 85% ,$sidebar-content);*/
-              }
               
               &#information{
-                  top: 50px;
-                  background-color: $information;
-                /*  background-image:
-                      linear-gradient(to right, $information 85% ,$sidebar-content);*/
-                  
+                  top: 0px;
+                  background-color: $information;                  
               }
               
               &#settings{
-                  top:100px;
+                  top: 50px;
                   background-color: $settings;
-                /*  background-image:
-                      linear-gradient(to right, $settings 85% ,$sidebar-content);*/
               }
               
               &.active{
                   box-shadow: none;
-                  background-color: $sidebar-content !important;
-                /*  background-image:
-                      linear-gradient(to right, $sidebar-content , $sidebar-content) !important;*/
               }
           }
       }
@@ -336,3 +301,4 @@ $disconnect:  #e74c3c;
         transform: translate3d(0,0,0);
     }
 }
+
