@@ -17,7 +17,7 @@ class Sidebar extends Component {
       {
         name: 'information',
         component: Info,
-        bgColor: '#c2e078',
+        bgColor: '#2c3e50',
       },
       {
         name: 'settings',
@@ -53,6 +53,8 @@ class Sidebar extends Component {
   render() {
     const activeTab = this.state.activeTab;
     const { uiSize } = this.props;
+
+    // change styling here for mobile later.
     const sidebarClassNames = {
       sidebar: true,
       compact: uiSize === uiConfig.COMPACT,
@@ -61,37 +63,44 @@ class Sidebar extends Component {
       visible: this.state.isVisible,
     };
 
-    const sidebarStyling = {
-      boxShadow: `inset 5px -5px 0px ${activeTab.bgColor}`,
-    };
-
     const renderSwitch = (tab) => {
       const switchClassNames = {
-        'anchor-button': true,
+        switch: true,
         active: tab.name === activeTab.name,
+      };
+      const switchStyle = {
+        backgroundColor: tab.bgColor,
       };
       return (
         <div
           key={tab.name}
           onClick={() => { this.switchToTab(tab); }}
           className={classNames(switchClassNames)}
+          style={switchStyle}
           id={tab.name}>
         </div>
       );
     };
 
     const renderTabContent = (tab) => {
-      const isOnTop = tab.name === activeTab.name;
-      return <tab.component key={tab.name} onTop={isOnTop}/>;
+      const tabContentClassNames = {
+        content: true,
+        onTop: tab.name === activeTab.name,
+      };
+      const tabContentStyle = {
+        backgroundColor: activeTab.bgColor,
+      };
+      return <tab.component key={tab.name}
+        classNames={classNames(tabContentClassNames)}
+        style={tabContentStyle}/>;
     };
 
     return (
       <div
-        className={classNames(sidebarClassNames)}
-        style={sidebarStyling} >
+        className={classNames(sidebarClassNames)} >
         <div id="close-sidebar" onClick={this.closeSidebar}>
         </div>
-        <div className="content">
+        <div className="content-wrapper">
           {this.tabs.map(renderTabContent)}
         </div>
         <div className="content-switcher">

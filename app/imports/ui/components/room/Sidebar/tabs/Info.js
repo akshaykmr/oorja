@@ -3,15 +3,16 @@ import React, { Component } from 'react';
 class Info extends Component {
   render() {
     return (
-      <div>
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem sapiente sequi eos esse consequuntur, non, temporibus perspiciatis voluptatem omnis magnam ex aliquam obcaecati eum nihil quidem autem tenetur doloremque. A.
+      <div className={this.props.classNames} style={this.props.style}>
+      Info tab
       </div>
     );
   }
 }
 
 Info.propTypes = {
-  onTop: React.PropTypes.bool.isRequired,
+  classNames: React.PropTypes.string,
+  style: React.PropTypes.object,
 };
 
 export default Info;

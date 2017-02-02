@@ -8,9 +8,6 @@ $anchor-icon-top: 10px;
 $anchor-icon-left: 10px;
 
 //anchor-tabs-colors
-$messages: #ff6f69;
-$information: #c2e078;
-$settings: #45b29d;
 $sidebar-close-button :  #c1e1ed;
 
 
@@ -173,6 +170,7 @@ $disconnect:  #e74c3c;
         height: 20px;
         width: 20px;
         position: absolute;
+        z-index: 2;
         top: 0;
         right: 0;
         background-color: orange;
@@ -196,31 +194,28 @@ $disconnect:  #e74c3c;
           transform: translate3d(0,0,0) !important;
           .anchor{
               opacity: 1;
-          }
-          
-          .anchor .anchor-button{
-              border-top-left-radius: 0px !important;
-              border-bottom-left-radius: 0px !important;
-              
-          }
-          
-          @media only screen and (min-width: 700px) { 
-              .anchor .anchor-button{
-                  border-top-left-radius: 45% !important;
-                  border-bottom-left-radius: 45% !important;   
-              }
-          }     
+          } 
       }
       
-      .content{
-          margin-top: 5px;
-          margin-left: 5px;
-          height: calc(100% - 10px);
-          width: calc(100% - 10px);
-          padding: 10px;
-          overflow-y: auto;
-          background-color: $sidebar-content;
+      .content-wrapper {
+          position: absolute;
+          z-index: 1;
+          height: 100%;
+          width: 100%;
           color: $sidebar-content-text;
+      }
+
+      .content {
+          position: absolute;
+          height: 100%;
+          width: 100%;
+          padding: 20px;
+          overflow-y: auto;
+          z-index: 1;
+
+          &.onTop {
+            z-index: 2;
+          }
       }
       
       
@@ -237,16 +232,13 @@ $disconnect:  #e74c3c;
               opacity: 1;
           }
           
-          .anchor-button{
+          .switch {
               position: absolute;
               width: $anchor-width;
               height: $anchor-width;                
               border-top-left-radius: 45%;
               border-bottom-left-radius: 45%;
-              
-              @media only screen and (min-width: 700px) { 
-                  box-shadow: inset -1px 0px 3px gray;
-              }
+              box-shadow: inset -1px 0px 3px gray;
               
               cursor: pointer;
               
@@ -260,13 +252,11 @@ $disconnect:  #e74c3c;
               
               
               &#information{
-                  top: 0px;
-                  background-color: $information;                  
+                  top: 0px;                  
               }
               
               &#settings{
                   top: 50px;
-                  background-color: $settings;
               }
               
               &.active{

@@ -62,10 +62,10 @@ class Spotlight extends Component {
       );
     };
 
-    const renderTabContent = (tab) => {
-      const isOnTop = tab.name === activeTab.name;
-      return <tab.component key={tab.name} onTop={isOnTop}/>;
-    };
+    // const renderTabContent = (tab) => {
+    //   const isOnTop = tab.name === activeTab.name;
+    //   return <tab.component key={tab.name} onTop={isOnTop}/>;
+    // };
 
     return (
       <div
