@@ -46,7 +46,7 @@ class Sidebar extends Component {
     this.setState({
       ...this.state,
       activeTab: tab,
-      isVisible: true,
+      isVisible: this.state.isVisible ? tab.name !== this.state.activeTab.name : true,
     });
   }
 

@@ -187,8 +187,9 @@ $disconnect:  #e74c3c;
       }
 
       &.compact {
-        width: 100%;
-        transform: translate3d(0,0,0);
+        width: 340px; // do mobile later...
+        //width: 100%;
+        transform: translate3d(100%,0,0);
       }
       
       &.visible {
@@ -212,10 +213,11 @@ $disconnect:  #e74c3c;
       }
       
       .content{
+          margin-top: 5px;
           margin-left: 5px;
-          padding: 10px 8px;
-          height: calc(100% - 5px);
-          width: calc(100% - 5px);
+          height: calc(100% - 10px);
+          width: calc(100% - 10px);
+          padding: 10px;
           overflow-y: auto;
           background-color: $sidebar-content;
           color: $sidebar-content-text;
