@@ -120,7 +120,7 @@ class JoinRoomForm extends Component {
   }
 
   render() {
-    const { name, loggedIn, picture } = this.state;
+    const { name, loggedIn, picture, waiting } = this.state;
     const inputAttr = {
       disabled: loggedIn || !!this.existingUser,
       value: name,
@@ -152,7 +152,7 @@ class JoinRoomForm extends Component {
     const avatar = picture ? <img className="avatar" src={picture} alt=""/> : null;
 
     const buttonAttr = {
-      disabled: !name,
+      disabled: !name || waiting,
       className: 'joinButton',
       onSubmit: this.handleSubmit,
     };

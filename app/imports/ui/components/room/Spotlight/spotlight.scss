@@ -1,7 +1,74 @@
+$switcher-width: 60px;
+
 .spotlight {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
   width: 100%;
+
+  .content-wrapper {
+    position: absolute;
+    left: $switcher-width;
+    height: 100%;
+    width: calc(100% - 60px); // cant apply scss variable here? why?
+  }
+
+  .content-switcher {
+    background-color: #2e3136;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: center;
+
+
+    &.default {
+      height: 100%;
+      width: $switcher-width;
+    }
+
+    &.compact {
+      width: 100%;
+      height: $switcher-width;
+    }
+
+    .switch {
+      width: 45px;
+      height: 45px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      border-radius: 30%;
+      background-color: gray;
+      transform: scale(1.0);
+      transition: transform ease 0.3s;
+      cursor: pointer;
+      opacity: 0.5;
+
+      &:hover {
+        border: 2px solid #3e606f;
+        opacity: 0.8;
+      }
+
+      &.active {
+        &:hover {
+          opacity: 1.0;
+        }
+        border: 2px solid #3e606f;
+        opacity: 1.0;
+        transform: scale(1.07)
+      }
+    }
+  }
+
+  .content {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      z-index: 1;
+
+      &.onTop {
+        z-index: 2;
+      }
+  }
 }

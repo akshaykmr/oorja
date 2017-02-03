@@ -5,6 +5,10 @@ import uiConfig from '../constants/uiConfig';
 
 import './spotlight.scss';
 
+// tabs
+import Info from './tabs/Info';
+import Settings from './tabs/Settings';
+
 class Spotlight extends Component {
 
   constructor(props) {
@@ -12,11 +16,14 @@ class Spotlight extends Component {
     this.tabs = [
       {
         name: 'information',
-        bgColor: '#c2e078',
+        component: Info,
+        bgColor: '',
+        color: '',
       },
       {
         name: 'settings',
-        bgColor: '#45b29d',
+        component: Settings,
+        bgColor: '',
       },
     ];
 
@@ -37,44 +44,57 @@ class Spotlight extends Component {
   render() {
     const activeTab = this.state.activeTab;
     const { uiSize } = this.props;
+
+    // change styling here for mobile later.
     const spotlightClassNames = {
       spotlight: true,
       compact: uiSize === uiConfig.COMPACT,
       default: uiSize !== uiConfig.COMPACT,
-
-      visible: this.state.isVisible,
     };
-
-    const spotlightStyling = {};
 
     const renderSwitch = (tab) => {
       const switchClassNames = {
-        'anchor-button': true,
+        switch: true,
         active: tab.name === activeTab.name,
+      };
+      const switchStyle = {
+        backgroundColor: tab.bgColor,
       };
       return (
         <div
           key={tab.name}
           onClick={() => { this.switchToTab(tab); }}
           className={classNames(switchClassNames)}
+          style={switchStyle}
           id={tab.name}>
         </div>
       );
     };
 
-    // const renderTabContent = (tab) => {
-    //   const isOnTop = tab.name === activeTab.name;
-    //   return <tab.component key={tab.name} onTop={isOnTop}/>;
-    // };
+    const renderTabContent = (tab) => {
+      const onTop = tab.name === activeTab.name;
+      const tabContentClassNames = {
+        content: true,
+        onTop,
+      };
+      const tabContentStyle = {
+        backgroundColor: tab.bgColor || '#36393e', // defaults, move them to settings later.
+        color: tab.color || '#fefefe',
+      };
+      return <tab.component
+        key={tab.name}
+        onTop={onTop}
+        classNames={classNames(tabContentClassNames)}
+        style={tabContentStyle}/>;
+    };
 
     return (
       <div
-        className={classNames(spotlightClassNames)}
-        style={spotlightStyling} >
-        <div className="content">
-          {/* this.tabs.map(renderTabContent) */ }
+        className={classNames(spotlightClassNames)} >
+        <div className="content-wrapper">
+          {this.tabs.map(renderTabContent)}
         </div>
-        <div className="content-switcher">
+        <div className="content-switcher default">
           {this.tabs.map(renderSwitch)}
         </div>
       </div>
