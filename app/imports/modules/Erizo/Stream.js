@@ -8,7 +8,7 @@ import Erizo from './index';
 
 export default function Stream (spec) {
     var that = Erizo.EventDispatcher(spec),
-        getFrame;
+        getFrame, controlHandler;
 
     that.stream = spec.stream;
     that.url = spec.url;
@@ -20,6 +20,7 @@ export default function Stream (spec) {
     that.audio = spec.audio;
     that.screen = spec.screen;
     that.videoSize = spec.videoSize;
+    that.videoFrameRate = spec.videoFrameRate;
     that.extensionId = spec.extensionId;
 
     if (that.videoSize !== undefined &&
@@ -92,12 +93,22 @@ export default function Stream (spec) {
         if ((spec.audio || spec.video || spec.screen) && spec.url === undefined) {
           L.Logger.info('Requested access to local media');
           var videoOpt = spec.video;
-          if ((videoOpt === true || spec.screen === true) &&
-              that.videoSize !== undefined) {
-            videoOpt = {mandatory: {minWidth: that.videoSize[0],
-                                    minHeight: that.videoSize[1],
-                                    maxWidth: that.videoSize[2],
-                                    maxHeight: that.videoSize[3]}};
+          if (videoOpt === true || spec.screen === true) {
+              videoOpt = {}
+              if (that.videoSize !== undefined) {
+                  videoOpt.mandatory = {};
+                  videoOpt.mandatory.minWidth = that.videoSize[0];
+                  videoOpt.mandatory.minHeight = that.videoSize[1];
+                  videoOpt.mandatory.maxWidth = that.videoSize[2];
+                  videoOpt.mandatory.maxHeight = that.videoSize[3];
+              }
+              
+              if (that.videoFrameRate !== undefined) {
+                  videoOpt.optional = []
+                  videoOpt.optional.push({minFrameRate: that.videoFrameRate[0]});
+                  videoOpt.optional.push({maxFrameRate: that.videoFrameRate[1]});
+              }
+              
           } else if (spec.screen === true && videoOpt === undefined) {
             videoOpt = true;
           }
@@ -287,14 +298,27 @@ export default function Stream (spec) {
             callback ('error');
             return;
         }
-        if (that.local) {
-            L.Logger.warning('muteAudio can only be used in remote streams');
-            callback('Error');
-            return;
-        }
         var config = {muteStream : {audio : isMuted}};
         that.checkOptions(config, true);
         that.pc.updateSpec(config, callback);
+    };
+
+    controlHandler = function (handlers, publisherSide, enable) {
+      publisherSide = !(publisherSide !== true);
+      var handlers = (typeof handlers === 'string') ? [handlers] : handlers;
+      handlers = (handlers instanceof Array) ? handlers : [];
+
+      if (handlers.length > 0) {
+        that.room.sendControlMessage(that, 'control', {name: 'controlhandlers', enable: enable, publisherSide: publisherSide, handlers: handlers});
+      }
+    };
+
+    that.disableHandlers = function (handlers, publisherSide) {
+      controlHandler(handlers, publisherSide, false);
+    };
+
+    that.enableHandlers = function (handlers, publisherSide) {
+        controlHandler(handlers, publisherSide, true);
     };
 
     that.updateConfiguration = function (config, callback) {

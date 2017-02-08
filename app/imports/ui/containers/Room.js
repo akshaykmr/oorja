@@ -7,7 +7,7 @@ import Erizo from '../../modules/Erizo';
 import uiConfig from '../components/room/constants/uiConfig';
 
 // room components
-import CommsBar from './CommsBar';
+import StreamsContainer from '../components/room/StreamsContainer/';
 import Sidebar from '../components/room/Sidebar';
 import Spotlight from '../components/room/Spotlight';
 
@@ -24,12 +24,14 @@ class Room extends Component {
 
     this.calculateUISize = this.calculateUISize.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
+    this.resizeStreamContainer = this.resizeStreamContainer.bind(this);
 
     this.state = {
       roomInfo: props.roomInfo,
       connected: false,
       tryingToConnect: true,
       uiSize: this.calculateUISize(),
+      streamContainerSize: uiConfig.COMPACT,
       roomHeight: innerHeight,
       roomWidth: innerWidth,
       settings: {
@@ -38,6 +40,13 @@ class Room extends Component {
       }, // user preferences such as room component sizes, position etc.
     };
     this.unmountInProgress = false;
+  }
+
+  resizeStreamContainer(size) {
+    this.setState({
+      ...this.state,
+      streamContainerSize: size,
+    });
   }
 
   calculateUISize() {
@@ -108,7 +117,6 @@ class Room extends Component {
   componentDidMount() {
     this.setRoomConnectionListeners();
     this.room.connect();
-    console.log(this.room);
   }
 
   componentWillUnmount() {
@@ -118,19 +126,17 @@ class Room extends Component {
   }
 
   render() {
-    const uiSize = this.state.uiSize;
-
-    const renderComms = () => {
-      const { comms } = this.state.roomInfo;
-      if (comms === 'text') return null; // text communication in sidebar
-
-      return <CommsBar comms={comms} uiSize={uiSize}/>;
-    };
-
+    const { uiSize, streamContainerSize } = this.state;
     return (
       <div className='room'>
-        { renderComms() }
-        <Spotlight uiSize={uiSize}/>
+        <StreamsContainer
+          resizeStreamContainer={this.resizeStreamContainer}
+          streamContainerSize={streamContainerSize}
+          roomInfo={this.state.roomInfo}/>
+        <Spotlight
+          uiSize={uiSize}
+          resizeStreamContainer={this.resizeStreamContainer}
+          streamContainerSize={streamContainerSize}/>
         <Sidebar uiSize={uiSize}/>
       </div>
     );

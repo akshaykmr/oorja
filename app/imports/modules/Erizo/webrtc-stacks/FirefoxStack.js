@@ -168,7 +168,12 @@ export default function FirefoxStack (spec) {
         if (isSubscribe === true) {
             that.peerConnection.createOffer(setLocalDesc, errorCallback, that.mediaConstraints);
         } else {
-            that.peerConnection.createOffer(setLocalDesc, errorCallback);
+            that.mediaConstraints = {
+                offerToReceiveAudio: false,
+                offerToReceiveVideo: false,
+                mozDontOfferDataChannel: true
+            };
+            that.peerConnection.createOffer(setLocalDesc, errorCallback, that.mediaConstraints);
         }
     };
 

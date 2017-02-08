@@ -26,8 +26,6 @@ Meteor.methods({
     check(roomInfo, Object); // matches any object recieved for now. add validation later
 
     let { roomName } = roomInfo;
-    const { private: { roomConfig: { defaultComms } } } = Meteor.settings;
-    const { comms } = roomInfo;
     roomName = roomName.trim();
 
     roomName = roomName.split('').map((char) => {
@@ -61,7 +59,6 @@ Meteor.methods({
         owner: Meteor.userId() || null,
         ...roomInfo,
         roomName,
-        comms: comms || defaultComms,
         roomSecret,
         userTokens: [],
         password,
@@ -189,7 +186,7 @@ Meteor.methods({
       return profile;
     };
 
-    const result = N.API.createToken(room._id, userId, 'presenterRecord');
+    const result = N.API.createToken(room._id, userId, 'presenter');
     const roomToken = result.content;
 
     const existingUser = _.find(room.userTokens, { userToken })
