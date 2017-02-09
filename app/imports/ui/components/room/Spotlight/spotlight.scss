@@ -2,12 +2,12 @@ $switcher-width: 60px;
 
 .spotlight {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
-  height: 100%;
   width: 100%;
 
   .content-wrapper {
+    background-color: #2e3136;
     position: absolute;
     left: $switcher-width;
     height: 100%;
@@ -66,6 +66,8 @@ $switcher-width: 60px;
   }
 
   .content {
+      padding: 10px; // temp
+      border-top-left-radius: 8px;
       position: absolute;
       height: 100%;
       width: 100%;

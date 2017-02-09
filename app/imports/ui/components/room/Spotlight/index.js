@@ -43,7 +43,7 @@ class Spotlight extends Component {
 
   render() {
     const activeTab = this.state.activeTab;
-    const { uiSize } = this.props;
+    const { uiSize, streamContainerSize } = this.props;
 
     // change styling here for mobile later.
     const spotlightClassNames = {
@@ -90,7 +90,9 @@ class Spotlight extends Component {
 
     return (
       <div
-        className={classNames(spotlightClassNames)} >
+        className={classNames(spotlightClassNames)}
+        // move to config if it feels good
+        style={{ height: streamContainerSize === uiConfig.LARGE ? '82%' : 'calc(100% - 60px)' }} >
         <div className="content-wrapper">
           {this.tabs.map(renderTabContent)}
         </div>
@@ -104,6 +106,7 @@ class Spotlight extends Component {
 
 Spotlight.propTypes = {
   uiSize: React.PropTypes.string.isRequired,
+  streamContainerSize: React.PropTypes.string.isRequired,
 };
 
 
