@@ -130,6 +130,7 @@ class Room extends Component {
     return (
       <div className='room'>
         <StreamsContainer
+          uiSize={uiSize}
           resizeStreamContainer={this.resizeStreamContainer}
           streamContainerSize={streamContainerSize}
           roomInfo={this.state.roomInfo}/>

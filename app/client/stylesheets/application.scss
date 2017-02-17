@@ -1,8 +1,9 @@
 @import "base/animations";
 @import "module/Loading";
+
 // pages
 @import "./pages/_landing";
-$primary-bg-color: #fafafa;
+$primary-bg-color: #fff;
 * {
   box-sizing: border-box !important;
 }

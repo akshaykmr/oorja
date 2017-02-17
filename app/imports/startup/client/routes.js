@@ -15,6 +15,7 @@ import { Meteor } from 'meteor/meteor';
 
 // components
 import App from '../../ui/layouts/App.js';
+import SupremeToaster from '../../ui/components/Toaster';
 import Landing from '../../ui/pages/Landing.js';
 import Door from '../../ui/containers/Door';
 import NotFound from '../../ui/pages/NotFound.js';
@@ -32,6 +33,12 @@ const store = createStoreWithMiddleware(rootReducer,
 
 const history = syncHistoryWithStore(browserHistory, store);
 
+
+const onEnterDoor = (nextState, replace, callback) => {
+  SupremeToaster.clear();
+  callback();
+};
+
 Meteor.startup(() => {
   render(
     <Provider store={store}
@@ -40,7 +47,7 @@ Meteor.startup(() => {
         <Route path="/" component={ App }>
           <IndexRoute name="Landing" component={ Landing } />
           <Route path="/kek" component={ NotFound }/>
-          <Route path="/:roomName" component={ Door } />
+          <Route path="/:roomName" component={ Door } onEnter={onEnterDoor} />
         </Route>
       </Router>
     </Provider>,

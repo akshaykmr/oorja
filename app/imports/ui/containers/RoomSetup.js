@@ -1,3 +1,5 @@
+import { Meteor } from 'meteor/meteor';
+
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
@@ -44,11 +46,13 @@ class RoomSetup extends Component {
     this.props.createRoom(roomName, passwordEnabled, password).then(
       ({ createdRoomName, roomSecret }) => {
         this.setWaitState(false);
-        SupremeToaster.show({
-          intent: Intent.SUCCESS,
-          message: 'Room Created ヾ(⌐■_■)ノ♪',
-          timeout: 3000,
-        });
+        Meteor.setTimeout(() => {
+          SupremeToaster.show({
+            intent: Intent.SUCCESS,
+            message: 'Room Created ヾ(⌐■_■)ノ♪',
+            timeout: 3000,
+          });
+        }, 100);
         const queryString = passwordEnabled ? '' : `?secret=${roomSecret}`;
         browserHistory.push(`/${createdRoomName}${queryString}`);
       },
