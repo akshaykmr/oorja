@@ -188,9 +188,8 @@ Meteor.methods({
 
     const result = N.API.createToken(room._id, userId, 'presenter');
     const roomToken = result.content;
-
-    const existingUser = _.find(room.userTokens, { userToken })
-      || user ? _.find(room.userTokens, { userId: user._id }) : null;
+    const existingUser = _.find(room.userTokens, { userToken }) ||
+      (user ? _.find(room.userTokens, { userId: user._id }) : null);
 
     if (!existingUser) {
       const profile = generateProfile();

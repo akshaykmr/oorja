@@ -16,15 +16,15 @@ es5-shim@4.6.15                # ECMAScript 5 compatibility for older browsers.
 ecmascript@0.6.1              # Enable ECMAScript2015+ syntax in app code
 
 accounts-base@1.2.14
-accounts-facebook
-accounts-github
-accounts-google
-accounts-meetup
-accounts-twitter
-accounts-weibo
+accounts-facebook@1.0.11
+accounts-github@1.0.11
+accounts-google@1.0.11
+accounts-meetup@1.0.11
+accounts-twitter@1.1.12
+accounts-weibo@1.0.11
 alexbeauchemin:accounts-twitch
 pauli:accounts-linkedin
-service-configuration
+service-configuration@1.0.11
 check@1.2.4
 audit-argument-checks@1.0.7
 # browser-policy@1.0.9
@@ -38,5 +38,5 @@ deanius:promise
 msavin:mongol
 momentjs:moment
 aldeed:simple-schema
-random
-http
+random@1.0.10
+http@1.2.10

@@ -8,7 +8,7 @@ import uiConfig from '../components/room/constants/uiConfig';
 
 // room components
 import StreamsContainer from '../components/room/StreamsContainer/';
-import Sidebar from '../components/room/Sidebar';
+// import Sidebar from '../components/room/Sidebar';
 import Spotlight from '../components/room/Spotlight';
 
 class Room extends Component {
@@ -137,9 +137,9 @@ class Room extends Component {
           uiSize={uiSize}
           resizeStreamContainer={this.resizeStreamContainer}
           streamContainerSize={streamContainerSize}/>
-        <Sidebar uiSize={uiSize}/>
       </div>
     );
+    /* <Sidebar uiSize={uiSize}/>*/
   }
 }
 
