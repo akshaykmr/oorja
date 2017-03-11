@@ -1,6 +1,6 @@
 /* global Erizo window */
 import React, { Component } from 'react';
-import Erizo from '../../../modules/Erizo/';
+// import Erizo from '../../../modules/Erizo/';
 
 /* eslint-disable */
 export default class testErizo extends Component {

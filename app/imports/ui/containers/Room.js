@@ -1,8 +1,8 @@
-/* global location window */
+/* global location window Erizo*/
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import Erizo from '../../modules/Erizo';
+// import Erizo from '../../modules/Erizo';
 
 import uiConfig from '../components/room/constants/uiConfig';
 
