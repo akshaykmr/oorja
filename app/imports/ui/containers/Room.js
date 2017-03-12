@@ -165,10 +165,6 @@ class Room extends Component {
     });
   }
 
-  setStreamListners(stream, options = null) {
-
-  }
-
   onWindowResize(event) {
     const { innerHeight, innerWidth } = event.target.window;
     this.setState({
