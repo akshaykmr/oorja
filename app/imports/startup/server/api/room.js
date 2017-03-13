@@ -124,6 +124,7 @@ Meteor.methods({
     return null;
   },
 
+  // ughh improve this code 😣
   joinRoom(roomName, roomSecret, name, textAvatarColor, userToken) {
     check(roomName, String);
     check(roomSecret, String);
@@ -154,7 +155,7 @@ Meteor.methods({
     // TODO: add check to only allow access based on loginService if configured so in room.
 
     if (!user) { // for anonynymous users
-      userId = Random.id(10);
+      userId = Random.id(16);
       this.setUserId(userId);
     }
     const computeInitials = (fullName) => {
@@ -208,42 +209,11 @@ Meteor.methods({
 
     return {
       roomToken,
-      userId,
+      userId: existingUser.userId,
       newUserToken: existingUser.userToken, // existing token
     };
   },
 
-  joinRoomWithAnonToken(roomName, roomSecret, anonToken) {
-    check(roomName, String);
-    check(roomSecret, String);
-    check(anonToken, String);
-
-    const room = Rooms.findOne({
-      roomName,
-      roomSecret,
-    });
-    const user = Meteor.user();
-
-    const errorTopic = 'Failed to join Room with anonToken';
-    if (!room) {
-      throw new Meteor.Error(errorTopic, 'Room not found');
-    }
-    if (user) {
-      throw new Meteor.Error(errorTopic, 'User signed in with a service');
-    }
-    const anon = _.find(room.anonTokens, { anonToken });
-
-    if (!anon) {
-      throw new Meteor.Error(errorTopic, 'token invalid');
-    } else {
-      const result = N.API.createToken(room._id, anon.userId, 'presenterRecord');
-      return {
-        userId: anon.userId,
-        token: result.content,
-        anonToken: anon.anonToken,
-      };
-    }
-  },
 });
 
 

@@ -1,11 +1,18 @@
 /* global location window Erizo*/
+import { Meteor } from 'meteor/meteor';
+
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import update from 'immutability-helper';
+import _ from 'lodash';
 
 // import Erizo from '../../modules/Erizo';
 
+// constants
 import uiConfig from '../components/room/constants/uiConfig';
 import status from '../components/room/constants/status';
+import streamTypes from '../components/room/constants/streamType';
+
 // room components
 import StreamsContainer from '../components/room/StreamsContainer/';
 // import Sidebar from '../components/room/Sidebar';
@@ -24,25 +31,30 @@ class Room extends Component {
     // should I use `new` keyword here? licode docs dont use them, And If I did
     // I may run into some issues due to context of `this` etc.
 
-    // an erizo data stream to be used for all 'data' purposes
+    // an erizo data stream to be used for sending 'data' by this user
     this.primaryDataStream = Erizo.Stream({
       data: true,
       attributes: {
         userId: this.roomUserId,
-        name: 'primary_data_stream',
+        type: streamTypes.PRIMARY_DATA_STREAM,
       },
     });
     this.setPrimaryDataStreamListners();
     this.primaryDataStream.init();
     /* eslint-enable new-cap */
 
+    // subscribed incoming data streams
+    this.subscribedDataStreams = [];
+
+
     this.calculateUISize = this.calculateUISize.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
     this.resizeStreamContainer = this.resizeStreamContainer.bind(this);
 
     this.state = {
-      roomInfo: props.roomInfo,
-      connectionStatus: status.TRYING_TO_CONNECT,
+      connectedUsers: [],
+
+      roomConnectionStatus: status.TRYING_TO_CONNECT,
       primaryDataStreamStatus: status.TRYING_TO_CONNECT,
 
       uiSize: this.calculateUISize(),
@@ -89,9 +101,11 @@ class Room extends Component {
   }
 
   tryToReconnect() {
-    if (this.state.connectionStatus === status.TRYING_TO_CONNECT || this.unmountInProgress) return;
-    console.log('trying to reconnect');
-    this.setState({ ...this.state, connectionStatus: status.TRYING_TO_CONNECT });
+    if (this.state.roomConnectionStatus === status.TRYING_TO_CONNECT || this.unmountInProgress) {
+      return;
+    }
+    console.info('trying to reconnect');
+    this.setState({ ...this.state, roomConnectionStatus: status.TRYING_TO_CONNECT });
     this.props.joinRoom()
       .then(({ roomToken }) => {
         this.roomToken = roomToken;
@@ -99,7 +113,7 @@ class Room extends Component {
         this.room = Erizo.Room({ token: this.roomToken });
         /* eslint-enable new-cap */
         this.setRoomConnectionListeners();
-        console.log('got new token, reconnecting');
+        console.info('got new token, reconnecting');
         this.room.connect();
       })
       .catch(() => { location.reload(); });
@@ -110,44 +124,51 @@ class Room extends Component {
       console.info('room connected', roomEvent);
       console.log(room);
       this.setRoomStreamListners();
-      this.setState({ ...this.state, connectionStatus: status.CONNECTED });
-
+      this.setState({ ...this.state, roomConnectionStatus: status.CONNECTED });
+      roomEvent.streams.forEach((stream) => {
+        this.handleStreamSubscription(stream);
+      });
       room.publish(this.primaryDataStream);
     });
 
     room.addEventListener('room-error', (roomEvent) => {
       console.error('room connection error', roomEvent);
-      this.setState({ ...this.state, connectionStatus: status.DISCONNECTED });
+      this.setState({ ...this.state, roomConnectionStatus: status.DISCONNECTED });
     });
 
     room.addEventListener('room-disconnected', (roomEvent) => {
       console.info('room disconnected', roomEvent);
-      this.setState({ ...this.state, connectionStatus: status.DISCONNECTED });
+      this.setState({ ...this.state, roomConnectionStatus: status.DISCONNECTED });
       this.tryToReconnect();
     });
   }
 
   setRoomStreamListners(room = this.room) { // when streams are added_to/removed_from the room
     room.addEventListener('stream-added', (streamEvent) => {
-      console.log(streamEvent);
-      if (streamEvent.stream.getID() in room.localStreams) { // published by us
-        if (streamEvent.stream.getAttributes().name === 'primary_data_stream') {
+      const { stream } = streamEvent;
+      if (stream.getID() in room.localStreams) { // published by us
+        const attributes = stream.getAttributes();
+        if (attributes.type === streamTypes.PRIMARY_DATA_STREAM) {
           this.setState({ ...this.state, primaryDataStreamStatus: status.CONNECTED });
         }
         // do not subscribe local streams
         console.info('local stream added');
-        return;
+      } else {
+        this.handleStreamSubscription(stream);
       }
-      room.subscribe(streamEvent.stream);
       console.info('stream added', streamEvent);
     });
 
+    // I don't know whether a failed stream would trigger a stream-removed later
+    // need to keep this in mind for later
     room.addEventListener('stream-failed', (streamEvent) => {
       console.error('stream failed', streamEvent);
+      this.handleStreamRemoval(streamEvent.stream);
     });
 
     room.addEventListener('stream-removed', (streamEvent) => {
       console.info('stream removed', streamEvent);
+      this.handleStreamRemoval(streamEvent.stream);
     });
   }
 
@@ -163,6 +184,77 @@ class Room extends Component {
       this.setState({ ...this.state, primaryDataStreamStatus: status.ERROR });
       console.error('primaryDataStream stream-failed', streamEvent);
     });
+  }
+
+  // do not pass local streams | only remote streams may be subscribed
+  handleStreamSubscription(stream) {
+    const attributes = stream.getAttributes();
+
+    const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
+    if (!user) throw new Meteor.Error('stream publisher not found');
+
+    const { PRIMARY_DATA_STREAM } = streamTypes;
+    switch (attributes.type) {
+      case PRIMARY_DATA_STREAM :
+        if (_.find(this.connectedUsers, { userId: user.userId })) {
+          // if user is connected
+          console.error('only one primary data stream expected from any user. hmm...');
+          return;
+        }
+
+        // connect user to the room and subscribe the stream and apply listeners
+
+        // just a check If I run into this later
+        this.subscribedDataStreams.forEach((s) => {
+          if (s.getID() === stream.getID()) throw new Meteor.Error('over here!');
+        });
+        this.setIncomingStreamListners(stream);
+        this.room.subscribe(stream);
+        this.subscribedDataStreams.push(stream);
+        this.setState(update(this.state, {
+          connectedUsers: { $push: [user] },
+        }));
+        break;
+      default: console.error('unexpected stream type');
+    }
+  }
+
+  setIncomingStreamListners(stream) {
+    const attributes = stream.getAttributes();
+    const { PRIMARY_DATA_STREAM } = streamTypes;
+    switch (attributes.type) {
+      case PRIMARY_DATA_STREAM :
+        // set listners for data
+        break;
+      default: console.error('unexpected stream type');
+    }
+  }
+
+  handleStreamRemoval(stream) {
+    const attributes = stream.getAttributes();
+
+    const { PRIMARY_DATA_STREAM } = streamTypes;
+    const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
+
+    switch (attributes.type) {
+      case PRIMARY_DATA_STREAM :
+        if (_.find(this.connectedUsers, { userId: user.userId })) {
+          // if user is connected
+          console.error('user doesnt seem to be connected. hmm...');
+          return;
+        }
+
+        // disconnect user from the room and remove stream from subscribed streams list
+        _.remove(this.subscribedDataStreams, s => s.getID() === stream.getID());
+        this.setState(update(this.state, {
+          connectedUsers: {
+            $set: this.state.connectedUsers.filter(connectedUser =>
+              connectedUser.userId !== user.userId),
+          },
+        }));
+        break;
+      default: console.error('unexpected stream type');
+    }
   }
 
   onWindowResize(event) {
@@ -198,7 +290,7 @@ class Room extends Component {
           uiSize={uiSize}
           resizeStreamContainer={this.resizeStreamContainer}
           streamContainerSize={streamContainerSize}
-          roomInfo={this.state.roomInfo}/>
+          roomInfo={this.props.roomInfo}/>
         <Spotlight
           uiSize={uiSize}
           resizeStreamContainer={this.resizeStreamContainer}
