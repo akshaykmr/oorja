@@ -246,10 +246,15 @@ class Room extends Component {
 
         // disconnect user from the room and remove stream from subscribed streams list
         _.remove(this.subscribedDataStreams, s => s.getID() === stream.getID());
+
+        const userIndex = _.findIndex(
+          this.state.connectedUsers,
+          connectedUser => connectedUser.userId === user.userId
+        );
+
         this.setState(update(this.state, {
           connectedUsers: {
-            $set: this.state.connectedUsers.filter(connectedUser =>
-              connectedUser.userId !== user.userId),
+            $splice: [[userIndex, 1]],
           },
         }));
         break;
