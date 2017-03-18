@@ -5,6 +5,7 @@ import Y from '../../../../../modules/Yjs';
 class Info extends Component {
 
   componentDidMount() {
+    const { connectTab, dispatchMessage } = this.props; 
     const y = new Y({
       db: {
         name: 'memory', // use memory database adapter.
@@ -14,6 +15,8 @@ class Info extends Component {
         name: 'licodeConnector', // use webrtc connector
         room: this.props.roomInfo.roomName, // clients connecting to the same room share data
         role: 'slave',
+        registerMessageHandler,
+        dispatchMessage,
       },
       share: {
         textarea: 'Text', // y.share.textarea is of type y-text
@@ -33,6 +36,8 @@ class Info extends Component {
 }
 
 Info.propTypes = {
+  connectTab: React.PropTypes.func,
+  dispatchMessage: React.PropTypes.func,
   connectedUsers: React.PropTypes.array,
   roomInfo: React.PropTypes.object,
   classNames: React.PropTypes.string,

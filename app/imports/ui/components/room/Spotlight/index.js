@@ -13,14 +13,17 @@ class Spotlight extends Component {
 
   constructor(props) {
     super(props);
-    this.tabs = [
+
+    this.tabs = [ // default tabs
       {
+        tabId: 1,
         name: 'information',
         component: Info,
         bgColor: '',
         color: '',
       },
       {
+        tabId: 2,
         name: 'settings',
         component: Settings,
         bgColor: '',
@@ -85,6 +88,11 @@ class Spotlight extends Component {
         key={tab.name}
         roomInfo={this.props.roomInfo}
         connectedUsers={this.props.connectedUsers}
+        connectTab={this.props.connectTab}
+
+        // maybe wrap dispatch message so that I can fix `message.from` here instead of leaving
+        // it for the tab do it.(the tab may also give a false `message.from`)
+        dispatchMessage={this.props.dispatchMessage}
         onTop={onTop}
         classNames={classNames(tabContentClassNames)}
         style={tabContentStyle}/>;
@@ -107,6 +115,8 @@ class Spotlight extends Component {
 }
 
 Spotlight.propTypes = {
+  connectTab: React.PropTypes.func,
+  dispatchMessage: React.PropTypes.func,
   connectedUsers: React.PropTypes.array,
   roomInfo: React.PropTypes.object,
   uiSize: React.PropTypes.string.isRequired,

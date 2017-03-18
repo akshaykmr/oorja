@@ -12,11 +12,13 @@ import _ from 'lodash';
 import uiConfig from '../components/room/constants/uiConfig';
 import status from '../components/room/constants/status';
 import streamTypes from '../components/room/constants/streamType';
+import roomActivities from '../components/room/constants/roomActivities';
 
 // room components
 import StreamsContainer from '../components/room/StreamsContainer/';
 // import Sidebar from '../components/room/Sidebar';
 import Spotlight from '../components/room/Spotlight';
+import ActivityListner from './ActivityListner';
 
 
 class Room extends Component {
@@ -45,11 +47,18 @@ class Room extends Component {
 
     // subscribed incoming data streams
     this.subscribedDataStreams = [];
+    this.messageHandlers = {}; // tabId -> handlerFunction
 
+
+    // Listens for activities in the room, such as user entering, leaving etc.
+    // not naming it roomEvent because that naming is used in the Erizo room.
+    this.activityListner = new ActivityListner(roomActivities);
 
     this.calculateUISize = this.calculateUISize.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
     this.resizeStreamContainer = this.resizeStreamContainer.bind(this);
+    this.connectTab = this.connectTab.bind(this);
+    this.dispatchMessage = this.dispatchMessage.bind(this);
 
     this.state = {
       connectedUsers: [],
@@ -213,24 +222,33 @@ class Room extends Component {
         this.setState(update(this.state, {
           connectedUsers: { $push: [{ ...user, streamID }] },
         }));
+        this.activityListner.dispatch(roomActivities.USER_JOINED, user);
         break;
       default: console.error('unexpected stream type');
     }
   }
 
   setIncomingStreamListners(stream) {
-
-    const postMan = (streamEvent) => {
+    const { messageHandlers } = this;
+    function messageListner(streamEvent) {
       const message = streamEvent.msg;
-      
-    };
+      // probably would want to add more logic here for different message types later.
+      message.to.forEach((tabId) => {
+        const handler = messageHandlers[tabId];
+        if (!handler) { // this will probably happen a lot if I dynamically import tabs
+          console.log('handler not found', tabId, message);
+          return;
+        }
+        handler(message);
+      });
+    }
+
     const attributes = stream.getAttributes();
     const { PRIMARY_DATA_STREAM } = streamTypes;
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM :
         // set listners for data
-        stream.addEventListener('stream-data', postMan);
-
+        stream.addEventListener('stream-data', messageListner);
         break;
       default: console.error('unexpected stream type');
     }
@@ -264,9 +282,34 @@ class Room extends Component {
             $splice: [[userIndex, 1]],
           },
         }));
+        this.activityListner.dispatch(roomActivities.USER_LEFT, user);
         break;
       default: console.error('unexpected stream type');
     }
+  }
+
+  connectTab(tab, messageHandler, listners) {
+    // setup listners for roomActivities for this tab
+    if (listners) {
+      Object.keys(listners).forEach((activity) => {
+        this.activityListner.listen(activity, listners[activity]);
+      });
+    }
+    // setup message handler for this tab
+    function registerMessageHandler({ tabId, handler }) {
+      const { messageHandlers } = this;
+      if (messageHandlers[tabId]) {
+        throw new Meteor.Error('handler already registered', tabId, messageHandlers[tabId]);
+      }
+      messageHandlers[tabId] = handler;
+    }
+    if (messageHandler) {
+      registerMessageHandler(tab.Id, messageHandler);
+    }
+  }
+
+  dispatchMessage(message) {
+    this.primaryDataStream.sendData(message);
   }
 
   onWindowResize(event) {
@@ -306,6 +349,8 @@ class Room extends Component {
         <Spotlight
           roomInfo={this.props.roomInfo}
           connectedUsers={this.state.connectedUsers}
+          connectTab={this.connectTab}
+          dispatchMessage={this.dispatchMessage}
           uiSize={uiSize}
           resizeStreamContainer={this.resizeStreamContainer}
           streamContainerSize={streamContainerSize}/>
