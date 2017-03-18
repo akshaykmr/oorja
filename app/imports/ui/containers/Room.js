@@ -151,9 +151,9 @@ class Room extends Component {
         if (attributes.type === streamTypes.PRIMARY_DATA_STREAM) {
           this.setState({ ...this.state, primaryDataStreamStatus: status.CONNECTED });
         }
-        // do not subscribe local streams
         console.info('local stream added');
       } else {
+        // only subscribe subscribe remote streams
         this.handleStreamSubscription(stream);
       }
       console.info('stream added', streamEvent);
@@ -189,6 +189,7 @@ class Room extends Component {
   // do not pass local streams | only remote streams may be subscribed
   handleStreamSubscription(stream) {
     const attributes = stream.getAttributes();
+    const streamID = stream.getID();
 
     const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
     if (!user) throw new Meteor.Error('stream publisher not found');
@@ -196,10 +197,8 @@ class Room extends Component {
     const { PRIMARY_DATA_STREAM } = streamTypes;
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM :
-        if (_.find(this.connectedUsers, { userId: user.userId })) {
-          // if user is connected
-          console.error('only one primary data stream expected from any user. hmm...');
-          return;
+        if (_.find(this.state.connectedUsers, { userId: user.userId, streamID })) {
+          throw new Meteor.Error('unexpected republishing?'); // should have been removed from state
         }
 
         // connect user to the room and subscribe the stream and apply listeners
@@ -212,7 +211,7 @@ class Room extends Component {
         this.room.subscribe(stream);
         this.subscribedDataStreams.push(stream);
         this.setState(update(this.state, {
-          connectedUsers: { $push: [user] },
+          connectedUsers: { $push: [{ ...user, streamID }] },
         }));
         break;
       default: console.error('unexpected stream type');
@@ -220,11 +219,18 @@ class Room extends Component {
   }
 
   setIncomingStreamListners(stream) {
+
+    const postMan = (streamEvent) => {
+      const message = streamEvent.msg;
+      
+    };
     const attributes = stream.getAttributes();
     const { PRIMARY_DATA_STREAM } = streamTypes;
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM :
         // set listners for data
+        stream.addEventListener('stream-data', postMan);
+
         break;
       default: console.error('unexpected stream type');
     }
@@ -232,26 +238,27 @@ class Room extends Component {
 
   handleStreamRemoval(stream) {
     const attributes = stream.getAttributes();
+    const streamID = stream.getID();
+
+    if (streamID in this.room.localStreams) return;
 
     const { PRIMARY_DATA_STREAM } = streamTypes;
     const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
 
+    const userIndex = _.findIndex(
+      this.state.connectedUsers,
+      { userId: user.userId, streamID }
+    );
+
+    if (userIndex === -1) {
+      console.error('unexpected: user/stream combo not in state');
+    }
+
     switch (attributes.type) {
-      case PRIMARY_DATA_STREAM :
-        if (_.find(this.connectedUsers, { userId: user.userId })) {
-          // if user is connected
-          console.error('user doesnt seem to be connected. hmm...');
-          return;
-        }
+      case PRIMARY_DATA_STREAM:
 
         // disconnect user from the room and remove stream from subscribed streams list
-        _.remove(this.subscribedDataStreams, s => s.getID() === stream.getID());
-
-        const userIndex = _.findIndex(
-          this.state.connectedUsers,
-          connectedUser => connectedUser.userId === user.userId
-        );
-
+        _.remove(this.subscribedDataStreams, s => s.getID() === streamID);
         this.setState(update(this.state, {
           connectedUsers: {
             $splice: [[userIndex, 1]],
@@ -283,8 +290,8 @@ class Room extends Component {
 
   componentWillUnmount() {
     this.unmountInProgress = true;
-    window.removeEventListener('resize', this.onWindowResize);
     this.room.disconnect();
+    window.removeEventListener('resize', this.onWindowResize);
   }
 
   render() {
@@ -297,6 +304,8 @@ class Room extends Component {
           streamContainerSize={streamContainerSize}
           roomInfo={this.props.roomInfo}/>
         <Spotlight
+          roomInfo={this.props.roomInfo}
+          connectedUsers={this.state.connectedUsers}
           uiSize={uiSize}
           resizeStreamContainer={this.resizeStreamContainer}
           streamContainerSize={streamContainerSize}/>
