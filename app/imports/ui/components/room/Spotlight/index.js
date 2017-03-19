@@ -14,25 +14,29 @@ class Spotlight extends Component {
   constructor(props) {
     super(props);
 
-    this.tabs = [ // default tabs
+    this.tabComponents = {  // id -> reactComponent(tab)
+      1: Info,
+      2: Settings,
+    };
+
+    const defaultTabs = [ // default tabs
       {
         tabId: 1,
         name: 'information',
-        component: Info,
         bgColor: '',
         color: '',
       },
       {
         tabId: 2,
         name: 'settings',
-        component: Settings,
         bgColor: '',
       },
     ];
 
     this.state = {
       isVisible: false,
-      activeTab: this.tabs[0],
+      tabs: defaultTabs,
+      activeTab: defaultTabs[0],
     };
   }
 
@@ -84,15 +88,14 @@ class Spotlight extends Component {
         backgroundColor: tab.bgColor || '#36393e', // defaults, move them to settings later.
         color: tab.color || '#fefefe',
       };
-      return <tab.component
+
+      const TabComponent = this.tabComponents[tab.tabId];
+      return <TabComponent
         key={tab.name}
+        tabInfo={tab}
         roomInfo={this.props.roomInfo}
         connectedUsers={this.props.connectedUsers}
-        connectTab={this.props.connectTab}
-
-        // maybe wrap dispatch message so that I can fix `message.from` here instead of leaving
-        // it for the tab do it.(the tab may also give a false `message.from`)
-        dispatchMessage={this.props.dispatchMessage}
+        api={this.props.api}
         onTop={onTop}
         classNames={classNames(tabContentClassNames)}
         style={tabContentStyle}/>;
@@ -104,10 +107,10 @@ class Spotlight extends Component {
         // move to config if it feels good
         style={{ height: streamContainerSize === uiConfig.LARGE ? '82%' : 'calc(100% - 60px)' }} >
         <div className="content-wrapper">
-          {this.tabs.map(renderTabContent)}
+          {this.state.tabs.map(renderTabContent)}
         </div>
         <div className="content-switcher default">
-          {this.tabs.map(renderSwitch)}
+          {this.state.tabs.map(renderSwitch)}
         </div>
       </div>
     );
@@ -115,8 +118,7 @@ class Spotlight extends Component {
 }
 
 Spotlight.propTypes = {
-  connectTab: React.PropTypes.func,
-  dispatchMessage: React.PropTypes.func,
+  api: React.PropTypes.object,
   connectedUsers: React.PropTypes.array,
   roomInfo: React.PropTypes.object,
   uiSize: React.PropTypes.string.isRequired,

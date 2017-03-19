@@ -36,8 +36,8 @@ class Info extends Component {
 }
 
 Info.propTypes = {
-  connectTab: React.PropTypes.func,
-  dispatchMessage: React.PropTypes.func,
+  tabInfo: React.PropTypes.object,
+  api: React.PropTypes.object,
   connectedUsers: React.PropTypes.array,
   roomInfo: React.PropTypes.object,
   classNames: React.PropTypes.string,

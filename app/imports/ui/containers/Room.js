@@ -19,6 +19,7 @@ import StreamsContainer from '../components/room/StreamsContainer/';
 // import Sidebar from '../components/room/Sidebar';
 import Spotlight from '../components/room/Spotlight';
 import ActivityListner from './ActivityListner';
+import API from './RoomAPI';
 
 
 class Room extends Component {
@@ -54,11 +55,10 @@ class Room extends Component {
     // not naming it roomEvent because that naming is used in the Erizo room.
     this.activityListner = new ActivityListner(roomActivities);
 
+    this.api = new API(this);
+
     this.calculateUISize = this.calculateUISize.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
-    this.resizeStreamContainer = this.resizeStreamContainer.bind(this);
-    this.connectTab = this.connectTab.bind(this);
-    this.dispatchMessage = this.dispatchMessage.bind(this);
 
     this.state = {
       connectedUsers: [],
@@ -78,13 +78,6 @@ class Room extends Component {
       }, // user preferences such as room component sizes, position etc.
     };
     this.unmountInProgress = false;
-  }
-
-  resizeStreamContainer(size) {
-    this.setState({
-      ...this.state,
-      streamContainerSize: size,
-    });
   }
 
   calculateUISize() {
@@ -308,10 +301,6 @@ class Room extends Component {
     }
   }
 
-  dispatchMessage(message) {
-    this.primaryDataStream.sendData(message);
-  }
-
   onWindowResize(event) {
     const { innerHeight, innerWidth } = event.target.window;
     this.setState({
@@ -343,16 +332,14 @@ class Room extends Component {
       <div className='room'>
         <StreamsContainer
           uiSize={uiSize}
-          resizeStreamContainer={this.resizeStreamContainer}
+          api={this.api}
           streamContainerSize={streamContainerSize}
           roomInfo={this.props.roomInfo}/>
         <Spotlight
           roomInfo={this.props.roomInfo}
           connectedUsers={this.state.connectedUsers}
-          connectTab={this.connectTab}
-          dispatchMessage={this.dispatchMessage}
+          api={this.api}
           uiSize={uiSize}
-          resizeStreamContainer={this.resizeStreamContainer}
           streamContainerSize={streamContainerSize}/>
       </div>
     );
