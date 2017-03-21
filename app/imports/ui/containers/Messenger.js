@@ -18,17 +18,28 @@ class Messenger {
   }
 
   recieve(message) {
-    console.info('recieve message called');
-    console.log(message);
-    if (message.to.indexOf(this.room.roomAPI.getUserId()) > -1 || !message.to.length) {
-      console.log('hehehrhehrehrhehhre');
-      const { messageHandlers } = this;
+    const { messageHandlers } = this;
+    const callHandlers = () => {
       // probably would want to add more logic here for different message types later.
       message.destinationTabs.forEach((tabId) => {
         messageHandlers[tabId].forEach((handler) => {
           handler(message);
         });
       });
+    };
+
+    console.info('recieve message called');
+    console.log(message);
+
+    if (message.broadcast) {
+      console.log('isBroadcast', message.broadcast);
+      callHandlers();
+      return;
+    }
+    const isRecepient = message.to.indexOf(this.room.roomAPI.getUserId()) > -1;
+    console.log('isRecepient', isRecepient);
+    if (isRecepient) {
+      callHandlers();
     }
   }
 

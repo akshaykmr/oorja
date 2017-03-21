@@ -20,13 +20,8 @@ class RoomAPI {
   sendMessage(message) {
     if (message.local) {
       this.messenger.recieve(message);
-      return true;
-    }
-    if (!this.primaryDataStreamConnected) {
-      return false;
     }
     this.messenger.send(message);
-    return true;
   }
 
   addMessageHandler(tabId, handler) {

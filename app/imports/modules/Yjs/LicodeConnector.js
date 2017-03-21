@@ -49,16 +49,8 @@ class LicodeConnector extends AbstractConnector {
       to: [recieverId],
       content,
     };
-
-    const dispatch = () => {
-      console.info('sending message');
-      const success = connectorOptions.roomAPI.sendMessage(message);
-      if (!success) {
-        console.error('not successfull!');
-        setTimeout(dispatch, 200);
-      }
-    };
-    dispatch();
+    console.info('sending message');
+    connectorOptions.roomAPI.sendMessage(message);
   }
 
   broadcast(content) {
@@ -68,7 +60,7 @@ class LicodeConnector extends AbstractConnector {
       sourceTab: tabId,
       destinationTabs: [tabId],
       from: connectorOptions.roomAPI.getUserId(),
-      to: [],
+      broadcast: true,
       content,
     };
     console.info('broadcasting message');

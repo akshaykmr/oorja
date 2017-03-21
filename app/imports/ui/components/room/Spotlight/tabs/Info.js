@@ -8,13 +8,14 @@ class Info extends Component {
     const { roomAPI, connectedUsers, tabInfo, roomInfo } = this.props;
     new Y({
       db: {
-        name: 'memory', // use memory database adapter.
+        name: 'indexeddb', // use memory database adapter.
         // name: 'indexeddb' // use indexeddb database adapter instead for offline apps
       },
       connector: {
         name: 'licodeConnector', // use webrtc connector
         room: this.props.roomInfo.roomName, // clients connecting to the same room share data
         role: 'slave',
+        syncMethod: 'syncAll',
         roomAPI,
         connectedUsers,
         tabInfo,
