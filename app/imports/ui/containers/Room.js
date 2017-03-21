@@ -49,6 +49,9 @@ class Room extends Component {
     this.primaryDataStream.init();
     /* eslint-enable new-cap */
 
+    // for checking membership of an already subscribed stream(by Id)
+    this.subscribedStreamSet = new Set();
+
     // subscribed incoming data streams
     this.subscribedDataStreams = [];
 
@@ -130,11 +133,8 @@ class Room extends Component {
       console.info('room connected', roomEvent);
       console.log(room);
       this.setRoomStreamListners();
-      this.setState({ ...this.state, roomConnectionStatus: status.CONNECTED });
-      roomEvent.streams.forEach((stream) => {
-        this.handleStreamSubscription(stream);
-      });
       room.publish(this.primaryDataStream);
+      this.setState({ ...this.state, roomConnectionStatus: status.CONNECTED });
     });
 
     room.addEventListener('room-error', (roomEvent) => {
@@ -151,18 +151,29 @@ class Room extends Component {
 
   setRoomStreamListners(room = this.room) { // when streams are added_to/removed_from the room
     room.addEventListener('stream-added', (streamEvent) => {
+      // TODO organize this code better when handling other type of streams
       const { stream } = streamEvent;
       if (stream.getID() in room.localStreams) { // published by us
         const attributes = stream.getAttributes();
         if (attributes.type === streamTypes.PRIMARY_DATA_STREAM) {
+          // local stream successfully added to the room.
+          console.info('local stream successfully added to the room.');
           this.setState({ ...this.state, primaryDataStreamStatus: status.CONNECTED });
+
+          // subscribe any prexisting streams in the room
+          console.info('subscribe any prexisting streams in the room');
+          Object.keys(room.remoteStreams).forEach((streamID) => {
+            this.handleStreamSubscription(room.remoteStreams[streamID]);
+          });
         }
-        console.info('local stream added');
       } else {
-        // only subscribe subscribe remote streams
+        // subscribe subscribe remote streams
+        if (this.state.primaryDataStreamStatus !== status.CONNECTED) {
+          return; // better to subscribe when our primaryDataStream is connected.
+        }
         this.handleStreamSubscription(stream);
+        console.info('stream added', streamEvent);
       }
-      console.info('stream added', streamEvent);
     });
 
     // I don't know whether a failed stream would trigger a stream-removed later
@@ -192,13 +203,17 @@ class Room extends Component {
     });
   }
 
-  // do not pass local streams | only remote streams may be subscribed
   handleStreamSubscription(stream) {
     const attributes = stream.getAttributes();
     const streamID = stream.getID();
 
+    if (attributes.userId === this.props.roomUserId) {
+      return; // do not subscibe local streams.
+    }
+
     const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
     if (!user) throw new Meteor.Error('stream publisher not found');
+
 
     const { PRIMARY_DATA_STREAM } = streamTypes;
     switch (attributes.type) {
@@ -210,12 +225,13 @@ class Room extends Component {
         // connect user to the room, subscribe the stream and apply listeners
 
         // just a check If I run into this later
-        this.subscribedDataStreams.forEach((s) => {
-          if (s.getID() === stream.getID()) throw new Meteor.Error('over here!');
-        });
+        if (this.subscribedStreamSet.has(streamID)) {
+          throw new Meteor.Error('over here!');
+        }
         this.setIncomingStreamListners(stream);
         this.room.subscribe(stream);
         this.subscribedDataStreams.push(stream);
+        this.subscribedStreamSet.add(streamID);
         this.setState(update(this.state, {
           connectedUsers: { $push: [{ ...user, streamID }] },
         }));
@@ -261,7 +277,9 @@ class Room extends Component {
       case PRIMARY_DATA_STREAM:
 
         // disconnect user from the room and remove stream from subscribed streams list
-        _.remove(this.subscribedDataStreams, s => s.getID() === streamID);
+        this.subscribedDataStreams =
+          _.remove(this.subscribedDataStreams, s => s.getID() === streamID);
+
         this.setState(update(this.state, {
           connectedUsers: {
             $splice: [[userIndex, 1]],
@@ -271,6 +289,8 @@ class Room extends Component {
         break;
       default: console.error('unexpected stream type');
     }
+
+    this.subscribedStreamSet.delete(streamID);
   }
 
   onWindowResize(event) {

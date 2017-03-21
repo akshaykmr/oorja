@@ -8,6 +8,9 @@ class LicodeConnector extends AbstractConnector {
     super(yConfig, connectorOptions);
     this.connectorOptions = connectorOptions;
     const { roomAPI, connectedUsers, tabInfo } = connectorOptions;
+    // this should be unique I guess. eg. when a user logs in with
+    // same account from different devices.
+    this.setUserId(roomAPI.getUserId());
 
     const self = this;
     roomAPI.addActivityListner(roomActivities.USER_JOINED, (user) => {
@@ -27,11 +30,6 @@ class LicodeConnector extends AbstractConnector {
     connectedUsers.forEach((user) => {
       this.userJoined(user.userId, 'slave');
     });
-
-    // this should be unique I guess. eg. when a user logs in with
-    // same account from different devices.
-    this.setUserId(roomAPI.getUserId());
-    self.userJoined(roomAPI.getUserId(), 'slave');
   }
 
   disconnect() {
@@ -56,6 +54,7 @@ class LicodeConnector extends AbstractConnector {
       console.info('sending message');
       const success = connectorOptions.roomAPI.sendMessage(message);
       if (!success) {
+        console.error('not successfull!');
         setTimeout(dispatch, 200);
       }
     };
