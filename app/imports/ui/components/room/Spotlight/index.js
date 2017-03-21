@@ -95,7 +95,7 @@ class Spotlight extends Component {
         tabInfo={tab}
         roomInfo={this.props.roomInfo}
         connectedUsers={this.props.connectedUsers}
-        api={this.props.api}
+        roomAPI={this.props.roomAPI}
         onTop={onTop}
         classNames={classNames(tabContentClassNames)}
         style={tabContentStyle}/>;
@@ -118,7 +118,7 @@ class Spotlight extends Component {
 }
 
 Spotlight.propTypes = {
-  api: React.PropTypes.object,
+  roomAPI: React.PropTypes.object,
   connectedUsers: React.PropTypes.array,
   roomInfo: React.PropTypes.object,
   uiSize: React.PropTypes.string.isRequired,

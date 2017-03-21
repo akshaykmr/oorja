@@ -4,6 +4,7 @@
 // error: Class constructor AbstractConnector cannot be invoked without 'new'
 // so I have included this class manually for the time being. revisit this later.
 /* eslint-disable */
+import Y from 'yjs';
 
 function canRead (auth) { return auth === 'read' || auth === 'write' }
 function canWrite (auth) { return auth === 'write' }

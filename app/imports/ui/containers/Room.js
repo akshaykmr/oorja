@@ -18,15 +18,18 @@ import roomActivities from '../components/room/constants/roomActivities';
 import StreamsContainer from '../components/room/StreamsContainer/';
 // import Sidebar from '../components/room/Sidebar';
 import Spotlight from '../components/room/Spotlight';
+
+// misc.
 import ActivityListner from './ActivityListner';
-import API from './RoomAPI';
+import RoomAPI from './RoomAPI';
+import Messenger from './Messenger';
 
 
 class Room extends Component {
 
   constructor(props) {
     super(props);
-    this.roomUserId = props.roomUserId;
+
     this.roomName = props.roomInfo.roomName;
     this.roomToken = localStorage.getItem(`roomToken:${this.roomName}`);
     /* eslint-disable new-cap */
@@ -38,7 +41,7 @@ class Room extends Component {
     this.primaryDataStream = Erizo.Stream({
       data: true,
       attributes: {
-        userId: this.roomUserId,
+        userId: props.roomUserId,
         type: streamTypes.PRIMARY_DATA_STREAM,
       },
     });
@@ -48,14 +51,15 @@ class Room extends Component {
 
     // subscribed incoming data streams
     this.subscribedDataStreams = [];
-    this.messageHandlers = {}; // tabId -> handlerFunction
 
+    // for passing messages to and from tabs | local or remote(other users)
+    this.messenger = new Messenger(this);
 
     // Listens for activities in the room, such as user entering, leaving etc.
     // not naming it roomEvent because that naming is used in the Erizo room.
     this.activityListner = new ActivityListner(roomActivities);
 
-    this.api = new API(this);
+    this.roomAPI = new RoomAPI(this);
 
     this.calculateUISize = this.calculateUISize.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
@@ -203,7 +207,7 @@ class Room extends Component {
           throw new Meteor.Error('unexpected republishing?'); // should have been removed from state
         }
 
-        // connect user to the room and subscribe the stream and apply listeners
+        // connect user to the room, subscribe the stream and apply listeners
 
         // just a check If I run into this later
         this.subscribedDataStreams.forEach((s) => {
@@ -222,26 +226,14 @@ class Room extends Component {
   }
 
   setIncomingStreamListners(stream) {
-    const { messageHandlers } = this;
-    function messageListner(streamEvent) {
-      const message = streamEvent.msg;
-      // probably would want to add more logic here for different message types later.
-      message.to.forEach((tabId) => {
-        const handler = messageHandlers[tabId];
-        if (!handler) { // this will probably happen a lot if I dynamically import tabs
-          console.log('handler not found', tabId, message);
-          return;
-        }
-        handler(message);
-      });
-    }
-
     const attributes = stream.getAttributes();
     const { PRIMARY_DATA_STREAM } = streamTypes;
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM :
         // set listners for data
-        stream.addEventListener('stream-data', messageListner);
+        stream.addEventListener('stream-data', (streamEvent) => {
+          this.messenger.recieve(streamEvent.msg);
+        });
         break;
       default: console.error('unexpected stream type');
     }
@@ -281,26 +273,6 @@ class Room extends Component {
     }
   }
 
-  connectTab(tab, messageHandler, listners) {
-    // setup listners for roomActivities for this tab
-    if (listners) {
-      Object.keys(listners).forEach((activity) => {
-        this.activityListner.listen(activity, listners[activity]);
-      });
-    }
-    // setup message handler for this tab
-    function registerMessageHandler({ tabId, handler }) {
-      const { messageHandlers } = this;
-      if (messageHandlers[tabId]) {
-        throw new Meteor.Error('handler already registered', tabId, messageHandlers[tabId]);
-      }
-      messageHandlers[tabId] = handler;
-    }
-    if (messageHandler) {
-      registerMessageHandler(tab.Id, messageHandler);
-    }
-  }
-
   onWindowResize(event) {
     const { innerHeight, innerWidth } = event.target.window;
     this.setState({
@@ -332,13 +304,13 @@ class Room extends Component {
       <div className='room'>
         <StreamsContainer
           uiSize={uiSize}
-          api={this.api}
+          roomAPI={this.roomAPI}
           streamContainerSize={streamContainerSize}
           roomInfo={this.props.roomInfo}/>
         <Spotlight
           roomInfo={this.props.roomInfo}
           connectedUsers={this.state.connectedUsers}
-          api={this.api}
+          roomAPI={this.roomAPI}
           uiSize={uiSize}
           streamContainerSize={streamContainerSize}/>
       </div>

@@ -27,6 +27,7 @@ class StreamsContainer extends Component {
  }
 
 StreamsContainer.propTypes = {
+  roomAPI: React.PropTypes.object,
   roomInfo: React.PropTypes.object,
   uiSize: React.PropTypes.string.isRequired,
   streamContainerSize: React.PropTypes.string.isRequired,
