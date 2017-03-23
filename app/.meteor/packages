@@ -23,13 +23,11 @@ accounts-meetup@1.2.1
 accounts-twitter@1.2.1
 accounts-weibo@1.1.1
 alexbeauchemin:accounts-twitch
-pauli:accounts-linkedin
 service-configuration@1.0.11
 check@1.2.5
 audit-argument-checks@1.0.7
 # browser-policy@1.0.9
 
-fourseven:scss
 alanning:roles
 static-html@1.1.11
 mdg:validated-method
@@ -40,3 +38,5 @@ momentjs:moment
 aldeed:simple-schema
 random@1.0.10
 http@1.2.12
+fourseven:scss
+pauli:accounts-linkedin

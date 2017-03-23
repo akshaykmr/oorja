@@ -4,7 +4,7 @@ import roomActivities from '../../ui/components/room/constants/roomActivities';
 
 class LicodeConnector extends AbstractConnector {
   constructor(yConfig, connectorOptions) {
-    console.log(yConfig, connectorOptions);
+    // console.log(yConfig, connectorOptions);
     super(yConfig, connectorOptions);
     this.connectorOptions = connectorOptions;
     const { roomAPI, connectedUsers, tabInfo } = connectorOptions;

@@ -8,6 +8,8 @@ import './spotlight.scss';
 // tabs
 import Info from './tabs/Info';
 import Settings from './tabs/Settings';
+// import ExperimentTab from './tabs/ExperimentTab';
+import QuillPad from './tabs/QuillPad';
 
 class Spotlight extends Component {
 
@@ -17,26 +19,39 @@ class Spotlight extends Component {
     this.tabComponents = {  // id -> reactComponent(tab)
       1: Info,
       2: Settings,
+      3: QuillPad,
     };
 
     const defaultTabs = [ // default tabs
       {
         tabId: 1,
         name: 'information',
+        iconBgcolor: '',
         bgColor: '',
         color: '',
       },
       {
         tabId: 2,
         name: 'settings',
+
+        iconBgcolor: '',
+        ContentBgColor: '',
         bgColor: '',
+      },
+      {
+        tabId: 3,
+        name: 'QuillPad',
+
+        iconBgcolor: '',
+        bgColor: 'white',
+        color: 'black',
       },
     ];
 
     this.state = {
       isVisible: false,
       tabs: defaultTabs,
-      activeTab: defaultTabs[0],
+      activeTab: defaultTabs[2],
     };
   }
 
@@ -65,7 +80,7 @@ class Spotlight extends Component {
         active: tab.name === activeTab.name,
       };
       const switchStyle = {
-        backgroundColor: tab.bgColor,
+        backgroundColor: tab.iconBgcolor,
       };
       return (
         <div
@@ -84,6 +99,9 @@ class Spotlight extends Component {
         content: true,
         onTop,
       };
+      tabContentClassNames[tab.name] = true;
+
+
       const tabContentStyle = {
         backgroundColor: tab.bgColor || '#36393e', // defaults, move them to settings later.
         color: tab.color || '#fefefe',
