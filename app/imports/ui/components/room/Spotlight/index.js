@@ -10,6 +10,7 @@ import Info from './tabs/Info';
 import Settings from './tabs/Settings';
 // import ExperimentTab from './tabs/ExperimentTab';
 import QuillPad from './tabs/QuillPad';
+import CodePad from './tabs/CodePad';
 
 class Spotlight extends Component {
 
@@ -20,6 +21,7 @@ class Spotlight extends Component {
       1: Info,
       2: Settings,
       3: QuillPad,
+      4: CodePad,
     };
 
     const defaultTabs = [ // default tabs
@@ -46,12 +48,20 @@ class Spotlight extends Component {
         bgColor: 'white',
         color: 'black',
       },
+      {
+        tabId: 4,
+        name: 'CodePad',
+
+        iconBgcolor: '',
+        bgColor: '',
+        color: '',
+      },
     ];
 
     this.state = {
       isVisible: false,
       tabs: defaultTabs,
-      activeTab: defaultTabs[2],
+      activeTab: defaultTabs[3],
     };
   }
 

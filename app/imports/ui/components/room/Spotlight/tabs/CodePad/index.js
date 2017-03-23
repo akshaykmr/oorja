@@ -1,18 +1,23 @@
 import React, { Component } from 'react';
-import 'quill/dist/quill.snow.css';
-import Quill from 'quill';
 
-import Y from '../../../../../modules/Yjs';
-import tabPropTypes from './tabPropTypes';
+import * as ace from 'brace';
+import 'brace/mode/javascript';
+import 'brace/theme/dawn';
 
-class QuillPad extends Component {
+import Y from '../../../../../../modules/Yjs';
+import tabPropTypes from '../tabPropTypes';
+
+class CodePad extends Component {
 
   constructor(props) {
     super(props);
-    this.quill = null; // will be replace by quill instance later.
+
+    this.editor = null; // will be replaced by ace editor instance later
     this.y = null;
+
     this.state = {
       synced: false,
+      fontSize: 16,
     };
   }
   componentDidMount() {
@@ -32,29 +37,16 @@ class QuillPad extends Component {
         roomInfo,
       },
       share: {
-        richtext: 'Richtext',
+        ace: 'Text',
       },
     }).then((y) => {
       this.y = y;
 
-      this.quill = new Quill('#quillpad-editor', {
-        theme: 'snow',
-        bounds: tabInfo.name,
-        modules: {
-          // formula: true, KaTex
-          // syntax: true, // uses highliht js
-          toolbar: [
-            [{ size: ['small', false, 'large', 'huge'] }],
-            ['bold', 'italic', 'underline'],
-            [{ color: [] }, { background: [] }],    // Snow theme fills in values
-            [{ script: 'sub' }, { script: 'super' }],
-            ['link', 'image'],
-            ['link', 'code-block'],
-            [{ list: 'ordered' }],
-          ],
-        },
-      });
-      y.share.richtext.bind(this.quill);
+      const editor = ace.edit('codepad-editor');
+      editor.getSession().setMode('ace/mode/javascript');
+      editor.setTheme('ace/theme/dawn');
+      y.share.ace.bindAce(editor, { aceRequire: ace.acequire });
+      this.editor = editor;
 
       y.connector.whenSynced(() => {
         this.setState({
@@ -68,18 +60,27 @@ class QuillPad extends Component {
 
   componentWillUnmount() {
     this.y.close();
+    this.editor.destroy();
+    this.editor.container.remove();
   }
 
   render() {
+    const editorStyle = {
+      height: '100%',
+      width: '100%',
+      position: 'relative',
+
+      fontSize: this.state.fontSize,
+    };
     return (
       <div className={this.props.classNames} style={this.props.style}>
-        <div id="quillpad-editor" style={{ height: 'calc(100% - 42px)' }}>
+        <div id="codepad-editor" style={editorStyle}>
         </div>
       </div>
     );
   }
 }
 
-QuillPad.propTypes = tabPropTypes;
+CodePad.propTypes = tabPropTypes;
 
-export default QuillPad;
+export default CodePad;
