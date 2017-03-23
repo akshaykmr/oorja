@@ -12,7 +12,7 @@ class QuillPad extends Component {
     this.quill = null; // will be replace by quill instance later.
     this.y = null;
     this.state = {
-      synced: false,
+      initialSyncComplete: false,
     };
   }
   componentDidMount() {
@@ -23,7 +23,7 @@ class QuillPad extends Component {
       },
       connector: {
         name: 'licodeConnector', // use webrtc connector
-        room: this.props.roomInfo.roomName, // clients connecting to the same room share data
+        room: `${this.props.roomInfo.roomName}:${tabInfo.name}`, // clients connecting to the same room share data
         role: 'slave',
         syncMethod: 'syncAll',
         roomAPI,
@@ -59,7 +59,9 @@ class QuillPad extends Component {
       y.connector.whenSynced(() => {
         this.setState({
           ...this.state,
-          synced: true, // synced with atleast one user. not called when no other user in the room.
+
+          // synced with atleast one user. not called when no other user in the room.
+          initialSyncComplete: true,
         });
         console.info(tabInfo.name, 'synced');
       });

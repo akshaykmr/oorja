@@ -16,7 +16,7 @@ class CodePad extends Component {
     this.y = null;
 
     this.state = {
-      synced: false,
+      initialSyncComplete: false,
       fontSize: 16,
     };
   }
@@ -28,7 +28,7 @@ class CodePad extends Component {
       },
       connector: {
         name: 'licodeConnector', // use webrtc connector
-        room: this.props.roomInfo.roomName, // clients connecting to the same room share data
+        room: `${this.props.roomInfo.roomName}:${tabInfo.name}`, // clients connecting to the same room share data
         role: 'slave',
         syncMethod: 'syncAll',
         roomAPI,
@@ -51,7 +51,9 @@ class CodePad extends Component {
       y.connector.whenSynced(() => {
         this.setState({
           ...this.state,
-          synced: true, // synced with atleast one user. not called when no other user in the room.
+
+          // synced with atleast one user. not called when no other user in the room.
+          initialSyncComplete: true,
         });
         console.info(tabInfo.name, 'synced');
       });
