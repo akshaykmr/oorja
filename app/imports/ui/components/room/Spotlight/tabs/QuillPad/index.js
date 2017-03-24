@@ -5,15 +5,16 @@ import Quill from 'quill';
 import Y from '../../../../../../modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
 
+import './quillpad.scss';
 
 // these two plugins are for resizing image in quill.
 // reference: https://github.com/quilljs/quill/issues/104
 // just for testing. wait for author to publish the plugin.
-import ImageImport from './ImageImport.js';
-import ImageResize from './ImageResize.js';
+// import ImageImport from './ImageImport.js';
+// import ImageResize from './ImageResize.js';
 
-Quill.register('modules/imageImport', ImageImport);
-Quill.register('modules/imageResize', ImageResize);
+// Quill.register('modules/imageImport', ImageImport);
+// Quill.register('modules/imageResize', ImageResize);
 
 class QuillPad extends Component {
 
@@ -67,10 +68,10 @@ class QuillPad extends Component {
             maxStack: 50,
             userOnly: true,
           },
-          imageImport: true,
-          imageResize: {
-            displaySize: true,
-          },
+          // imageImport: true,
+          // imageResize: {
+          //   displaySize: true,
+          // },
         },
       });
       y.share.richtext.bind(this.quill);
@@ -94,7 +95,7 @@ class QuillPad extends Component {
   render() {
     return (
       <div className={this.props.classNames} style={this.props.style}>
-        <div id="quillpad-editor" style={{ height: 'calc(100% - 42px)' }}>
+        <div id="quillpad-editor" style={{ height: 'calc(100% - 68px)' }}>
         </div>
       </div>
     );

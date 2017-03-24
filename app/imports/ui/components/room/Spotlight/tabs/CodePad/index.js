@@ -7,6 +7,8 @@ import 'brace/theme/dawn';
 import Y from '../../../../../../modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
 
+import './codepad.scss';
+
 class CodePad extends Component {
 
   constructor(props) {

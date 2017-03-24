@@ -1,6 +1,22 @@
 @import "base/animations";
 @import "module/Loading";
 
+$scrollbar-width: 10px;
+
+::-webkit-scrollbar {
+    width: $scrollbar-width;
+}
+ 
+::-webkit-scrollbar-track {
+    border-radius: $scrollbar-width;
+    background-color: #999999;
+}
+ 
+::-webkit-scrollbar-thumb {
+  border-radius: $scrollbar-width;
+  background-color:#575a5e;
+}
+
 // pages
 @import "./pages/_landing";
 $primary-bg-color: #fff;
@@ -23,3 +39,5 @@ body {
   overflow-x: hidden;
   background: $primary-bg-color;
 }
+
+

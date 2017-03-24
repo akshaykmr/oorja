@@ -11,6 +11,7 @@ import Settings from './tabs/Settings';
 // import ExperimentTab from './tabs/ExperimentTab';
 import QuillPad from './tabs/QuillPad';
 import CodePad from './tabs/CodePad';
+import Chat from './tabs/Chat/';
 
 class Spotlight extends Component {
 
@@ -22,6 +23,7 @@ class Spotlight extends Component {
       2: Settings,
       3: QuillPad,
       4: CodePad,
+      5: Chat,
     };
 
     const defaultTabs = [ // default tabs
@@ -45,7 +47,7 @@ class Spotlight extends Component {
         name: 'QuillPad',
 
         iconBgcolor: '',
-        bgColor: 'white',
+        bgColor: '#f3f3f3',
         color: 'black',
       },
       {
@@ -56,12 +58,19 @@ class Spotlight extends Component {
         bgColor: '',
         color: '',
       },
+      {
+        tabId: 5,
+        name: 'Chat',
+        iconBgcolor: '',
+        bgColor: '#ffebcd',
+        color: '',
+      },
     ];
 
     this.state = {
       isVisible: false,
       tabs: defaultTabs,
-      activeTab: defaultTabs[3],
+      activeTab: defaultTabs[4],
     };
   }
 
