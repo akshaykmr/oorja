@@ -27,11 +27,11 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
   border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
   .bubble {
+    margin-top: 2px;
     position: relative;
     clear: both;
     display: inline-block;
     padding: 16px 40px 16px 20px;
-    margin: 0 0 20px 0;
     font: 16px/20px 'Noto Sans', sans-serif;
     border-radius: 10px;
     background-color: $chat-bubble-color;
@@ -41,6 +41,7 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
 
 .bubble {
   .avatar {
+    display: none;
     color: #ffffff;
     position: absolute;
     top: 0;
@@ -52,15 +53,24 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
     background-size:     cover;
     background-repeat:   no-repeat;
     background-position: center center;   
-  } // arrow
-  &:after {
-    position: absolute;
-    top: $chat-thread-msg-arrow-size;
-    content: '';
-    width: 0;
-    height: 0;
-    border-top: $chat-thread-msg-arrow-size solid $chat-bubble-color;
+  } 
+
+  &.begining {
+    margin-top: 10px;
+
+    .avatar {
+      display: initial;
+    } 
+    &:after {
+      position: absolute;
+      top: $chat-thread-msg-arrow-size;
+      content: '';
+      width: 0;
+      height: 0;
+      border-top: $chat-thread-msg-arrow-size solid $chat-bubble-color;
+    }
   }
+
   &.sent {
     animation: show-chant-sent 0.4s ease-in;
     float: right;

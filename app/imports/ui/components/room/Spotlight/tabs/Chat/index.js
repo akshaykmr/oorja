@@ -137,17 +137,25 @@ class Chat extends Component {
     this.updateState({
       chatInputValue: { $set: '' },
     });
-
-    console.info('push called');
     y.share.chat.push([message]);
   }
 
   renderChatBubble(chatMessage, index) {
+    let inContinuation = false;
+    let messageAbove = null;
+    if (index > 0) {
+      messageAbove = this.state.chatMessages[index - 1];
+      if (chatMessage.user.userId === messageAbove.user.userId) {
+        inContinuation = true;
+      }
+    }
+
     const sender = chatMessage.user.userId === this.props.roomAPI.getUserId();
     const bubbleClassNames = {
       bubble: true,
       sent: sender,
       recepient: !sender,
+      begining: !inContinuation,
     };
     const { user } = chatMessage;
     const avatarStyle = {
