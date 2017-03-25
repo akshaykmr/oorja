@@ -10,11 +10,16 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
   padding: 0;
   border-top-left-radius: 6px;
   background-color: #faebd7;
+  form {
+    margin: 8px auto 0 auto;
+    width: 90%;
+    max-width: 760px;
+  }
 }
 
 .chat-thread {
   margin: 25px auto 0 auto;
-  padding: 0 20px 0 0; // scroll bar pad.
+  padding: 0 20px 4px 0; // scroll bar pad.
   list-style: none;
   overflow-y: auto;
   overflow-x: hidden;
@@ -98,9 +103,7 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
 }
 
 .chat-input {
-  margin-top: 8px;
-  width: calc(90% - 60px);
-  margin-left: 35px;
+  width: calc(100% - 60px);
   padding-left: 5px;
   padding-right: 5px;
   max-width: 720px;
