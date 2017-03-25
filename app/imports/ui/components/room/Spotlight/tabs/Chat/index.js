@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import classNames from 'classnames';
 
 // import Y from '../../../../../../modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
@@ -13,6 +14,16 @@ class Chat extends Component {
 
     this.state = {
       initialSyncComplete: false,
+      chatMessages: [
+        {
+          user: this.props.roomInfo.participants[0],
+          text: 'Are we meeting today?',
+        },
+        {
+          user: this.props.roomInfo.participants[1],
+          text: 'nah dude',
+        },
+      ],
     };
   }
   componentDidMount() {
@@ -53,27 +64,31 @@ class Chat extends Component {
   }
 
   render() {
+    const renderChatBubble = (chatMessage, index) => {
+      const sender = chatMessage.user.userId === this.props.roomAPI.getUserId();
+      const bubbleClassNames = {
+        bubble: true,
+        sent: sender,
+        recepient: !sender,
+      };
+      const { user } = chatMessage;
+      const avatarStyle = {
+        backgroundImage: `url(${user.picture})`,
+        backgroundColor: user.textAvatarColor,
+      };
+      return (
+        <li className={classNames(bubbleClassNames)} key={index}>
+          <div className="avatar" style={avatarStyle}>
+            {user.picture ? '' : user.initials}
+          </div>
+          {chatMessage.text}
+        </li>
+      );
+    };
     return (
       <div className={this.props.classNames} style={this.props.style}>
         <ul className="chat-thread">
-          <li>Are we meeting today?</li>
-          <li>yes, what time suits you?</li>
-          <li>I was thinking after lunch, I have a meeting in the morning</li>
-          <li>Are we meeting today?</li>
-          <li>yes, what time suits you?</li>
-          <li>I was thinking after lunch, I have a meeting in the morning</li>
-          <li>Are we meeting today?</li>
-          <li>yes, what time suits you?</li>
-          <li>I was thinking after lunch, I have a meeting in the morning</li>
-          <li>Are we meeting today?</li>
-          <li>yes, what time suits you?</li>
-          <li>I was thinking after lunch, I have a meeting in the morning</li>
-          <li>Are we meeting today?</li>
-          <li>yes, what time suits you?</li>
-          <li>I was thinking after lunch, I have a meeting in the morning</li>
-          <li>Are we meeting today?</li>
-          <li>yes, what time suits you?</li>
-          <li>I was thinking after lunch, I have a meeting in the morning</li>
+          {this.state.chatMessages.map(renderChatBubble)}
         </ul>
         <form className="chat-input-form">
           <input className="chat-input"

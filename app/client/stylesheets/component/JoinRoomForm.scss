@@ -27,6 +27,9 @@ $preview-spacing: 30px;
     height: $preview-height;
     width: $preview-height;
     border-radius: 50%;
+    background-size:     cover;
+    background-repeat:   no-repeat;
+    background-position: center center;      
   }
 
   .textAvatar {
