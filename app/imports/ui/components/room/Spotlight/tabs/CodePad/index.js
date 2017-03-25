@@ -30,7 +30,7 @@ class CodePad extends Component {
       },
       connector: {
         name: 'licodeConnector', // use webrtc connector
-        room: `${this.props.roomInfo.roomName}:${tabInfo.name}`, // clients connecting to the same room share data
+        room: `${roomInfo.roomName}:${tabInfo.name}`, // clients connecting to the same room share data
         role: 'slave',
         syncMethod: 'syncAll',
         roomAPI,

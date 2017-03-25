@@ -53,7 +53,7 @@ class PasswordPrompt extends Component {
           ...this.state,
           password: '',
           waiting: false,
-          tries: this.state.tries + 1,
+          tries: this.state.tries + 1, // setState is async, this should not be this way.
         });
       }
     );

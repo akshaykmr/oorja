@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import status from '../components/room/constants/status';
 
 class RoomAPI {
@@ -15,6 +16,11 @@ class RoomAPI {
 
   getUserId() {
     return this.room.props.roomUserId;
+  }
+
+  getUserInfo(userId) {
+    const { participants } = this.room.props.roomInfo;
+    return _.find(participants, { userId });
   }
 
   sendMessage(message) {

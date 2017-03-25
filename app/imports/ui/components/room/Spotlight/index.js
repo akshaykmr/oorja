@@ -62,7 +62,7 @@ class Spotlight extends Component {
         tabId: 5,
         name: 'Chat',
         iconBgcolor: '',
-        bgColor: '#ffebcd',
+        bgColor: '#faebd7',
         color: '',
       },
     ];

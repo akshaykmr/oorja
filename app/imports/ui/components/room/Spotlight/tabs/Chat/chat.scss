@@ -9,7 +9,7 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
 .content.Chat {
   padding: 0;
   border-top-left-radius: 6px;
-  background-color: #ffebcd;
+  background-color: #faebd7;
 }
 
 .chat-thread {
@@ -23,7 +23,7 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
   max-width: 760px;
   border-bottom-style: solid;
   border-bottom-width: thin;
-  border-bottom-color: darkgray;
+  border-bottom-color: honeydew;
   border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
   .bubble {
@@ -62,7 +62,7 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
     border-top: $chat-thread-msg-arrow-size solid $chat-bubble-color;
   }
   &.sent {
-    animation: show-chant-sent 0.15s 1 ease-in;
+    animation: show-chant-sent 0.4s ease-in;
     float: right;
     margin-right: $chat-thread-offset;
     .avatar {
@@ -74,7 +74,7 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
     }
   }
   &.recepient {
-    animation: show-chat-recieved 0.15s 1 ease-in;
+    animation: show-chat-recieved 0.4s ease-in;
     float: left;
     margin-left: $chat-thread-offset;
     .avatar {
@@ -91,6 +91,8 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
   margin-top: 8px;
   width: calc(90% - 60px);
   margin-left: 35px;
+  padding-left: 5px;
+  padding-right: 5px;
   max-width: 720px;
   height: 42px;
   font-size: 18px;

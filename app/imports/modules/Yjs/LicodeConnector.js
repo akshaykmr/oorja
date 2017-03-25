@@ -10,6 +10,7 @@ class LicodeConnector extends AbstractConnector {
     const { roomAPI, connectedUsers, tabInfo } = connectorOptions;
     const tabName = tabInfo.name;
 
+    // TODO:
     // this should be unique I guess. eg. when a user logs in with
     // same account from different devices.
     this.setUserId(roomAPI.getUserId());
@@ -41,6 +42,10 @@ class LicodeConnector extends AbstractConnector {
     super.reconnect();
   }
 
+
+  // probably would want to add options to the constructor later
+  // like a function that decides how to pack the message(source/destination)
+  // instead of being fixed
   send(recieverId, content) {
     const { connectorOptions } = this;
     const { tabId, name } = connectorOptions.tabInfo; // our own tab
