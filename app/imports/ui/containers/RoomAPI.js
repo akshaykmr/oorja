@@ -7,11 +7,11 @@ class RoomAPI {
     // this object, since there are no private properties in jaaavaascriipptt..
     this.room = room;
     this.messenger = room.messenger;
-    this.activityListner = room.activityListner;
+    this.activityListener = room.activityListener;
   }
 
   primaryDataStreamConnected() {
-    return this.room.state.primaryDataStreamStatus === status.CONNECTED;
+    return this.room.stateBuffer.primaryDataStreamStatus === status.CONNECTED;
   }
 
   getUserId() {
@@ -26,6 +26,7 @@ class RoomAPI {
   sendMessage(message) {
     if (message.local) {
       this.messenger.recieve(message);
+      return;
     }
     this.messenger.send(message);
   }
@@ -44,18 +45,17 @@ class RoomAPI {
     this.messenger.removeMessageHandler(tabId, handler);
   }
 
-  addActivityListner(activity, listner) {
-    this.room.activityListner.listen(activity, listner);
+  addActivityListener(activity, listner) {
+    this.room.activityListener.listen(activity, listner);
   }
 
-  removeActivityListner() {
+  removeActivityListener() {
 
   }
 
   resizeStreamContainer(size) {
-    this.room.setState({
-      ...this.room.state,
-      streamContainerSize: size,
+    this.room.updateState({
+      streamContainerSize: { $set: size },
     });
   }
 }

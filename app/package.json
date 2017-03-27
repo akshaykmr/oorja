@@ -44,6 +44,7 @@
       "expect": false
     },
     "rules": {
+      "new-cap": 0,
       "no-plusplus": 0,
       "import/no-unresolved": 0,
       "import/no-extraneous-dependencies": 0,

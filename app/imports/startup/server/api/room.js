@@ -51,7 +51,7 @@ Meteor.methods({
       const validTill = now.add(7, 'days').toDate().getTime();
       const roomSecret = Random.secret(14);
 
-      const response = N.API.createRoom(roomName);
+      const response = N.API.createRoom(roomName, { p2p: true });
 
       const roomDocument = {
         _id: response.data._id,

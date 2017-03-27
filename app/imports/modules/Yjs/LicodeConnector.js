@@ -16,11 +16,11 @@ class LicodeConnector extends AbstractConnector {
     this.setUserId(roomAPI.getUserId());
 
     const self = this;
-    roomAPI.addActivityListner(roomActivities.USER_JOINED, (user) => {
+    roomAPI.addActivityListener(roomActivities.USER_JOINED, (user) => {
       console.info(tabName, 'user joined');
       self.userJoined(user.userId, 'slave');
     });
-    roomAPI.addActivityListner(roomActivities.USER_LEFT, (user) => {
+    roomAPI.addActivityListener(roomActivities.USER_LEFT, (user) => {
       console.info(tabName, 'user left');
       self.userLeft(user.userId);
     });

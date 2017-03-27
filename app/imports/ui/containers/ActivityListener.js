@@ -1,5 +1,5 @@
 // be sure to bind the listners with context(this) before attaching them.
-class ActivityListner {
+class ActivityListener {
   constructor(activities) {
     this.listnerStore = {}; // ActivityType -> [handlerFunction, ...]
     Object.keys(activities).forEach((activity) => {
@@ -22,4 +22,4 @@ class ActivityListner {
   }
 }
 
-export default ActivityListner;
+export default ActivityListener;
