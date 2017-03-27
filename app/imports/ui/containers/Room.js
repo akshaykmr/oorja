@@ -75,6 +75,10 @@ class Room extends Component {
     this.tryToReconnect = this.tryToReconnect.bind(this);
     this.setRoomConnectionListeners = this.setRoomConnectionListeners.bind(this);
     this.setRoomStreamListners = this.setRoomStreamListners.bind(this);
+    this.connectUser = this.connectUser.bind(this);
+    this.disconnectUser = this.disconnectUser.bind(this);
+    // not all of these need to be bound, doing so anyway as I
+    // often end up moving them around and getting stuck with the same error for a while.
 
     this.setPrimaryDataStreamListners = this.setPrimaryDataStreamListners.bind(this);
     this.handleStreamSubscription = this.handleStreamSubscription.bind(this);
@@ -212,22 +216,18 @@ class Room extends Component {
     if (!user) throw new Meteor.Error('stream publisher not found');
 
     const subscribePrimaryDataStream = () => {
-      const connectedUser = _.find(
-        this.stateBuffer.connectedUsers,
-        { userId: user.userId }
-      );
-      // connect user to the room, increment sessionCount if already connected.
       // subscribe the stream if remote and apply listeners
+      // connect user to the room.
 
       // just a check If I run into this later
       if (this.subscribedStreamSet.has(stream.getID())) {
         throw new Meteor.Error('over here!');
       }
-
       if (this.streamManager.isLocalStream(stream)) {
         // do not subscribe our own data stream.
         this.updateState({ primaryDataStreamStatus: { $set: status.CONNECTED } });
         console.info('primaryDataStream successfully added to the room.');
+        this.connectUser(user);
 
         // subscribe any prexisting streams in the room
         console.info('subscribing any prexisting streams in the room');
@@ -244,39 +244,13 @@ class Room extends Component {
         this.erizoRoom.subscribe(stream);
         this.subscribedDataStreams.push(stream);
         this.subscribedStreamSet.add(stream.getID());
-      }
-
-      if (connectedUser) {
-        const connectedUserIndex = _.findIndex(
-          this.stateBuffer.connectedUsers,
-          { userId: connectedUser.userId }
-        );
-        if (connectedUserIndex === -1) {
-          throw new Meteor.Error("this shouldn't happen, but just in case");
-        }
-
-        const updatedUser = update(
-          connectedUser,
-          {
-            sessionCount: { $set: connectedUser.sessionCount + 1 },
-          }
-        );
-        this.updateState({
-          connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
-        });
-        console.info('incremented session', updatedUser);
-      } else {
-        this.updateState({
-          connectedUsers: { $push: [{ ...user, sessionCount: 1 }] },
-        });
-        this.activityListener.dispatch(roomActivities.USER_JOINED, user);
+        this.connectUser(user);
       }
     };
 
-
     const { PRIMARY_DATA_STREAM } = streamTypes;
     switch (attributes.type) {
-      case PRIMARY_DATA_STREAM : subscribePrimaryDataStream.call(this);
+      case PRIMARY_DATA_STREAM : subscribePrimaryDataStream();
         break;
       default: console.error('unexpected stream type');
     }
@@ -308,53 +282,84 @@ class Room extends Component {
     const { PRIMARY_DATA_STREAM } = streamTypes;
     const user = this.roomAPI.getUserInfo(attributes.userId);
 
-    const removePrimaryDataStream = () => {
-      // remove stream from subscribed streams list
-      this.subscribedDataStreams =
-        _.remove(this.subscribedDataStreams, s => s.getID() === streamID);
-
-      // decrement connectedUser's sessionCount. remove if count reaches 0;
-
-      const connectedUserIndex = _.findIndex(
-        this.stateBuffer.connectedUsers,
-        { userId: user.userId }
-      );
-      if (connectedUserIndex === -1) {
-        throw new Meteor.Error('User does not seem to be connected');
-      }
-
-      const connectedUser = this.stateBuffer.connectedUsers[connectedUserIndex];
-      if (connectedUser.sessionCount > 1) {
-        const updatedUser = update(
-          connectedUser,
-          {
-            sessionCount: { $set: connectedUser.sessionCount - 1 },
-          }
-        );
-
-        this.updateState({
-          connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
-        });
-        console.info('decremented uses sessions', updatedUser);
-      } else {
-        this.updateState({
-          connectedUsers: {
-            $splice: [[connectedUserIndex, 1]],
-          },
-        });
-        this.activityListener.dispatch(roomActivities.USER_LEFT, user);
-      }
-    };
-
-
     switch (attributes.type) {
-      case PRIMARY_DATA_STREAM: removePrimaryDataStream();
+      case PRIMARY_DATA_STREAM:
+        // remove stream from subscribed streams list
+        this.subscribedDataStreams =
+          _.remove(this.subscribedDataStreams, s => s.getID() === streamID);
 
+        this.disconnectUser(user);
         break;
       default: console.error('unexpected stream type');
     }
 
     this.subscribedStreamSet.delete(streamID);
+  }
+
+  connectUser(user) {
+    // adds user to connectedUsers list in state, increments sessionCount if already there.
+    const connectedUser = _.find(
+      this.stateBuffer.connectedUsers,
+      { userId: user.userId }
+    );
+
+    if (connectedUser) {
+      const connectedUserIndex = _.findIndex(
+        this.stateBuffer.connectedUsers,
+        { userId: connectedUser.userId }
+      );
+      if (connectedUserIndex === -1) {
+        throw new Meteor.Error("this shouldn't happen, but just in case");
+      }
+
+      const updatedUser = update(
+        connectedUser,
+        {
+          sessionCount: { $set: connectedUser.sessionCount + 1 },
+        }
+      );
+      this.updateState({
+        connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
+      });
+      console.info('incremented session', updatedUser);
+    } else {
+      this.updateState({
+        connectedUsers: { $push: [{ ...user, sessionCount: 1 }] },
+      });
+      this.activityListener.dispatch(roomActivities.USER_JOINED, user);
+    }
+  }
+
+  disconnectUser(user) {
+    const connectedUserIndex = _.findIndex(
+      this.stateBuffer.connectedUsers,
+      { userId: user.userId }
+    );
+    if (connectedUserIndex === -1) {
+      throw new Meteor.Error('User does not seem to be connected');
+    }
+
+    const connectedUser = this.stateBuffer.connectedUsers[connectedUserIndex];
+    if (connectedUser.sessionCount > 1) {
+      const updatedUser = update(
+        connectedUser,
+        {
+          sessionCount: { $set: connectedUser.sessionCount - 1 },
+        }
+      );
+
+      this.updateState({
+        connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
+      });
+      console.info('decremented uses sessions', updatedUser);
+    } else {
+      this.updateState({
+        connectedUsers: {
+          $splice: [[connectedUserIndex, 1]],
+        },
+      });
+      this.activityListener.dispatch(roomActivities.USER_LEFT, user);
+    }
   }
 
   onWindowResize(event) {
