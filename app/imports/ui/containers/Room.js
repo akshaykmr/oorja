@@ -330,6 +330,7 @@ class Room extends Component {
     }
   }
 
+  // decrements sessionCount for user. removing from connectUsers if reaches 0.
   disconnectUser(user) {
     const connectedUserIndex = _.findIndex(
       this.stateBuffer.connectedUsers,

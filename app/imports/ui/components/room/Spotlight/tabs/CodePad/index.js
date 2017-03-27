@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 
+// man monaco editor is awesome imo
+// I should replace ace with it. https://microsoft.github.io/monaco-editor/
+
 import * as ace from 'brace';
 import 'brace/mode/javascript';
 import 'brace/theme/dawn';
