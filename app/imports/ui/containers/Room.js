@@ -50,11 +50,8 @@ class Room extends Component {
     this.primaryDataStream.init();
     /* eslint-enable new-cap */
 
-    // for checking membership of an already subscribed stream(by Id)
-    this.subscribedStreamSet = new Set();
-
     // subscribed incoming data streams
-    this.subscribedDataStreams = [];
+    this.subscribedDataStreams = {}; // id -> erizoStream
 
     // for passing messages to and from tabs | local or remote(other users)
     this.messenger = new Messenger(this);
@@ -90,6 +87,8 @@ class Room extends Component {
 
       roomConnectionStatus: status.TRYING_TO_CONNECT,
       primaryDataStreamStatus: status.TRYING_TO_CONNECT,
+
+      mediaStreams: {}, // userId -> []
 
       uiSize: this.calculateUISize(),
       streamContainerSize: uiConfig.COMPACT,
@@ -220,7 +219,7 @@ class Room extends Component {
       // connect user to the room.
 
       // just a check If I run into this later
-      if (this.subscribedStreamSet.has(stream.getID())) {
+      if (this.subscribedDataStreams[stream.getID()]) { // stream already subscribed
         throw new Meteor.Error('over here!');
       }
       if (this.streamManager.isLocalStream(stream)) {
@@ -231,19 +230,21 @@ class Room extends Component {
 
         // subscribe any prexisting streams in the room
         console.info('subscribing any prexisting streams in the room');
-        Object.keys(this.erizoRoom.remoteStreams).forEach((streamIDString) => {
-          if (Number(streamIDString) !== stream.getID()) {
-            this.handleStreamSubscription(this.erizoRoom.remoteStreams[streamIDString]);
-          }
-        });
+        const currentStreamID = stream.getID();
+        Object.keys(this.erizoRoom.remoteStreams)
+          .map(streamIDString => Number(streamIDString))
+          .forEach((streamID) => {
+            if (streamID !== currentStreamID) {
+              this.handleStreamSubscription(this.erizoRoom.remoteStreams[streamID]);
+            }
+          });
       } else {
         if (this.stateBuffer.primaryDataStreamStatus !== status.CONNECTED) {
           return; // better to subscribe remote streams when our primaryDataStream is connected.
         }
         this.setIncomingStreamListners(stream);
         this.erizoRoom.subscribe(stream);
-        this.subscribedDataStreams.push(stream);
-        this.subscribedStreamSet.add(stream.getID());
+        this.subscribedDataStreams[stream.getID()] = stream;
         this.connectUser(user);
       }
     };
@@ -272,7 +273,6 @@ class Room extends Component {
 
   handleStreamRemoval(stream) {
     const attributes = stream.getAttributes();
-    const streamID = stream.getID();
 
     if (this.streamManager.isLocalStream(stream)) { // should not execute for current functionality.
       console.error('stream removal called for local stream');
@@ -284,16 +284,13 @@ class Room extends Component {
 
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM:
-        // remove stream from subscribed streams list
-        this.subscribedDataStreams =
-          _.remove(this.subscribedDataStreams, s => s.getID() === streamID);
+        // remove stream from subscribed streams
+        this.subscribedDataStreams[stream.getID()] = null;
 
         this.disconnectUser(user);
         break;
       default: console.error('unexpected stream type');
     }
-
-    this.subscribedStreamSet.delete(streamID);
   }
 
   connectUser(user) {
@@ -396,7 +393,8 @@ class Room extends Component {
           uiSize={uiSize}
           roomAPI={this.roomAPI}
           streamContainerSize={streamContainerSize}
-          roomInfo={this.props.roomInfo}/>
+          roomInfo={this.props.roomInfo}
+          connectedUsers={this.state.connectedUsers}/>
         <Spotlight
           roomInfo={this.props.roomInfo}
           connectedUsers={this.state.connectedUsers}
