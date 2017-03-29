@@ -130,6 +130,7 @@ class Chat extends Component {
 
     const message = {
       userId: this.props.roomAPI.getUserId(),
+      //  TODO: timeStamp: this.props.roomAPI.timeStamp(),
       text: chatInputValue,
     };
 

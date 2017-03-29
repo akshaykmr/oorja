@@ -70,7 +70,7 @@ class Spotlight extends Component {
     this.state = {
       isVisible: false,
       tabs: defaultTabs,
-      activeTab: defaultTabs[4],
+      activeTab: defaultTabs[0],
     };
   }
 

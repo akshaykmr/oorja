@@ -1,7 +1,61 @@
+$avatar-size: 50px;
+
 .streamContainer {
   position: absolute;
   width: 100%;
+  overflow-x: auto;
   top: 0;
   left: 0;
-  background-color: #2e3136;;
+  padding: 5px;
+  background-color: #2e3136;
+
+  span {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+  }
+
+  .streamBox {
+    height: 100%;
+  }
+
+}
+
+.streamBox {
+  padding-left: 5px;
+  padding-right: 5px;
+  .avatar {
+    color: #ffffff;
+    position: relative;
+    top: 0px;
+    width: $avatar-size;
+    height: $avatar-size;
+    line-height: $avatar-size;
+    text-align: center;
+    border-radius: 50%;
+    background-size:     cover;
+    background-repeat:   no-repeat;
+    background-position: center center;   
+  } 
+}
+
+.streamBox-enter {
+  transform: translate3d(0, -100%, 0);
+}
+
+.streamBox-enter.streamBox-enter-active {
+  transform: translate3d(0, 0, 0);
+  transition: transform 500ms ease-in;
+}
+
+.streamBox-leave {
+  transform: translate3d(0, 0, 0);
+}
+
+.streamBox-leave.streamBox-leave-active {
+  transform: translate3d(0, -100%, 0);
+  transition: transform 300ms ease-out;
 }

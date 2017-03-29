@@ -33,10 +33,8 @@ class Room extends Component {
 
     this.roomName = props.roomInfo.roomName;
     this.roomToken = localStorage.getItem(`roomToken:${this.roomName}`);
-    /* eslint-disable new-cap */
+
     this.erizoRoom = Erizo.Room({ token: this.roomToken });
-    // should I use `new` keyword here? licode docs dont use them, And If I did
-    // I may run into some issues due to context of `this` etc.
 
     // an erizo data stream to be used for sending 'data' by this user
     this.primaryDataStream = Erizo.Stream({
@@ -48,10 +46,12 @@ class Room extends Component {
     });
     this.setPrimaryDataStreamListners();
     this.primaryDataStream.init();
-    /* eslint-enable new-cap */
 
     // subscribed incoming data streams
     this.subscribedDataStreams = {}; // id -> erizoStream
+
+    this.subscribedMediaStreams = {}; // id -> erizoStream
+    // note: erizoStream.stream would be of type MediaStream(the browser's MediaStream object)
 
     // for passing messages to and from tabs | local or remote(other users)
     this.messenger = new Messenger(this);
@@ -88,7 +88,7 @@ class Room extends Component {
       roomConnectionStatus: status.TRYING_TO_CONNECT,
       primaryDataStreamStatus: status.TRYING_TO_CONNECT,
 
-      mediaStreams: {}, // userId -> []
+      mediaStreams: {}, // userId -> [mediaStreamState, ...]
 
       uiSize: this.calculateUISize(),
       streamContainerSize: uiConfig.COMPACT,
@@ -272,15 +272,11 @@ class Room extends Component {
   }
 
   handleStreamRemoval(stream) {
+    if (this.unmountInProgress) return;
+
     const attributes = stream.getAttributes();
-
-    if (this.streamManager.isLocalStream(stream)) { // should not execute for current functionality.
-      console.error('stream removal called for local stream');
-      return;
-    }
-
-    const { PRIMARY_DATA_STREAM } = streamTypes;
     const user = this.roomAPI.getUserInfo(attributes.userId);
+    const { PRIMARY_DATA_STREAM } = streamTypes;
 
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM:
@@ -290,6 +286,11 @@ class Room extends Component {
         this.disconnectUser(user);
         break;
       default: console.error('unexpected stream type');
+    }
+
+    if (this.streamManager.isLocalStream(stream)) {
+      console.info('local stream removed');
+      return;
     }
   }
 
