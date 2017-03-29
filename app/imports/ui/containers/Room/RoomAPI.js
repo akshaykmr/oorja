@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import status from '../components/room/constants/status';
+import status from '../../components/room/constants/status';
 
 class RoomAPI {
   constructor(room) {

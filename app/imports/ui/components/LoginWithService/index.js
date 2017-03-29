@@ -4,6 +4,8 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 
+import './LoginWithService.scss';
+
 // TODO css stuff.
 class LoginWithService extends Component {
   constructor(props) {

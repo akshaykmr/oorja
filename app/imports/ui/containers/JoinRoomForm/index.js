@@ -4,13 +4,15 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import _ from 'lodash';
 // import ImageLoader from 'react-imageloader';
 
+
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 
-import LoginWithService from '../components/LoginWithService';
-import { joinRoom } from '../actions/roomConfiguration';
+import LoginWithService from '../../components/LoginWithService/';
+import { joinRoom } from '../../actions/roomConfiguration';
 
-import { Rooms as MongoRoom } from '../../collections/common';
+import { Rooms as MongoRoom } from '../../../collections/common';
+import './JoinRoomForm.scss';
 
 // inputs user name and joins the room.
 class JoinRoomForm extends Component {

@@ -9,18 +9,18 @@ import _ from 'lodash';
 // import Erizo from '../../modules/Erizo';
 
 // constants
-import uiConfig from '../components/room/constants/uiConfig';
-import status from '../components/room/constants/status';
-import streamTypes from '../components/room/constants/streamType';
-import roomActivities from '../components/room/constants/roomActivities';
+import uiConfig from '../../components/room/constants/uiConfig';
+import status from '../../components/room/constants/status';
+import streamTypes from '../../components/room/constants/streamType';
+import roomActivities from '../../components/room/constants/roomActivities';
 
 // room components
-import StreamsContainer from '../components/room/StreamsContainer/';
+import StreamsContainer from '../../components/room/StreamsContainer/';
 // import Sidebar from '../components/room/Sidebar';
-import Spotlight from '../components/room/Spotlight';
+import Spotlight from '../../components/room/Spotlight';
 
 // misc.
-import ActivityListener from './ActivityListener';
+import ActivityListener from '../../../modules/ActivityListener';
 import RoomAPI from './RoomAPI';
 import Messenger from './Messenger';
 import StreamManager from './StreamManager';
