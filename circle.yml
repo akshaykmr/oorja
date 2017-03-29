@@ -18,3 +18,4 @@ dependencies:
 test:
   override:
     - meteor npm run lint # its a start...
+    - meteor build --architecture os.linux.x86_64 --directory ../build
