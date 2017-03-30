@@ -1,6 +1,7 @@
 import React from 'react';
 
-import RoomSetup from '../containers/RoomSetup';
+import RoomSetup from '../../containers/RoomSetup';
+import './landing.scss';
 
 const Landing = () => (
   <div className="landing">

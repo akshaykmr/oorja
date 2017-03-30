@@ -9,18 +9,20 @@ import { moment } from 'meteor/momentjs:moment';
 import { Meteor } from 'meteor/meteor';
 
 import { Intent } from '@blueprintjs/core';
-import SupremeToaster from '../components/Toaster';
+import SupremeToaster from '../../components/Toaster';
 
-import Loading from '../components/Loading';
-import PasswordPrompt from './PasswordPrompt';
-import GettingReady from '../components/room/GettingReady';
-import Room from './Room';
+import Loading from '../../components/Loading';
+import PasswordPrompt from '../PasswordPrompt';
+import GettingReady from '../../components/room/GettingReady';
+import Room from '../Room';
 // import TestErizo from '../components/room/TestErizo';
 
-import { Rooms as MongoRoom } from '../../collections/common';
+import { Rooms as MongoRoom } from '../../../collections/common';
 
 import { deleteSecret, getRoomInfo, storeSecret,
-  deleteRoomUserId, deleteRoomToken, joinRoom } from '../actions/roomConfiguration';
+  deleteRoomUserId, deleteRoomToken, joinRoom } from '../../actions/roomConfiguration';
+
+import './door.scss';
 
 class Door extends Component {
 

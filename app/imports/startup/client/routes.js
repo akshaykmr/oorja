@@ -16,7 +16,7 @@ import { Meteor } from 'meteor/meteor';
 // components
 import App from '../../ui/layouts/App.js';
 import SupremeToaster from '../../ui/components/Toaster';
-import Landing from '../../ui/pages/Landing.js';
+import Landing from '../../ui/pages/Landing/';
 import Door from '../../ui/containers/Door';
 import NotFound from '../../ui/pages/NotFound.js';
 
