@@ -9,46 +9,23 @@ $landing-primary : white;
 
 .kickstart {
   min-height: 90vh; 
-  display: flex;
-  align-content: stretch;
-  align-items: baseline;
-  flex-wrap: wrap;
-  justify-content: space-around;
 
-  .intro {  
-    max-width: 95%;
+  .tagline {
+    font-weight: 200;
+    text-align: center;
+    font-size: 2.6em;
 
-    @media only screen and (min-width: 500px) { 
-        max-width: 80%;
+    @media only screen and (min-width: 600px) { 
+        padding-top: 20px;
     }
-
-    @media only screen and (min-width: 920px) { 
-        padding: 6%;
-        display: inline-block;
-        max-width: 500px;
-    }
-
-    .text {
-      font-size: 1.3em;
-      color: #33485f;
-    }
-
-    .branding {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      font-size: 2.0em;
-      color: deepskyblue;
-    }
-
   }
 
   .room-form {
-    display: inline-block;
-    min-width: 320px;
-    max-width: 500px;
-    @media only screen and (min-width: 920px) { 
-        display: inline-block;
-        width: calc(100% - 500px);
-    }
+    height: 400px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
   }
 }
