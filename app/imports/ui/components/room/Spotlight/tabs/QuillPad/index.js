@@ -5,6 +5,8 @@ import Quill from 'quill';
 import Y from '../../../../../../modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
 
+import roomActivities from '../../../constants/roomActivities';
+
 import './quillpad.scss';
 
 // these two plugins are for resizing image in quill.
@@ -75,6 +77,12 @@ class QuillPad extends Component {
         },
       });
       y.share.richtext.bind(this.quill);
+
+      roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
+        if (payload.to === tabInfo.tabId) {
+          this.quill.focus();
+        }
+      });
 
       y.connector.whenSynced(() => {
         this.setState({

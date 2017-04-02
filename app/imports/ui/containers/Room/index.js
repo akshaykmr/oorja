@@ -400,6 +400,7 @@ class Room extends Component {
           roomInfo={this.props.roomInfo}
           connectedUsers={this.state.connectedUsers}
           roomAPI={this.roomAPI}
+          dispatchRoomActivity={this.activityListener.dispatch}
           uiSize={uiSize}
           streamContainerSize={streamContainerSize}/>
       </div>

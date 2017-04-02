@@ -4,6 +4,8 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import update from 'immutability-helper';
 
+import roomActivities from '../../../constants/roomActivities';
+
 import Y from '../../../../../../modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
 
@@ -20,6 +22,8 @@ class Chat extends Component {
   constructor(props) {
     super(props);
     this.y = null;
+
+    this.chatInput = null; // dom element for chatInput
 
     this.history = 50;
 
@@ -88,6 +92,14 @@ class Chat extends Component {
 
       y.share.chat.toArray().forEach(this.appendMessage);
       this.cleanupChat();
+
+      roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
+        if (payload.to === tabInfo.tabId) {
+          if (this.chatInput) { // input element is mounted
+            this.chatInput.focus();
+          }
+        }
+      });
     });
   }
 
@@ -194,6 +206,7 @@ class Chat extends Component {
                  autoComplete="off"
                  value={this.state.chatInputValue}
                  onChange={this.handleChatInput}
+                 ref = { (input) => { this.chatInput = input; } }
           />
         </form>
       </div>

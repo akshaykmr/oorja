@@ -1,10 +1,12 @@
-// be sure to bind the listners with context(this) before attaching them.
 class ActivityListener {
   constructor(activities) {
     this.listnerStore = {}; // ActivityType -> [handlerFunction, ...]
     Object.keys(activities).forEach((activity) => {
       this.listnerStore[activity] = [];
     });
+
+    this.listen = this.listen.bind(this);
+    this.dispatch = this.dispatch.bind(this);
   }
 
   listen(activity, listner) {

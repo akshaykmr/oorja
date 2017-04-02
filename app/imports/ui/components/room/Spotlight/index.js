@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 
 import uiConfig from '../constants/uiConfig';
+import roomActivities from '../constants/roomActivities';
 
 import './spotlight.scss';
 
@@ -68,18 +69,19 @@ class Spotlight extends Component {
     ];
 
     this.state = {
-      isVisible: false,
       tabs: defaultTabs,
       activeTab: defaultTabs[0],
     };
   }
 
   switchToTab(tab) {
+    const from = this.state.activeTab.tabId;
+    const to = tab.tabId;
     this.setState({
       ...this.state,
       activeTab: tab,
-      isVisible: this.state.isVisible ? tab.name !== this.state.activeTab.name : true,
     });
+    this.props.dispatchRoomActivity(roomActivities.TAB_SWITCH, { from, to });
   }
 
   render() {
@@ -156,6 +158,7 @@ class Spotlight extends Component {
 
 Spotlight.propTypes = {
   roomAPI: React.PropTypes.object,
+  dispatchRoomActivity: React.PropTypes.func,
   connectedUsers: React.PropTypes.array,
   roomInfo: React.PropTypes.object,
   uiSize: React.PropTypes.string.isRequired,

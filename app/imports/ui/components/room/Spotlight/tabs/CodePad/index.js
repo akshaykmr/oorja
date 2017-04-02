@@ -7,6 +7,8 @@ import * as ace from 'brace';
 import 'brace/mode/javascript';
 import 'brace/theme/dawn';
 
+import roomActivities from '../../../constants/roomActivities';
+
 import Y from '../../../../../../modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
 
@@ -52,6 +54,13 @@ class CodePad extends Component {
       editor.setTheme('ace/theme/dawn');
       y.share.ace.bindAce(editor, { aceRequire: ace.acequire });
       this.editor = editor;
+
+      // add activity listner to focus editor when user switches to this tab.
+      roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
+        if (payload.to === tabInfo.tabId) {
+          editor.focus();
+        }
+      });
 
       y.connector.whenSynced(() => {
         this.setState({
