@@ -32,9 +32,9 @@ class Room extends Component {
     super(props);
 
     this.roomName = props.roomInfo.roomName;
-    this.roomToken = localStorage.getItem(`roomToken:${this.roomName}`);
+    this.erizoToken = localStorage.getItem(`erizoToken:${this.roomName}`);
 
-    this.erizoRoom = Erizo.Room({ token: this.roomToken });
+    this.erizoRoom = Erizo.Room({ token: this.erizoToken });
 
     // an erizo data stream to be used for sending 'data' by this user
     this.primaryDataStream = Erizo.Stream({
@@ -139,11 +139,11 @@ class Room extends Component {
     }
     console.info('trying to reconnect');
     this.updateState({ roomConnectionStatus: { $set: status.TRYING_TO_CONNECT } });
-    this.props.joinRoom()
-      .then(({ roomToken }) => {
-        this.roomToken = roomToken;
+    this.props.joinRoom(this.props.roomInfo._id)
+      .then(({ erizoToken }) => {
+        this.erizoToken = erizoToken;
         /* eslint-disable new-cap */
-        this.erizoRoom = Erizo.Room({ token: this.roomToken });
+        this.erizoRoom = Erizo.Room({ token: this.erizoToken });
         /* eslint-enable new-cap */
         this.setRoomConnectionListeners();
         console.info('got new token, reconnecting');
@@ -410,8 +410,8 @@ class Room extends Component {
 }
 
 Room.propTypes = {
-  roomUserId: React.PropTypes.string,
-  roomInfo: React.PropTypes.object,
+  roomUserId: React.PropTypes.string.isRequired,
+  roomInfo: React.PropTypes.object.isRequired,
   joinRoom: React.PropTypes.func.isRequired,
 };
 

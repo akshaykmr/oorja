@@ -3,7 +3,8 @@
 
   keys: 
     - 'roomSecret:$roomName' ->  // room auth | contains a secret
-    - 'roomToken:$roomName' // erizoToken
+    - 'erizoToken:$roomName' // erizoToken
+    - 'roomAccessToken:$roomName' // room auth | jwt for password protected rooms
     - 'roomUserId:$roomName' // the userId used to join the room
     - 'roomUserToken:$roomName' // user token used to skip adding a new user to the room if found
     - 'roomReady:$roomName' // maps last ready timestamp.

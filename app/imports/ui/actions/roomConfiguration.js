@@ -9,11 +9,14 @@ import { Rooms } from '../../collections/common';
 export const CREATE_ROOM = 'CREATE_ROOM';
 export const JOINED_ROOM = 'JOINED_ROOM';
 
-export const STORE_SECRET = 'STORE_SECRET';
-export const DELETE_SECRET = 'DELETE_SECRET';
+export const STORE_ROOM_SECRET = 'STORE_ROOM_SECRET';
+export const DELETE_ROOM_SECRET = 'DELETE_ROOM_SECRET';
 
-export const STORE_TOKEN = 'STORE_TOKEN';
-export const DELETE_TOKEN = 'DELETE_TOKEN';
+export const STORE_ROOM_ACCESS_TOKEN = 'STORE_ROOM_ACCESS_TOKEN';
+export const DELETE_ROOM_ACCESS_TOKEN = 'DELETE_ROOM_ACCESS_TOKEN';
+
+export const STORE_ERIZO_TOKEN = 'STORE_ERIZO_TOKEN';
+export const DELETE_ERIZO_TOKEN = 'DELETE_ERIZO_TOKEN';
 
 export const STORE_ROOM_USERID = 'STORE_ROOM_USERID';
 export const DELETE_ROOM_USERID = 'STORE_ROOM_USERID';
@@ -26,32 +29,49 @@ export const UNEXPECTED_AUTHENTICATION_ERROR = 'UNEXPECTED_AUTHENTICATION_ERROR'
 
 const GENERIC_ERROR_MESSAGE = 'Something went wrong... ¯\\(°_o)/¯';
 
-export const deleteSecret = (roomName) => {
+export const deleteRoomSecret = (roomName) => {
   localStorage.removeItem(`roomSecret:${roomName}`);
 
   return {
-    type: DELETE_SECRET,
+    type: DELETE_ROOM_SECRET,
   };
 };
 
-export const storeSecret = (roomName, roomSecret) => {
+export const storeRoomSecret = (roomName, roomSecret) => {
   localStorage.setItem(`roomSecret:${roomName}`, roomSecret);
   return {
-    type: STORE_SECRET,
+    type: STORE_ROOM_SECRET,
   };
 };
 
-export const storeRoomToken = (roomName, token) => {
-  localStorage.setItem(`roomToken:${roomName}`, token);
+
+export const deleteRoomAccessToken = (roomName) => {
+  localStorage.removeItem(`roomAccessToken:${roomName}`);
+
   return {
-    type: STORE_TOKEN,
+    type: DELETE_ROOM_ACCESS_TOKEN,
   };
 };
 
-export const deleteRoomToken = (roomName) => {
-  localStorage.removeItem(`roomToken:${roomName}`);
+export const storeRoomAccessToken = (roomName, accessToken) => {
+  localStorage.setItem(`roomAccessToken:${roomName}`, accessToken);
   return {
-    type: DELETE_TOKEN,
+    type: STORE_ROOM_ACCESS_TOKEN,
+  };
+};
+
+
+export const storeErizoToken = (roomName, token) => {
+  localStorage.setItem(`erizoToken:${roomName}`, token);
+  return {
+    type: STORE_ERIZO_TOKEN,
+  };
+};
+
+export const deleteErizoToken = (roomName) => {
+  localStorage.removeItem(`erizoToken:${roomName}`);
+  return {
+    type: DELETE_ERIZO_TOKEN,
   };
 };
 
@@ -82,9 +102,10 @@ const unexpectedError = ({ dispatch, message, error, roomName }) => {
   });
 
   if (roomName) {
-    deleteSecret(roomName);
-    deleteRoomToken(roomName);
+    deleteRoomSecret(roomName);
+    deleteErizoToken(roomName);
     deleteRoomUserId(roomName);
+    deleteRoomAccessToken(roomName);
   }
   SupremeToaster.show({
     message: message || GENERIC_ERROR_MESSAGE,
@@ -93,30 +114,29 @@ const unexpectedError = ({ dispatch, message, error, roomName }) => {
 };
 
 // this action relies redux-thunk middleware.
-export const createRoom = (roomName, passwordEnabled, password = '') =>
-  (dispatch, getState) => {
-    const roomInfo = {
-      roomName,
-      passwordEnabled,
-      password,
-      configuration: getState().roomConfiguration,
-    };
-    return Meteor.callPromise('createRoom', roomInfo).then(
-      (response) => {
-        const { createdRoomName, roomSecret } = response;
-        // its called createdRoomName because some minor changes may be done to
-        // the name send by the client above.
-        // store secret in localStorage
-        dispatch({
-          type: CREATE_ROOM,
-          payload: { createdRoomName },
-        });
-        storeSecret(createdRoomName, roomSecret);
-        return Promise.resolve(response);
-      },
-      error => Promise.reject(error)
-    );
-  };
+// this short form is less readable but I'm going to keep it this way to remember it.
+export const createRoom = roomSpecification =>
+    dispatch =>
+      Meteor.callPromise('createRoom', roomSpecification).then(
+        (response) => {
+          const { createdRoomName, roomSecret, passwordEnabled, roomAccessToken } = response;
+          // its called createdRoomName because some minor changes may be done to
+          // the name send by the client above.
+          // store secret in localStorage
+          dispatch({
+            type: CREATE_ROOM,
+            payload: { createdRoomName },
+          });
+
+          if (passwordEnabled) {
+            dispatch(storeRoomAccessToken(createdRoomName, roomAccessToken));
+          } else {
+            dispatch(storeRoomSecret(createdRoomName, roomSecret));
+          }
+          return Promise.resolve(response);
+        },
+        error => Promise.reject(error)
+      );
 
 
 export const getRoomInfo = (roomName, userToken = null) => ({
@@ -128,41 +148,44 @@ export const getRoomInfo = (roomName, userToken = null) => ({
 export const checkPassword = (roomName, password) =>
   dispatch =>
     Meteor.callPromise('authenticatePassword', roomName, password).then(
-      (roomSecret) => {
+      (roomAccessToken) => {
         dispatch({
           type: CHECK_PASSWORD,
           payload: {
-            successful: !!roomSecret,
+            successful: !!roomAccessToken,
           },
         });
-        if (roomSecret != null) {
-          localStorage.setItem(`roomSecret:${roomName}`, roomSecret);
+        if (roomAccessToken != null) {
+          localStorage.setItem(`roomAccessToken:${roomName}`, roomAccessToken);
         }
-        return Promise.resolve(roomSecret);
+        return Promise.resolve(roomAccessToken);
       },
       (error) => { unexpectedError({ dispatch, error, roomName }); },
     );
 
-export const joinRoom = (name = '', textAvatarColor = '') =>
+export const joinRoom = (roomId, name = '', textAvatarColor = '') =>
   (dispatch) => {
-    const room = Rooms.findOne();
+    const room = Rooms.findOne({ _id: roomId });
     if (!room) {
       unexpectedError(dispatch);
       return Promise.resolve();
     }
     const roomName = room.roomName;
-    const roomSecret = localStorage.getItem(`roomSecret:${roomName}`);
-    const userToken = localStorage.getItem(`roomUserToken:${roomName}`);
-    return Meteor.callPromise('joinRoom', roomName, roomSecret, name, textAvatarColor, userToken).then(
-      ({ roomToken, userId, newUserToken }) => {
-        const action = storeRoomToken(roomName, roomToken);
+    const credentials = {
+      roomSecret: localStorage.getItem(`roomSecret:${roomName}`) || '',
+      roomAccessToken: localStorage.getItem(`roomAccessToken:${roomName}`) || '',
+      userToken: localStorage.getItem(`roomUserToken:${roomName}`) || '',
+    };
+    return Meteor.callPromise('joinRoom', roomId, credentials, name, textAvatarColor).then(
+      ({ erizoToken, userId, newUserToken }) => {
+        const action = storeErizoToken(roomName, erizoToken);
         Meteor.connection.setUserId(userId);
         dispatch(storeRoomUserId(roomName, userId, newUserToken));
         dispatch(action);
         dispatch({
           type: JOINED_ROOM,
         });
-        return Promise.resolve({ roomToken });
+        return Promise.resolve({ erizoToken });
       },
       (error) => { unexpectedError({ dispatch, error, roomName }); },
     );

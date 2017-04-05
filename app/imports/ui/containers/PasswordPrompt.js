@@ -32,8 +32,8 @@ class PasswordPrompt extends Component {
       waiting: true,
     });
     this.props.checkPassword(this.props.roomName, this.state.password).then(
-      (roomSecret) => {
-        if (!roomSecret) {
+      (roomAccessToken) => {
+        if (!roomAccessToken) {
           SupremeToaster.show({
             message: 'Incorrect password',
             intent: Intent.WARNING,
@@ -51,7 +51,7 @@ class PasswordPrompt extends Component {
         }
         this.setState({
           ...this.state,
-          password: '',
+          password: roomAccessToken ? this.state.password : '',
           waiting: false,
           tries: this.state.tries + 1, // setState is async, this should not be this way.
         });

@@ -29,21 +29,25 @@ class RoomSetup extends Component {
       PASSWORD: 'PASSWORD',
     };
 
-    this.state = {
+    this.defaultCustomizationState = {
       roomName: '',
-      validName: true, // set a random roomName on app bootup? eg. taco-central or something
-      waitingForServer: false,
-
-      customRoom: false,
-      passwordEnabled: true, // TODO
-      password: '',
       shareChoice: this.shareChoices.SECRET_LINK,
+      password: '',
+    };
+
+    this.state = {
+      customRoom: false,
+      waitingForServer: false,
+      validName: false,
+      roomNameTouched: false, // disable placeholder animation etc. if touched
+      customization: this.defaultCustomizationState,
     };
     this.stateBuffer = this.state;
     this.updateState = this.updateState.bind(this);
     this.handleShareChoice = this.handleShareChoice.bind(this);
     this.toggleCustomRoomForm = this.toggleCustomRoomForm.bind(this);
     this.resetCustomization = this.resetCustomization.bind(this);
+    this.roomNameTouched = this.roomNameTouched.bind(this);
   }
 
   updateState(changes, buffer = this.stateBuffer) {
@@ -54,13 +58,21 @@ class RoomSetup extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    if (!this.state.validName) {
+    if (this.stateBuffer.customRoom && !this.stateBuffer.validName) {
+      const invalidNameMessage = '😣 Room name must only contain letters, hyphen, underscore or numbers';
+      const emptyNameMessage = 'Room Name is empty 😕';
+      SupremeToaster.show({
+        intent: Intent.WARNING,
+        message: !this.stateBuffer.customization.roomName ? emptyNameMessage : invalidNameMessage,
+        timeout: 4000,
+      });
       return;
     }
-    const { roomName, passwordEnabled, password } = this.state;
+
+    const { customization, customRoom } = this.stateBuffer;
     this.updateState({ waitingForServer: { $set: true } });
-    this.props.createRoom(roomName, passwordEnabled, password).then(
-      ({ createdRoomName, roomSecret }) => {
+    this.props.createRoom(customRoom ? customization : null).then(
+      ({ createdRoomName, roomSecret, passwordEnabled }) => {
         this.updateState({ waitingForServer: { $set: false } });
         Meteor.setTimeout(() => {
           SupremeToaster.show({
@@ -88,34 +100,38 @@ class RoomSetup extends Component {
     const namePattern = /^[ @a-zA-Z0-9_-]+$/;
 
     this.updateState({
-      roomName: { $set: candidateName },
+      customization: {
+        roomName: { $set: candidateName },
+      },
       validName: { $set: namePattern.test(candidateName) },
     });
+    this.roomNameTouched();
   }
 
   handleShareChoice(event) {
     this.updateState({
-      shareChoice: { $set: event.target.value },
+      customization: { shareChoice: { $set: event.target.value } },
     });
   }
 
   handlePasswordChange(event) {
     this.updateState({
-      password: { $set: event.target.value },
+      customization: { password: { $set: event.target.value } },
     });
   }
 
   resetCustomization() {
     this.updateState({
       customRoom: { $set: false },
-      password: { $set: '' },
-      shareChoice: { $set: this.shareChoices.SECRET_LINK },
+      validName: { $set: false },
+      roomNameTouched: { $set: false },
+      customization: { $set: this.defaultCustomizationState },
     });
   }
 
   toggleCustomRoomForm(event) {
-    event.preventDefault();
-    if (this.state.customRoom) {
+    event.preventDefault(); // remove this.
+    if (this.stateBuffer.customRoom) {
       this.resetCustomization();
     } else {
       this.updateState({
@@ -124,41 +140,56 @@ class RoomSetup extends Component {
     }
   }
 
+  roomNameTouched() {
+    if (this.stateBuffer.roomNameTouched) return;
+    this.updateState({
+      roomNameTouched: { $set: true },
+    });
+  }
+
   render() {
     // sexy form goes here. learn some styling yo!
+
+    const { roomNameTouched, validName, customization } = this.state;
     return (
       <div className="roomSetup">
         <form onSubmit = {this.handleSubmit.bind(this)}>
-          <label className="pt-label" htmlFor="roomName">Room Name</label>
-          <input className="pt-input" type="text" id="roomName"
-            placeholder=""
-            value={this.state.roomName}
-            onChange={this.handleNameChange.bind(this)} />
+          <fieldset disabled={this.state.waitingForServer}>
           <div>
-          <br/>
-          <button onClick={this.toggleCustomRoomForm}>Customize</button>
-          <Collapse isOpen={this.state.customRoom} >
-            <div>
-              <RadioGroup
-                      label="How will others join this room?"
-                      onChange={this.handleShareChoice}
-                      selectedValue={this.state.shareChoice}>
-                      <Radio label="With a secret link that I share with them"
-                        value={this.shareChoices.SECRET_LINK} />
-                      <Radio label="Those who know the password may enter"
-                        value={this.shareChoices.PASSWORD} />
-              </RadioGroup>
-            </div>
-            <Collapse isOpen={this.state.shareChoice === this.shareChoices.PASSWORD} >
-              <label className="pt-label" htmlFor="roomPassword">Password</label>
-                <input className="pt-input" type="password" id="roomPassword"
-                  value={this.state.password}
-                  onChange={this.handlePasswordChange.bind(this)}/>
+            <button onClick={this.toggleCustomRoomForm}>Customize</button>
+            <Collapse isOpen={this.state.customRoom} >
+              <div>
+                <label className="pt-label" htmlFor="roomName">
+                  Room Name
+                  <span className="pt-text-muted"> </span>
+                </label>
+                <input className="pt-input" type="text" id="roomName"
+                  placeholder=""
+                  style={{ color: roomNameTouched && !validName ? '#ff2d00' : 'inherit' }}
+                  value={customization.roomName}
+                  onChange={this.handleNameChange.bind(this)} />
+                <RadioGroup
+                        label="How will others join this room?"
+                        onChange={this.handleShareChoice}
+                        selectedValue={customization.shareChoice}>
+                        <Radio label="With a secret link that I share with them"
+                          value={this.shareChoices.SECRET_LINK} />
+                        <Radio label="Those who know the password may enter"
+                          value={this.shareChoices.PASSWORD} />
+                </RadioGroup>
+              </div>
+              <Collapse
+                isOpen={customization.shareChoice === this.shareChoices.PASSWORD} >
+                <label className="pt-label" htmlFor="roomPassword">Password</label>
+                  <input className="pt-input" type="password" id="roomPassword"
+                    value={customization.password}
+                    onChange={this.handlePasswordChange.bind(this)}/>
+              </Collapse>
             </Collapse>
-          </Collapse>
           </div>
 
           <button type="submit">Create Room!</button>
+         </fieldset>
         </form>
       </div>
     );

@@ -87,6 +87,7 @@
     "redux": "^3.6.0",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.1.0",
+    "sentencer": "^0.1.5",
     "y-array": "^10.0.6",
     "y-indexeddb": "^8.1.9",
     "y-map": "^10.0.5",

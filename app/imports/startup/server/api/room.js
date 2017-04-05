@@ -3,18 +3,25 @@ import { check, Match } from 'meteor/check';
 import bcrypt from 'bcrypt';
 import _ from 'lodash';
 import { moment as Moment } from 'meteor/momentjs:moment';
-// import jwt from 'jwt-simple';
+import jwt from 'jwt-simple';
 import { Random } from 'meteor/random';
+
+import sentencer from 'sentencer';
 
 import { Rooms } from '../../../collections/common';
 import N from '../../../modules/NuveClient/';
 
-const { private: { saltRounds, Nuve } } = Meteor.settings;
+const { private: { saltRounds, Nuve, JWTsecret, JWTalgo, tokenVersion } } = Meteor.settings;
 
 N.API.init(Nuve.serviceId, Nuve.serviceKey, Nuve.host);
 
 const hashPassword = Meteor.wrapAsync(bcrypt.hash);
 const comparePassword = Meteor.wrapAsync(bcrypt.compare);
+
+function validTokenPayload(payload, roomDocument) {
+  const now = (new Moment()).toDate().getTime();
+  return (payload.v === tokenVersion && payload.exp > now && roomDocument._id === payload.roomId);
+}
 
 // Common error handling
 const PASS_TO_CLIENT = 'PASS_TO_CLIENT';
@@ -22,50 +29,86 @@ const GENERIC_ERROR_MESSAGE = 'Something went wrong... ¯\\(°_o)/¯';
 
 Meteor.methods({
 
-  createRoom(roomInfo) {
-    check(roomInfo, Object); // matches any object recieved for now. add validation later
+  createRoom(options) {
+    check(options, Match.Maybe(Object));
 
-    let { roomName } = roomInfo;
-    roomName = roomName.trim();
-
-    roomName = roomName.split('').map((char) => {
-      if (char === ' ') {
-        return '-';
-      }
-      return char;
-    }).join('');
-
+    const shareChoices = {
+      SECRET_LINK: 'SECRET_LINK',
+      PASSWORD: 'PASSWORD',
+    };
+    const defaultOptions = {
+      roomName: '',
+      shareChoice: shareChoices.SECRET_LINK,
+      password: '',
+    };
+    const roomSpecification = options || defaultOptions;
     // error format : throw new Meteor.Error(errorTopic,reason, passToClient)
     const errorTopic = 'Failed to create Room';
 
-    try {
+    const checkIfValidRoomName = (roomName) => {
       const namePattern = /^[ @a-z0-9_-]+$/;
       if (!namePattern.test(roomName)) {
-        throw new Meteor.Error(errorTopic, 'Invalid Room Name ಠ_ಠ', PASS_TO_CLIENT);
+        throw new Meteor.Error(errorTopic, 'Invalid Room Name');
+      }
+    };
+
+    try {
+      const validSpecification = Match.test(roomSpecification, {
+        roomName: Match.Where((candidateName) => {
+          check(candidateName, String);
+          return candidateName.length < 50;
+        }),
+        shareChoice: Match.Where((choice) => {
+          check(choice, String);
+          return choice === shareChoices.SECRET_LINK || choice === shareChoices.PASSWORD;
+        }),
+        password: String,
+      });
+
+      if (!validSpecification) {
+        throw new Meteor.Error(errorTopic, 'Invalid params for creating room', PASS_TO_CLIENT);
       }
 
-      const { passwordEnabled } = roomInfo;
-      const password = passwordEnabled ? hashPassword(roomInfo.password, saltRounds) : null;
+      let { roomName } = roomSpecification;
+      if (!roomName) { // generate randomly
+        const template = '{{ adjective }}-{{ adjective }}-{{ nouns }}';
+        roomName = sentencer.make(template);
+      }
+      roomName = roomName.trim();
+      roomName = roomName.split('').map((char) => {
+        if (char === ' ') {
+          return '-';
+        }
+        return char;
+      }).join('');
+      checkIfValidRoomName(roomName);
+
+
+      checkIfValidRoomName(roomName);
+
+      const passwordEnabled = roomSpecification.shareChoice === shareChoices.PASSWORD;
+      const password = passwordEnabled ?
+                        hashPassword(roomSpecification.password, saltRounds) : null;
+
+      const roomSecret = !passwordEnabled ? Random.secret(20) : null;
 
       const now = new Moment();
-      const validTill = now.add(7, 'days').toDate().getTime();
-      const roomSecret = Random.secret(14);
-
-      const response = N.API.createRoom(roomName, { p2p: true });
+      const nuveResponse = N.API.createRoom(roomName, { p2p: true });
 
       const roomDocument = {
-        _id: response.data._id,
+        _id: nuveResponse.data._id,
         NuveServiceName: Nuve.serviceName,
         owner: Meteor.userId() || null,
-        ...roomInfo,
         roomName,
+        passwordEnabled,
         roomSecret,
-        userTokens: [],
         password,
+        userTokens: [],
         participants: [],
         createdAt: now.toDate().getTime(),
-        validTill,
+        validTill: now.add(4, 'days').toDate().getTime(),
       };
+
       if (Rooms.findOne({ roomName })) {
         throw new Meteor.Error(errorTopic, 'Room with same name exists (；一_一)', PASS_TO_CLIENT);
       }
@@ -75,10 +118,19 @@ Meteor.methods({
         throw new Meteor.Error(errorTopic, 'Failed to create Room');
       }
 
-      return {
+      const response = {
         createdRoomName: roomName,
         roomSecret,
+        passwordEnabled,
+        roomAccessToken: passwordEnabled ? jwt.encode({
+          v: tokenVersion,
+          iat: roomDocument.createdAt,
+          exp: roomDocument.validTill,
+          roomId,
+        }, JWTsecret, JWTalgo) : null,
       };
+      console.log(response);
+      return response;
     } catch (exception) {
       console.log(exception);
       const { details, reason } = exception;
@@ -101,7 +153,7 @@ Meteor.methods({
     }
     const existingUser = _.find(room.userTokens, { userToken });
     // be sure to filter for only relevent fields. dont send the whole doc lol.
-    const info = _.pick(room, ['passwordEnabled']);
+    const info = _.pick(room, ['passwordEnabled', '_id']);
 
     const roomInfo = {
       ...info,
@@ -110,68 +162,92 @@ Meteor.methods({
     return roomInfo;
   },
 
-  // returns null or roomSecret(string)
+  // returns null or roomAccessToken(string)
   authenticatePassword(roomName, password) {
     check(roomName, String);
     check(password, String);
 
-    const room = Rooms.findOne({ roomName });
-    if (!room) {
+    const roomDocument = Rooms.findOne({ roomName });
+    if (!roomDocument) {
       throw new Meteor.Error('Room not found');
-    } else if (comparePassword(password, room.password)) {
-      return room.roomSecret;
+    } else if (comparePassword(password, roomDocument.password)) {
+      return jwt.encode({
+        v: tokenVersion,
+        iat: (new Moment()).toDate().getTime(),
+        exp: roomDocument.validTill,
+        roomId: roomDocument._id,
+      }, JWTsecret, JWTalgo);
     }
     return null;
   },
 
   // ughh improve this code 😣
-  joinRoom(roomName, roomSecret, name, textAvatarColor, userToken) {
-    check(roomName, String);
-    check(roomSecret, String);
-    /* eslint-disable new-cap*/
+  joinRoom(roomId, credentials, name, textAvatarColor) {
+    check(roomId, String);
+    check(credentials, Match.ObjectIncluding({
+      roomSecret: String,
+      roomAccessToken: String,
+      userToken: String,
+    }));
+
+    const errorTopic = 'Failed to join Room';
+    console.log(roomId, credentials, name, textAvatarColor);
+
     check(name, Match.Maybe(String));
     check(textAvatarColor, Match.Maybe(String)); // add check for allowed colors
-    check(userToken, Match.Maybe(String));
-    /* eslint-enable new-cap */
-
-    if (!userToken) {
-      if (!name || !textAvatarColor) {
-        throw new Meteor.Error('missing user name');
-      }
-    }
 
     const room = Rooms.findOne({
-      roomName,
-      roomSecret,
+      _id: roomId,
     });
-    const errorTopic = 'Failed to join Room';
+
     if (!room) {
       throw new Meteor.Error(errorTopic, 'Room not found');
+    }
+
+
+    if (!room.passwordEnabled) {
+      if (room.roomSecret !== credentials.roomSecret) {
+        throw new Meteor.Error(errorTopic, 'Unauthorized');
+      }
+    } else {
+      const payload = jwt.decode(credentials.roomAccessToken, JWTsecret);
+      if (!validTokenPayload(payload, room)) {
+        throw new Meteor.Error(errorTopic, 'Unauthorized');
+      }
     }
 
     const user = Meteor.user();
     let userId = Meteor.userId();
 
-    // TODO: add check to only allow access based on loginService if configured so in room.
+    const existingUser = _.find(room.userTokens, { userToken: credentials.userToken }) ||
+      (user ? _.find(room.userTokens, { userId: user._id }) : null);
+
+    if (!existingUser) {
+      if (!name || !textAvatarColor) {
+        throw new Meteor.Error('missing name and avatar color');
+      }
+    }
+    // TODO: add check to only allow access based on specific loginService if configured so in room.
 
     if (!user) { // for anonynymous users
       userId = Random.id(16);
       this.setUserId(userId);
     }
-    const computeInitials = (fullName) => {
-      // first two letters of the name or first letters of first and last word.
-      const words = fullName.toUpperCase().trim().split(' ');
-      let initials = '';
-      if (words.length > 1) {
-        initials = words[0][0] + words[words.length - 1][0];
-      } else if (words.length === 1 && words[0] !== '') {
-        initials = words[0][0];
-        if (words[0][1]) initials += words[0][1];
-      }
-      return initials;
-    };
+
 
     const generateProfile = () => {
+      const computeInitials = (fullName) => {
+        // first two letters of the name or first letters of first and last word.
+        const words = fullName.toUpperCase().trim().split(' ');
+        let initials = '';
+        if (words.length > 1) {
+          initials = words[0][0] + words[words.length - 1][0];
+        } else if (words.length === 1 && words[0] !== '') {
+          initials = words[0][0];
+          if (words[0][1]) initials += words[0][1];
+        }
+        return initials;
+      };
       let profile = {};
       if (user) {
         profile = user.profile;
@@ -188,9 +264,8 @@ Meteor.methods({
     };
 
     const result = N.API.createToken(room._id, userId, 'presenter');
-    const roomToken = result.content;
-    const existingUser = _.find(room.userTokens, { userToken }) ||
-      (user ? _.find(room.userTokens, { userId: user._id }) : null);
+    const erizoToken = result.content;
+
 
     if (!existingUser) {
       const profile = generateProfile();
@@ -201,14 +276,14 @@ Meteor.methods({
       Rooms.update(room._id, { $push: { participants: profile, userTokens: newUserToken } });
 
       return {
-        roomToken,
+        erizoToken,
         userId,
         newUserToken: newUserToken.userToken,
       };
     }
 
     return {
-      roomToken,
+      erizoToken,
       userId: existingUser.userId,
       newUserToken: existingUser.userToken, // existing token
     };
@@ -217,17 +292,36 @@ Meteor.methods({
 });
 
 
-Meteor.publish('room.info', (roomName, roomSecret) => {
+Meteor.publish('room.info', (roomName, credentials) => {
   check(roomName, String);
-  check(roomSecret, String);
+  check(credentials, Match.ObjectIncluding({
+    roomSecret: String,
+    roomAccessToken: String,
+  }));
 
-  return Rooms.find({ roomName, roomSecret }, {
+  const roomCursor = Rooms.find({ roomName }, {
     fields: {
       roomName: 1,
       participants: 1,
+      passwordEnabled: 1,
+      roomSecret: 1,
       comms: 1,
       createdAt: 1,
     },
     limit: 1,
   });
+
+  const roomDocument = roomCursor.fetch()[0];
+  console.log(roomDocument, credentials);
+  if (!roomDocument) throw new Meteor.Error('Room document not found');
+  if (roomDocument.passwordEnabled) {
+    if (!credentials.roomAccessToken) throw new Meteor.Error('Token Required');
+    const payload = jwt.decode(credentials.roomAccessToken, JWTsecret);
+    if (validTokenPayload(payload, roomDocument)) {
+      console.log(validTokenPayload(payload, roomDocument));
+      return roomCursor;
+    }
+  } else if (roomDocument.roomSecret === credentials.roomSecret) return roomCursor;
+
+  return [];
 });

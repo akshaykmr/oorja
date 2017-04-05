@@ -10,7 +10,7 @@ export default class testErizo extends Component {
   }
   componentDidMount() {
     var localStream = Erizo.Stream({ audio: true, video: true, data: true });
-    var obj = { token: localStorage.getItem(`roomToken:${this.roomName}`) };
+    var obj = { token: localStorage.getItem(`erizoToken:${this.roomName}`) };
     var room = Erizo.Room(obj);
     window.room = room;
 

@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 import { browserHistory } from 'react-router';
 import { connect } from 'react-redux';
+import update from 'immutability-helper';
 import _ from 'lodash';
 import { moment } from 'meteor/momentjs:moment';
 
@@ -19,8 +20,8 @@ import Room from '../Room';
 
 import { Rooms as MongoRoom } from '../../../collections/common';
 
-import { deleteSecret, getRoomInfo, storeSecret,
-  deleteRoomUserId, deleteRoomToken, joinRoom } from '../../actions/roomConfiguration';
+import { getRoomInfo, deleteRoomSecret, storeRoomSecret, deleteRoomUserId, deleteErizoToken,
+        deleteRoomAccessToken, joinRoom } from '../../actions/roomConfiguration';
 
 import './door.scss';
 
@@ -32,14 +33,17 @@ class Door extends Component {
     const roomName = this.props.params.roomName;
     this.roomName = roomName;
     this.roomSecret = localStorage.getItem(`roomSecret:${roomName}`);
+    this.roomAccessToken = localStorage.getItem(`roomAccessToken:${roomName}`);
     this.roomUserToken = localStorage.getItem(`roomUserToken:${roomName}`);
     this.roomUserId = localStorage.getItem(`roomUserId:${roomName}`);
-    this.props.deleteRoomToken();
+    this.props.deleteErizoToken();
     this.urlRoomSecret = props.location.query.secret;
 
     // if secret exists in url delete storedSecret
     if (this.urlRoomSecret) {
-      this.props.deleteSecret(roomName);
+      this.props.deleteRoomSecret(roomName);
+      this.props.storeRoomSecret(roomName, this.urlRoomSecret);
+      this.roomSecret = this.urlRoomSecret;
     }
 
     this.stages = {
@@ -55,21 +59,37 @@ class Door extends Component {
       roomInfo: null,
       stage: this.stages.LOADING,
       initialized: false,
+      cleanRun: false,
     };
+
+    this.passwordSuccess = this.passwordSuccess.bind(this);
+    this.stateBuffer = this.state;
+  }
+
+  updateState(changes, buffer = this.stateBuffer) {
+    this.stateBuffer = update(buffer, changes);
+    this.setState(this.stateBuffer);
   }
 
   passwordSuccess() {
-    this.roomSecret = localStorage.getItem(`roomSecret:${this.roomName}`);
+    this.roomAccessToken = localStorage.getItem(`roomAccessToken:${this.roomName}`);
     this.gotoStage(this.stages.INITIALIZING);
   }
 
-  componentWillMount() {
-    document.body.classList.add('room-container');
-    // get room info
+  beginEntranceProcedure(getFreshAccessToken = false) {
+    if (getFreshAccessToken) {
+      this.props.deleteRoomAccessToken();
+      this.updateState({
+        cleanRun: { $set: true },
+      });
+    }
+
     const self = this;
     (async function setRoomInfo() {
+      // get room info
       const response = await self.props.getRoomInfo(self.roomName, self.roomUserToken);
       const roomInfo = response.payload;
+      self.roomId = roomInfo ? roomInfo._id : null;
       if (!roomInfo) {
         // room not found
         SupremeToaster.show({
@@ -84,37 +104,38 @@ class Door extends Component {
           timeout: 6000,
         });
         browserHistory.push('/');
-      } else if (!self.urlRoomSecret && !self.roomSecret) {
-        // secret not found: check if passwordEnabled and fetch secret through password.
-        // room can be only opened with secret,
+        return;
+      } else if (!roomInfo.passwordEnabled && !self.roomSecret) {
         // fail? either user can create a new room or get a new shareLink.
-        if (roomInfo.passwordEnabled) {
-          SupremeToaster.show({
-            message: 'This room is password protected (°ロ°)☝',
-            intent: Intent.PRIMARY,
-            timeout: 3000,
-          });
-          // set state for password prompt.
-          self.gotoStage(self.stages.PASSWORD_PROMPT);
-        } else {
-          SupremeToaster.show({
-            message: `Please enter the complete link to enter the room.
-            Or ask someone to send you a new one.`,
-            intent: Intent.WARNING,
-            timeout: 10000,
-          });
-          browserHistory.push('/');
-        }
+        SupremeToaster.show({
+          message: `Please enter the complete link to enter the room.
+          Or ask someone to send you a new one.`,
+          intent: Intent.WARNING,
+          timeout: 10000,
+        });
+        browserHistory.push('/');
+        return;
+      } else if (roomInfo.passwordEnabled && !self.roomAccessToken) {
+        SupremeToaster.show({
+          message: 'This room is password protected (°ロ°)☝',
+          intent: Intent.PRIMARY,
+          timeout: 3000,
+        });
+        self.gotoStage(self.stages.PASSWORD_PROMPT);
       } else {
         if (!roomInfo.existingUser) {
           self.roomUserToken = null;
           self.roomUserId = null;
-          self.props.deleteRoomToken();
           self.props.deleteRoomUserId();
         }
         self.gotoStage(self.stages.INITIALIZING);
       }
     }());
+  }
+
+  componentWillMount() {
+    document.body.classList.add('room-container');
+    this.beginEntranceProcedure();
   }
 
   isRoomReady() {
@@ -125,17 +146,18 @@ class Door extends Component {
 
   gotoStage(stage) {
     const { INITIALIZING, GETTING_READY, SHOW_TIME } = this.stages;
-    const { roomName, roomSecret, roomUserId } = this;
-    // const previousStage = this.state.stage;
+    const { roomName, roomSecret, roomUserId, roomAccessToken } = this;
+    // const previousStage = this.stateBuffer.stage;
     // custom action before switching to stage
     switch (stage) {
       case GETTING_READY:
         if (roomUserId) {
-          const room = MongoRoom.findOne();
+          const room = MongoRoom.findOne({ _id: this.roomId });
+          if (!room) console.error('room not foind');
           if (_.find(room.participants, { userId: roomUserId })) {
             if (this.isRoomReady()) {
               this.gotoStage(this.stages.LOADING);
-              this.props.joinRoom()
+              this.props.joinRoom(this.roomId)
                 .then(() => {
                   this.gotoStage(SHOW_TIME);
                 });
@@ -150,14 +172,13 @@ class Door extends Component {
         localStorage.setItem(`roomReady:${roomName}`, moment().toISOString());
         this.roomUserId = localStorage.getItem(`roomUserId:${roomName}`);
         this.roomUserToken = localStorage.getItem(`roomUserToken:${roomName}`);
-        this.roomToken = localStorage.getItem(`roomToken:${roomName}`);
+        this.erizoToken = localStorage.getItem(`erizoToken:${roomName}`);
         break;
       default: break;
     }
 
-    this.setState({
-      ...this.state,
-      stage,
+    this.updateState({
+      stage: { $set: stage },
     });
 
     const self = this;
@@ -169,31 +190,48 @@ class Door extends Component {
           self.roomInfoSubscriptionHandle = Meteor.subscribe(
             'room.info',
             roomName,
-            roomSecret
+            {
+              roomAccessToken: roomAccessToken || '',
+              roomSecret: roomSecret || '',
+            }
           );
           await self.roomInfoSubscriptionHandle.readyPromise();
-          const updateRoomInfo = (roomInfo) => {
-            self.setState({
-              ...this.state,
-              roomInfo,
-            });
-          };
+          const roomInfo = MongoRoom.findOne({ _id: self.roomId });
+          self.updateState({
+            roomInfo: { $set: roomInfo },
+          });
+          if (!roomInfo) {
+            console.error('room info not found');
+            // possible reasons
+            // - could be that room link is faulty (invalid secret)
+            // - tokens are faulty
+            // do a clean run once, if not fixed redirect to /.
+            if (self.stateBuffer.cleanRun) {
+              SupremeToaster.show({
+                message: 'Could not enter room. Please check your link or try later',
+                intent: Intent.WARNING,
+                timeout: 7000,
+              });
+              browserHistory.push('/');
+              return;
+            }
+            self.beginEntranceProcedure(true);
+            return;
+          }
+
           // set an observer to sync roomInfo changes to the state.
           self.observeRoomInfo = MongoRoom.find({ roomName }).observe({
-            added: (roomInfo) => {
-              // should run only once
-              updateRoomInfo(roomInfo);
-            },
             changed: (latestRoomInfo) => {
-              updateRoomInfo(latestRoomInfo);
+              self.updateState({
+                roomInfo: { $set: latestRoomInfo },
+              });
             },
             removed: () => {
               browserHistory.push('/');
             },
           });
-          self.setState({
-            ...self.state,
-            initialized: true,
+          self.updateState({
+            initialized: { $set: true },
           });
           self.gotoStage(self.stages.GETTING_READY);
         }());
@@ -205,7 +243,7 @@ class Door extends Component {
   componentWillUnmount() {
     document.body.classList.remove('room-container');
     // cleanup
-    if (this.state.initialized) {
+    if (this.stateBuffer.initialized) {
       this.roomInfoSubscriptionHandle.stop();
       this.observeRoomInfo.stop();
     }
@@ -218,10 +256,11 @@ class Door extends Component {
       case PASSWORD_PROMPT:
         return <PasswordPrompt
                   roomName = {this.roomName}
-                  onSuccess = {this.passwordSuccess.bind(this)}
+                  onSuccess = {this.passwordSuccess}
                 />;
       case GETTING_READY:
         return <GettingReady
+        roomId={this.roomId}
         onReady={() => { this.gotoStage(SHOW_TIME); }}
         isRoomReady={this.isRoomReady()}
         roomUserId={this.roomUserId}/>;
@@ -238,22 +277,24 @@ class Door extends Component {
 Door.propTypes = {
   params: React.PropTypes.object,
   location: React.PropTypes.object,
-  deleteSecret: React.PropTypes.func.isRequired,
+  storeRoomSecret: React.PropTypes.func.isRequired,
+  deleteRoomSecret: React.PropTypes.func.isRequired,
   getRoomInfo: React.PropTypes.func.isRequired,
-  storeSecret: React.PropTypes.func.isRequired,
   deleteRoomUserId: React.PropTypes.func.isRequired,
-  deleteRoomToken: React.PropTypes.func.isRequired,
+  deleteErizoToken: React.PropTypes.func.isRequired,
+  deleteRoomAccessToken: React.PropTypes.func.isRequired,
   joinRoom: React.PropTypes.func.isRequired,
 };
 
 export default connect(
   null,
   {
-    deleteSecret,
+    storeRoomSecret,
+    deleteRoomSecret,
     getRoomInfo,
-    storeSecret,
     deleteRoomUserId,
-    deleteRoomToken,
+    deleteErizoToken,
+    deleteRoomAccessToken,
     joinRoom,
   }
 )(Door);

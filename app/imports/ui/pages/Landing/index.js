@@ -7,7 +7,7 @@ const Landing = () => (
   <div className="landing">
     <section className="kickstart">
       <div className="tagline">
-        Simple Secure Meetings
+        finish this project already
       </div>
       <div className="room-form">
         <RoomSetup />

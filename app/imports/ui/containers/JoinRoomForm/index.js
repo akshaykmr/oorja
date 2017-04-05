@@ -110,7 +110,7 @@ class JoinRoomForm extends Component {
       ...this.state,
       waiting: true,
     });
-    this.props.joinRoom(name, textAvatarColor).then(
+    this.props.joinRoom(this.props.roomId, name, textAvatarColor).then(
       () => {
         this.setState({
           ...this.state,
@@ -201,6 +201,7 @@ class JoinRoomForm extends Component {
 JoinRoomForm.propTypes = {
   processComplete: React.PropTypes.func.isRequired,
   joinRoom: React.PropTypes.func.isRequired,
+  roomId: React.PropTypes.string.isRequired,
   roomUserId: React.PropTypes.string,
 };
 
