@@ -27,19 +27,6 @@ $avatar-size: 50px;
 .streamBox {
   padding-left: 5px;
   padding-right: 5px;
-  .avatar {
-    color: #ffffff;
-    position: relative;
-    top: 0px;
-    width: $avatar-size;
-    height: $avatar-size;
-    line-height: $avatar-size;
-    text-align: center;
-    border-radius: 50%;
-    background-size:     cover;
-    background-repeat:   no-repeat;
-    background-position: center center;   
-  } 
 }
 
 .streamBox-enter {

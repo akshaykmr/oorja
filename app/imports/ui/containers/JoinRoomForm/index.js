@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+// import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import _ from 'lodash';
+import classNames from 'classnames';
 // import ImageLoader from 'react-imageloader';
 
 
@@ -11,7 +12,9 @@ import { Tracker } from 'meteor/tracker';
 import LoginWithService from '../../components/LoginWithService/';
 import { joinRoom } from '../../actions/roomConfiguration';
 
-import { Rooms as MongoRoom } from '../../../collections/common';
+import Avatar from '../../components/room/Avatar';
+
+
 import './JoinRoomForm.scss';
 
 // inputs user name and joins the room.
@@ -27,9 +30,8 @@ class JoinRoomForm extends Component {
     this.initialState = this.initialState.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.room = MongoRoom.findOne();
     this.state = this.initialState();
-    this.existingUser = _.find(this.room.participants, { userId: this.props.roomUserId });
+    this.existingUser = _.find(this.props.roomInfo.participants, { userId: this.props.roomUserId });
   }
 
   getRandomColor() {
@@ -110,7 +112,7 @@ class JoinRoomForm extends Component {
       ...this.state,
       waiting: true,
     });
-    this.props.joinRoom(this.props.roomId, name, textAvatarColor).then(
+    this.props.joinRoom(this.props.roomInfo._id, name, textAvatarColor).then(
       () => {
         this.setState({
           ...this.state,
@@ -122,7 +124,7 @@ class JoinRoomForm extends Component {
   }
 
   render() {
-    const { name, loggedIn, picture, waiting } = this.state;
+    const { name, loggedIn, picture, waiting, textAvatarColor } = this.state;
     const inputAttr = {
       disabled: loggedIn || !!this.existingUser,
       value: name,
@@ -131,27 +133,20 @@ class JoinRoomForm extends Component {
       placeholder: 'Your Name...',
     };
 
-    const textAvatar = () => {
-      if (!name || picture) return null;
-      // first two letters of the name or first letters of first and last word.
-      const words = name.toUpperCase().trim().split(' ');
-      let initials = '';
-      if (words.length > 1) {
-        initials = words[0][0] + words[words.length - 1][0];
-      } else if (words.length === 1 && words[0] !== '') {
-        initials = words[0][0];
-        if (words[0][1]) initials += words[0][1];
-      }
+    const renderAvatar = () => {
+      const avatarStyle = {
+        opacity: (!picture && !name) ? 0 : 100,
+      };
 
       return (
-        <div className='textAvatar'
-        style={{ backgroundColor: this.state.textAvatarColor }}>
-          {initials}
-        </div>
+        <Avatar
+          name={name}
+          picture={picture}
+          textAvatarColor={textAvatarColor}
+          avatarStyle={avatarStyle}
+        />
       );
     };
-
-    const avatar = picture ? <img className="avatar" src={picture} alt=""/> : null;
 
     const buttonAttr = {
       disabled: !name || waiting,
@@ -159,36 +154,21 @@ class JoinRoomForm extends Component {
       onSubmit: this.handleSubmit,
     };
 
-    const loginContainerClasses = () => {
-      let classes = '';
-      if (!loggedIn && name) classes += ' blur';
-      if (this.existingUser) classes += ' hidden';
-      return classes;
-    };
+    const loginContainerClasses = classNames({
+      blur: !loggedIn && name,
+      hidden: this.existingUser,
+    });
+
     return (
       <div className='JoinRoomForm'>
       <form onSubmit={this.handleSubmit}>
         <div className="interactiveInput">
-          <ReactCSSTransitionGroup
-            transitionName="avatar"
-            transitionAppear={true}
-            transitionAppearTimeout={2000}
-            transitionEnterTimeout={2000}
-            transitionLeaveTimeout={300}>
-            {avatar}
-          </ReactCSSTransitionGroup>
-          <ReactCSSTransitionGroup
-            transitionName="textAvatar"
-            transitionEnterTimeout={300}
-            transitionLeaveTimeout={100}>
-            {textAvatar()}
-          </ReactCSSTransitionGroup>
-
+          {renderAvatar()}
           <input type="text" {...inputAttr}/>
         </div>
 
         <LoginWithService
-          extraClasses={loginContainerClasses()} />
+          extraClasses={loginContainerClasses} />
         <div className="joinButtonWrapper">
           <button {...buttonAttr} type="submit">Join the Room !</button>
         </div>
@@ -201,7 +181,7 @@ class JoinRoomForm extends Component {
 JoinRoomForm.propTypes = {
   processComplete: React.PropTypes.func.isRequired,
   joinRoom: React.PropTypes.func.isRequired,
-  roomId: React.PropTypes.string.isRequired,
+  roomInfo: React.PropTypes.object.isRequired,
   roomUserId: React.PropTypes.string,
 };
 

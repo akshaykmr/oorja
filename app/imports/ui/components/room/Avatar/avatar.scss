@@ -1,0 +1,14 @@
+$preview-height: 50px;
+
+.avatar {
+  height: $preview-height;
+  width: $preview-height;
+  border-radius: 50%;
+  background-size:     cover;
+  background-repeat:   no-repeat;
+  background-position: center center; 
+  line-height: $preview-height; // vertical align text in a div :D
+  text-align: center;
+  color: #ffffff;
+  transition: background-color 0.5s ease, opacity 0.3s ease;   
+}

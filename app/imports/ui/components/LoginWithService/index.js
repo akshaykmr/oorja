@@ -3,6 +3,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
+import classNames from 'classnames';
 
 import './LoginWithService.scss';
 
@@ -70,15 +71,15 @@ class LoginWithService extends Component {
     };
 
     return this.services.map(({ service, login }, index) => {
-      let classes = 'example loginButton';
-      if (loggedIn && loginService === service) {
-        classes += ' active';
-      }
-      if (waitingFor === service) {
-        classes += ' waiting';
-      }
+      const loginButtonClasses = classNames({
+        loginButton: true,
+        example: true,
+        active: loggedIn && loginService === service,
+        waiting: waitingFor === service,
+      });
+
       const button = (
-        <div key={index} className={classes} id={service}
+        <div key={index} className={loginButtonClasses} id={service}
           onClick={ loggedIn && loginService === service ? null : () => {
             setWaiting(service);
             login();

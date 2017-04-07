@@ -129,7 +129,6 @@ Meteor.methods({
           roomId,
         }, JWTsecret, JWTalgo) : null,
       };
-      console.log(response);
       return response;
     } catch (exception) {
       console.log(exception);
@@ -181,7 +180,7 @@ Meteor.methods({
     return null;
   },
 
-  // ughh improve this code 😣
+
   joinRoom(roomId, credentials, name, textAvatarColor) {
     check(roomId, String);
     check(credentials, Match.ObjectIncluding({
@@ -191,7 +190,6 @@ Meteor.methods({
     }));
 
     const errorTopic = 'Failed to join Room';
-    console.log(roomId, credentials, name, textAvatarColor);
 
     check(name, Match.Maybe(String));
     check(textAvatarColor, Match.Maybe(String)); // add check for allowed colors
@@ -312,13 +310,11 @@ Meteor.publish('room.info', (roomName, credentials) => {
   });
 
   const roomDocument = roomCursor.fetch()[0];
-  console.log(roomDocument, credentials);
   if (!roomDocument) throw new Meteor.Error('Room document not found');
   if (roomDocument.passwordEnabled) {
     if (!credentials.roomAccessToken) throw new Meteor.Error('Token Required');
     const payload = jwt.decode(credentials.roomAccessToken, JWTsecret);
     if (validTokenPayload(payload, roomDocument)) {
-      console.log(validTokenPayload(payload, roomDocument));
       return roomCursor;
     }
   } else if (roomDocument.roomSecret === credentials.roomSecret) return roomCursor;

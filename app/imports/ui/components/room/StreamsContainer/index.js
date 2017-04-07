@@ -4,6 +4,8 @@ import classNames from 'classnames';
 
 import { connect } from 'react-redux';
 
+import Avatar from '../Avatar';
+
 import uiConfig from '../constants/uiConfig';
 
 import './streamsContainer.scss';
@@ -16,15 +18,9 @@ class StreamsContainer extends Component {
   }
 
   renderUserStreamBox(connectedUser) {
-    const avatarStyle = {
-      backgroundImage: `url(${connectedUser.picture})`,
-      backgroundColor: connectedUser.textAvatarColor,
-    };
     return (
       <div className="streamBox" key={connectedUser.userId}>
-        <div className="avatar" style={avatarStyle}>
-          {connectedUser.picture ? '' : connectedUser.initials}
-        </div>
+        <Avatar user={connectedUser} />
       </div>
     );
   }

@@ -227,6 +227,7 @@ class Door extends Component {
               });
             },
             removed: () => {
+              console.error('room removed');
               browserHistory.push('/');
             },
           });
@@ -260,7 +261,7 @@ class Door extends Component {
                 />;
       case GETTING_READY:
         return <GettingReady
-        roomId={this.roomId}
+        roomInfo={this.state.roomInfo}
         onReady={() => { this.gotoStage(SHOW_TIME); }}
         isRoomReady={this.isRoomReady()}
         roomUserId={this.roomUserId}/>;

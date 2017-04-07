@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import update from 'immutability-helper';
 
+import Avatar from '../../../Avatar';
 import roomActivities from '../../../constants/roomActivities';
 
 import Y from '../../../../../../modules/Yjs';
@@ -143,7 +144,7 @@ class Chat extends Component {
     const message = {
       userId: this.props.roomAPI.getUserId(),
       //  TODO: timeStamp: this.props.roomAPI.timeStamp(),
-      text: chatInputValue,
+      text: chatInputValue.trim(),
     };
 
     const y = this.y;
@@ -171,18 +172,11 @@ class Chat extends Component {
       begining: !inContinuation,
     };
     const { user } = chatMessage;
-    const avatarStyle = {
-      backgroundImage: `url(${user.picture})`,
-      backgroundColor: user.textAvatarColor,
-    };
-
     // TODO: set a proper key.
     // Scroll chatbox on new message.
     return (
       <li className={classNames(bubbleClassNames)} key={index}>
-        <div className="avatar" style={avatarStyle}>
-          {user.picture ? '' : user.initials}
-        </div>
+        <Avatar user={user}/>
         {chatMessage.text}
       </li>
     );
