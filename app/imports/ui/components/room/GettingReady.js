@@ -5,7 +5,7 @@ import JoinRoomForm from '../../containers/JoinRoomForm';
 export default class GettingReady extends Component {
   render() {
     return (
-      <div>
+      <div className="page">
         <JoinRoomForm
           roomInfo={this.props.roomInfo}
           processComplete={this.props.onReady}

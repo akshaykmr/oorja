@@ -73,7 +73,7 @@ class LoginWithService extends Component {
     return this.services.map(({ service, login }, index) => {
       const loginButtonClasses = classNames({
         loginButton: true,
-        example: true,
+        buttonTransition: true,
         active: loggedIn && loginService === service,
         waiting: waitingFor === service,
       });
@@ -136,7 +136,7 @@ class LoginWithService extends Component {
         </div>
         <div className="button-container">
           <CSSTransitionGroup
-            transitionName="example"
+            transitionName="buttonTransition"
             transitionEnterTimeout={2000}
             transitionLeaveTimeout={0}>
               {this.loginButtons()}

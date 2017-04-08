@@ -26,6 +26,24 @@ $icon-spacing: 10px;
   padding: 8px;
   width: 6 * ($icon-size + $icon-spacing) ;
   margin: 0 auto;
+
+  .buttonTransition-enter {
+    opacity: 0.01;
+  }
+
+  .buttonTransition-enter.buttonTransition-enter-active {
+    opacity: 1;
+    transition: opacity 500ms ease-in;
+  }
+
+  .buttonTransition-leave {
+    opacity: 1;
+  }
+
+  .buttonTransition-leave.buttonTransition-leave-active {
+    opacity: 0.01;
+    transition: opacity 100ms ease-out;
+  }
 }
 
 
@@ -107,22 +125,4 @@ $icon-spacing: 10px;
     transform: translate3d(($icon-size + $icon-spacing)*6,0,0);
   }
 
-}
-
-.example-enter {
-  opacity: 0.01;
-}
-
-.example-enter.example-enter-active {
-  opacity: 1;
-  transition: opacity 500ms ease-in;
-}
-
-.example-leave {
-  opacity: 1;
-}
-
-.example-leave.example-leave-active {
-  opacity: 0.01;
-  transition: opacity 100ms ease-out;
 }

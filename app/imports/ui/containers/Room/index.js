@@ -388,8 +388,13 @@ class Room extends Component {
 
   render() {
     const { uiSize, streamContainerSize } = this.state;
+
+    const roomStyle = {
+      height: '100vh',
+      width: '100vw',
+    };
     return (
-      <div className='room'>
+      <div className='room page' style={roomStyle}>
         <StreamsContainer
           uiSize={uiSize}
           roomAPI={this.roomAPI}

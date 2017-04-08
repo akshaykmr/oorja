@@ -1,0 +1,34 @@
+// page transitions
+
+.page {
+  position: absolute;
+  width: 100vw;
+}
+
+
+.page-appear {
+  opacity: 0.01;
+}
+
+.page-appear.page-appear-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.page-enter {
+  opacity: 0.01;
+}
+
+.page-enter.page-enter-active {
+  opacity: 1;
+  transition: opacity ease-out 500ms;
+
+}
+.page-leave {
+  opacity: 1;
+}
+
+.page-leave.page-leave-active {
+  opacity: 0.01;
+  transition: opacity ease-out 600ms;
+}
