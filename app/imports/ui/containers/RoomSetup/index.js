@@ -155,10 +155,9 @@ class RoomSetup extends Component {
       <div className="roomSetup">
         <form onSubmit = {this.handleSubmit.bind(this)}>
           <fieldset disabled={this.state.waitingForServer}>
-          <div>
             <button onClick={this.toggleCustomRoomForm}>Customize</button>
             <Collapse isOpen={this.state.customRoom} >
-              <div>
+              <div style={{ padding: '5px' }}>
                 <label className="pt-label" htmlFor="roomName">
                   Room Name
                   <span className="pt-text-muted"> </span>
@@ -180,14 +179,14 @@ class RoomSetup extends Component {
               </div>
               <Collapse
                 isOpen={customization.shareChoice === this.shareChoices.PASSWORD} >
+                <div style={{ padding: '5px' }}>
                 <label className="pt-label" htmlFor="roomPassword">Password</label>
                   <input className="pt-input" type="password" id="roomPassword"
                     value={customization.password}
                     onChange={this.handlePasswordChange.bind(this)}/>
+                </div>
               </Collapse>
             </Collapse>
-          </div>
-
           <button type="submit">Create Room!</button>
          </fieldset>
         </form>
