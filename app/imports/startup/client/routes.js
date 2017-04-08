@@ -2,6 +2,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+import PropTypes from 'prop-types';
 
 // Redux related
 import { createStore, applyMiddleware } from 'redux';
@@ -22,6 +23,8 @@ import NotFound from '../../ui/pages/NotFound.js';
 
 // root reducer
 import rootReducer from '../../ui/reducers';
+
+React.PropTypes = PropTypes;
 
 const createStoreWithMiddleware = applyMiddleware(ReduxThunk, ReduxPromise)(createStore);
 

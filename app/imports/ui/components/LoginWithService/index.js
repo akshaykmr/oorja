@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup'
 
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
@@ -135,12 +135,12 @@ class LoginWithService extends Component {
           {this.loginInfo()}
         </div>
         <div className="button-container">
-          <ReactCSSTransitionGroup
+          <CSSTransitionGroup
             transitionName="example"
             transitionEnterTimeout={2000}
             transitionLeaveTimeout={0}>
               {this.loginButtons()}
-          </ReactCSSTransitionGroup>
+          </CSSTransitionGroup>
         </div>
       </div>
     );

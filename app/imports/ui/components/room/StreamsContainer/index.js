@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup'
 import classNames from 'classnames';
 
 import { connect } from 'react-redux';
@@ -37,14 +37,14 @@ class StreamsContainer extends Component {
       <div
         className={classNames(streamContainerClassNames)}
         style={{ height: streamContainerSize === uiConfig.LARGE ? '18%' : '60px' }}>
-        <ReactCSSTransitionGroup
+        <CSSTransitionGroup
             transitionName="streamBox"
             transitionAppear={true}
             transitionAppearTimeout={200}
             transitionEnterTimeout={1000}
             transitionLeaveTimeout={400}>
             {this.props.connectedUsers.map(this.renderUserStreamBox)}
-        </ReactCSSTransitionGroup>
+        </CSSTransitionGroup>
       </div>
     );
   }

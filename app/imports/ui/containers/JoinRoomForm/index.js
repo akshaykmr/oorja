@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-// import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import _ from 'lodash';
 import classNames from 'classnames';
 // import ImageLoader from 'react-imageloader';
