@@ -10,9 +10,12 @@ class Avatar extends Component {
     this.imageCurtainColor = 'floralwhite'; // bg color when Avatarimage is loading. should not be bright imo.
     this.loadImg = this.loadImg.bind(this);
 
+    const { user, picture } = props;
+
     this.state = {
       pictureReady: false,
       pictureError: false,
+      pictureSrc: (user && user.picture) || picture,
     };
   }
 
@@ -69,26 +72,36 @@ class Avatar extends Component {
     tryImage();
   }
 
+  handleImageState(pictureSrc = this.state.pictureSrc) {
+    if (!pictureSrc) return;
+    this.loadImg({ src: pictureSrc }, (status) => {
+      console.log(status);
+      if (!status.err) {
+        this.setState({
+          ...this.state,
+          pictureReady: true,
+        });
+      } else {
+        this.setState({
+          ...this.state,
+          pictureError: true,
+        });
+      }
+    });
+  }
   componentWillMount() {
-    const { user, picture } = this.props;
-    const pictureSrc = (user && user.picture) || picture;
-    if (pictureSrc) {
-      // try to load picture, if not successfull, fallback to text avatar
-      // picture src not expected to change, hence only run this on mount.
-      this.loadImg({ src: pictureSrc }, (status) => {
-        if (!status.err) {
-          this.setState({
-            ...this.state,
-            pictureReady: true,
-          });
-        } else {
-          console.error('avatar picture loading timeout');
-          this.setState({
-            ...this.state,
-            pictureError: true,
-          });
-        }
+    this.handleImageState();
+  }
+  componentWillReceiveProps(nextProps) {
+    const { user, picture } = nextProps;
+    const newPictureSrc = (user && user.picture) || picture;
+    if (newPictureSrc !== this.state.pictureSrc) {
+      this.setState({
+        pictureError: false,
+        pictureReady: false,
+        pictureSrc: newPictureSrc,
       });
+      this.handleImageState(newPictureSrc);
     }
   }
 
@@ -109,16 +122,16 @@ class Avatar extends Component {
   render() {
     // pararms to be picked from user object if in props, else explicitly specified.
     const paramContainer = this.props.user ? this.props.user : this.props;
-    const { pictureError, pictureReady } = this.state;
-    const { name, initials, picture, textAvatarColor, avatarStyle } = paramContainer;
+    const { pictureError, pictureReady, pictureSrc } = this.state;
+    const { name, initials, textAvatarColor, avatarStyle } = paramContainer;
     const text = initials || this.computeInitials(name);
     const defaultStyle = {
-      backgroundImage: picture && pictureReady ? `url(${picture})` : null,
-      backgroundColor: !picture ? textAvatarColor : this.imageCurtainColor,
+      backgroundImage: pictureSrc && pictureReady ? `url(${pictureSrc})` : null,
+      backgroundColor: !pictureSrc ? textAvatarColor : this.imageCurtainColor,
     };
     return (
       <div className="avatar" style={Object.assign(defaultStyle, avatarStyle)}>
-        {!picture || pictureError ? text : ''}
+        {!pictureSrc || pictureError ? text : ''}
       </div>
     );
   }
