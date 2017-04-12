@@ -5,6 +5,8 @@ class Settings extends Component {
     return (
       <div className={this.props.classNames} style={this.props.style}>
       Settings tab
+      <br/>
+      Configure user preferences. such as webcam/mic/ui etc.
       </div>
     );
   }

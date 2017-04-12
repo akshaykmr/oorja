@@ -8,13 +8,11 @@ $landing-primary : white;
 
 .kickstart {
   min-height: 95vh; 
-  background-size: cover;
-  background-position: 50%;
-  // background-image: url('/images/breather2.jpg'); too heavy. need something minimal if anything
 
   .tagline {
-    margin-top: 50px;
-    margin-bottom: 40px;
+    height: 136px;
+    padding-top: 50px;
+    padding-bottom: 50px;
     font-weight: 200;
     text-align: center;
     font-size: 2.0em;
@@ -29,7 +27,7 @@ $landing-primary : white;
   }
 
   .room-form {
-    margin-top: 35px;
+    margin-top: 20px;
     min-height: 100px;
     max-height: 400px;
     width: 100%;

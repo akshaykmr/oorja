@@ -13,6 +13,7 @@ import Settings from './tabs/Settings';
 import QuillPad from './tabs/QuillPad';
 import CodePad from './tabs/CodePad';
 import Chat from './tabs/Chat/';
+import AddTab from './tabs/AddTab';
 
 class Spotlight extends Component {
 
@@ -25,6 +26,7 @@ class Spotlight extends Component {
       3: QuillPad,
       4: CodePad,
       5: Chat,
+      6: AddTab,
     };
 
     const defaultTabs = [ // default tabs
@@ -34,6 +36,7 @@ class Spotlight extends Component {
         iconBgcolor: '',
         bgColor: '',
         color: '',
+        icon: 'information-circled',
       },
       {
         tabId: 2,
@@ -42,6 +45,7 @@ class Spotlight extends Component {
         iconBgcolor: '',
         ContentBgColor: '',
         bgColor: '',
+        icon: 'ios-gear',
       },
       {
         tabId: 3,
@@ -50,6 +54,7 @@ class Spotlight extends Component {
         iconBgcolor: '',
         bgColor: '#f3f3f3',
         color: 'black',
+        icon: 'document-text',
       },
       {
         tabId: 4,
@@ -58,6 +63,7 @@ class Spotlight extends Component {
         iconBgcolor: '',
         bgColor: '',
         color: '',
+        icon: 'code-working',
       },
       {
         tabId: 5,
@@ -65,6 +71,15 @@ class Spotlight extends Component {
         iconBgcolor: '',
         bgColor: '#faebd7',
         color: '',
+        icon: 'chatbubbles',
+      },
+      {
+        tabId: 6,
+        name: 'AddTab',
+        iconBgcolor: '',
+        bgColor: '',
+        color: '',
+        icon: 'ios-plus',
       },
     ];
 
@@ -110,6 +125,7 @@ class Spotlight extends Component {
           className={classNames(switchClassNames)}
           style={switchStyle}
           id={tab.name}>
+          <i className={`icon ion-${tab.icon}`}></i>
         </div>
       );
     };

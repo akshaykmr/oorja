@@ -2,19 +2,20 @@ import React, { Component } from 'react';
 
 import tabPropTypes from './tabPropTypes';
 
-class Info extends Component {
+class AddTab extends Component {
 
   render() {
     return (
       <div className={this.props.classNames} style={this.props.style}>
-        Info tab
+        AddTab tab
         <br/>
-        Room link and other stats go here.
+        Dynamically load other tabs from server for added functionality.
+        ( React components using room api )
       </div>
     );
   }
 }
 
-Info.propTypes = tabPropTypes;
+AddTab.propTypes = tabPropTypes;
 
-export default Info;
+export default AddTab;
