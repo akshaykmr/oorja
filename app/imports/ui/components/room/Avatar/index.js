@@ -79,6 +79,7 @@ class Avatar extends Component {
       if (!status.err) {
         this.setState({
           ...this.state,
+          pictureSrc,
           pictureReady: true,
         });
       } else {
