@@ -1,6 +1,16 @@
 $primary-bg-color: #fff;
 $scrollbar-width: 10px;
 
+.loading.page {
+  height: 100vh;
+
+  .loader {
+    margin: 200px auto;
+    height: 100px;
+    width: 100px;
+  }
+}
+
 .room-container {
   height: 100vh;
   width: 100vw;

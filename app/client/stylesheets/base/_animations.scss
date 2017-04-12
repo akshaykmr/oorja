@@ -3,11 +3,6 @@
   to   { transform: rotate( 360deg ); }
 }
 
-@-webkit-keyframes rotate {
-  from { -webkit-transform: rotate( 0deg );   }
-  to   { -webkit-transform: rotate( 360deg ); }
-}
-
  .animate.fade-in {
     animation-name: fade-in;
     animation-duration: 0.2s;

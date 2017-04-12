@@ -1,6 +1,13 @@
 .roomSetup {
   form {
+    position: relative;
+    background-color: white;
+    border-radius: 5px;
+    left: 8px;
 
+    fieldset {
+      border: none;
+    }
     #roomName, #roomPassword {
       width: 300px
     }

@@ -3,25 +3,35 @@ $landing-primary : white;
 
 .landing {
   background-color: $landing-primary;
-  padding: 20px;
   min-height: 100vh;
 }
 
 .kickstart {
-  min-height: 90vh; 
+  min-height: 95vh; 
+  background-size: cover;
+  background-position: 50%;
+  // background-image: url('/images/breather2.jpg'); too heavy. need something minimal if anything
 
   .tagline {
+    margin-top: 50px;
+    margin-bottom: 40px;
     font-weight: 200;
     text-align: center;
-    font-size: 2.6em;
+    font-size: 2.0em;
+    width: 100%;
 
-    @media only screen and (min-width: 600px) { 
-        padding-top: 20px;
-    }
+  }
+
+  .logoJazz {
+    height: 140px;
+    width: 100%;
+    text-align: center
   }
 
   .room-form {
-    height: 400px;
+    margin-top: 35px;
+    min-height: 100px;
+    max-height: 400px;
     width: 100%;
     display: flex;
     justify-content: center;

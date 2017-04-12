@@ -253,7 +253,14 @@ class Door extends Component {
   render() {
     const { LOADING, PASSWORD_PROMPT, GETTING_READY, SHOW_TIME } = this.stages;
     switch (this.state.stage) {
-      case LOADING: return <Loading />;
+      case LOADING:
+        return (
+          <div className='loading page'>
+            <div className="loader spin-infinite">
+              <Loading />
+            </div>
+          </div>
+        );
       case PASSWORD_PROMPT:
         return <PasswordPrompt
                   roomName = {this.roomName}

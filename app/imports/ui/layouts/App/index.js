@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import { FocusStyleManager } from '@blueprintjs/core';
 
 import './app.scss';
+
+
+FocusStyleManager.onlyShowFocusOnTabs();
 
 class App extends Component {
   render() {
