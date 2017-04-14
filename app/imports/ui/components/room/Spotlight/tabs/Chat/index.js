@@ -202,6 +202,9 @@ class Chat extends Component {
                  onChange={this.handleChatInput}
                  ref = { (input) => { this.chatInput = input; } }
           />
+          <div className="sendButton" onClick={this.handleSubmit}>
+            <i className="icon ion-ios-paperplane"></i>
+          </div>
         </form>
       </div>
     );

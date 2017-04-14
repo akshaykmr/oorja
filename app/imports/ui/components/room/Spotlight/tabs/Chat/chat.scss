@@ -14,6 +14,29 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
     margin: 8px auto 0 auto;
     width: 90%;
     max-width: 760px;
+    position: relative;
+
+    .sendButton {
+      top: 0;
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      text-align: center;
+      line-height: 100%;
+      color: cornflowerblue;
+      background-color: floralwhite;
+      cursor: pointer;
+      border-radius: 5px;
+      right: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4em;
+
+      &:hover {
+        border: 2px solid cornflowerblue;
+      }
+    }
   }
 
   &.compact {
