@@ -15,6 +15,10 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
     width: 90%;
     max-width: 760px;
   }
+
+  &.compact {
+    border-top-left-radius: initial;
+  }
 }
 
 .chat-thread {

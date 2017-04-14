@@ -4,4 +4,8 @@
   #codepad-editor {
     border-top-left-radius: 5px;
   }
+
+  &.compact #codepad-editor {
+    border-top-left-radius: initial;
+  }
 }

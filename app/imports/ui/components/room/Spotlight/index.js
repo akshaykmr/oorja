@@ -32,17 +32,16 @@ class Spotlight extends Component {
     const defaultTabs = [ // default tabs
       {
         tabId: 1,
-        name: 'information',
-        iconBgcolor: '',
+        name: 'Info',
+        iconColor: 'honeydew',
         bgColor: '',
-        color: '',
         icon: 'information-circled',
       },
       {
         tabId: 2,
-        name: 'settings',
+        name: 'Settings',
 
-        iconBgcolor: '',
+        iconColor: '#c9ffd5',
         ContentBgColor: '',
         bgColor: '',
         icon: 'ios-gear',
@@ -51,34 +50,30 @@ class Spotlight extends Component {
         tabId: 3,
         name: 'QuillPad',
 
-        iconBgcolor: '',
+        iconColor: '#65c184',
         bgColor: '#f3f3f3',
-        color: 'black',
         icon: 'document-text',
       },
       {
         tabId: 4,
         name: 'CodePad',
 
-        iconBgcolor: '',
+        iconColor: '#80b6eb',
         bgColor: '',
-        color: '',
         icon: 'code-working',
       },
       {
         tabId: 5,
         name: 'Chat',
-        iconBgcolor: '',
+        iconColor: '#30c053',
         bgColor: '#faebd7',
-        color: '',
         icon: 'chatbubbles',
       },
       {
         tabId: 6,
         name: 'AddTab',
-        iconBgcolor: '',
+        iconColor: '#bdd4de',
         bgColor: '',
-        color: '',
         icon: 'ios-plus',
       },
     ];
@@ -111,12 +106,14 @@ class Spotlight extends Component {
     };
 
     const renderSwitch = (tab) => {
+      const onTop = tab.name === activeTab.name;
       const switchClassNames = {
         switch: true,
-        active: tab.name === activeTab.name,
+        active: onTop,
       };
       const switchStyle = {
-        backgroundColor: tab.iconBgcolor,
+        backgroundColor: '#1b1d1e',
+        color: onTop ? tab.iconColor : 'white',
       };
       return (
         <div
@@ -135,13 +132,13 @@ class Spotlight extends Component {
       const tabContentClassNames = {
         content: true,
         onTop,
+        compact: this.props.uiSize === uiConfig.COMPACT,
       };
       tabContentClassNames[tab.name] = true;
 
 
       const tabContentStyle = {
         backgroundColor: tab.bgColor || '#36393e', // defaults, move them to settings later.
-        color: tab.color || '#fefefe',
       };
 
       const TabComponent = this.tabComponents[tab.tabId];
@@ -164,7 +161,7 @@ class Spotlight extends Component {
         <div className="content-wrapper">
           {this.state.tabs.map(renderTabContent)}
         </div>
-        <div className="content-switcher default">
+        <div className="content-switcher">
           {this.state.tabs.map(renderSwitch)}
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
-import tabPropTypes from './tabPropTypes';
+import tabPropTypes from '../tabPropTypes';
+import './info.scss';
 
 class Info extends Component {
 

@@ -1,6 +1,11 @@
 .content.QuillPad {
   padding-top: 5px;
   padding-left: 5px;
+
+  &.compact {
+    padding-top: initial;
+    padding-left: initial;
+  }
 }
 .ql-editor {
   font-family: 'Droid Sans Mono Awesome';

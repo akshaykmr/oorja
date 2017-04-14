@@ -1,0 +1,7 @@
+.content.Info {
+  border-top-left-radius: 5px;
+  &.compact {
+    border-top-left-radius: initial;
+  }
+  color: #fefefe;
+}

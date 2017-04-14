@@ -14,6 +14,12 @@ $switcher-width: 60px;
     width: calc(100% - 60px); // cant apply scss variable here? why?
   }
 
+  &.compact .content-wrapper {
+    left: 0;
+    width: 100%;
+    height: calc(100% - 60px);
+  }
+
   .content-switcher {
     background-color: #2e3136;
     display: flex;
@@ -22,16 +28,8 @@ $switcher-width: 60px;
     align-items: center;
     align-content: center;
 
-
-    &.default {
-      height: 100%;
-      width: $switcher-width;
-    }
-
-    &.compact {
-      width: 100%;
-      height: $switcher-width;
-    }
+    height: 100%;
+    width: $switcher-width;
 
     .switch {
       width: 45px;
@@ -55,7 +53,7 @@ $switcher-width: 60px;
       }
 
       &:first-child {
-        margin-top: 25px !important;
+        margin-top: 25px;
       }
 
       &:hover {
@@ -74,15 +72,37 @@ $switcher-width: 60px;
     }
   }
 
-  .content {
-      border-top-left-radius: 5px;
-      position: absolute;
-      height: 100%;
-      width: 100%;
-      z-index: 1;
+  &.compact .content-switcher {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    justify-content: center;
+    flex-direction: row;
 
-      &.onTop {
-        z-index: 2;
-      }
+    .switch {
+      margin-top: initial;
+      margin-bottom: initial;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  }
+
+
+  .content {
+    border-top-left-radius: 5px;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+
+    &.onTop {
+      z-index: 2;
+    }
+  }
+
+  &.compact .content {
+    border-top-left-radius: initial;
   }
 }
