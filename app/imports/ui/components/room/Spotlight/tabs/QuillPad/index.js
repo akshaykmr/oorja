@@ -101,8 +101,10 @@ class QuillPad extends Component {
   }
 
   render() {
+    const isSyncing = (!this.state.initialSyncComplete) && (this.props.connectedUsers.length > 1);
     return (
       <div className={this.props.classNames} style={this.props.style}>
+        <this.props.Spinner show={this.props.onTop && isSyncing }/>
         <div id="quillpad-editor" style={{ height: 'calc(100% - 68px)' }}>
         </div>
       </div>

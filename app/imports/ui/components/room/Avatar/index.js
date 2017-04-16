@@ -75,7 +75,6 @@ class Avatar extends Component {
   handleImageState(pictureSrc = this.state.pictureSrc) {
     if (!pictureSrc) return;
     this.loadImg({ src: pictureSrc }, (status) => {
-      console.log(status);
       if (!status.err) {
         this.setState({
           ...this.state,

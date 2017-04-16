@@ -169,7 +169,14 @@ class Room extends Component {
 
     erizoRoom.addEventListener('room-disconnected', (roomEvent) => {
       console.info('room disconnected', roomEvent);
-      this.updateState({ roomConnectionStatus: { $set: status.DISCONNECTED } });
+      this.updateState({
+        roomConnectionStatus: { $set: status.DISCONNECTED },
+        primaryDataStreamStatus: { $set: status.TRYING_TO_CONNECT },
+        connectedUsers: { $set: [] },
+        mediaStreams: { $set: {} },
+      });
+      this.subscribedDataStreams = {};
+      this.subscribedMediaStreams = {};
       this.tryToReconnect();
     });
   }

@@ -88,8 +88,10 @@ class CodePad extends Component {
 
       fontSize: this.state.fontSize,
     };
+    const isSyncing = (!this.state.initialSyncComplete) && (this.props.connectedUsers.length > 1);
     return (
       <div className={this.props.classNames} style={this.props.style}>
+        <this.props.Spinner show={this.props.onTop && isSyncing}/>
         <div id="codepad-editor" style={editorStyle}>
         </div>
       </div>

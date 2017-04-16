@@ -8,6 +8,7 @@
     - 'roomUserId:$roomName' // the userId used to join the room
     - 'roomUserToken:$roomName' // user token used to skip adding a new user to the room if found
     - 'roomReady:$roomName' // maps last ready timestamp.
+    - 'lastActiveTab:$roomName' // -> tabName
     // remember to delete the room tokens when user logs out/ exits the room
 
 

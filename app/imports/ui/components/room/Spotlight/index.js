@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import _ from 'lodash';
 
 import uiConfig from '../constants/uiConfig';
 import roomActivities from '../constants/roomActivities';
 
 import './spotlight.scss';
+import Spinner from './Spinner';
 
 // tabs
 import Info from './tabs/Info';
@@ -33,7 +35,7 @@ class Spotlight extends Component {
       {
         tabId: 1,
         name: 'Info',
-        iconColor: 'honeydew',
+        iconColor: 'beige',
         bgColor: '',
         icon: 'information-circled',
       },
@@ -50,7 +52,7 @@ class Spotlight extends Component {
         tabId: 3,
         name: 'QuillPad',
 
-        iconColor: '#65c184',
+        iconColor: 'bisque',
         bgColor: '#f3f3f3',
         icon: 'document-text',
       },
@@ -58,7 +60,7 @@ class Spotlight extends Component {
         tabId: 4,
         name: 'CodePad',
 
-        iconColor: '#80b6eb',
+        iconColor: 'turquoise',
         bgColor: '',
         icon: 'code-working',
       },
@@ -78,9 +80,13 @@ class Spotlight extends Component {
       },
     ];
 
+    const lastActiveTab = localStorage.getItem(`lastActiveTab:${props.roomInfo.roomName}`);
+    const lastActiveTabIndex = _.findIndex(defaultTabs, { name: lastActiveTab });
+    const tabFound = lastActiveTabIndex > -1;
+
     this.state = {
       tabs: defaultTabs,
-      activeTab: defaultTabs[0],
+      activeTab: defaultTabs[tabFound ? lastActiveTabIndex : 0],
     };
   }
 
@@ -91,6 +97,7 @@ class Spotlight extends Component {
       ...this.state,
       activeTab: tab,
     });
+    localStorage.setItem(`lastActiveTab:${this.props.roomInfo.roomName}`, tab.name);
     this.props.dispatchRoomActivity(roomActivities.TAB_SWITCH, { from, to });
   }
 
@@ -149,6 +156,7 @@ class Spotlight extends Component {
         connectedUsers={this.props.connectedUsers}
         roomAPI={this.props.roomAPI}
         onTop={onTop}
+        Spinner={Spinner}
         classNames={classNames(tabContentClassNames)}
         style={tabContentStyle}/>;
     };

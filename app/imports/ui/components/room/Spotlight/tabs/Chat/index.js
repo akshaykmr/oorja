@@ -111,7 +111,7 @@ class Chat extends Component {
   }
 
   appendMessage(message, position) {
-    console.info('appending message', position, message);
+    console.info(this.props.tabInfo.name, 'appending message', position, message);
     const user = this.props.roomAPI.getUserInfo(message.userId);
     if (!user) throw new Meteor.Error('chat sender not found');
 
@@ -124,7 +124,7 @@ class Chat extends Component {
   }
 
   removeMessage(position) {
-    console.info('removing message', position);
+    console.info(this.props.tabInfo.name, 'removing message', position);
     this.updateState({
       chatMessages: { $splice: [[position, 1]] },
     });
@@ -187,8 +187,10 @@ class Chat extends Component {
   }
 
   render() {
+    const isSyncing = (!this.state.initialSyncComplete) && (this.props.connectedUsers.length > 1);
     return (
       <div className={this.props.classNames} style={this.props.style}>
+        <this.props.Spinner show={this.props.onTop && isSyncing}/>
         <ul className="chat-thread">
           {this.state.chatMessages.map(this.renderChatBubble)}
         </ul>
