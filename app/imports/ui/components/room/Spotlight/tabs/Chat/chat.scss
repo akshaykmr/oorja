@@ -69,6 +69,21 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
     background-color: $chat-bubble-color;
     color: $chat-text-color;
   }
+
+  .unreadMessageTicker {
+    display: inline-block;
+    background-color: #fffaf0;
+    height: 40px;
+    width: 40px;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: absolute;
+    bottom: 90px;
+    color: #6495ed;
+    font-weight: 500;
+  }
 }
 
 .bubble {

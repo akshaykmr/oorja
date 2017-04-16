@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-
+import _ from 'lodash';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import update from 'immutability-helper';
@@ -18,6 +18,8 @@ import './chat.scss';
 // return the existing value. There is no guarantee of synchronous operation of
 // calls to setState and calls may be batched for performance gains.
 
+// TODO: implement Scrolling chatbox on new message.
+
 class Chat extends Component {
 
   constructor(props) {
@@ -35,11 +37,16 @@ class Chat extends Component {
     this.appendMessage = this.appendMessage.bind(this);
     this.removeMessage = this.removeMessage.bind(this);
     this.updateState = this.updateState.bind(this);
+    this.handleThreadScroll = this.handleThreadScroll.bind(this);
+    this.scrollToBottom = this.scrollToBottom.bind(this);
+    this.prefixString = this.props.roomAPI.getUserId() + _.random(5000).toString();
 
     this.state = {
       initialSyncComplete: false,
       chatInputValue: '',
       chatMessages: [],
+      freeNavigation: false,
+      newMessageCount: 0,
     };
 
     this.stateBuffer = this.state;
@@ -117,10 +124,18 @@ class Chat extends Component {
 
     const chatMessage = {
       user,
+      key: message.key,
       text: message.text,
     };
-
-    this.updateState({ chatMessages: { $splice: [[position, 0, chatMessage]] } });
+    // let newMessageCount = this.stateBuffer.newMessageCount;
+    // if (this.stateBuffer.freeNavigation) newMessageCount += 1;
+    this.updateState({
+      chatMessages: { $splice: [[position, 0, chatMessage]] },
+      // newMessageCount: { $set: newMessageCount },
+    });
+    // if (!this.stateBuffer.freeNavigation) { // autoscoll chat-thread.
+    this.chatThread.scrollTop = this.chatThread.scrollHeight;
+    // }
   }
 
   removeMessage(position) {
@@ -136,13 +151,30 @@ class Chat extends Component {
     });
   }
 
+  handleThreadScroll() { // throttle this function later
+    if (this.chatThread.scrollTop === this.chatThread.scrollHeight) {
+      this.updateState({
+        freeNavigation: { $set: false },
+        newMessageCount: { $set: 0 },
+      });
+      return;
+    }
+
+    if (this.stateBuffer.freeNavigation) return;
+
+    this.updateState({
+      freeNavigation: { $set: true },
+      newMessageCount: { $set: 0 },
+    });
+  }
+
   handleSubmit(event) {
     event.preventDefault();
     const { chatInputValue } = this.state;
     if (!chatInputValue || !this.y) return;
-
     const message = {
       userId: this.props.roomAPI.getUserId(),
+      key: _.uniqueId(this.prefixString),
       //  TODO: timeStamp: this.props.roomAPI.timeStamp(),
       text: chatInputValue.trim(),
     };
@@ -171,11 +203,9 @@ class Chat extends Component {
       recepient: !sender,
       begining: !inContinuation,
     };
-    const { user } = chatMessage;
-    // TODO: set a proper key.
-    // Scroll chatbox on new message.
+    const { user, key } = chatMessage;
     return (
-      <li className={classNames(bubbleClassNames)} key={index}>
+      <li className={classNames(bubbleClassNames)} key={key}>
         <Avatar user={user}/>
         {chatMessage.text}
       </li>
@@ -186,13 +216,33 @@ class Chat extends Component {
     this.y.close();
   }
 
+  scrollToBottom() {
+    this.chatThread.scrollTop = this.chatThread.scrollHeight;
+    this.updateState({
+      freeNavigation: { $set: false },
+      newMessageCount: { $set: 0 },
+    });
+  }
+
   render() {
+    const unreadMessageTickerStyle = {
+      visibility: this.state.newMessageCount > 0 ? 'initial' : 'hidden',
+    };
     const isSyncing = (!this.state.initialSyncComplete) && (this.props.connectedUsers.length > 1);
     return (
       <div className={this.props.classNames} style={this.props.style}>
         <this.props.Spinner show={this.props.onTop && isSyncing}/>
-        <ul className="chat-thread">
+        <ul className="chat-thread"
+          onScroll={this.handleThreadScroll}
+          ref={ (chatThread) => { this.chatThread = chatThread; }}>
           {this.state.chatMessages.map(this.renderChatBubble)}
+
+          <div
+            className="unreadMessageTicker"
+            style={unreadMessageTickerStyle}
+            onClick={this.scrollToBottom}>
+            <i className="icon ion-ios-arrow-down"></i> {this.state.newMessageCount}
+          </div>
         </ul>
         <form className="chat-input-form" onSubmit={this.handleSubmit}>
           <input className="chat-input"
