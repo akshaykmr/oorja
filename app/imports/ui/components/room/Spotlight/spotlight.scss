@@ -103,11 +103,11 @@ $switcher-width: 60px;
     }
 
     .syncSpinner {
-      height: 30px;
-      width: 30px;
+      height: 35px;
+      width: 35px;
       position: absolute;
-      right: 10px;
-      top: 6px;
+      right: 30px;
+      bottom: 30px;
       z-index: 9999;
     }
   }

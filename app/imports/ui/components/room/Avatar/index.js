@@ -130,7 +130,7 @@ class Avatar extends Component {
     const text = initials || this.computeInitials(name);
     const defaultStyle = {
       backgroundImage: pictureSrc && loadComplete && !pictureError ? `url(${pictureSrc})` : null,
-      backgroundColor: !textAvatarColor,
+      backgroundColor: textAvatarColor,
     };
 
     return (
