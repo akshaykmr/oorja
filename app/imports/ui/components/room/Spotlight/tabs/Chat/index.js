@@ -151,6 +151,7 @@ class Chat extends Component {
     });
   }
 
+  // FIXME
   handleThreadScroll() { // throttle this function later
     if (this.chatThread.scrollTop === this.chatThread.scrollHeight) {
       this.updateState({

@@ -6,7 +6,7 @@ $switcher-width: 60px;
   left: 0;
   width: 100%;
 
-  .content-wrapper {
+  > .content-wrapper {
     background-color: #2e3136;
     position: absolute;
     left: $switcher-width;
@@ -14,13 +14,13 @@ $switcher-width: 60px;
     width: calc(100% - 60px); // cant apply scss variable here? why?
   }
 
-  &.compact .content-wrapper {
+  &.compact > .content-wrapper {
     left: 0;
     width: 100%;
     height: calc(100% - 60px);
   }
 
-  .content-switcher {
+  > .content-switcher {
     background-color: #2e3136;
     display: flex;
     flex-direction: column;
@@ -31,7 +31,7 @@ $switcher-width: 60px;
     height: 100%;
     width: $switcher-width;
 
-    .switch {
+    > .switch {
       flex-shrink: 0;
       width: 45px;
       height: 45px;
@@ -73,7 +73,7 @@ $switcher-width: 60px;
     }
   }
 
-  &.compact .content-switcher {
+  &.compact > .content-switcher {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -82,7 +82,7 @@ $switcher-width: 60px;
     justify-content: center;
     flex-direction: row;
 
-    .switch {
+    > .switch {
       margin-top: initial;
       margin-bottom: initial;
       margin-left: 5px;
@@ -91,7 +91,7 @@ $switcher-width: 60px;
   }
 
 
-  .content {
+  > .content-wrapper > .content {
     border-top-left-radius: 5px;
     position: absolute;
     height: 100%;
@@ -112,7 +112,7 @@ $switcher-width: 60px;
     }
   }
 
-  &.compact .content {
+  &.compact > .content-wrapper > .content {
     border-top-left-radius: initial;
   }
 }

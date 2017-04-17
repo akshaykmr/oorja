@@ -1,3 +1,11 @@
 .content.Settings {
   color: #fefefe;
+
+  .settingsContainer {
+    padding-top: 25px;
+    width: 90%;
+    max-width: 760px;
+    min-height: 100%;
+    margin: 0 auto;
+  }
 }

@@ -1,296 +1,129 @@
 $background: #13171f; //also change on template html for safari
-
 //anchor : have to calculate offsets manually for icons !
 $anchor-width: 50px;
 $anchor-height: 100px;
 $anchor-icon-size: 30px;
 $anchor-icon-top: 10px;
 $anchor-icon-left: 10px;
-
 //anchor-tabs-colors
-$sidebar-close-button :  #c1e1ed;
-
-
+$sidebar-close-button: #c1e1ed;
 //sidebar
 $sidebar-content: #0d1f30;
 $sidebar-content-text: ghostwhite;
-
 //primary-action-colors
-
 $toggle:#2c3e50;
 $toggle-active: #fffff0;
-$disconnect:  #e74c3c;
-
-
-
-.top-section {
-    position: relative;
-    top:0;
-    left: 0;
-    bottom: 0;
-    height: 20%;
-    width: 100%;
-    background-color:$background;
-    overflow: hidden;
-     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    display: flex;
-    justify-content:center;
-    padding-bottom: 2%;
-    
-    video{
-        //transition: all 0.2s linear;
-        padding: 0 5px;
-        border-radius: 3px;
-        height: 100%;
-        width: auto;
-
-    }
-}
-
-.main-section {
-    position: relative;
-    height: 80%;
-    background-color: $background;
-    overflow: hidden;
-    
-    .spotlight-container{
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        
-        .spotlight{
-            position: absolute;
-            right: 0;
-            border-radius: 3px;
-            max-height: 100%; 
-            max-width: 100%;
-            height: 100%;
-            width: auto;
-            margin: 0 auto !important;
-            
-            transition-property: transform;
-            transition-duration: 0.5s;
-            transition-timing-function: ease-in-out;
-            transition-delay: 0ms;
-            transform: translate3d(-18%,0,0);
-        }
-        
-        .primary-action{  
-            display: inline-block;
-            position: absolute;
-            bottom: 10px;
-            right: 0;
-            opacity: 0;
-            height: 40px;
-            width: 160px;
-            background-color: transparent;
-            transition: opacity 0.2s ease-in-out; 
-
-            transition-property: transform;
-            transition-duration: 0.5s;
-            transition-timing-function: ease-in-out;
-            transition-delay: 0ms;
-            transform: translate3d(-200%,0,0);
-  
-
-            &.visible{
-                animation-name: fade-in;
-                animation-duration: 0.2s;
-                animation-timing-function: ease-in-out;
-                animation-fill-mode:both;
-            }
-            
-            .action-button{
-                position: absolute;
-                display: inline-block;
-                height: 40px;
-                width: 40px;
-                cursor: pointer;
-                
-                transform: scale(1);
-                transition: transform 0.2s ease-in-out;
-                
-                svg{
-                    width: 70%;
-                    position: absolute;
-                    top: 6px;
-                    left: 6px;
-                }
-                
-                &:hover,&.active{
-                    z-index: 99999999;
-                    transform: scale(1.4) !important;
-                }
-                
-                &.active{
-                    background-color: $toggle-active !important;
-                }
-                
-
-                border-radius: 40px;
-                
-                &.toggle-video{
-                    left: 0px;
-                    background-color: $toggle;
-                }
-                
-                &.toggle-mic{
-                    left: 120px;
-                    background-color: $toggle;
-                }
-                
-                &.disconnect-connection{
-                    left: 60px;
-                    background-color: $disconnect;
-                    transform: scale(1.2);
-                }
-            }
-        }
-    
-    }
-    
-}
-
-.room {
-  position: relative;
-  height: 100vh;
-  width: 100vw;
+$disconnect: #e74c3c;
+.compact .sidebar {
+  width: 320px; // do mobile later...
+  //width: 100%;
+  transform: translate3d(100%, 0, 0);
 }
 
 .sidebar {
- 
-      background-color: $sidebar-content;
-      height: 100%;
-      position: absolute;
-      z-index: 500;
-      top:0;
-      right:0;
-      #close-sidebar {
-        height: 20px;
-        width: 20px;
-        position: absolute;
-        z-index: 2;
-        top: 0;
-        right: 0;
-        background-color: orange;
-        cursor: pointer;
-      }
+  background-color: $sidebar-content;
+  height: 100%;
+  position: absolute;
+  z-index: 500;
+  top: 0;
+  right: 0;
+  #close-sidebar {
+    height: 25px;
+    width: 25px;
+    position: absolute;
+    z-index: 500;
+    top: 0;
+    right: 0;
+    font-size: 1.4em;
+    border-bottom-left-radius: 5px;
+    color: #2c3e50;
+    cursor: pointer;
+    line-height: 25px;
+    text-align: center;
 
-      transition: transform 400ms ease;
-
-      &.default {
-        width: 340px;
-        transform: translate3d(100%,0,0);
-      }
-
-      &.compact {
-        width: 340px; // do mobile later...
-        //width: 100%;
-        transform: translate3d(100%,0,0);
-      }
-      
-      &.visible {
-          transform: translate3d(0,0,0) !important;
-          .anchor{
-              opacity: 1;
-          } 
-      }
-      
-      .content-wrapper {
-          position: absolute;
-          z-index: 1;
-          height: 100%;
-          width: 100%;
-          color: $sidebar-content-text;
-      }
-
-      .content {
-          position: absolute;
-          height: 100%;
-          width: 100%;
-          padding: 20px;
-          overflow-y: auto;
-          z-index: 1;
-
-          &.onTop {
-            z-index: 2;
-          }
-      }
-      
-      
-      .content-switcher {
-          opacity: 1;
-          position: absolute;
-          top: 0;
-          right:100%;            
-          width: $anchor-width;
-          height: $anchor-height;
-          transition: opacity 0.3s ease-in-out;
-          
-          &.visible{
-              opacity: 1;
-          }
-          
-          .switch {
-              position: absolute;
-              width: $anchor-width;
-              height: $anchor-width;                
-              border-top-left-radius: 45%;
-              border-bottom-left-radius: 45%;
-              box-shadow: inset -1px 0px 3px gray;
-              
-              cursor: pointer;
-              
-              svg{
-                  width: $anchor-icon-size;
-                  position: absolute;
-                  top:$anchor-icon-top;
-                  left: $anchor-icon-left;
-                  
-              }
-              
-              
-              &#information{
-                  top: 0px;                  
-              }
-              
-              &#settings{
-                  top: 50px;
-              }
-              
-              &.active{
-                  box-shadow: none;
-              }
-          }
-      }
   }
-
-@keyframes fade-in{
-    0%{
-        opacity: 0;
+  transition: transform 400ms ease;
+  width: 340px;
+  transform: translate3d(100%, 0, 0);
+  &.visible {
+    transform: translate3d(0, 0, 0) !important;
+    .anchor {
+      opacity: 1;
     }
-    
-    100%{
-        opacity: 1;
+  }
+  .content-wrapper {
+    position: absolute;
+    z-index: 1;
+    height: 100%;
+    width: 100%;
+    color: $sidebar-content-text;
+  }
+  .content {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 1;
+    &.onTop {
+      z-index: 2;
     }
+  }
+  .content-switcher {
+    opacity: 1;
+    position: absolute;
+    top: 0;
+    right: 100%;
+    width: $anchor-width;
+    height: $anchor-height;
+    transition: opacity 0.3s ease-in-out;
+    &.visible {
+      opacity: 1;
+    }
+    .switch {
+      position: absolute;
+      width: $anchor-width;
+      height: $anchor-width;
+      border-top-left-radius: 45%;
+      border-bottom-left-radius: 45%;
+      box-shadow: inset -1px 0px 3px #2e3136;
+      cursor: pointer;
+      svg {
+        width: $anchor-icon-size;
+        position: absolute;
+        top: $anchor-icon-top;
+        left: $anchor-icon-left;
+      }
+      &.active {
+        box-shadow: none;
+      }
+    }
+  }
 }
 
-@keyframes anchor-in{
-    0%{
-        transform: translate3d(0,0,0);
-    }
-    100%{
-        transform: translate3d(100%,0,0);
-    }
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
-@keyframes anchor-out{
-    0%{
-        transform: translate3d(100%,0,0);
-    }
-    100%{
-        transform: translate3d(0,0,0);
-    }
+@keyframes anchor-in {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(100%, 0, 0);
+  }
 }
 
+@keyframes anchor-out {
+  0% {
+    transform: translate3d(100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}

@@ -13,7 +13,7 @@ class Avatar extends Component {
     const { user, picture } = props;
 
     this.state = {
-      pictureReady: false,
+      loadComplete: false,
       pictureError: false,
       pictureSrc: (user && user.picture) || picture,
     };
@@ -65,6 +65,7 @@ class Avatar extends Component {
       console.error(error);
       this.setState({
         ...this.state,
+        loadComplete: true,
         pictureError: true,
       });
     };
@@ -79,11 +80,13 @@ class Avatar extends Component {
         this.setState({
           ...this.state,
           pictureSrc,
-          pictureReady: true,
+          pictureError: false,
+          loadComplete: true,
         });
       } else {
         this.setState({
           ...this.state,
+          loadComplete: true,
           pictureError: true,
         });
       }
@@ -98,7 +101,7 @@ class Avatar extends Component {
     if (newPictureSrc !== this.state.pictureSrc) {
       this.setState({
         pictureError: false,
-        pictureReady: false,
+        loadComplete: false,
         pictureSrc: newPictureSrc,
       });
       this.handleImageState(newPictureSrc);
@@ -122,16 +125,17 @@ class Avatar extends Component {
   render() {
     // pararms to be picked from user object if in props, else explicitly specified.
     const paramContainer = this.props.user ? this.props.user : this.props;
-    const { pictureError, pictureReady, pictureSrc } = this.state;
+    const { pictureError, loadComplete, pictureSrc } = this.state;
     const { name, initials, textAvatarColor, avatarStyle } = paramContainer;
     const text = initials || this.computeInitials(name);
     const defaultStyle = {
-      backgroundImage: pictureSrc && pictureReady ? `url(${pictureSrc})` : null,
-      backgroundColor: !pictureSrc ? textAvatarColor : this.imageCurtainColor,
+      backgroundImage: pictureSrc && loadComplete && !pictureError ? `url(${pictureSrc})` : null,
+      backgroundColor: !textAvatarColor,
     };
+
     return (
       <div className="avatar" style={Object.assign(defaultStyle, avatarStyle)}>
-        {!pictureSrc || pictureError ? text : ''}
+        {!pictureSrc || pictureError || !loadComplete ? text : ''}
       </div>
     );
   }
