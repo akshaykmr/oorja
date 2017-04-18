@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import update from 'immutability-helper';
 // man monaco editor is awesome imo
 // I should replace ace with it. https://microsoft.github.io/monaco-editor/
 
@@ -22,6 +22,9 @@ import 'brace/mode/ruby';
 import 'brace/mode/swift';
 import 'brace/mode/typescript';
 
+import syntaxList from './syntaxList';
+import colorSchemes from './colorSchemes';
+
 import roomActivities from '../../../constants/roomActivities';
 
 import Y from '../../../../../../modules/Yjs';
@@ -30,7 +33,7 @@ import tabPropTypes from '../tabPropTypes';
 import './codepad.scss';
 
 import Sidebar from '../../../Sidebar/';
-
+import SettingsTab from './SettingsTab';
 
 class CodePad extends Component {
 
@@ -40,67 +43,47 @@ class CodePad extends Component {
     this.editor = null; // will be replaced by ace editor instance later
     this.y = null;
 
-    this.colorScheme = [
-      {
-        name: 'Light',
-        theme: 'dawn',
-      },
-      {
-        name: 'Dark',
-        theme: 'tomorrow_night_eighties',
-      },
-    ];
+    this.defaults = {
+      fontSize: 15,
+      syntax: syntaxList[6], // default | javascript
+      colorScheme: colorSchemes[1], // default | dark,
+    };
 
-    this.syntaxList = [
-      {
-        name: 'C C++',
-        mode: 'c_cpp',
-      },
-      {
-        name: 'C#',
-        mode: 'csharp',
-      },
-      {
-        name: 'CSS',
-        mode: 'css',
-      },
-      {
-        name: 'GoLang',
-        mode: 'golang',
-      },
-      {
-        name: 'HTML',
-        mode: 'html',
-      },
-      {
-        name: 'Java',
-        mode: 'java',
-      },
-      {
-        name: 'Javascript',
-        mode: 'javascript',
-      },
-      {
-        name: 'JSON',
-        mode: 'json',
-      },
-      {
-        name: 'Swift',
-        mode: 'swift',
-      },
-      {
-        name: 'TypeScript',
-        mode: 'typescript',
-      },
-    ];
+    // todo save any editor settings in localStorage and
+    // override defaults over here.
 
     this.state = {
-      activeSyntax: this.syntaxList[6],
-      activeColorScheme: this.colorScheme[1],
+
       initialSyncComplete: false,
-      fontSize: 16,
+      tabList: [
+        {
+          name: 'editorSettings',
+          component: SettingsTab,
+          componentProps: {
+            editor: this.editor,
+            initialSettings: this.defaults,
+          },
+          bgColor: '#2e3136',
+          iconColor: '#45b29d',
+          icon: 'ion-ios-settings',
+        },
+      ],
     };
+    this.stateBuffer = this.state;
   }
+
+  updateState(changes, buffer = this.stateBuffer) {
+    this.stateBuffer = update(buffer, changes);
+    this.setState(this.stateBuffer);
+  }
+
+  updateEditorSettings(changes, buffer = this.stateBuffer.tabList[0]) {
+    const updatedEditorSettings = update(buffer, changes);
+    this.updateState({
+      tabList: { $splice: [[0, 1, updatedEditorSettings]] },
+    });
+  }
+
   componentDidMount() {
     const { roomAPI, connectedUsers, tabInfo, roomInfo } = this.props;
     new Y({
@@ -124,10 +107,15 @@ class CodePad extends Component {
       this.y = y;
 
       const editor = ace.edit('codepad-editor');
-      editor.getSession().setMode(`ace/mode/${this.state.activeSyntax.mode}`);
-      editor.setTheme(`ace/theme/${this.state.activeColorScheme.theme}`);
+      editor.getSession().setMode(`ace/mode/${this.defaults.syntax.mode}`);
+      editor.setTheme(`ace/theme/${this.defaults.colorScheme.theme}`);
       y.share.ace.bindAce(editor, { aceRequire: ace.acequire });
       this.editor = editor;
+      this.updateEditorSettings({
+        componentProps: {
+          editor: { $set: editor },
+        },
+      });
 
       // add activity listner to focus editor when user switches to this tab.
       roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
@@ -137,11 +125,9 @@ class CodePad extends Component {
       });
 
       y.connector.whenSynced(() => {
-        this.setState({
-          ...this.state,
-
+        this.updateState({
           // synced with atleast one user. not called when no other user in the room.
-          initialSyncComplete: true,
+          initialSyncComplete: { $set: true },
         });
         console.info(tabInfo.name, 'synced');
       });
@@ -160,12 +146,12 @@ class CodePad extends Component {
       width: '100%',
       position: 'relative',
 
-      fontSize: this.state.fontSize,
+      fontSize: this.defaults.fontSize,
     };
     const isSyncing = (!this.state.initialSyncComplete) && (this.props.connectedUsers.length > 1);
     return (
       <div className={this.props.classNames} style={this.props.style}>
-        <Sidebar></Sidebar>
+        <Sidebar tabList={this.state.tabList}></Sidebar>
         <this.props.Spinner show={this.props.onTop && isSyncing}/>
         <div id="codepad-editor" style={editorStyle}>
         </div>

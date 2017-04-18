@@ -3,9 +3,19 @@ import classNames from 'classnames';
 
 import './sidebar.scss';
 
-// tabs
-import Info from './tabs/Info';
-import Settings from './tabs/Settings';
+/*
+  required prop: tabList = [
+    {
+      name: 'information',
+      component: React Component,
+      bgColor: '#2c3e50',
+      icon: '', // currently only supports ionicons eg.`ion-android-arrow-dropright`
+      iconColor: '',
+    },
+    ...
+  ]
+  these tabs are then rendered on the sidebar.
+*/
 
 class Sidebar extends Component {
   constructor(props) {
@@ -13,30 +23,16 @@ class Sidebar extends Component {
 
 
     this.tabDefaults = {
-      bgColor: '#45b29d',
+      bgColor: '#2e3136',
       iconColor: 'white',
     };
 
-    this.closeButtonColor = 'aquamarine';
-
-    this.tabs = [
-      {
-        name: 'information',
-        component: Info,
-        bgColor: '#2c3e50',
-        iconColor: '',
-      },
-      {
-        name: 'settings',
-        component: Settings,
-        bgColor: '#45b29d',
-        iconColor: '',
-      },
-    ];
+    this.closeButtonBgColor = this.props.closeButtonBgColor || '#3e606f';
+    this.closeButtonColor = this.props.closeButtonColor || 'aquamarine';
 
     this.state = {
       isVisible: false,
-      activeTab: this.tabs[0],
+      activeTab: this.props.tabList[0],
     };
 
     this.closeSidebar = this.closeSidebar.bind(this);
@@ -75,7 +71,7 @@ class Sidebar extends Component {
       const switchStyle = {
         backgroundColor: tab.bgColor || this.tabDefaults.bgColor,
         color: tab.iconColor || this.tabDefaults.iconColor,
-        top: `${(index * 50).toString()} px`,
+        top: `${(index * 50).toString()}px`,
       };
       return (
         <div
@@ -84,6 +80,7 @@ class Sidebar extends Component {
           className={classNames(switchClassNames)}
           style={switchStyle}
           id={tab.name}>
+          <i className={`icon ${tab.icon}`}></i>
         </div>
       );
     };
@@ -96,7 +93,7 @@ class Sidebar extends Component {
       const tabContentStyle = {
         backgroundColor: activeTab.bgColor || this.tabDefaults.bgColor,
       };
-      return <tab.component key={tab.name}
+      return <tab.component key={tab.name} {...tab.componentProps}
         classNames={classNames(tabContentClassNames)}
         style={tabContentStyle}/>;
     };
@@ -106,19 +103,25 @@ class Sidebar extends Component {
         className={classNames(sidebarClassNames)} >
         <div id="close-sidebar"
           onClick={this.closeSidebar}
-          style={{ backgroundColor: this.closeButtonColor }}
+          style={{ backgroundColor: this.closeButtonBgColor, color: this.closeButtonColor }}
           >
           <i className="icon ion-ios-arrow-forward"></i>
         </div>
         <div className="content-wrapper">
-          {this.tabs.map(renderTabContent)}
+          {this.props.tabList.map(renderTabContent)}
         </div>
         <div className="content-switcher">
-          {this.tabs.map(renderSwitch)}
+          {this.props.tabList.map(renderSwitch)}
         </div>
       </div>
     );
   }
 }
+
+Sidebar.propTypes = {
+  closeButtonColor: React.PropTypes.string,
+  closeButtonBgColor: React.PropTypes.string,
+  tabList: React.PropTypes.array,
+};
 
 export default Sidebar;

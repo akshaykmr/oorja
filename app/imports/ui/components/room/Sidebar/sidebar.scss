@@ -1,7 +1,7 @@
 $background: #13171f; //also change on template html for safari
 //anchor : have to calculate offsets manually for icons !
 $anchor-width: 50px;
-$anchor-height: 100px;
+// $anchor-height: 100px;
 $anchor-icon-size: 30px;
 $anchor-icon-top: 10px;
 $anchor-icon-left: 10px;
@@ -36,7 +36,7 @@ $disconnect: #e74c3c;
     right: 0;
     font-size: 1.4em;
     border-bottom-left-radius: 5px;
-    color: #2c3e50;
+    color: aquamarine;
     cursor: pointer;
     line-height: 25px;
     text-align: center;
@@ -75,7 +75,7 @@ $disconnect: #e74c3c;
     top: 0;
     right: 100%;
     width: $anchor-width;
-    height: $anchor-height;
+    // height: $anchor-height;
     transition: opacity 0.3s ease-in-out;
     &.visible {
       opacity: 1;
@@ -88,6 +88,10 @@ $disconnect: #e74c3c;
       border-bottom-left-radius: 45%;
       box-shadow: inset -1px 0px 3px #2e3136;
       cursor: pointer;
+      line-height: $anchor-width;
+      text-align: center;
+      font-size: 2.4em;
+      color: white;
       svg {
         width: $anchor-icon-size;
         position: absolute;
