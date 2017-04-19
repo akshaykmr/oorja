@@ -8,6 +8,7 @@ import { Intent, RadioGroup, Radio, Collapse } from '@blueprintjs/core';
 
 import { createRoom } from '../../actions/roomConfiguration';
 import SupremeToaster from '../../components/Toaster';
+import Oorja from '../../components/Oorja';
 
 import './roomSetup.scss';
 
@@ -150,46 +151,62 @@ class RoomSetup extends Component {
   render() {
     // sexy form goes here. learn some styling yo!
 
-    const { roomNameTouched, validName, customization } = this.state;
+    const { roomNameTouched, validName, customization, customRoom, waitingForServer } = this.state;
     return (
-      <div className="roomSetup">
-        <form onSubmit = {this.handleSubmit.bind(this)}>
-          <fieldset disabled={this.state.waitingForServer}>
-            <button onClick={this.toggleCustomRoomForm}>Customize</button>
-            <Collapse isOpen={this.state.customRoom} >
-              <div style={{ padding: '5px' }}>
-                <label className="pt-label" htmlFor="roomName">
-                  Room Name
-                  <span className="pt-text-muted"> </span>
-                </label>
-                <input className="pt-input" type="text" id="roomName"
-                  placeholder=""
-                  style={{ color: roomNameTouched && !validName ? '#ff2d00' : 'inherit' }}
-                  value={customization.roomName}
-                  onChange={this.handleNameChange.bind(this)} />
-                <RadioGroup
-                        label="How will others join this room?"
-                        onChange={this.handleShareChoice}
-                        selectedValue={customization.shareChoice}>
-                        <Radio label="With a secret link that I share with them"
-                          value={this.shareChoices.SECRET_LINK} />
-                        <Radio label="Those who know the password may enter"
-                          value={this.shareChoices.PASSWORD} />
-                </RadioGroup>
-              </div>
-              <Collapse
-                isOpen={customization.shareChoice === this.shareChoices.PASSWORD} >
+      <div>
+        <div className={`logoJazz ${waitingForServer ? 'active' : ''}`}>
+          <Oorja />
+        </div>
+        <div className="roomSetup room-form">
+          <form onSubmit = {this.handleSubmit.bind(this)}>
+            <fieldset disabled={this.state.waitingForServer}>
+              <Collapse isOpen={this.state.customRoom} >
                 <div style={{ padding: '5px' }}>
-                <label className="pt-label" htmlFor="roomPassword">Password</label>
-                  <input className="pt-input" type="password" id="roomPassword"
-                    value={customization.password}
-                    onChange={this.handlePasswordChange.bind(this)}/>
+                  <label className="pt-label" htmlFor="roomName">
+                    Room Name
+                    <span className="pt-text-muted"> </span>
+                  </label>
+                  <input className="pt-input" type="text" id="roomName"
+                    placeholder=""
+                    style={{ color: roomNameTouched && !validName ? '#ff2d00' : 'inherit' }}
+                    value={customization.roomName}
+                    onChange={this.handleNameChange.bind(this)} />
+                  <RadioGroup
+                          label="How will others join this room?"
+                          onChange={this.handleShareChoice}
+                          selectedValue={customization.shareChoice}>
+                          <Radio label="With a secret link that I share with them"
+                            value={this.shareChoices.SECRET_LINK} />
+                          <Radio label="Those who know the password may enter"
+                            value={this.shareChoices.PASSWORD} />
+                  </RadioGroup>
                 </div>
+                <Collapse
+                  isOpen={customization.shareChoice === this.shareChoices.PASSWORD} >
+                  <div style={{ padding: '5px' }}>
+                  <label className="pt-label" htmlFor="roomPassword">Password</label>
+                    <input className="pt-input" type="password" id="roomPassword"
+                      value={customization.password}
+                      onChange={this.handlePasswordChange.bind(this)}/>
+                  </div>
+                </Collapse>
               </Collapse>
-            </Collapse>
-          <button type="submit">Create Room!</button>
-         </fieldset>
-        </form>
+              <div className="buttonContainer">
+                <button
+                  type="button"
+                  className={`pt-button pt-minimal ${customRoom ? 'pt-active' : ''}`}
+                  onClick={this.toggleCustomRoomForm}>
+                  Customize
+                </button>
+                <button type="submit"
+                  disabled={waitingForServer}
+                  className="pt-button pt-large">
+                  Create Room !
+                </button>
+              </div>
+          </fieldset>
+          </form>
+        </div>
       </div>
     );
   }
