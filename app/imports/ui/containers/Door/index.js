@@ -64,6 +64,17 @@ class Door extends Component {
 
     this.passwordSuccess = this.passwordSuccess.bind(this);
     this.stateBuffer = this.state;
+
+    this.lastActiveTime = (new Date()).getTime();
+
+    this.SleepTracker = setInterval(() => {
+      const currentTime = (new Date()).getTime();
+      if (currentTime > (this.lastTime + 5000)) {  // check every 3 seconds
+        // resumed from sleep ?
+        location.reload();
+      }
+      this.lastTime = currentTime;
+    }, 3000);
   }
 
   updateState(changes, buffer = this.stateBuffer) {
@@ -244,6 +255,7 @@ class Door extends Component {
   componentWillUnmount() {
     document.body.classList.remove('room-container');
     // cleanup
+    clearInterval(this.SleepTracker);
     if (this.stateBuffer.initialized) {
       this.roomInfoSubscriptionHandle.stop();
       this.observeRoomInfo.stop();
