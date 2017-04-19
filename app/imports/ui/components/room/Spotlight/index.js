@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import _ from 'lodash';
 
+import { Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
+
 import uiConfig from '../constants/uiConfig';
 import roomActivities from '../constants/roomActivities';
 
@@ -35,26 +37,29 @@ class Spotlight extends Component {
       {
         tabId: 1,
         name: 'Info',
-        iconColor: 'beige',
+        iconColor: '#fffad5',
         bgColor: '',
         icon: 'information-circled',
+        description: 'Room information',
       },
       {
         tabId: 2,
         name: 'Settings',
 
-        iconColor: '#c9ffd5',
+        iconColor: '#acf0f2',
         ContentBgColor: '',
         bgColor: '',
-        icon: 'ios-gear',
+        icon: 'ios-settings',
+        description: 'Configure your webcam and Room settings',
       },
       {
         tabId: 3,
         name: 'QuillPad',
 
-        iconColor: 'bisque',
+        iconColor: '#fff0a5',
         bgColor: '#f3f3f3',
         icon: 'document-text',
+        description: 'Shared Richtext document',
       },
       {
         tabId: 4,
@@ -63,20 +68,23 @@ class Spotlight extends Component {
         iconColor: 'turquoise',
         bgColor: '',
         icon: 'code-working',
+        description: 'Shared Code editor',
       },
       {
         tabId: 5,
         name: 'Chat',
-        iconColor: '#30c053',
+        iconColor: '#9ac16e',
         bgColor: '#faebd7',
         icon: 'chatbubbles',
+        description: 'Chat',
       },
       {
         tabId: 6,
         name: 'AddTab',
-        iconColor: '#bdd4de',
+        iconColor: '#7dd3f5',
         bgColor: '',
         icon: 'ios-plus',
+        description: 'Discover more tabs',
       },
     ];
 
@@ -123,14 +131,22 @@ class Spotlight extends Component {
         color: onTop ? tab.iconColor : 'white',
       };
       return (
-        <div
+        <Popover
           key={tab.name}
-          onClick={() => { this.switchToTab(tab); }}
+          content={tab.description}
+          interactionKind={PopoverInteractionKind.HOVER}
+          popoverClassName="pt-popover-content-sizing"
+          position={uiSize === uiConfig.COMPACT ? Position.TOP : Position.RIGHT}
           className={classNames(switchClassNames)}
-          style={switchStyle}
-          id={tab.name}>
-          <i className={`icon ion-${tab.icon}`}></i>
-        </div>
+          hoverOpenDelay={500}
+          useSmartPositioning={true}>
+          <div
+            onClick={() => { this.switchToTab(tab); }}
+            style={switchStyle}
+            id={tab.name}>
+            <i className={`icon ion-${tab.icon}`}></i>
+          </div>
+        </Popover>
       );
     };
 
