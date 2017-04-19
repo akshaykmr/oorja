@@ -8,7 +8,7 @@ const Landing = () => (
   <div className="landing page">
     <section className="kickstart">
       <div className="tagline">
-        A nice and short intro of the app.
+        Connect and Collaborate
       </div>
       <div className="logoJazz">
         <Oorja />

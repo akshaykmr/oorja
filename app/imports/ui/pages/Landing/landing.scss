@@ -23,7 +23,21 @@ $landing-primary : white;
   .logoJazz {
     height: 140px;
     width: 100%;
-    text-align: center
+    text-align: center;
+    cursor: pointer;
+
+    svg {
+      transition: transform 0.5s ease-in;
+      transform: scale(1,1);
+
+      &:hover, &.active {
+        transform: scale(1.06,1.06);
+      }
+
+      &:hover .surround, &.active .surround {
+        animation: blink-activity 5s infinite cubic-bezier(0.075, 0.82, 0.165, 1);
+      }
+    }
   }
 
   .room-form {

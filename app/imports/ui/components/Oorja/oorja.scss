@@ -1,8 +1,46 @@
 #oorja {
+
   #center-circle-filler {
     fill: white;
   }
   .surround {
     fill: ghostwhite;
   }
+
+  #br-person > .surround {
+    animation-delay: 0.6s;
+    animation-duration: 3.2s;
+  }
+
+  #cp-person > .surround {
+    animation-delay: 0.8s;
+    animation-duration: 4.0s;
+  }
+
+  #bl-person > .surround {
+    animation-delay: 0.7s;
+    animation-duration: 3.1s;
+  }
+
+
+  #tr-person > .surround {
+    animation-delay: 0.1s;
+    animation-duration: 3.6s;
+  }
+
+
+  #tl-person > .surround {
+    animation-delay: 0.2s;
+    animation-duration: 2.9s;
+  }
 }
+
+@keyframes  blink-activity {
+  0%, 100% { 
+    fill: ghostwhite;
+  }  50% { 
+    fill: #1695a3;
+  }
+}
+
+//lightcyan
