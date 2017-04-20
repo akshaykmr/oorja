@@ -128,7 +128,7 @@ class Spotlight extends Component {
       };
       const switchStyle = {
         backgroundColor: '#1b1d1e',
-        color: onTop ? tab.iconColor : 'white',
+        color: onTop ? '#beeb9f' : 'white', // tab.iconColor:white
       };
       return (
         <Popover
@@ -138,7 +138,7 @@ class Spotlight extends Component {
           popoverClassName="pt-popover-content-sizing"
           position={uiSize === uiConfig.COMPACT ? Position.TOP : Position.RIGHT}
           className={classNames(switchClassNames)}
-          hoverOpenDelay={500}
+          hoverOpenDelay={800}
           useSmartPositioning={true}>
           <div
             onClick={() => { this.switchToTab(tab); }}
