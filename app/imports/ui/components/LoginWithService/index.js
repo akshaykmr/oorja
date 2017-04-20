@@ -120,7 +120,7 @@ class LoginWithService extends Component {
 
   loginInfo() {
     if (!this.state.loggedIn) {
-      const text = 'Or, Sign in using these services';
+      const text = 'Sign in';
       /* if (this.state.hasLoggedOutOnce) {
         text = 'You have successfully signed out.';
       } else {
@@ -152,7 +152,7 @@ class LoginWithService extends Component {
   render() {
     return (
       <div className={`login-container ${this.props.extraClasses}`}>
-        <div className="login-info">
+        <div className="login-info" style={{ fontSize: this.state.loggedIn ? '1.0em' : '1.3em' }}>
           {this.loginInfo()}
         </div>
         <div className={`button-container ${this.state.loggedIn ? 'hidden' : ''}`}>

@@ -30,6 +30,7 @@ class JoinRoomForm extends Component {
     this.initialState = this.initialState.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.enableAnon = this.enableAnon.bind(this);
     this.state = this.initialState();
     this.existingUser = _.find(this.props.roomInfo.participants, { userId: this.props.roomUserId });
   }
@@ -51,6 +52,7 @@ class JoinRoomForm extends Component {
         name: firstName,
         textAvatarColor: textAvatarColor || this.getRandomColor(),
         picture,
+        goAnon: false,
       };
     }
     return {
@@ -59,6 +61,7 @@ class JoinRoomForm extends Component {
       name: user ? `${user.profile.firstName} ${user.profile.lastName}` : '',
       textAvatarColor: this.getRandomColor(),
       picture: user ? user.profile.picture : null,
+      goAnon: false,
     };
   }
 
@@ -123,8 +126,16 @@ class JoinRoomForm extends Component {
     );
   }
 
+  enableAnon() {
+    if (this.state.goAnon) return;
+    this.setState({
+      ...this.state,
+      goAnon: true,
+    });
+  }
+
   render() {
-    const { name, loggedIn, picture, waiting, textAvatarColor } = this.state;
+    const { name, loggedIn, picture, waiting, textAvatarColor, existingUser, goAnon } = this.state;
     const inputAttr = {
       disabled: loggedIn || !!this.existingUser,
       value: name,
@@ -164,16 +175,27 @@ class JoinRoomForm extends Component {
       hidden: this.existingUser,
     });
 
+    const renderPreview = () => {
+      if (loggedIn || existingUser || goAnon) {
+        return (
+          <div className="interactiveInput">
+            {renderAvatar()}
+            <input type="text" {...inputAttr}/>
+          </div>
+        );
+      }
+      return (
+        <div className="goAnonText">
+          <span className="animate fade-in" onClick={this.enableAnon}>join anonymously?</span>
+        </div>
+      );
+    };
     return (
       <div className='JoinRoomForm'>
       <form onSubmit={this.handleSubmit}>
-        <div className="interactiveInput">
-          {renderAvatar()}
-          <input type="text" {...inputAttr}/>
-        </div>
-
         <LoginWithService
           extraClasses={loginContainerClasses} />
+        {renderPreview()}
         <div className="joinButtonWrapper">
           <Button {...buttonAttr} />
         </div>

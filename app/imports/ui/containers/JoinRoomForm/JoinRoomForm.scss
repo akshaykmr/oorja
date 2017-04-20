@@ -9,6 +9,20 @@ $preview-spacing: 30px;
     height: 100%;
     width: 100%;
   }
+
+  .goAnonText {
+    margin-top: 10px;
+    text-align: center;
+
+    span {
+      color: #3f5765;
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+  }
 }
 
 .interactiveInput {
