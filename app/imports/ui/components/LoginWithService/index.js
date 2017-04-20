@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+// import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
@@ -7,7 +7,6 @@ import classNames from 'classnames';
 
 import './LoginWithService.scss';
 
-// TODO css stuff.
 class LoginWithService extends Component {
   constructor(props) {
     super(props);
@@ -23,13 +22,42 @@ class LoginWithService extends Component {
 
     this.services = [
       // comment the service if not needed.
-      // make changes to LoginWithService.scss as well to align the buttons.
-      { service: 'Google', login: () => Meteor.loginWithGoogle({}, loginCallback) },
-      { service: 'Facebook', login: () => Meteor.loginWithFacebook({}, loginCallback) },
-      { service: 'Twitter', login: () => Meteor.loginWithTwitter({}, loginCallback) },
-      { service: 'LinkedIn', login: () => Meteor.loginWithLinkedIn({}, loginCallback) },
-      { service: 'Github', login: () => Meteor.loginWithGithub({}, loginCallback) },
-      { service: 'Twitch', login: () => Meteor.loginWithTwitch({}, loginCallback) },
+      {
+        service: 'Google',
+        login: () => Meteor.loginWithGoogle({}, loginCallback),
+        icon: 'ion-social-googleplus',
+        color: '#dd4b39',
+      },
+      {
+        service: 'Facebook',
+        login: () => Meteor.loginWithFacebook({}, loginCallback),
+        icon: 'ion-social-facebook',
+        color: '#3b5998',
+      },
+      {
+        service: 'Twitter',
+        login: () => Meteor.loginWithTwitter({}, loginCallback),
+        icon: 'ion-social-twitter',
+        color: '#1da1f2',
+      },
+      {
+        service: 'LinkedIn',
+        login: () => Meteor.loginWithLinkedIn({}, loginCallback),
+        icon: 'ion-social-linkedin',
+        color: '#0077b5',
+      },
+      {
+        service: 'Github',
+        login: () => Meteor.loginWithGithub({}, loginCallback),
+        icon: 'ion-social-github',
+        color: '#24292e',
+      },
+      {
+        service: 'Twitch',
+        login: () => Meteor.loginWithTwitch({}, loginCallback),
+        icon: 'ion-social-twitch',
+        color: '#6441a4',
+      },
     ];
   }
 
@@ -60,17 +88,13 @@ class LoginWithService extends Component {
     this.loginStatusTracker.stop();
   }
 
-  loginButtons() {
+  renderLoginButtons() {
     const { loggedIn, waitingFor, loginService } = this.state;
+    if (loggedIn) {
+      return null;
+    }
 
-    const setWaiting = (service) => {
-      this.setState({
-        ...this.state,
-        waitingFor: service,
-      });
-    };
-
-    return this.services.map(({ service, login }, index) => {
+    return this.services.map(({ service, login, icon }, index) => {
       const loginButtonClasses = classNames({
         loginButton: true,
         buttonTransition: true,
@@ -81,15 +105,15 @@ class LoginWithService extends Component {
       const button = (
         <div key={index} className={loginButtonClasses} id={service}
           onClick={ loggedIn && loginService === service ? null : () => {
-            setWaiting(service);
+            this.setState({
+              ...this.state,
+              waitingFor: service,
+            });
             login();
           }}>
+          <i className={`icon ${icon}`}></i>
         </div>
       );
-
-      if (loggedIn) {
-        return loginService === service ? button : null;
-      }
       return button;
     });
   }
@@ -97,22 +121,17 @@ class LoginWithService extends Component {
   loginInfo() {
     if (!this.state.loggedIn) {
       let text;
-      let detailText;
-
       if (this.state.hasLoggedOutOnce) {
-        text = 'You have successfully logged out.';
-        detailText = `You may login again with an account to meet
-         people with a username and/or a picture familiar to them.`;
+        text = 'You have successfully signed out.';
       } else {
-        text = `Or sign in with your online account to meet
-          people with a username and/or a picture familiar to them.`;
+        text = 'Sign in using an existing account';
       }
       return (
-        <span className='animate fade-in'>{text} {detailText ? <br /> : null } {detailText}</span>
+        <span className='animate fade-in'>{text}</span>
       );
     }
     const service = this.state.loginService;
-    const greet = `Welcome, you are logged in with ${service}.`;
+    const greet = `Welcome, you are signed in with ${service} `;
     const logoutHandler = () => {
       Meteor.logout();
       this.setState({
@@ -122,8 +141,10 @@ class LoginWithService extends Component {
     };
     return (
       <div className="animate fade-in">
-        <div>{greet}</div>
-        <div><button type="button" onClick={logoutHandler}>logout</button></div>
+        <span>{greet}</span>
+        <span>
+          <button type="button" className="pt-button" onClick={logoutHandler}>logout</button>
+        </span>
       </div>
     );
   }
@@ -134,13 +155,8 @@ class LoginWithService extends Component {
         <div className="login-info">
           {this.loginInfo()}
         </div>
-        <div className="button-container">
-          <CSSTransitionGroup
-            transitionName="buttonTransition"
-            transitionEnterTimeout={2000}
-            transitionLeaveTimeout={0}>
-              {this.loginButtons()}
-          </CSSTransitionGroup>
+        <div className={`button-container ${this.state.loggedIn ? 'hidden' : ''}`}>
+          {this.renderLoginButtons()}
         </div>
       </div>
     );

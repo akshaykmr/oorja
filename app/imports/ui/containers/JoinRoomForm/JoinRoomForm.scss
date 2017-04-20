@@ -17,6 +17,7 @@ $preview-spacing: 30px;
   position: relative;
   width: $preview-width;
   margin: 0 auto;
+  margin-top: 20px;
 
   div {
     display: inline-block;
@@ -47,23 +48,4 @@ $preview-spacing: 30px;
   text-align: center;
   height: 60px;
   margin-top: 20px;
-}
-
-.avatar-enter, .avatar-appear {
-  transform: scale(0.1);
-}
-
-// this effect is not visible everytime because the popup makes the 
-.avatar-enter.avatar-enter-active , .avatar-appear.avatar-appear-active {
-  transform: scale(1.0);
-  transition: transform 1500ms ease;
-}
-
-.avatar-leave {
-  transform: scale(1.0);
-}
-
-.avatar-leave.avatar-leave-active {
-  transform: scale(0);
-  transition: transform 300ms ease;
 }
