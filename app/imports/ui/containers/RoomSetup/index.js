@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import update from 'immutability-helper';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
-import { Intent, RadioGroup, Radio, Collapse } from '@blueprintjs/core';
+import { Intent, RadioGroup, Radio, Collapse, Button } from '@blueprintjs/core';
 
 import { createRoom } from '../../actions/roomConfiguration';
 import SupremeToaster from '../../components/Toaster';
@@ -49,6 +49,7 @@ class RoomSetup extends Component {
     this.toggleCustomRoomForm = this.toggleCustomRoomForm.bind(this);
     this.resetCustomization = this.resetCustomization.bind(this);
     this.roomNameTouched = this.roomNameTouched.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   updateState(changes, buffer = this.stateBuffer) {
@@ -154,8 +155,9 @@ class RoomSetup extends Component {
     const { roomNameTouched, validName, customization, customRoom, waitingForServer } = this.state;
     return (
       <div>
-        <div className={`logoJazz ${waitingForServer ? 'active' : ''}`}>
-          <Oorja />
+        <div
+          className="logoJazz">
+          <Oorja onClick={this.handleSubmit} animate={waitingForServer}/>
         </div>
         <div className="roomSetup room-form">
           <form onSubmit = {this.handleSubmit.bind(this)}>
@@ -165,12 +167,12 @@ class RoomSetup extends Component {
                   <label className="pt-label" htmlFor="roomName">
                     Room Name
                     <span className="pt-text-muted"> </span>
-                  </label>
                   <input className="pt-input" type="text" id="roomName"
                     placeholder=""
                     style={{ color: roomNameTouched && !validName ? '#ff2d00' : 'inherit' }}
                     value={customization.roomName}
                     onChange={this.handleNameChange.bind(this)} />
+                  </label>
                   <RadioGroup
                           label="How will others join this room?"
                           onChange={this.handleShareChoice}
@@ -183,7 +185,7 @@ class RoomSetup extends Component {
                 </div>
                 <Collapse
                   isOpen={customization.shareChoice === this.shareChoices.PASSWORD} >
-                  <div style={{ padding: '5px' }}>
+                  <div style={{ padding: '5px', paddingTop: '0px' }}>
                   <label className="pt-label" htmlFor="roomPassword">Password</label>
                     <input className="pt-input" type="password" id="roomPassword"
                       value={customization.password}
@@ -198,11 +200,12 @@ class RoomSetup extends Component {
                   onClick={this.toggleCustomRoomForm}>
                   Customize
                 </button>
-                <button type="submit"
-                  disabled={waitingForServer}
-                  className="pt-button pt-large">
-                  Create Room !
-                </button>
+                <Button
+                  loading={waitingForServer}
+                  onClick={this.handleSubmit}
+                  className="pt-large"
+                  text="Create Room !">
+                </Button>
               </div>
           </fieldset>
           </form>

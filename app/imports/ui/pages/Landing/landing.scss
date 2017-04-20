@@ -4,51 +4,57 @@ $landing-primary : white;
 .landing {
   background-color: $landing-primary;
   min-height: 100vh;
-}
 
-.kickstart {
-  min-height: 95vh; 
+  .kickstart {
+    min-height: 95vh; 
+    background-image: url('/images/geo.png');
 
-  .tagline {
-    height: 136px;
-    padding-top: 50px;
-    padding-bottom: 50px;
-    font-weight: 200;
-    text-align: center;
-    font-size: 2.0em;
-    width: 100%;
+    .tagline {
+      color: #474747;
+      height: 136px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      font-weight: 200;
+      text-align: center;
+      font-size: 2.0em;
+      width: 100%;
 
-  }
+    }
 
-  .logoJazz {
-    height: 140px;
-    width: 100%;
-    text-align: center;
-    cursor: pointer;
-
-    &.active, &:hover {
+    .logoJazz {
+      height: 140px;
+      width: 100%;
+      text-align: center;
       svg {
-        transform: scale(1.06,1.06);
-      }
-      .surround {
-        animation: blink-activity 5s infinite cubic-bezier(0.075, 0.82, 0.165, 1);
+        cursor: pointer;
+        transition: transform 0.5s ease-in;
+        transform: scale(1,1);
+        &.active, &:hover {
+          transform: scale(1.06,1.06);
+
+          .surround {
+            animation: blink-activity 5s infinite cubic-bezier(0.075, 0.82, 0.165, 1);
+          }
+        }
+
       }
     }
 
-    svg {
-      transition: transform 0.5s ease-in;
-      transform: scale(1,1);
+    .room-form {
+      margin-top: 20px;
+      min-height: 100px;
+      max-height: 400px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      align-content: center;
     }
   }
 
-  .room-form {
-    margin-top: 20px;
-    min-height: 100px;
-    max-height: 400px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
+  .about {
+    height: 50vh;
+    background-color: teal;
   }
 }
+

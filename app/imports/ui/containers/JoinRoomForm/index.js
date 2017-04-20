@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import classNames from 'classnames';
+import { Button } from '@blueprintjs/core';
 // import ImageLoader from 'react-imageloader';
 
 
@@ -148,9 +149,14 @@ class JoinRoomForm extends Component {
     };
 
     const buttonAttr = {
+      type: 'submit',
+      text: 'Join the Room',
+      rightIconName: 'arrow-right',
       disabled: !name || waiting,
-      className: 'joinButton',
+      loading: waiting,
+      className: 'joinButton pt-large pt-intent-success',
       onSubmit: this.handleSubmit,
+      onClick: this.handleSubmit,
     };
 
     const loginContainerClasses = classNames({
@@ -169,7 +175,7 @@ class JoinRoomForm extends Component {
         <LoginWithService
           extraClasses={loginContainerClasses} />
         <div className="joinButtonWrapper">
-          <button {...buttonAttr} type="submit">Join the Room !</button>
+          <Button {...buttonAttr} />
         </div>
       </form>
       </div>

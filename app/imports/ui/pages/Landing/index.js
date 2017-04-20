@@ -11,6 +11,8 @@ const Landing = () => (
       </div>
       <RoomSetup />
     </section>
+    <section className="about">
+    </section>
   </div>
 );
 
