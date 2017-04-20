@@ -120,12 +120,12 @@ class LoginWithService extends Component {
 
   loginInfo() {
     if (!this.state.loggedIn) {
-      let text;
-      if (this.state.hasLoggedOutOnce) {
+      const text = 'Or, Sign in using these services';
+      /* if (this.state.hasLoggedOutOnce) {
         text = 'You have successfully signed out.';
       } else {
-        text = 'Sign in using an existing account';
-      }
+        text = ';
+      }*/
       return (
         <span className='animate fade-in'>{text}</span>
       );
