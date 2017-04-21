@@ -201,6 +201,7 @@ class RoomSetup extends Component {
                   Customize
                 </button>
                 <Button
+                  type="submit"
                   loading={waitingForServer}
                   onClick={this.handleSubmit}
                   className="pt-large"

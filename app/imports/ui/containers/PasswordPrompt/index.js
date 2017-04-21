@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { Intent } from '@blueprintjs/core';
-import SupremeToaster from '../components/Toaster';
+import { Intent, Button } from '@blueprintjs/core';
+import SupremeToaster from '../../components/Toaster';
 
-import { checkPassword } from '../actions/roomConfiguration';
+import { checkPassword } from '../../actions/roomConfiguration';
+import './passwordForm.scss';
 
 class PasswordPrompt extends Component {
   constructor(props) {
@@ -16,6 +17,8 @@ class PasswordPrompt extends Component {
       waiting: false,
       authSuccess: false,
     };
+
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleChange(event) {
@@ -35,19 +38,16 @@ class PasswordPrompt extends Component {
       (roomAccessToken) => {
         if (!roomAccessToken) {
           SupremeToaster.show({
-            message: 'Incorrect password',
+            message: 'Incorrect password 😕',
             intent: Intent.WARNING,
             timeout: 4000,
           });
         } else {
+          this.props.onSuccess();
           this.setState({
             ...this.state,
             authSuccess: true,
           });
-
-          setTimeout(() => {
-            this.props.onSuccess();
-          }, 1000);
         }
         this.setState({
           ...this.state,
@@ -61,15 +61,24 @@ class PasswordPrompt extends Component {
 
   render() {
     return (
-      <div>
-        <form onSubmit={this.handleSubmit.bind(this)}>
-          <input
-            value={this.state.password}
-            onChange={this.handleChange.bind(this)}
-            type="password"
-          />
-          <button type="submit">submit</button>
-        </form>
+      <div className="passwordFormContainer">
+        <div className="passwordForm">
+          <form onSubmit={this.handleSubmit.bind(this)}>
+            <input
+              placeholder="Room Password..."
+              value={this.state.password}
+              onChange={this.handleChange.bind(this)}
+              type="password"
+            />
+            <Button
+              type="submit"
+              loading={this.state.waiting}
+              onClick={this.handleSubmit}
+              className="pt-large pt-intent-primary"
+              text="submit">
+            </Button>
+          </form>
+        </div>
       </div>
     );
   }

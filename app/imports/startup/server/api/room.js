@@ -25,7 +25,7 @@ function validTokenPayload(payload, roomDocument) {
 
 // Common error handling
 const PASS_TO_CLIENT = 'PASS_TO_CLIENT';
-const GENERIC_ERROR_MESSAGE = 'Something went wrong... ¯\\(°_o)/¯';
+const GENERIC_ERROR_MESSAGE = 'Something went wrong... ☹️';
 
 Meteor.methods({
 

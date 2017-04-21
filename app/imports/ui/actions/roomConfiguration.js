@@ -27,7 +27,7 @@ export const CHECK_PASSWORD = 'CHECK_PASSWORD';
 export const JOIN_ROOM = 'JOIN_ROOM';
 export const UNEXPECTED_AUTHENTICATION_ERROR = 'UNEXPECTED_AUTHENTICATION_ERROR';
 
-const GENERIC_ERROR_MESSAGE = 'Something went wrong... ¯\\(°_o)/¯';
+const GENERIC_ERROR_MESSAGE = 'Something went wrong... ☹️';
 
 export const deleteRoomSecret = (roomName) => {
   localStorage.removeItem(`roomSecret:${roomName}`);

@@ -65,7 +65,7 @@ class CodePad extends Component {
           },
           bgColor: '#2e3136',
           iconColor: '#45b29d',
-          icon: 'ion-ios-gear',
+          icon: 'ion-ios-toggle-outline',
         },
       ],
     };

@@ -39,7 +39,7 @@ class Spotlight extends Component {
         name: 'Info',
         iconColor: '#fffad5',
         bgColor: '',
-        icon: 'information-circled',
+        icon: 'ios-information-outline',
         description: 'Room information',
       },
       {
@@ -128,7 +128,7 @@ class Spotlight extends Component {
       };
       const switchStyle = {
         backgroundColor: '#1b1d1e',
-        color: onTop ? '#beeb9f' : 'white', // tab.iconColor:white
+        color: onTop ? '#45b29d' : 'white', // tab.iconColor:white
       };
       return (
         <Popover
