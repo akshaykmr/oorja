@@ -1,5 +1,17 @@
 // page transitions
 
+.versionTag {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  z-index: 99999;
+  background-color: purple;
+  color: white;
+  border-radius: 6px;
+  padding: 4px;
+  font-size: 0.8em;
+}
+
 .page {
   position: absolute;
   width: 100%;

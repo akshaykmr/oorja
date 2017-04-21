@@ -12,6 +12,7 @@ class App extends Component {
     const path = this.props.location.pathname;
     return (
       <div>
+        <div className="versionTag"><strong>BETA</strong></div>
         <CSSTransitionGroup
           transitionName="page"
           transitionAppear={true}

@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import Loading from '../../Loading';
+import MinimalLogo from '../../MinimalLogo';
 
 class Spinner extends Component {
   render() {
     if (!this.props.show) return null;
     return (
       <div className="syncSpinner spin-infinite">
-        <Loading />
+        <MinimalLogo />
       </div>
     );
   }

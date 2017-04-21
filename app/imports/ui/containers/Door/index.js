@@ -12,7 +12,7 @@ import { Meteor } from 'meteor/meteor';
 import { Intent } from '@blueprintjs/core';
 import SupremeToaster from '../../components/Toaster';
 
-import Loading from '../../components/Loading';
+import MinimalLogo from '../../components/MinimalLogo';
 import PasswordPrompt from '../PasswordPrompt';
 import GettingReady from '../../components/room/GettingReady';
 import Room from '../Room';
@@ -269,7 +269,7 @@ class Door extends Component {
         return (
           <div className='loading page'>
             <div className="loader spin-infinite">
-              <Loading />
+              <MinimalLogo />
             </div>
           </div>
         );

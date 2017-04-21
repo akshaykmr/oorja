@@ -48,7 +48,7 @@ Meteor.methods({
     const checkIfValidRoomName = (roomName) => {
       const namePattern = /^[ @a-z0-9_-]+$/;
       if (!namePattern.test(roomName)) {
-        throw new Meteor.Error(errorTopic, 'Invalid Room Name');
+        throw new Meteor.Error(errorTopic, `Invalid Room Name: ${roomName}`);
       }
     };
 
@@ -81,9 +81,6 @@ Meteor.methods({
         }
         return char;
       }).join('');
-      checkIfValidRoomName(roomName);
-
-
       checkIfValidRoomName(roomName);
 
       const passwordEnabled = roomSpecification.shareChoice === shareChoices.PASSWORD;

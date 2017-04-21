@@ -1,6 +1,6 @@
 import React from 'react';
 /* eslint-disable max-len*/
-const Loading = () => (
+const MinimalLogo = () => (
   <svg height="100%" viewBox="0 0 96 96" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
       <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
           <g id="loader">
@@ -19,4 +19,4 @@ const Loading = () => (
   </svg>
 );
 /* eslint-enable max-len*/
-export default Loading;
+export default MinimalLogo;

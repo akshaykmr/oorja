@@ -155,10 +155,6 @@ class RoomSetup extends Component {
     const { roomNameTouched, validName, customization, customRoom, waitingForServer } = this.state;
     return (
       <div>
-        <div
-          className="logoJazz">
-          <Oorja onClick={this.handleSubmit} animate={waitingForServer}/>
-        </div>
         <div className="roomSetup room-form">
           <form onSubmit = {this.handleSubmit.bind(this)}>
             <fieldset disabled={this.state.waitingForServer}>
@@ -168,7 +164,7 @@ class RoomSetup extends Component {
                     Room Name
                     <span className="pt-text-muted"> </span>
                   <input className="pt-input" type="text" id="roomName"
-                    placeholder=""
+                    placeholder="something meaningful"
                     style={{ color: roomNameTouched && !validName ? '#ff2d00' : 'inherit' }}
                     value={customization.roomName}
                     onChange={this.handleNameChange.bind(this)} />
@@ -210,6 +206,10 @@ class RoomSetup extends Component {
               </div>
           </fieldset>
           </form>
+        </div>
+        <div
+          className="logoJazz">
+          <Oorja onClick={this.handleSubmit} animate={waitingForServer}/>
         </div>
       </div>
     );
