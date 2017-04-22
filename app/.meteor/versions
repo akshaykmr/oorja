@@ -21,6 +21,10 @@ binary-heap@1.0.10
 blaze@2.3.2
 blaze-tools@1.0.10
 boilerplate-generator@1.0.11
+browser-policy@1.1.0
+browser-policy-common@1.0.11
+browser-policy-content@1.1.0
+browser-policy-framing@1.1.0
 caching-compiler@1.1.9
 caching-html-compiler@1.1.2
 callback-hook@1.0.10
@@ -44,7 +48,7 @@ fastclick@1.0.13
 fourseven:scss@4.5.0
 geojson-utils@1.0.10
 github-oauth@1.2.0
-google-oauth@1.2.3
+google-oauth@1.2.4
 hot-code-push@1.0.4
 html-tools@1.0.11
 htmljs@1.0.11

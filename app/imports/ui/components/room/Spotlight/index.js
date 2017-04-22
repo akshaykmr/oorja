@@ -138,8 +138,7 @@ class Spotlight extends Component {
           popoverClassName="pt-popover-content-sizing"
           position={uiSize === uiConfig.COMPACT ? Position.TOP : Position.RIGHT}
           className={classNames(switchClassNames)}
-          hoverOpenDelay={800}
-          useSmartPositioning={true}>
+          hoverOpenDelay={800}>
           <div
             onClick={() => { this.switchToTab(tab); }}
             style={switchStyle}

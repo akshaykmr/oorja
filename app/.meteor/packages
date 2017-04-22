@@ -27,7 +27,7 @@ alexbeauchemin:accounts-twitch
 service-configuration@1.0.11
 check@1.2.5
 audit-argument-checks@1.0.7
-# browser-policy@1.0.9
+browser-policy@1.0.9
 
 alanning:roles
 static-html@1.1.11
