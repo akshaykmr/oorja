@@ -1,5 +1,5 @@
 .content.Info {
-  background-image: url('/images/geo.png');
+  //background-image: url('/images/geo.png');
   border-top-left-radius: 5px;
   &.compact {
     border-top-left-radius: initial;
@@ -18,6 +18,8 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    position: relative;
+    right: 30px;
 
     &:hover .copyButton{
       transform: scale(1.05, 1.05);

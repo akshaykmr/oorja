@@ -38,7 +38,7 @@ class Spotlight extends Component {
         tabId: 1,
         name: 'Info',
         iconColor: '#fffad5',
-        bgColor: '',
+        bgColor: '#ffffff',
         icon: 'android-share-alt',
         description: 'Room information',
       },
@@ -57,7 +57,7 @@ class Spotlight extends Component {
         name: 'QuillPad',
 
         iconColor: '#fff0a5',
-        bgColor: '#f3f3f3',
+        bgColor: '#ffffff',
         icon: 'document-text',
         description: 'Shared Richtext document',
       },
