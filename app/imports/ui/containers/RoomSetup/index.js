@@ -165,7 +165,7 @@ class RoomSetup extends Component {
                     <span className="pt-text-muted"> </span>
                   <input className="pt-input" type="text" id="roomName"
                     placeholder="something meaningful"
-                    style={{ color: roomNameTouched && !validName ? '#ff2d00' : 'inherit' }}
+                    style={{ color: roomNameTouched && !validName ? '#d90000' : 'inherit' }}
                     value={customization.roomName}
                     onChange={this.handleNameChange.bind(this)} />
                   </label>

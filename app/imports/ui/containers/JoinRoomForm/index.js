@@ -52,6 +52,7 @@ class JoinRoomForm extends Component {
         name: firstName,
         textAvatarColor: textAvatarColor || this.getRandomColor(),
         picture,
+        validName: true,
         goAnon: false,
       };
     }
@@ -61,6 +62,7 @@ class JoinRoomForm extends Component {
       name: user ? `${user.profile.firstName} ${user.profile.lastName}` : '',
       textAvatarColor: this.getRandomColor(),
       picture: user ? user.profile.picture : null,
+      validName: true,
       goAnon: false,
     };
   }
@@ -87,6 +89,7 @@ class JoinRoomForm extends Component {
       loggedIn: true,
       name,
       picture,
+      validName: true,
     });
   }
 
@@ -96,16 +99,19 @@ class JoinRoomForm extends Component {
   }
 
   handleNameChange(event) {
+    const candidateName = event.target.value;
+    const namePattern = /^[ @a-zA-Z0-9_-]+$/;
     this.setState({
       ...this.state,
-      name: event.target.value,
+      validName: namePattern.test(candidateName),
+      name: candidateName,
       textAvatarColor: this.getRandomColor(),
     });
   }
 
   handleSubmit(event) {
     event.preventDefault();
-    if (this.state.waiting) return;
+    if (this.state.waiting || !(this.state.validName)) return;
     if (!Meteor.user() && !this.state.name) {
       return;
     }
@@ -135,12 +141,14 @@ class JoinRoomForm extends Component {
   }
 
   render() {
-    const { name, loggedIn, picture, waiting, textAvatarColor, existingUser, goAnon } = this.state;
+    const { name, loggedIn, picture, waiting, textAvatarColor, existingUser, goAnon, validName }
+      = this.state;
+
     const inputAttr = {
       disabled: loggedIn || !!this.existingUser,
       value: name,
       onChange: this.handleNameChange,
-      className: `nameInput ${name ? 'active' : ''}`,
+      className: classNames({ nameInput: true, active: !!name, errorState: !validName }),
       placeholder: 'Your Name...',
     };
 
@@ -163,7 +171,7 @@ class JoinRoomForm extends Component {
       type: 'submit',
       text: 'Join the Room',
       rightIconName: 'arrow-right',
-      disabled: !name || waiting,
+      disabled: !name || waiting || !validName,
       loading: waiting,
       className: 'joinButton pt-large pt-intent-success',
       onSubmit: this.handleSubmit,

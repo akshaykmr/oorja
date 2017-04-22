@@ -5,5 +5,4 @@ BrowserPolicy.content.allowSameOriginForAll();
 BrowserPolicy.content.allowDataUrlForAll();
 BrowserPolicy.content.allowOriginForAll('blob:');
 BrowserPolicy.content.allowConnectOrigin('https://*.oorja.io');
-BrowserPolicy.content.disallowInlineScripts();
 BrowserPolicy.content.allowImageOrigin('*');

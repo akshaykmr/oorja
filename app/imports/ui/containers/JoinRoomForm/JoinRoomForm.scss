@@ -45,6 +45,10 @@ $preview-spacing: 30px;
     width: $input-width;
     transform: translate3d(($preview-width - $input-width)/2,0,0);
     transition: transform 500ms ease;
+
+    &.errorState {
+      color: #d90000;
+    }
   }
 
   .nameInput.active {
