@@ -97,7 +97,6 @@ class LoginWithService extends Component {
     return this.services.map(({ service, login, icon }, index) => {
       const loginButtonClasses = classNames({
         loginButton: true,
-        buttonTransition: true,
         active: loggedIn && loginService === service,
         waiting: waitingFor === service,
       });

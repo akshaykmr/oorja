@@ -1,16 +1,62 @@
+/* global location*/
+
 import React, { Component } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { Intent } from '@blueprintjs/core';
+
+import SupremeToaster from '../../../../../components/Toaster';
 
 import tabPropTypes from '../tabPropTypes';
 import './info.scss';
 
 class Info extends Component {
 
+  constructor(props) {
+    super(props);
+    this.onCopy = this.onCopy.bind(this);
+    const { host, pathname, search } = location;
+    const roomLink = host + pathname + search;
+    this.state = {
+      roomLink,
+      copied: false,
+    };
+  }
+
+  onCopy() {
+    this.setState({ copied: true });
+    SupremeToaster.show({
+      message: (
+        <div style={{ textAlign: 'center' }}>
+        Link Copied to Clipboard 👍
+        </div>
+      ),
+      intent: Intent.SUCCESS,
+    });
+  }
+
   render() {
+    const { roomLink } = this.state;
     return (
       <div className={this.props.classNames} style={this.props.style}>
-        Info tab
-        <br/>
-        Room link and other stats go here.
+      <CopyToClipboard text={roomLink}
+        onCopy={this.onCopy}>
+        <div className="shareRoom" onClick={this.copyRoomLinkToClipboard}>
+          <div className="copyButton">
+            <i className="icon ion-ios-copy-outline"></i>
+          </div>
+          <div className="copyText">
+            Click to copy room link 👋
+          </div>
+          <div className="roomLink">
+              <a onClick={ event => event.preventDefault()}
+                href={roomLink}>{roomLink}
+              </a>
+          </div>
+          <div className="copyReason">
+            Share it to invite others to this room
+          </div>
+        </div>
+      </CopyToClipboard>
       </div>
     );
   }

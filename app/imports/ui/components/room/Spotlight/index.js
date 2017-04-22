@@ -39,7 +39,7 @@ class Spotlight extends Component {
         name: 'Info',
         iconColor: '#fffad5',
         bgColor: '',
-        icon: 'ios-information-outline',
+        icon: 'android-share-alt',
         description: 'Room information',
       },
       {

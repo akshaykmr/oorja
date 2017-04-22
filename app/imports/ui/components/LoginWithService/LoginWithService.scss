@@ -8,6 +8,11 @@ $icon-spacing: 10px;
   margin-top: 60px;
   transition: opacity 500ms ease;
 
+  // safari workaround ? wth yo
+  .ion-social-linkedin, .ion-social-twitter, .ion-social-facebook, .ion-social-googleplus {
+    display: initial !important;
+  }
+
   &.blur {
     opacity: 0.5;
   }
@@ -56,7 +61,6 @@ $icon-spacing: 10px;
 
 
 .loginButton {
-  position: relative;
   cursor: pointer;
   display: inline-block;
   height: $icon-size;
@@ -71,11 +75,7 @@ $icon-spacing: 10px;
 
   &:hover {
     transform: scale(1.05, 1.05);
-  }
-
-  /* Fade in the pseudo-element with the bigger shadow */
-  &:hover::after {
-    opacity: 1;
+    box-shadow: 0px 5px 15px -6px rgba(0, 0, 0, 0.81);
   }
 
   // -webkit-background-clip: padding-box; 
@@ -99,10 +99,6 @@ $icon-spacing: 10px;
   }
   &#Twitch {
     color: #6441a4;
-  }
-
-  &:hover {
-    box-shadow: 0px 5px 15px -6px rgba(0, 0, 0, 0.81);
   }
 
   &.active {
