@@ -40,7 +40,7 @@ class Spotlight extends Component {
         iconColor: '#fffad5',
         bgColor: '#ffffff',
         icon: 'android-share-alt',
-        description: 'Room information',
+        description: 'Invite others to this room',
       },
       {
         tabId: 2,
@@ -170,6 +170,7 @@ class Spotlight extends Component {
         roomInfo={this.props.roomInfo}
         connectedUsers={this.props.connectedUsers}
         roomAPI={this.props.roomAPI}
+        uiSize={this.props.uiSize}
         onTop={onTop}
         Spinner={Spinner}
         classNames={classNames(tabContentClassNames)}

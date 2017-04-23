@@ -11,7 +11,7 @@
     max-width: 380px;
     width: 90%;
     margin: 0 auto;
-    margin-top: 100px;
+    margin-top: 90px;
     display: flex;
     padding: 5px;
     border-radius: 20px;
@@ -26,6 +26,11 @@
       box-shadow: 0px 5px 15px -6px rgba(0, 0, 0, 0.81);
       background-color: mediumaquamarine;
     }
+  }
+
+  &.compact .shareRoom {
+    position: initial;
+    right: initial;
   }
 
   .copyButton {
@@ -60,5 +65,43 @@
     color: #666666;
     height: 30px;
     line-height: 30px;
+  }
+
+  .exploreContainer {
+    margin-left: 10px;
+    position: relative;
+    top: -40px;
+
+    .arrowPointer {
+      height: 100px;
+      width: 100px;
+      transform: rotateY(180deg) rotateZ(-30deg);
+    }
+
+    .text {
+      font-size: 1.2em;
+      color: #666666;
+      margin-top: 20px;
+      margin-left: 10px;
+    }
+  }
+
+  &.compact .exploreContainer {
+    width: 100%;
+    position: absolute;
+    bottom: 20px;
+    top: initial;
+    margin-left: initial;
+    .arrowPointer {
+      // width: 60px;
+      // height: 60px;
+      display: none;
+    }
+
+    .text {
+      margin: 0 auto;
+      text-align: center;
+      font-size: 1em;
+    }
   }
 }

@@ -177,7 +177,9 @@ class Room extends Component {
       });
       this.subscribedDataStreams = {};
       this.subscribedMediaStreams = {};
-      this.tryToReconnect();
+      setTimeout(() => {
+        this.tryToReconnect();
+      }, 1000);
     });
   }
 
