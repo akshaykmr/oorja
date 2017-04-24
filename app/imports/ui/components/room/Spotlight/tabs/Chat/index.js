@@ -37,6 +37,7 @@ class Chat extends Component {
     this.appendMessage = this.appendMessage.bind(this);
     this.removeMessage = this.removeMessage.bind(this);
     this.updateState = this.updateState.bind(this);
+    this.handleThreadScroll = _.throttle(this.handleThreadScroll, 100);
     this.handleThreadScroll = this.handleThreadScroll.bind(this);
     this.scrollToBottom = this.scrollToBottom.bind(this);
     this.prefixString = this.props.roomAPI.getUserId() + _.random(5000).toString();
@@ -127,12 +128,15 @@ class Chat extends Component {
       key: message.key,
       text: message.text,
     };
+
+    // TODO: below commented code is related to handleThreadScroll
     // let newMessageCount = this.stateBuffer.newMessageCount;
     // if (this.stateBuffer.freeNavigation) newMessageCount += 1;
     this.updateState({
       chatMessages: { $splice: [[position, 0, chatMessage]] },
       // newMessageCount: { $set: newMessageCount },
     });
+    // if freeNavigation is set false -> scroll the thread to bottom on every new message.
     // if (!this.stateBuffer.freeNavigation) { // autoscoll chat-thread.
     this.chatThread.scrollTop = this.chatThread.scrollHeight;
     // }
@@ -151,9 +155,17 @@ class Chat extends Component {
     });
   }
 
-  // FIXME
-  handleThreadScroll() { // throttle this function later
-    if (this.chatThread.scrollTop === this.chatThread.scrollHeight) {
+// FIXME:
+// expectedBehaviour: onScroll
+// if freeNavigation is true ignore this function and return;
+// else
+// when user scrolls the chatThread, set freeNavigation to false.
+// i.e. dont automatically scroll to bottom with new messaages.
+//  then, keep track of new Messages and show a counter on bottom left. (see this.appendMessage)
+// clicking on the counter show bring the thread to bottom | reset counter |
+// set freeNavigation to false. i.e reset deafult behaviour
+  handleThreadScroll() {
+    if (this.chatThread.scrollTop === this.chatThread.scrollHeight) { // fix this
       this.updateState({
         freeNavigation: { $set: false },
         newMessageCount: { $set: 0 },
@@ -176,7 +188,6 @@ class Chat extends Component {
     const message = {
       userId: this.props.roomAPI.getUserId(),
       key: _.uniqueId(this.prefixString),
-      //  TODO: timeStamp: this.props.roomAPI.timeStamp(),
       text: chatInputValue.trim(),
     };
 

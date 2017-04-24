@@ -1,5 +1,7 @@
+import { Meteor } from 'meteor/meteor';
 import _ from 'lodash';
 import status from '../../components/room/constants/status';
+import roomActivities from '../../components/room/constants/roomActivities';
 
 class RoomAPI {
   constructor(room) {
@@ -46,6 +48,7 @@ class RoomAPI {
   }
 
   addActivityListener(activity, listner) {
+    if (!roomActivities[activity]) throw new Meteor.Error('Room activity not found.');
     this.room.activityListener.listen(activity, listner);
   }
 
