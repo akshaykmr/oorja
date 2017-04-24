@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 // import Erizo from '../../../modules/Erizo/';
 
+// throwaway component to test Erizo quickly.
+
 /* eslint-disable */
 export default class testErizo extends Component {
   constructor(props) {

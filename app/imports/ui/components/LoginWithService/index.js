@@ -142,7 +142,7 @@ class LoginWithService extends Component {
       <div className="animate fade-in">
         <span>{greet}</span>
         <span>
-          <button type="button" className="pt-button" onClick={logoutHandler}>logout</button>
+          <button type="button" className="pt-button" onClick={logoutHandler}>Sign out</button>
         </span>
       </div>
     );
