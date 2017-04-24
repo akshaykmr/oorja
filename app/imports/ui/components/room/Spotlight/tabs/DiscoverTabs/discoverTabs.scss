@@ -1,0 +1,34 @@
+.content.DiscoverTabs {
+  border-top-left-radius: 6px;
+  background-image: url('/images/geo.png');
+  &.compact {
+    border-top-left-radius: initial;
+    .container {
+      position: initial;
+      left: initial;
+    }
+  }
+  
+  .container {
+    padding-top: 20px;
+    max-width: 600px;
+    width: 90%;
+    margin: 0 auto;
+    height: 100%;
+    position: relative;
+    left: -30px;
+
+    .heading {
+      color: #333333;
+      width: 100%;
+      text-align: center;
+      font-size: 1.4em;
+    }
+
+    .description {
+      width: 100%;
+      text-align: center;
+      color: #666666;
+    }
+  }
+}

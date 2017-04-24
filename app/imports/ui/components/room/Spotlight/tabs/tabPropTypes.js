@@ -3,6 +3,7 @@ import React from 'react';
 // common proptypes for tab components
 export default {
   tabInfo: React.PropTypes.object,
+  tabs: React.PropTypes.array.isRequired,
   roomAPI: React.PropTypes.object,
   connectedUsers: React.PropTypes.array,
   roomInfo: React.PropTypes.object,

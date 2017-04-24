@@ -10,6 +10,7 @@ import sentencer from 'sentencer';
 
 import { Rooms } from '../../../collections/common';
 import N from '../../../modules/NuveClient/';
+import tabs from './tabs';
 
 const { private: { saltRounds, Nuve, JWTsecret, JWTalgo, tokenVersion } } = Meteor.settings;
 
@@ -97,6 +98,7 @@ Meteor.methods({
         NuveServiceName: Nuve.serviceName,
         owner: Meteor.userId() || null,
         roomName,
+        tabs, // currently loading all tabs.
         passwordEnabled,
         roomSecret,
         password,
@@ -149,7 +151,7 @@ Meteor.methods({
     }
     const existingUser = _.find(room.userTokens, { userToken });
     // be sure to filter for only relevent fields. dont send the whole doc lol.
-    const info = _.pick(room, ['passwordEnabled', '_id']);
+    const info = _.pick(room, ['passwordEnabled', '_id', 'tabs']);
 
     const roomInfo = {
       ...info,
@@ -284,6 +286,10 @@ Meteor.methods({
     };
   },
 
+  getTabList() {
+    // make range based when tabList gets big.
+    return tabs;
+  },
 });
 
 
@@ -297,6 +303,7 @@ Meteor.publish('room.info', (roomName, credentials) => {
   const roomCursor = Rooms.find({ roomName }, {
     fields: {
       roomName: 1,
+      tabs: 1,
       participants: 1,
       passwordEnabled: 1,
       roomSecret: 1,

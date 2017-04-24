@@ -17,7 +17,7 @@ import Settings from './tabs/Settings';
 import QuillPad from './tabs/QuillPad';
 import CodePad from './tabs/CodePad';
 import Chat from './tabs/Chat/';
-import AddTab from './tabs/AddTab';
+import DiscoverTabs from './tabs/DiscoverTabs';
 
 class Spotlight extends Component {
 
@@ -30,63 +30,10 @@ class Spotlight extends Component {
       3: QuillPad,
       4: CodePad,
       5: Chat,
-      6: AddTab,
+      6: DiscoverTabs,
     };
 
-    const defaultTabs = [ // default tabs
-      {
-        tabId: 1,
-        name: 'Info',
-        iconColor: '#fffad5',
-        bgColor: '#ffffff',
-        icon: 'android-share-alt',
-        description: 'Invite others to this room',
-      },
-      {
-        tabId: 2,
-        name: 'Settings',
-
-        iconColor: '#acf0f2',
-        ContentBgColor: '',
-        bgColor: '',
-        icon: 'ios-settings',
-        description: 'Configure your webcam and Room settings',
-      },
-      {
-        tabId: 3,
-        name: 'QuillPad',
-
-        iconColor: '#fff0a5',
-        bgColor: '#ffffff',
-        icon: 'document-text',
-        description: 'Shared Richtext document',
-      },
-      {
-        tabId: 4,
-        name: 'CodePad',
-
-        iconColor: 'turquoise',
-        bgColor: '',
-        icon: 'code-working',
-        description: 'Shared Code editor',
-      },
-      {
-        tabId: 5,
-        name: 'Chat',
-        iconColor: '#9ac16e',
-        bgColor: '#faebd7',
-        icon: 'chatbubbles',
-        description: 'Chat',
-      },
-      {
-        tabId: 6,
-        name: 'AddTab',
-        iconColor: '#7dd3f5',
-        bgColor: '',
-        icon: 'ios-plus',
-        description: 'Discover more tabs',
-      },
-    ];
+    const defaultTabs = props.roomInfo.tabs;
 
     const lastActiveTab = localStorage.getItem(`lastActiveTab:${props.roomInfo.roomName}`);
     const lastActiveTabIndex = _.findIndex(defaultTabs, { name: lastActiveTab });
@@ -167,6 +114,7 @@ class Spotlight extends Component {
       return <TabComponent
         key={tab.name}
         tabInfo={tab}
+        tabs={this.state.tabs}
         roomInfo={this.props.roomInfo}
         connectedUsers={this.props.connectedUsers}
         roomAPI={this.props.roomAPI}
