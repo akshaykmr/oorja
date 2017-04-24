@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import update from 'immutability-helper';
 import classNames from 'classnames';
 import _ from 'lodash';
 
@@ -19,10 +20,16 @@ import CodePad from './tabs/CodePad';
 import Chat from './tabs/Chat/';
 import DiscoverTabs from './tabs/DiscoverTabs';
 
+// constants
+import tabStatus from './tabStatus';
+
 class Spotlight extends Component {
 
   constructor(props) {
     super(props);
+
+    this.updateState = this.updateState.bind(this);
+    this.initialTabState = this.initialTabState.bind(this);
 
     this.tabComponents = {  // id -> reactComponent(tab)
       1: Info,
@@ -34,30 +41,83 @@ class Spotlight extends Component {
     };
 
     const defaultTabs = props.roomInfo.tabs;
+    /* eslint-disable arrow-body-style */
+    const tabListState = defaultTabs.map(this.initialTabState);
+    /* eslint-enable arrow-body-style */
 
     const lastActiveTab = localStorage.getItem(`lastActiveTab:${props.roomInfo.roomName}`);
     const lastActiveTabIndex = _.findIndex(defaultTabs, { name: lastActiveTab });
     const tabFound = lastActiveTabIndex > -1;
 
     this.state = {
-      tabs: defaultTabs,
-      activeTab: defaultTabs[tabFound ? lastActiveTabIndex : 0],
+      tabs: tabListState,
+      activeTabIndex: tabFound ? lastActiveTabIndex : 0,
+    };
+    this.stateBuffer = this.state;
+  }
+
+  initialTabState(tab) {
+    return {
+      ...tab,
+      // is the tab component loaded ?
+      status: this.tabComponents[tab.tabId] ? tabStatus.LOADED : tabStatus.LOADING,
+
+      // badge shown alongside switch
+      badge: {
+        content: '', // 2 characters max.
+        color: '',
+        visible: false,
+      },
+      // glowing animation for the tab switch | for some added ux or something
+      glow: false,
     };
   }
 
-  switchToTab(tab) {
-    const from = this.state.activeTab.tabId;
-    const to = tab.tabId;
-    this.setState({
-      ...this.state,
-      activeTab: tab,
+  updateState(changes, buffer = this.stateBuffer) {
+    this.stateBuffer = update(buffer, changes);
+    this.setState(this.stateBuffer);
+  }
+
+  switchToTab(tabIndex) {
+    const { activeTabIndex, tabs } = this.state;
+    const from = tabs[activeTabIndex].tabId;
+    const to = tabs[tabIndex].tabId;
+    this.updateState({
+      activeTabIndex: { $set: tabIndex },
     });
-    localStorage.setItem(`lastActiveTab:${this.props.roomInfo.roomName}`, tab.name);
+    localStorage.setItem(`lastActiveTab:${this.props.roomInfo.roomName}`, tabs[tabIndex].name);
     this.props.dispatchRoomActivity(roomActivities.TAB_SWITCH, { from, to });
   }
 
+  /*
+    nextProps
+  */
+  componentWillReceiveProps() {
+    // find if any new tabs were added
+    // by finding difference between props.roomInfo.tabs with nextProps.roomInfo.tabs
+    // for each of these tabs, get their initalState and push it to state.tabs
+  }
+
+  /*
+    prevProps, prevState
+  */
+  componentDidUpdate() {
+    this.fetchComponents();
+  }
+
+  fetchComponents() {
+    // for each tab in LOADING state, fetch that tab component from server,
+    // dynamic import with promise
+    // insert it to this.tabComponents and set tab state to LOADED
+  }
+
+  componentDidMount() {
+    this.fetchComponents();
+  }
+
   render() {
-    const activeTab = this.state.activeTab;
+    const { tabs, activeTabIndex } = this.state;
+    const activeTab = tabs[activeTabIndex];
     const { uiSize, streamContainerSize } = this.props;
 
     // change styling here for mobile later.
@@ -67,7 +127,8 @@ class Spotlight extends Component {
       default: uiSize !== uiConfig.COMPACT,
     };
 
-    const renderSwitch = (tab) => {
+    const renderSwitch = (tab, tabIndex) => {
+      if (tab.status !== tabStatus.LOADED) return null;
       const onTop = tab.name === activeTab.name;
       const switchClassNames = {
         switch: true,
@@ -87,7 +148,7 @@ class Spotlight extends Component {
           className={classNames(switchClassNames)}
           hoverOpenDelay={800}>
           <div
-            onClick={() => { this.switchToTab(tab); }}
+            onClick={() => { this.switchToTab(tabIndex); }}
             style={switchStyle}
             id={tab.name}>
             <i className={`icon ion-${tab.icon}`}></i>
@@ -97,6 +158,7 @@ class Spotlight extends Component {
     };
 
     const renderTabContent = (tab) => {
+      if (tab.status !== tabStatus.LOADED) return null;
       const onTop = tab.name === activeTab.name;
       const tabContentClassNames = {
         content: true,

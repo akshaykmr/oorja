@@ -1,4 +1,4 @@
-export default { // enums 😫
+export default {
   PRIMARY_DATA_STREAM: 'PRIMARY_DATA_STREAM',
   MEDIA_STREAM: 'MEDIA_STREAM',
 };

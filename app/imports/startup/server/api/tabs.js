@@ -2,7 +2,7 @@ export default [ // upsert contents to DB when this file gets big.
   {
     tabId: 1,
     name: 'Info',
-    DisplayName: 'Room Information',
+    displayName: 'Room Information',
     iconColor: '#fffad5',
     bgColor: '#ffffff',
     icon: 'android-share-alt',
@@ -11,7 +11,7 @@ export default [ // upsert contents to DB when this file gets big.
   {
     tabId: 2,
     name: 'Settings',
-    DisplayName: 'Settings',
+    displayName: 'Settings',
     iconColor: '#acf0f2',
     ContentBgColor: '',
     bgColor: '',
@@ -21,7 +21,7 @@ export default [ // upsert contents to DB when this file gets big.
   {
     tabId: 3,
     name: 'QuillPad',
-    DisplayName: 'QuillPad',
+    displayName: 'QuillPad',
     iconColor: '#fff0a5',
     bgColor: '#ffffff',
     icon: 'document-text',
@@ -30,7 +30,7 @@ export default [ // upsert contents to DB when this file gets big.
   {
     tabId: 4,
     name: 'CodePad',
-    DisplayName: 'CodePad',
+    displayName: 'CodePad',
     iconColor: 'turquoise',
     bgColor: '',
     icon: 'code-working',
@@ -39,19 +39,28 @@ export default [ // upsert contents to DB when this file gets big.
   {
     tabId: 5,
     name: 'Chat',
-    DisplayName: 'Chat',
+    displayName: 'Chat',
     iconColor: '#9ac16e',
     bgColor: '#faebd7',
     icon: 'chatbubbles',
-    description: 'Chat',
+    description: 'Chat messaging',
   },
   {
     tabId: 6,
     name: 'DiscoverTabs',
-    DisplayName: 'Discover Tabs',
+    displayName: 'Discover Tabs',
     iconColor: '#7dd3f5',
     bgColor: '#ffffff',
     icon: 'ios-plus',
     description: 'Discover more tabs',
+  },
+  {
+    tabId: 124,
+    name: 'test tab',
+    displayName: 'testing tab',
+    iconColor: '#7dd3f5',
+    bgColor: '#ffffff',
+    icon: 'ios-plus',
+    description: 'lorem ipsum',
   },
 ];

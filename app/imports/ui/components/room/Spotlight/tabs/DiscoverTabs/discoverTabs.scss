@@ -1,6 +1,6 @@
 .content.DiscoverTabs {
   border-top-left-radius: 6px;
-  background-image: url('/images/geo.png');
+  // background-image: url('/images/geo.png');
   &.compact {
     border-top-left-radius: initial;
     .container {
@@ -9,7 +9,7 @@
     }
   }
   
-  .container {
+  > .container {
     padding-top: 20px;
     max-width: 600px;
     width: 90%;
@@ -18,17 +18,49 @@
     position: relative;
     left: -30px;
 
-    .heading {
-      color: #333333;
-      width: 100%;
-      text-align: center;
-      font-size: 1.4em;
+    > .title {
+      height: 46px;
+      .heading {
+        color: #333333;
+        width: 100%;
+        text-align: center;
+        font-size: 1.4em;
+      }
+      .description {
+        width: 100%;
+        text-align: center;
+        color: #666666;
+      }
+    }
+  }
+
+  .tabList {
+    height: calc(100% - 46px);
+    padding-top: 20px;
+  }
+
+  .tabPreview {
+    padding: 8px;
+    border-bottom: 1px solid grey;
+    position: relative;
+    .name {
+      font-size: 1.14em;
+    }
+    .description{
+      color: #666666;
+      width: 70%;
     }
 
-    .description {
-      width: 100%;
+    .status {
+      width: 50px;
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 2.1em;
+      height: 50px;
+      line-height: 50px;
       text-align: center;
-      color: #666666;
+      cursor: pointer;
     }
   }
 }

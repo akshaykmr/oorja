@@ -11,6 +11,8 @@ import tabPropTypes from '../tabPropTypes';
 import SupremeToaster from '../../../../Toaster';
 import './discoverTabs.scss';
 
+import tabStatus from '../../tabStatus';
+
 class DiscoverTabs extends Component {
 
   constructor(props) {
@@ -22,12 +24,10 @@ class DiscoverTabs extends Component {
     };
 
     this.stateBuffer = this.state;
-    this.fetchTabs = _.throttle(this.fetchTabs, 60000);
+    this.fetchTabs = _.throttle(this.fetchTabs, 6000);
     this.updateState = this.updateState.bind(this);
     this.fetchTabs = this.fetchTabs.bind(this);
-    if (props.onTop) {
-      this.fetchTabs();
-    }
+    this.renderTabPreview = this.renderTabPreview.bind(this);
 
     props.roomAPI.addActivityListener(roomActivities.TAB_SWITCH, ({ to }) => {
       if (to === props.tabInfo.tabId) {
@@ -39,6 +39,12 @@ class DiscoverTabs extends Component {
   updateState(changes, buffer = this.stateBuffer) {
     this.stateBuffer = update(buffer, changes);
     this.setState(this.stateBuffer);
+  }
+
+  componentDidMount() {
+    if (this.props.onTop) {
+      this.fetchTabs();
+    }
   }
 
   fetchTabs() { // make range based later | or somthings like infinite scroll
@@ -57,6 +63,58 @@ class DiscoverTabs extends Component {
       );
   }
 
+  renderTabPreview(tab) {
+    if (tab.name === 'DiscoverTabs') return null;
+    const localTab = _.find(this.props.tabs, { tabId: tab.tabId });
+    let icon = 'ion-plus-circled';
+    let loading = false;
+    let iconColor = '#1a7ecb';
+    if (localTab) {
+      const status = localTab.status;
+      if (status === tabStatus.LOADED) {
+        icon = 'ion-ios-checkmark';
+        iconColor = 'darkseagreen';
+      } else if (status === tabStatus.LOADING) {
+        loading = true;
+        icon = 'ion-load-d';
+      }
+    }
+
+    const handleClick = () => {
+      if (loading) {
+        SupremeToaster.show({
+          message: 'please wait for the tab to load 😷',
+          intent: Intent.PRIMARY,
+        });
+        return;
+      } else if (localTab) {
+        SupremeToaster.show({
+          message: 'This tab is already part of the room',
+          intent: Intent.PRIMARY,
+        });
+        return;
+      }
+      // TODO: call meteor method to add this tab to the room.
+    };
+    return (
+      <div
+        key={tab.tabId}
+        className="tabPreview">
+        <div className="name">
+          {tab.displayName}
+        </div>
+        <div className="description">
+          {tab.description}
+        </div>
+        <div
+          className={`status ${loading ? 'spin-infinite' : ''}`}
+          style={{ color: iconColor }} onClick={handleClick}>
+          <i className={`icon ${icon}`}></i>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     return (
       <div className={this.props.classNames} style={this.props.style}>
@@ -68,6 +126,9 @@ class DiscoverTabs extends Component {
             <div className="description">
               tabs allow you to add more functionality to your room 🚀
             </div>
+          </div>
+          <div className="tabList">
+            {this.state.tabList.map(this.renderTabPreview)}
           </div>
         </div>
       </div>
