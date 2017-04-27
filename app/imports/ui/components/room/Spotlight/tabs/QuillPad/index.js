@@ -55,7 +55,7 @@ class QuillPad extends Component {
         bounds: tabInfo.name,
         modules: {
           // formula: true, KaTex
-          // syntax: true, // uses highliht js
+          // syntax: true, // uses highlight js
           toolbar: [
             [{ size: ['small', false, 'large', 'huge'] }],
             ['bold', 'italic', 'underline'],

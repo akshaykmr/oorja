@@ -3,6 +3,8 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import update from 'immutability-helper';
+import Remarkable from 'remarkable';
+// import hljs from 'highlight.js';
 
 import Avatar from '../../../Avatar';
 import roomActivities from '../../../constants/roomActivities';
@@ -27,6 +29,10 @@ class Chat extends Component {
     this.y = null;
 
     this.chatInput = null; // dom element for chatInput
+    this.md = new Remarkable({
+      linkify: true,
+      // todo: test highlight code using hljs
+    });
 
     this.history = 50;
 
@@ -217,9 +223,14 @@ class Chat extends Component {
     };
     const { user, key } = chatMessage;
     return (
-      <li className={classNames(bubbleClassNames)} key={key}>
+      <li
+        className={classNames(bubbleClassNames)}
+        key={key}>
         <Avatar user={user}/>
-        {chatMessage.text}
+        <div
+          className="message"
+          dangerouslySetInnerHTML={{ __html: this.md.render(chatMessage.text) }}>
+        </div>
       </li>
     );
   }

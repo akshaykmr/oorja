@@ -48,19 +48,26 @@ class DiscoverTabs extends Component {
   }
 
   fetchTabs() { // make range based later | or somthings like infinite scroll
+    if (this.unmountInProgress) return;
     this.updateState({ fetchingData: { $set: true } });
     Meteor.callPromise('getTabList')
       .then(
         (tabList) => {
+          if (this.unmountInProgress) return;
           this.updateState({ fetchingData: { $set: false }, tabList: { $set: tabList } });
         },
         () => {
+          if (this.unmountInProgress) return;
           SupremeToaster.show({
             message: 'Could not retrieve tabs from server 😕',
-            intent: Intent.WARNING,
+            intent: Intent.DANGER,
           });
         }
       );
+  }
+
+  componentWillUnmount() {
+    this.unmountInProgress = true;
   }
 
   renderTabPreview(tab) {
@@ -77,6 +84,9 @@ class DiscoverTabs extends Component {
       } else if (status === tabStatus.LOADING) {
         loading = true;
         icon = 'ion-load-d';
+      } else if (status === tabStatus.ERROR) {
+        icon = 'ion-alert-circled';
+        iconColor = 'palevioletred';
       }
     }
 
