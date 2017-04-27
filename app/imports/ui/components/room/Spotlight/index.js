@@ -236,11 +236,7 @@ class Spotlight extends Component {
         // move to config if it feels good
         style={{ height: streamContainerSize === uiConfig.LARGE ? '82%' : 'calc(100% - 60px)' }} >
         <div className="content-wrapper">
-          {
-            Object.keys(this.state.tabStatusRegistry)
-            .map(idString => Number(idString))
-            .map(renderTabContent)
-          }
+          {Object.keys(this.state.tabStatusRegistry).map(renderTabContent)}
         </div>
         <div className="content-switcher">
           <CSSTransitionGroup
@@ -249,11 +245,7 @@ class Spotlight extends Component {
               transitionAppearTimeout={1500}
               transitionEnterTimeout={1500}
               transitionLeaveTimeout={1000}>
-              {
-                Object.keys(this.state.tabStatusRegistry)
-                .map(idString => Number(idString))
-                .map(renderSwitch)
-              }
+              {Object.keys(this.state.tabStatusRegistry).map(renderSwitch)}
           </CSSTransitionGroup>
         </div>
       </div>
