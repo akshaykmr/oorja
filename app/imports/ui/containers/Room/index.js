@@ -66,6 +66,7 @@ class Room extends Component {
 
     this.applyRoomPreferences = this.applyRoomPreferences.bind(this);
     this.calculateUISize = this.calculateUISize.bind(this);
+    this.onWindowResize = _.throttle(this.onWindowResize, 100);
     this.onWindowResize = this.onWindowResize.bind(this);
 
     this.updateState = this.updateState.bind(this);
