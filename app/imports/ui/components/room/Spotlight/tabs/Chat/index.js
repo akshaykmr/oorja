@@ -14,13 +14,7 @@ import tabPropTypes from '../tabPropTypes';
 
 import './chat.scss';
 
-// Woah set state is async! Keep this in mind. and read the rtfm for avoiding headache lol.
-// setState() does not immediately mutate this.state but creates a pending
-// state transition. Accessing this.state after calling this method can potentially
-// return the existing value. There is no guarantee of synchronous operation of
-// calls to setState and calls may be batched for performance gains.
-
-// TODO: implement Scrolling chatbox on new message.
+// FIXME: scroll lags 1 message behind when automatically scrolling to bottom of chat thread.
 
 class Chat extends Component {
 
@@ -46,6 +40,7 @@ class Chat extends Component {
     this.handleThreadScroll = _.throttle(this.handleThreadScroll, 100);
     this.handleThreadScroll = this.handleThreadScroll.bind(this);
     this.scrollToBottom = this.scrollToBottom.bind(this);
+    this.isScrolledToBottom = this.isScrolledToBottom.bind(this);
     this.prefixString = this.props.roomAPI.getUserId() + _.random(5000).toString();
 
     this.state = {
@@ -135,17 +130,18 @@ class Chat extends Component {
       text: message.text,
     };
 
-    // TODO: below commented code is related to handleThreadScroll
-    // let newMessageCount = this.stateBuffer.newMessageCount;
-    // if (this.stateBuffer.freeNavigation) newMessageCount += 1;
+    let newMessageCount = this.stateBuffer.newMessageCount;
+    if (this.stateBuffer.freeNavigation) newMessageCount += 1;
     this.updateState({
       chatMessages: { $splice: [[position, 0, chatMessage]] },
-      // newMessageCount: { $set: newMessageCount },
+      newMessageCount: { $set: newMessageCount },
     });
-    // if freeNavigation is set false -> scroll the thread to bottom on every new message.
-    // if (!this.stateBuffer.freeNavigation) { // autoscoll chat-thread.
-    this.chatThread.scrollTop = this.chatThread.scrollHeight;
-    // }
+
+    if (message.userId === this.props.roomAPI.getUserId() || !this.stateBuffer.freeNavigation) {
+      // scroll to bottom of chat-thread.
+      const { clientHeight, scrollHeight } = this.chatThread;
+      this.chatThread.scrollTop = scrollHeight - clientHeight;
+    }
   }
 
   removeMessage(position) {
@@ -161,17 +157,14 @@ class Chat extends Component {
     });
   }
 
-// FIXME:
-// expectedBehaviour: onScroll
-// if freeNavigation is true ignore this function and return;
-// else
-// when user scrolls the chatThread, set freeNavigation to false.
-// i.e. dont automatically scroll to bottom with new messaages.
-//  then, keep track of new Messages and show a counter on bottom left. (see this.appendMessage)
-// clicking on the counter show bring the thread to bottom | reset counter |
-// set freeNavigation to false. i.e reset deafult behaviour
+  isScrolledToBottom() {
+    const { scrollHeight, clientHeight, scrollTop } = this.chatThread;
+    return scrollHeight - clientHeight <= scrollTop + 60;
+  }
+
+
   handleThreadScroll() {
-    if (this.chatThread.scrollTop === this.chatThread.scrollHeight) { // fix this
+    if (this.isScrolledToBottom()) {
       this.updateState({
         freeNavigation: { $set: false },
         newMessageCount: { $set: 0 },
@@ -228,7 +221,6 @@ class Chat extends Component {
         key={key}>
         <Avatar user={user}/>
         <div
-          className="message"
           dangerouslySetInnerHTML={{ __html: this.md.render(chatMessage.text) }}>
         </div>
       </li>
@@ -240,11 +232,12 @@ class Chat extends Component {
   }
 
   scrollToBottom() {
-    this.chatThread.scrollTop = this.chatThread.scrollHeight;
+    const { scrollHeight, clientHeight } = this.chatThread;
     this.updateState({
       freeNavigation: { $set: false },
       newMessageCount: { $set: 0 },
     });
+    this.chatThread.scrollTop = scrollHeight - clientHeight;
   }
 
   render() {

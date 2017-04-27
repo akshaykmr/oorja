@@ -46,7 +46,7 @@ class CodePad extends Component {
     this.defaults = {
       fontSize: 15,
       syntax: syntaxList[6], // default | javascript
-      colorScheme: colorSchemes[0], // default | light,
+      colorScheme: colorSchemes[1], // default | dark,
     };
 
     // todo save any editor settings in localStorage and
