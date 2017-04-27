@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import update from 'immutability-helper';
 import classNames from 'classnames';
-import _ from 'lodash';
 
 import { Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
 
@@ -41,17 +41,24 @@ class Spotlight extends Component {
     };
 
     const defaultTabs = props.roomInfo.tabs;
-    /* eslint-disable arrow-body-style */
-    const tabListState = defaultTabs.map(this.initialTabState);
-    /* eslint-enable arrow-body-style */
+    /* eslint-disable no-param-reassign*/
+    const tabStatusRegistry = defaultTabs.reduce((registry, tab) => {
+      registry[tab.tabId] = this.initialTabState(tab);
+      return registry;
+    }, {});
+    /* eslint-enable no-param-reassign*/
 
-    const lastActiveTab = localStorage.getItem(`lastActiveTab:${props.roomInfo.roomName}`);
-    const lastActiveTabIndex = _.findIndex(defaultTabs, { name: lastActiveTab });
-    const tabFound = lastActiveTabIndex > -1;
+    let tabFound = false;
+    let lastActiveTabId = localStorage.getItem(`lastActiveTab:${props.roomInfo.roomName}`);
+    if (lastActiveTabId && tabStatusRegistry[lastActiveTabId]) {
+      tabFound = true;
+      lastActiveTabId = Number(lastActiveTabId);
+    }
 
     this.state = {
-      tabs: tabListState,
-      activeTabIndex: tabFound ? lastActiveTabIndex : 0,
+      // id -> tabState (high level state, such as tabStatus[loading,loaded etc.], badge etc.)
+      tabStatusRegistry,
+      activeTabId: tabFound ? lastActiveTabId : 1,
     };
     this.stateBuffer = this.state;
   }
@@ -64,28 +71,29 @@ class Spotlight extends Component {
 
       // badge shown alongside switch
       badge: {
-        content: '', // 2 characters max.
-        color: '',
+        content: '', // upto 2 chars preferable, more wouldn't look good imo
         visible: false,
+        backgroundColor: '',
       },
       // glowing animation for the tab switch | for some added ux or something
       glow: false,
     };
   }
 
+
   updateState(changes, buffer = this.stateBuffer) {
     this.stateBuffer = update(buffer, changes);
     this.setState(this.stateBuffer);
   }
 
-  switchToTab(tabIndex) {
-    const { activeTabIndex, tabs } = this.state;
-    const from = tabs[activeTabIndex].tabId;
-    const to = tabs[tabIndex].tabId;
+  switchToTab(tabId) {
+    const { activeTabId } = this.state;
+    const from = activeTabId;
+    const to = tabId;
     this.updateState({
-      activeTabIndex: { $set: tabIndex },
+      activeTabId: { $set: tabId },
     });
-    localStorage.setItem(`lastActiveTab:${this.props.roomInfo.roomName}`, tabs[tabIndex].name);
+    localStorage.setItem(`lastActiveTab:${this.props.roomInfo.roomName}`, tabId);
     this.props.dispatchRoomActivity(roomActivities.TAB_SWITCH, { from, to });
   }
 
@@ -116,8 +124,8 @@ class Spotlight extends Component {
   }
 
   render() {
-    const { tabs, activeTabIndex } = this.state;
-    const activeTab = tabs[activeTabIndex];
+    const { tabStatusRegistry, activeTabId } = this.state;
+    const activeTab = tabStatusRegistry[activeTabId];
     const { uiSize, streamContainerSize } = this.props;
 
     // change styling here for mobile later.
@@ -127,9 +135,10 @@ class Spotlight extends Component {
       default: uiSize !== uiConfig.COMPACT,
     };
 
-    const renderSwitch = (tab, tabIndex) => {
+    const renderSwitch = (tabId) => {
+      const tab = tabStatusRegistry[tabId];
       if (tab.status !== tabStatus.LOADED) return null;
-      const onTop = tab.name === activeTab.name;
+      const onTop = tab.tabId === activeTab.tabId;
       const switchClassNames = {
         switch: true,
         active: onTop,
@@ -138,28 +147,51 @@ class Spotlight extends Component {
         backgroundColor: '#1b1d1e',
         color: onTop ? '#45b29d' : 'white', // tab.iconColor:white
       };
+
+      const renderBadge = () => {
+        const { content } = tab.badge;
+        let backgroundColor = tab.badge.backgroundColor;
+        if (!backgroundColor) {
+          backgroundColor = content ? '#1b1d1e' : 'orange';
+        }
+
+        if (tab.badge.visible) {
+          return (
+            <span
+              style={{ backgroundColor }}
+              className={classNames({ badge: true, empty: !content })}>
+              {content}
+            </span>
+          );
+        }
+        return null;
+      };
       return (
         <Popover
-          key={tab.name}
+          key={tab.tabId}
           content={tab.description}
           interactionKind={PopoverInteractionKind.HOVER}
           popoverClassName="pt-popover-content-sizing"
           position={uiSize === uiConfig.COMPACT ? Position.TOP : Position.RIGHT}
           className={classNames(switchClassNames)}
           hoverOpenDelay={800}>
-          <div
-            onClick={() => { this.switchToTab(tabIndex); }}
-            style={switchStyle}
-            id={tab.name}>
-            <i className={`icon ion-${tab.icon}`}></i>
+          <div className="box">
+            {renderBadge()}
+            <div
+              onClick={() => { this.switchToTab(tab.tabId); }}
+              className="tabIcon"
+              style={switchStyle}>
+              <i className={`icon ion-${tab.icon}`}></i>
+            </div>
           </div>
         </Popover>
       );
     };
 
-    const renderTabContent = (tab) => {
+    const renderTabContent = (tabId) => {
+      const tab = tabStatusRegistry[tabId];
       if (tab.status !== tabStatus.LOADED) return null;
-      const onTop = tab.name === activeTab.name;
+      const onTop = tab.tabId === activeTab.tabId;
       const tabContentClassNames = {
         content: true,
         onTop,
@@ -172,11 +204,20 @@ class Spotlight extends Component {
         backgroundColor: tab.bgColor || '#36393e', // defaults, move them to settings later.
       };
 
+      const updateBadge = (badgeState) => {
+        this.updateState({
+          tabStatusRegistry: {
+            tabId: { $set: { $merge: badgeState } },
+          },
+        });
+      };
+
       const TabComponent = this.tabComponents[tab.tabId];
       return <TabComponent
-        key={tab.name}
+        key={tab.tabId}
         tabInfo={tab}
-        tabs={this.state.tabs}
+        updateBadge={updateBadge.bind(this)}
+        tabStatusRegistry={this.state.tabStatusRegistry}
         roomInfo={this.props.roomInfo}
         connectedUsers={this.props.connectedUsers}
         roomAPI={this.props.roomAPI}
@@ -187,16 +228,33 @@ class Spotlight extends Component {
         style={tabContentStyle}/>;
     };
 
+    const switchTransition = uiSize === uiConfig.LARGE ? 'switch' : 'switch-alt';
+
     return (
       <div
         className={classNames(spotlightClassNames)}
         // move to config if it feels good
         style={{ height: streamContainerSize === uiConfig.LARGE ? '82%' : 'calc(100% - 60px)' }} >
         <div className="content-wrapper">
-          {this.state.tabs.map(renderTabContent)}
+          {
+            Object.keys(this.state.tabStatusRegistry)
+            .map(idString => Number(idString))
+            .map(renderTabContent)
+          }
         </div>
         <div className="content-switcher">
-          {this.state.tabs.map(renderSwitch)}
+          <CSSTransitionGroup
+              transitionName={switchTransition}
+              transitionAppear={true}
+              transitionAppearTimeout={1500}
+              transitionEnterTimeout={1500}
+              transitionLeaveTimeout={1000}>
+              {
+                Object.keys(this.state.tabStatusRegistry)
+                .map(idString => Number(idString))
+                .map(renderSwitch)
+              }
+          </CSSTransitionGroup>
         </div>
       </div>
     );

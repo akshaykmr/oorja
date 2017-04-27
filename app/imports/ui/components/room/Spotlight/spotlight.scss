@@ -21,7 +21,69 @@ $switcher-width: 60px;
   }
 
   > .content-switcher {
+    height: 100%;
+    width: $switcher-width;
     background-color: #2e3136;
+
+    // css transition group classes for switch
+    .switch-enter {
+      transform: translate3d(-70px, 0, 0);
+    }
+
+    .switch-enter.switch-enter-active {
+      transform: translate3d(0, 0, 0);
+      transition: transform 1s ease-in;
+    }
+
+    .switch-leave {
+      transform: translate3d(0, 0, 0);
+    }
+
+    .switch-appear {
+      transform: translate3d(-70px, 0, 0);
+    }
+
+    .switch-appear.switch-appear-active {
+      transform: translate3d(0, 0, 0);
+      transition: transform 1s ease-in;
+    }
+
+    .switch-leave.switch-leave-active {
+      transform: translate3d(-70px, 0, 0);
+      transition: transform 300ms ease-out;
+    }
+
+
+    // alt transition for compact UI
+    .switch-alt-enter {
+      transform: translate3d(0, 70px, 0);
+    }
+
+    .switch-alt-enter.switch-alt-enter-active {
+      transform: translate3d(0, 0, 0);
+      transition: transform 1s ease-in;
+    }
+
+    .switch-alt-leave {
+      transform: translate3d(0, 0, 0);
+    }
+
+    .switch-alt-appear {
+      transform: translate3d(0, 70px, 0);
+    }
+
+    .switch-alt-appear.switch-alt-appear-active {
+      transform: translate3d(0, 0, 0);
+      transition: transform 1s ease-in;
+    }
+
+    .switch-alt-leave.switch-alt-leave-active {
+      transform: translate3d(0, 70px, 0);
+      transition: transform 300ms ease-out;
+    }
+  }
+
+  > .content-switcher > span {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -29,20 +91,49 @@ $switcher-width: 60px;
     align-content: center;
 
     height: 100%;
-    width: $switcher-width;
+    width: 100%;
 
     > .switch {
       width: 45px;
       height: 45px;
       margin-top: 5px;
       margin-bottom: 5px;
-      transform: scale(1.0);
-      transition: transform ease 0.3s;
       cursor: pointer;
-      opacity: 0.5;
       color: white;
 
-      div {
+      .box {
+        height: 100%;
+        width: 100%;
+      }
+
+      .badge {
+        position: absolute;
+        z-index: 400;
+        top: -6px;
+        right: -4px;
+        min-width: 15px;
+        text-align: center;
+        background-color: #1b1d1e;
+        font-weight: bold;
+        color: white;
+        font-size: 0.8em;
+        border-radius: 7px;
+        border: 3px solid #3e606f;
+        padding: 1px;
+
+        &.empty {
+          min-width: initial;
+          font-size: 0.4em;
+          width: 17px;
+          height: 17px;
+          border-radius: 50%;
+          background-color: orange;
+        }
+      }
+
+      .tabIcon {
+        transform: scale(1.0);
+        transition: transform ease 300ms;
         height: 100%;
         width: 100%;
         border-radius: 30%;
@@ -50,6 +141,7 @@ $switcher-width: 60px;
         align-content: center;
         align-items: center;
         justify-content: center;
+        opacity: 0.5;
       }
 
       i {
@@ -61,22 +153,23 @@ $switcher-width: 60px;
       // }
 
       &:hover {
-        div {
+        .tabIcon {
           border: 3px solid #3e606f;    
+          opacity: 0.8;
         }
-        opacity: 0.8;
+        
       }
 
       &.active {
-        &:hover {
+        &:hover .tabIcon{
           opacity: 1.0;
         }
 
-        div {
+        .tabIcon {
           border: 4px solid #3e606f;
+          transform: scale(1.07);
+          opacity: 1.0;
         }
-        opacity: 1.0;
-        transform: scale(1.07)
       }
     }
   }
@@ -87,15 +180,18 @@ $switcher-width: 60px;
     left: 0;
     width: 100%;
     height: 60px;
-    justify-content: center;
-    flex-direction: row;
 
-    > .switch {
-      margin-top: initial;
-      margin-bottom: initial;
-      margin-left: 5px;
-      margin-right: 5px;
-    }
+    > span {
+      justify-content: center;
+      flex-direction: row;
+      
+      > .switch {
+        margin-top: initial;
+        margin-bottom: initial;
+        margin-left: 5px;
+        margin-right: 5px;
+      }
+    }  
   }
 
 

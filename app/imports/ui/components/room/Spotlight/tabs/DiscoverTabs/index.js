@@ -72,7 +72,7 @@ class DiscoverTabs extends Component {
 
   renderTabPreview(tab) {
     if (tab.name === 'DiscoverTabs') return null;
-    const localTab = _.find(this.props.tabs, { tabId: tab.tabId });
+    const localTab = this.props.tabStatusRegistry[tab.tabId];
     let icon = 'ion-plus-circled';
     let loading = false;
     let iconColor = '#1a7ecb';
