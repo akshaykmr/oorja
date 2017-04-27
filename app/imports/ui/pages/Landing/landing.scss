@@ -24,7 +24,7 @@ $landing-primary : white;
   }
   .kickstart {
     min-height: 95vh; 
-    background-image: url('/images/geo.png');
+    // background-image: url('/images/geo.png');
     padding-top: 100px;
 
     .tagline {
@@ -46,6 +46,7 @@ $landing-primary : white;
       height: 140px;
       width: 100%;
       text-align: center;
+      margin-bottom: 20px;
       svg {
         cursor: pointer;
         transition: transform 0.5s ease-in;

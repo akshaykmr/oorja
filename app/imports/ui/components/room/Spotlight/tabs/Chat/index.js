@@ -138,9 +138,7 @@ class Chat extends Component {
     });
 
     if (message.userId === this.props.roomAPI.getUserId() || !this.stateBuffer.freeNavigation) {
-      // scroll to bottom of chat-thread.
-      const { clientHeight, scrollHeight } = this.chatThread;
-      this.chatThread.scrollTop = scrollHeight - clientHeight;
+      this.scrollToBottom();
     }
   }
 
