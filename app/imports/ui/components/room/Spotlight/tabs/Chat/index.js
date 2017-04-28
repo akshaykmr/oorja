@@ -114,6 +114,11 @@ class Chat extends Component {
           if (this.chatInput) { // input element is mounted
             this.chatInput.focus();
           }
+          if (this.stateBuffer.newMessageCount > 0 && this.isScrolledToBottom()) {
+            this.updateState({
+              newMessageCount: { $set: 0 },
+            });
+          }
         }
       });
     });
@@ -258,7 +263,6 @@ class Chat extends Component {
     const isSyncing = (!this.state.initialSyncComplete) && (this.props.connectedUsers.length > 1);
     return (
       <div className={this.props.classNames} style={this.props.style}>
-        <this.props.Spinner show={this.props.onTop && isSyncing}/>
         <ul className="chat-thread"
           onScroll={this.handleThreadScroll}
           ref={ (chatThread) => { this.chatThread = chatThread; }}>
@@ -272,6 +276,7 @@ class Chat extends Component {
           </div>
         </ul>
         <form className="chat-input-form" onSubmit={this.handleSubmit}>
+          <this.props.Spinner show={this.props.onTop && isSyncing}/>
           <input className="chat-input"
                  name="chat-input"
                  placeholder= "Write a message..."

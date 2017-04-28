@@ -13,8 +13,9 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
   .syncSpinner { // override default spinner location
     height: 32px !important;
     width: 32px !important;
-    bottom: 30px !important;
-    right: calc(95px + 2%) !important;
+    bottom: initial !important;
+    top: 6px !important;
+    right: 66px !important;
   }
   form {
     margin: 8px auto 0 auto;
