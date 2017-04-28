@@ -207,7 +207,7 @@ class Spotlight extends Component {
       const updateBadge = (badgeState) => {
         this.updateState({
           tabStatusRegistry: {
-            tabId: { $set: { $merge: badgeState } },
+            [tabId]: { badge: { $merge: badgeState } },
           },
         });
       };

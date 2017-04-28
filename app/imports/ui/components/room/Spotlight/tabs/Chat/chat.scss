@@ -10,9 +10,11 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
   padding: 0;
   border-top-left-radius: 6px;
 
-  .syncSpinner {
-    bottom: initial important;
-    top: 20px;
+  .syncSpinner { // override default spinner location
+    height: 32px !important;
+    width: 32px !important;
+    bottom: 30px !important;
+    right: calc(95px + 2%) !important;
   }
   form {
     margin: 8px auto 0 auto;
@@ -62,6 +64,7 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
   border-bottom-color: honeydew;
   border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
+
   .bubble {
     margin-top: 2px;
     position: relative;
@@ -84,7 +87,9 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
     border-radius: 50%;
     cursor: pointer;
     position: absolute;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
     bottom: 90px;
+    left: calc(50% - 20px);
     color: #6495ed;
     font-weight: 500;
   }

@@ -14,8 +14,6 @@ import tabPropTypes from '../tabPropTypes';
 
 import './chat.scss';
 
-// FIXME: scroll lags 1 message behind when automatically scrolling to bottom of chat thread.
-
 class Chat extends Component {
 
   constructor(props) {
@@ -57,6 +55,14 @@ class Chat extends Component {
   updateState(changes, buffer = this.stateBuffer) {
     this.stateBuffer = update(buffer, changes);
     this.setState(this.stateBuffer);
+
+    if (changes.newMessageCount) {
+      const { newMessageCount } = this.stateBuffer;
+      this.props.updateBadge({
+        visible: newMessageCount > 0,
+        content: newMessageCount,
+      });
+    }
   }
 
   componentDidMount() {
@@ -131,14 +137,20 @@ class Chat extends Component {
     };
 
     let newMessageCount = this.stateBuffer.newMessageCount;
-    if (this.stateBuffer.freeNavigation) newMessageCount += 1;
+    if (this.stateBuffer.freeNavigation || !this.props.onTop) {
+      newMessageCount += 1;
+    }
     this.updateState({
       chatMessages: { $splice: [[position, 0, chatMessage]] },
       newMessageCount: { $set: newMessageCount },
     });
 
-    if (message.userId === this.props.roomAPI.getUserId() || !this.stateBuffer.freeNavigation) {
-      this.scrollToBottom();
+
+    if (
+      this.props.onTop &&
+      (message.userId === this.props.roomAPI.getUserId() || !this.stateBuffer.freeNavigation)
+    ) {
+      setTimeout(this.scrollToBottom, 200); // component should have updated by now
     }
   }
 
@@ -156,6 +168,7 @@ class Chat extends Component {
   }
 
   isScrolledToBottom() {
+    if (!this.chatThread) return true;
     const { scrollHeight, clientHeight, scrollTop } = this.chatThread;
     return scrollHeight - clientHeight <= scrollTop + 60;
   }
@@ -240,7 +253,7 @@ class Chat extends Component {
 
   render() {
     const unreadMessageTickerStyle = {
-      visibility: this.state.newMessageCount > 0 ? 'initial' : 'hidden',
+      visibility: this.state.newMessageCount > 0 && !this.isScrolledToBottom() ? 'initial' : 'hidden',
     };
     const isSyncing = (!this.state.initialSyncComplete) && (this.props.connectedUsers.length > 1);
     return (
