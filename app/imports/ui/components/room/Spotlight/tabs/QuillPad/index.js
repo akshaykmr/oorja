@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import 'quill/dist/quill.snow.css';
 import Quill from 'quill';
+// import { ImageResize } from 'quill-image-resize-module';
+// import { ImageDrop } from 'quill-image-drop-module';
+
+// npm
+// "quill-image-drop-module": "^1.0.3",
+// "quill-image-resize-module": "^3.0.0",
 
 import Y from '../../../../../../modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
@@ -9,14 +15,8 @@ import roomActivities from '../../../constants/roomActivities';
 
 import './quillpad.scss';
 
-// these two plugins are for resizing image in quill.
-// reference: https://github.com/quilljs/quill/issues/104
-// just for testing. wait for author to publish the plugin.
-// import ImageImport from './ImageImport.js';
-// import ImageResize from './ImageResize.js';
-
-// Quill.register('modules/imageImport', ImageImport);
 // Quill.register('modules/imageResize', ImageResize);
+// Quill.register('modules/imageDrop', ImageDrop);
 
 class QuillPad extends Component {
 
@@ -70,10 +70,8 @@ class QuillPad extends Component {
             maxStack: 50,
             userOnly: true,
           },
-          // imageImport: true,
-          // imageResize: {
-          //   displaySize: true,
-          // },
+          // imageDrop: true,
+          // ImageResize: {},
         },
       });
       y.share.richtext.bind(this.quill);
@@ -81,6 +79,19 @@ class QuillPad extends Component {
       roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
         if (payload.to === tabInfo.tabId) {
           this.quill.focus();
+          if (this.props.tabInfo.badge.visible) {
+            this.props.updateBadge({
+              visible: false,
+            });
+          }
+        }
+      });
+
+      roomAPI.addMessageHandler(tabInfo.tabId, () => {
+        if (!this.props.onTop) {
+          this.props.updateBadge({
+            visible: true,
+          });
         }
       });
 

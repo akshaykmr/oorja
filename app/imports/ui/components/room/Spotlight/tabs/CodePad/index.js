@@ -121,6 +121,20 @@ class CodePad extends Component {
       roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
         if (payload.to === tabInfo.tabId) {
           editor.focus();
+
+          if (this.props.tabInfo.badge.visible) {
+            this.props.updateBadge({
+              visible: false,
+            });
+          }
+        }
+      });
+
+      roomAPI.addMessageHandler(tabInfo.tabId, () => {
+        if (!this.props.onTop) {
+          this.props.updateBadge({
+            visible: true,
+          });
         }
       });
 
