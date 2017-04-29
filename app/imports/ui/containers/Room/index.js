@@ -1,4 +1,4 @@
-/* global location window Erizo*/
+/* global location window Erizo URL*/
 import { Meteor } from 'meteor/meteor';
 
 import React, { Component } from 'react';
@@ -7,6 +7,7 @@ import update from 'immutability-helper';
 import _ from 'lodash';
 
 // import Erizo from '../../modules/Erizo';
+
 
 // constants
 import uiConfig from '../../components/room/constants/uiConfig';
@@ -52,7 +53,7 @@ class Room extends Component {
 
     this.subscribedMediaStreams = {}; // id -> erizoStream
     // note: erizoStream.stream would be of type MediaStream(the browser's MediaStream object)
-
+    this.speechTrackers = {}; // id -> hark instance
     // for passing messages to and from tabs | local or remote(other users)
     this.messenger = new Messenger(this);
 
@@ -82,14 +83,35 @@ class Room extends Component {
     this.handleStreamSubscription = this.handleStreamSubscription.bind(this);
     this.setIncomingStreamListners = this.setIncomingStreamListners.bind(this);
     this.handleStreamRemoval = this.handleStreamRemoval.bind(this);
+    this.handleStreamSubscriptionSucess = this.handleStreamSubscriptionSucess.bind(this);
 
     this.state = {
       connectedUsers: [],
 
       roomConnectionStatus: status.TRYING_TO_CONNECT,
       primaryDataStreamStatus: status.TRYING_TO_CONNECT,
+      primaryMediaStreamStatus: status.TRYING_TO_CONNECT,
 
-      mediaStreams: {}, // userId -> [mediaStreamState, ...]
+      mediaStreams: {}, // { streamId -> mediaStreamState }
+      /* e.g.
+          {
+           12: {
+              streamId: Number,
+              local: bool,
+              audio: bool,
+              video: bool,
+              loading: bool
+              screen: bool,
+              streamSrc: '',
+              streamError: bool,
+              errorReason: '',
+              streamWarning: bool, // low bandwidth etc.
+              warningReason: ''
+              speaking: bool,
+            },
+            ...
+          }
+        */
 
       uiSize: this.calculateUISize(),
       streamContainerSize: uiConfig.COMPACT,
@@ -109,6 +131,17 @@ class Room extends Component {
   updateState(changes, buffer = this.stateBuffer) {
     this.stateBuffer = update(buffer, changes);
     this.setState(this.stateBuffer);
+  }
+
+  updateMediaStreamState(changes, stream) {
+    const streamId = stream.getID();
+    const buffer = this.stateBuffer.mediaStreams[streamId];
+    const updatedStreamState = update(changes, buffer);
+    this.updateState({
+      mediaStreams: {
+        [streamId]: { $set: updatedStreamState },
+      },
+    });
   }
 
   calculateUISize() {
@@ -160,6 +193,7 @@ class Room extends Component {
       console.info('room connected', roomEvent);
       console.log(erizoRoom);
       erizoRoom.publish(this.primaryDataStream);
+      this.initializePrimaryMediaStream();
       this.updateState({ roomConnectionStatus: { $set: status.CONNECTED } });
     });
 
@@ -199,6 +233,10 @@ class Room extends Component {
       console.info('stream added', streamEvent);
     });
 
+    erizoRoom.addEventListener('stream-subscribed', (streamEvent) => {
+      console.info('stream subscribed', streamEvent);
+      this.handleStreamSubscriptionSucess(streamEvent.stream);
+    });
     // I don't know whether a failed stream would trigger a stream-removed later
     // need to keep this in mind for later
     erizoRoom.addEventListener('stream-failed', (streamEvent) => {
@@ -226,10 +264,44 @@ class Room extends Component {
     });
   }
 
+  initializePrimaryMediaStream() {
+    if (this.primaryMediaStream) {
+      // unpublish and destroy
+    }
+    // get config and initialize new stream
+    // assume this config for now.
+    this.primaryMediaStream = Erizo.Stream({
+      audio: true,
+      video: true,
+      data: false,
+      attributes: {
+        userId: this.props.roomUserId,
+        type: streamTypes.PRIMARY_MEDIA_STREAM,
+      },
+    });
+    const mediaStream = this.primaryMediaStream;
+    mediaStream.addEventListener('access-accepted', () => {
+      this.erizoRoom.publish(mediaStream);
+    });
+    mediaStream.addEventListener('access-denied', () => {
+      this.updateState({
+        primaryMediaStream: { $set: status.ERROR },
+      });
+    });
+    mediaStream.addEventListener('stream-ended', () => {
+      this.updateState({
+        primaryMediaStream: { $set: status.DISCONNECTED },
+      });
+    });
+    mediaStream.init();
+  }
+
   handleStreamSubscription(stream) {
     const attributes = stream.getAttributes();
     const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
     if (!user) throw new Meteor.Error('stream publisher not found');
+
+    const { PRIMARY_DATA_STREAM, PRIMARY_MEDIA_STREAM, MEDIA_STREAM } = streamTypes;
 
     const subscribePrimaryDataStream = () => {
       // subscribe the stream if remote and apply listeners
@@ -261,14 +333,92 @@ class Room extends Component {
         }
         this.setIncomingStreamListners(stream);
         this.erizoRoom.subscribe(stream);
-        this.subscribedDataStreams[stream.getID()] = stream;
-        this.connectUser(user);
       }
     };
 
-    const { PRIMARY_DATA_STREAM } = streamTypes;
+    const subscribeMediaStream = () => {
+      const streamID = stream.getID();
+      // just a check If I run into this later
+      if (this.subscribedMediaStreams[streamID]) { // stream already subscribed
+        throw new Meteor.Error('over here!');
+      }
+      const isLocal = this.streamManager.isLocalStream(stream);
+      let streamSrc = '';
+      if (isLocal) {
+        if (attributes.type === PRIMARY_MEDIA_STREAM) {
+          streamSrc = URL.createObjectURL(this.primaryMediaStream.stream);
+          this.updateState({
+            primaryMediaStream: { $set: status.CONNECTED },
+          });
+        }
+        console.info('adding local media stream');
+      } else {
+        this.setIncomingStreamListners(stream);
+        this.erizoRoom.subscribe(stream);
+        this.subscribedMediaStreams[streamID] = stream;
+      }
+
+      this.updateState({
+        mediaStreams: {
+          [streamID]: {
+            $set: {
+              streamId: streamID,
+              local: isLocal,
+              loading: !isLocal, // loaded when stream is subscribed
+              audio: stream.hasAudio(),
+              video: stream.hasVideo(),
+              screen: !!attributes.screenshare,
+              streamSrc,
+              streamError: false,
+              errorReason: '',
+              streamWarning: false, // low bandwidth etc.
+              warningReason: '',
+              speaking: false,
+            },
+          },
+        },
+      });
+      // addSpeechTracker(stream);
+    };
+
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM : subscribePrimaryDataStream();
+        break;
+      case MEDIA_STREAM:
+      case PRIMARY_MEDIA_STREAM: subscribeMediaStream();
+        break;
+      default: console.error('unexpected stream type');
+    }
+  }
+
+  handleStreamSubscriptionSucess(stream) {
+    const attributes = stream.getAttributes();
+    const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
+    const { PRIMARY_DATA_STREAM, PRIMARY_MEDIA_STREAM, MEDIA_STREAM } = streamTypes;
+
+    const handlePrimaryDataStreamSubscriptionSuccess = () => {
+      this.subscribedDataStreams[stream.getID()] = stream;
+      this.connectUser(user);
+    };
+
+    const handleMediaSubscriptionSuccess = () => {
+      const streamSrc = URL.createObjectURL(stream.stream);
+      console.log(streamSrc);
+      this.updateState({
+        mediaStreams: {
+          [stream.getID()]: {
+            loading: { $set: false },
+            streamSrc: { $set: streamSrc },
+          },
+        },
+      });
+    };
+    switch (attributes.type) {
+      case PRIMARY_DATA_STREAM: handlePrimaryDataStreamSubscriptionSuccess();
+        break;
+      case PRIMARY_MEDIA_STREAM:
+      case MEDIA_STREAM:
+        handleMediaSubscriptionSuccess();
         break;
       default: console.error('unexpected stream type');
     }
@@ -276,13 +426,15 @@ class Room extends Component {
 
   setIncomingStreamListners(stream) {
     const attributes = stream.getAttributes();
-    const { PRIMARY_DATA_STREAM } = streamTypes;
+    const { PRIMARY_DATA_STREAM, PRIMARY_MEDIA_STREAM } = streamTypes;
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM :
         // set listners for data
         stream.addEventListener('stream-data', (streamEvent) => {
           this.messenger.recieve(streamEvent.msg);
         });
+        break;
+      case PRIMARY_MEDIA_STREAM:
         break;
       default: console.error('unexpected stream type');
     }
@@ -293,7 +445,7 @@ class Room extends Component {
 
     const attributes = stream.getAttributes();
     const user = this.roomAPI.getUserInfo(attributes.userId);
-    const { PRIMARY_DATA_STREAM } = streamTypes;
+    const { PRIMARY_DATA_STREAM, PRIMARY_MEDIA_STREAM } = streamTypes;
 
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM:
@@ -301,6 +453,13 @@ class Room extends Component {
         this.subscribedDataStreams[stream.getID()] = null;
 
         this.disconnectUser(user);
+        break;
+      case PRIMARY_MEDIA_STREAM:
+        this.updateState({
+          mediaStreams: {
+            [stream.getID()]: { $set: null },
+          },
+        });
         break;
       default: console.error('unexpected stream type');
     }
@@ -427,7 +586,6 @@ class Room extends Component {
           streamContainerSize={streamContainerSize}/>
       </div>
     );
-    /* <Sidebar uiSize={uiSize}/>*/
   }
 }
 

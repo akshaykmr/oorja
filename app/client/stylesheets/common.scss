@@ -9,5 +9,9 @@ body {
   margin: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+
+  .pt-toast-message {
+    text-align:  center;
+  }
 }
 

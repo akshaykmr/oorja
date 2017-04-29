@@ -33,11 +33,12 @@ class Spotlight extends Component {
 
     this.tabComponents = {  // id -> reactComponent(tab)
       1: Info,
-      2: Settings,
-      3: QuillPad,
-      4: CodePad,
-      5: Chat,
-      6: DiscoverTabs,
+      10: null,
+      30: Settings,
+      40: QuillPad,
+      41: CodePad,
+      31: Chat,
+      100: DiscoverTabs,
     };
 
     const defaultTabs = props.roomInfo.tabs;

@@ -323,5 +323,5 @@ Meteor.publish('room.info', (roomName, credentials) => {
     }
   } else if (roomDocument.roomSecret === credentials.roomSecret) return roomCursor;
 
-  return [];
+  return null;
 });
