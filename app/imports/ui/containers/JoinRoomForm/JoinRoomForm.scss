@@ -66,4 +66,10 @@ $preview-spacing: 30px;
   text-align: center;
   height: 60px;
   margin-top: 20px;
+
+  .joinButton.glow {
+    animation-name: greenPulse;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+  }
 }

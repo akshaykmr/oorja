@@ -167,13 +167,19 @@ class JoinRoomForm extends Component {
       );
     };
 
+    const buttonIsDisabled = !name || waiting || !validName;
     const buttonAttr = {
       type: 'submit',
-      text: 'Join the Room',
+      text: 'Ready to join',
       rightIconName: 'arrow-right',
-      disabled: !name || waiting || !validName,
+      disabled: buttonIsDisabled,
       loading: waiting,
-      className: 'joinButton pt-large pt-intent-success',
+      className: classNames({
+        joinButton: true,
+        'pt-large': true,
+        'pt-intent-success': true,
+        glow: !buttonIsDisabled,
+      }),
       onSubmit: this.handleSubmit,
       onClick: this.handleSubmit,
     };

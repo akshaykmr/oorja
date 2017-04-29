@@ -1,0 +1,49 @@
+.mediaPreview {
+  margin: 0 auto;
+  margin-top: 20px;
+  min-width: 360px;
+  width: 80%;
+  max-width: 600px;
+  color: #666666;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+
+  .description {
+    margin-top: 20px;
+    font-size: 1.1em;
+  }
+
+  .stream {
+    width: 280px;
+    max-height: 500px;
+    position: relative;
+
+    video {
+      width: 100%;
+      height: auto;
+      max-height: 100%;
+      max-width: 100%;
+      border-radius: 5px;
+    }
+
+    .speakingIndicator {
+      opacity: 0;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 5px;
+      transition: opacity 0.5s ease-out;
+      border-radius: 3px;
+      background-color: aquamarine;
+      will-change: opacity;
+      &.speaking {
+        opacity: 1;
+      }      
+    }
+  }
+
+
+}

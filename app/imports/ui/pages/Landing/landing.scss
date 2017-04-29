@@ -26,6 +26,7 @@ $landing-primary : white;
     min-height: 95vh; 
     // background-image: url('/images/geo.png');
     padding-top: 100px;
+    padding-bottom: 40px;
 
     .tagline {
       color: #474747;
@@ -46,7 +47,6 @@ $landing-primary : white;
       height: 140px;
       width: 100%;
       text-align: center;
-      margin-bottom: 20px;
       svg {
         cursor: pointer;
         transition: transform 0.5s ease-in;

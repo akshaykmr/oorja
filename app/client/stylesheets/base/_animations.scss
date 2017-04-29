@@ -33,3 +33,9 @@
     transform: scale(1);
   }
 }
+
+@keyframes greenPulse {
+  from { background-color: #1d9f69;  }
+  50% { background-color: #91bd09; }
+  to { background-color: #1d9f69;  }
+}

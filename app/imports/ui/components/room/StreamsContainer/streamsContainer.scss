@@ -2,10 +2,11 @@ $avatar-size: 50px;
 
 .streamContainer {
   position: absolute;
-  width: 100%;
   overflow-x: auto;
   top: 0;
   left: 0;
+  bottom: 0;
+  right: 0;
   padding: 5px;
   background-color: #2e3136;
 
