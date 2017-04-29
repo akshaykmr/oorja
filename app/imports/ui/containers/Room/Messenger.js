@@ -1,3 +1,5 @@
+import messageType from '../../components/room/constants/messageType';
+
 class Messenger {
 /*
   this class is responsible for delivering messages between tabs.
@@ -39,8 +41,9 @@ class Messenger {
   TODO: create a branch to try out other approach.
 */
 
-  constructor(room) {
+  constructor(room, roomMessageHandler) {
     this.room = room;
+    this.roomMessageHandler = roomMessageHandler;
     this.messageHandlers = {}; // tabId -> [handlerFunction, ...]
   }
 
@@ -60,12 +63,20 @@ class Messenger {
   recieve(message) {
     const { messageHandlers } = this;
     const callHandlers = () => {
-      // probably would want to add more logic here for different message types later.
-      message.destinationTabs.forEach((tabId) => {
-        messageHandlers[tabId].forEach((handler) => {
-          handler(message);
-        });
-      });
+      const { ROOM_MESSAGE, TAB_MESSAGE } = messageType;
+      switch (message.type) {
+        case ROOM_MESSAGE:
+          this.roomMessageHandler(message.content);
+          break;
+        case TAB_MESSAGE:
+          message.destinationTabs.forEach((tabId) => {
+            messageHandlers[tabId].forEach((handler) => {
+              handler(message);
+            });
+          });
+          break;
+        default: console.error('unexpected message type');
+      }
     };
 
     console.info('recieve message called', message);

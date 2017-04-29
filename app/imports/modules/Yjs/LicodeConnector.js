@@ -1,5 +1,6 @@
 import AbstractConnector from './AbstractConnector';
 
+import messageType from '../../ui/components/room/constants/messageType';
 import roomActivities from '../../ui/components/room/constants/roomActivities';
 
 class LicodeConnector extends AbstractConnector {
@@ -54,6 +55,7 @@ class LicodeConnector extends AbstractConnector {
     const { connectorOptions } = this;
     const { tabId, name } = connectorOptions.tabInfo; // our own tab
     const message = {
+      type: messageType.TAB_MESSAGE,
       sourceTab: tabId,
       destinationTabs: [tabId],
       from: connectorOptions.roomAPI.getUserId(),
@@ -68,6 +70,7 @@ class LicodeConnector extends AbstractConnector {
     const { connectorOptions } = this;
     const { tabId, name } = connectorOptions.tabInfo; // our own tab
     const message = {
+      type: messageType.TAB_MESSAGE,
       sourceTab: tabId,
       destinationTabs: [tabId],
       from: connectorOptions.roomAPI.getUserId(),

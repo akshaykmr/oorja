@@ -8,6 +8,7 @@ import _ from 'lodash';
 
 // import Erizo from '../../modules/Erizo';
 
+import hark from 'hark';
 
 // constants
 import uiConfig from '../../components/room/constants/uiConfig';
@@ -26,6 +27,11 @@ import RoomAPI from './RoomAPI';
 import Messenger from './Messenger';
 import StreamManager from './StreamManager';
 
+import messageType from '../../components/room/constants/messageType';
+
+const roomMessageTypes = {
+  SPEECH: 'SPEECH',
+};
 
 class Room extends Component {
 
@@ -54,8 +60,10 @@ class Room extends Component {
     this.subscribedMediaStreams = {}; // id -> erizoStream
     // note: erizoStream.stream would be of type MediaStream(the browser's MediaStream object)
     this.speechTrackers = {}; // id -> hark instance
+
+    this.messageHandler = this.messageHandler.bind(this);
     // for passing messages to and from tabs | local or remote(other users)
-    this.messenger = new Messenger(this);
+    this.messenger = new Messenger(this, this.messageHandler);
 
     // Listens for activities in the room, such as user entering, leaving etc.
     // not naming it roomEvent because that naming is used in the Erizo room.
@@ -131,17 +139,6 @@ class Room extends Component {
   updateState(changes, buffer = this.stateBuffer) {
     this.stateBuffer = update(buffer, changes);
     this.setState(this.stateBuffer);
-  }
-
-  updateMediaStreamState(changes, stream) {
-    const streamId = stream.getID();
-    const buffer = this.stateBuffer.mediaStreams[streamId];
-    const updatedStreamState = update(changes, buffer);
-    this.updateState({
-      mediaStreams: {
-        [streamId]: { $set: updatedStreamState },
-      },
-    });
   }
 
   calculateUISize() {
@@ -350,6 +347,7 @@ class Room extends Component {
           this.updateState({
             primaryMediaStream: { $set: status.CONNECTED },
           });
+          this.addSpeechTracker(this.primaryMediaStream);
         }
         console.info('adding local media stream');
       } else {
@@ -378,7 +376,6 @@ class Room extends Component {
           },
         },
       });
-      // addSpeechTracker(stream);
     };
 
     switch (attributes.type) {
@@ -389,6 +386,58 @@ class Room extends Component {
         break;
       default: console.error('unexpected stream type');
     }
+  }
+
+  addSpeechTracker(stream) { // to be used with media streams
+    if (!stream.hasAudio()) console.error('stream has no audio');
+    const tracker = hark(stream.stream); // the browser mediaStream object
+    tracker.on('speaking', () => {
+      this.updateState({
+        mediaStreams: {
+          [stream.getID()]: {
+            speaking: { $set: true },
+          },
+        },
+      });
+      this.roomAPI.sendMessage({
+        broadcast: true,
+        type: messageType.ROOM_MESSAGE,
+        content: {
+          type: roomMessageTypes.SPEECH,
+          content: {
+            status: 'SPEAKING',
+            streamId: stream.getID(),
+          },
+        },
+      });
+    });
+
+    tracker.on('stopped_speaking', () => {
+      this.updateState({
+        mediaStreams: {
+          [stream.getID()]: {
+            speaking: { $set: false },
+          },
+        },
+      });
+      this.roomAPI.sendMessage({
+        broadcast: true,
+        type: messageType.ROOM_MESSAGE,
+        content: {
+          type: roomMessageTypes.SPEECH,
+          content: {
+            status: 'STOPPED',
+            streamId: stream.getID(),
+          },
+        },
+      });
+    });
+    this.speechTrackers[stream.getID()] = tracker;
+  }
+
+  removeSpeechTracker(stream) {
+    const speechTracker = this.speechTrackers[stream.getID()];
+    if (speechTracker) speechTracker.stop();
   }
 
   handleStreamSubscriptionSucess(stream) {
@@ -460,6 +509,7 @@ class Room extends Component {
             [stream.getID()]: { $set: null },
           },
         });
+        this.removeSpeechTracker(stream);
         break;
       default: console.error('unexpected stream type');
     }
@@ -537,6 +587,45 @@ class Room extends Component {
     }
   }
 
+  messageHandler(message) { // handler for ROOM_MESSAGE message type.
+    console.log(message);
+    const { SPEECH } = roomMessageTypes;
+    const handleSpeechMessage = () => {
+      const eventDetail = message.content;
+      const streamId = eventDetail.streamId;
+      switch (eventDetail.status) {
+        case 'SPEAKING':
+          if (this.stateBuffer.mediaStreams[streamId]) {
+            this.updateState({
+              mediaStreams: {
+                [streamId]: {
+                  speaking: { $set: true },
+                },
+              },
+            });
+          }
+          break;
+        case 'STOPPED':
+          if (this.stateBuffer.mediaStreams[streamId]) {
+            this.updateState({
+              mediaStreams: {
+                [streamId]: {
+                  speaking: { $set: false },
+                },
+              },
+            });
+          }
+          break;
+        default: console.error('unrecognised speech status');
+      }
+    };
+    switch (message.type) {
+      case SPEECH: handleSpeechMessage();
+        break;
+      default: console.error('unrecognised room message');
+    }
+  }
+
   onWindowResize(event) {
     const { innerHeight, innerWidth } = event.target.window;
     this.updateState({
@@ -558,6 +647,7 @@ class Room extends Component {
 
   componentWillUnmount() {
     this.unmountInProgress = true;
+    if (this.primaryMediaStream) this.removeSpeechTracker(this.primaryMediaStream);
     this.erizoRoom.disconnect();
     window.removeEventListener('resize', this.onWindowResize);
   }
