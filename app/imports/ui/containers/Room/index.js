@@ -646,7 +646,10 @@ class Room extends Component {
 
   componentWillUnmount() {
     this.unmountInProgress = true;
-    if (this.primaryMediaStream) this.removeSpeechTracker(this.primaryMediaStream);
+    if (this.primaryMediaStream) {
+      this.removeSpeechTracker(this.primaryMediaStream);
+      this.primaryDataStream.close();
+    }
     this.erizoRoom.disconnect();
     window.removeEventListener('resize', this.onWindowResize);
   }
