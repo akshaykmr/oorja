@@ -108,12 +108,10 @@ class Room extends Component {
               local: bool,
               audio: bool,
               video: bool,
-              loading: bool
+              status: status[TRYING_TO_CONNECT, ERROR, CONNECTED etc.]
               screen: bool,
               streamSrc: '',
-              streamError: bool,
               errorReason: '',
-              streamWarning: bool, // low bandwidth etc.
               warningReason: ''
               speaking: bool,
             },
@@ -216,6 +214,10 @@ class Room extends Component {
       });
       this.subscribedDataStreams = {};
       this.subscribedMediaStreams = {};
+
+      // stop speechTrackers
+      Object.keys(this.speechTrackers).forEach(streamId => this.speechTrackers[streamId].stop());
+      this.speechTrackers = {};
       setTimeout(() => {
         this.tryToReconnect();
       }, 1000);
@@ -301,9 +303,6 @@ class Room extends Component {
     const { PRIMARY_DATA_STREAM, PRIMARY_MEDIA_STREAM, MEDIA_STREAM } = streamTypes;
 
     const subscribePrimaryDataStream = () => {
-      // subscribe the stream if remote and apply listeners
-      // connect user to the room.
-
       // just a check If I run into this later
       if (this.subscribedDataStreams[stream.getID()]) { // stream already subscribed
         throw new Meteor.Error('over here!');
@@ -353,23 +352,22 @@ class Room extends Component {
       } else {
         this.setIncomingStreamListners(stream);
         this.erizoRoom.subscribe(stream);
-        this.subscribedMediaStreams[streamID] = stream;
       }
 
       this.updateState({
         mediaStreams: {
           [streamID]: {
             $set: {
+              userId: user.userId,
               streamId: streamID,
               local: isLocal,
-              loading: !isLocal, // loaded when stream is subscribed
+              // connected when stream subscription is successfull
+              status: isLocal ? status.CONNECTED : status.TRYING_TO_CONNECT,
               audio: stream.hasAudio(),
               video: stream.hasVideo(),
               screen: !!attributes.screenshare,
               streamSrc,
-              streamError: false,
               errorReason: '',
-              streamWarning: false, // low bandwidth etc.
               warningReason: '',
               speaking: false,
             },
@@ -388,7 +386,9 @@ class Room extends Component {
     }
   }
 
-  addSpeechTracker(stream) { // to be used with media streams
+  // to be used with media streams
+  // only use for local streams and broadcast the speech events over data stream.
+  addSpeechTracker(stream) {
     if (!stream.hasAudio()) console.error('stream has no audio');
     const tracker = hark(stream.stream); // the browser mediaStream object
     tracker.on('speaking', () => {
@@ -452,15 +452,15 @@ class Room extends Component {
 
     const handleMediaSubscriptionSuccess = () => {
       const streamSrc = URL.createObjectURL(stream.stream);
-      console.log(streamSrc);
       this.updateState({
         mediaStreams: {
           [stream.getID()]: {
-            loading: { $set: false },
+            status: { $set: status.CONNECTED },
             streamSrc: { $set: streamSrc },
           },
         },
       });
+      this.subscribedMediaStreams[stream.getID()] = stream;
     };
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM: handlePrimaryDataStreamSubscriptionSuccess();
@@ -588,7 +588,6 @@ class Room extends Component {
   }
 
   messageHandler(message) { // handler for ROOM_MESSAGE message type.
-    console.log(message);
     const { SPEECH } = roomMessageTypes;
     const handleSpeechMessage = () => {
       const eventDetail = message.content;
