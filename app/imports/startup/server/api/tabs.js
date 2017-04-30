@@ -13,7 +13,7 @@ export default [ // upsert contents to DB when this file gets big.
     name: 'VideoChat',
     displayName: 'Video chat',
     iconColor: '#fffad5',
-    bgColor: '#ffffff',
+    bgColor: '#2e3136',
     icon: 'videocamera',
     description: 'Video chat',
   },

@@ -13,11 +13,12 @@ import Spinner from './Spinner';
 
 // tabs
 import Info from './tabs/Info';
-import Settings from './tabs/Settings';
+// import Settings from './tabs/Settings';
 // import ExperimentTab from './tabs/ExperimentTab';
 import QuillPad from './tabs/QuillPad';
 import CodePad from './tabs/CodePad';
-import Chat from './tabs/Chat/';
+import Chat from './tabs/Chat';
+import VideoChat from './tabs/VideoChat';
 import DiscoverTabs from './tabs/DiscoverTabs';
 
 // constants
@@ -33,8 +34,8 @@ class Spotlight extends Component {
 
     this.tabComponents = {  // id -> reactComponent(tab)
       1: Info,
-      10: null,
-      30: Settings,
+      10: VideoChat,
+      // 30: Settings,
       40: QuillPad,
       41: CodePad,
       31: Chat,
@@ -49,17 +50,19 @@ class Spotlight extends Component {
     }, {});
     /* eslint-enable no-param-reassign*/
 
+    this.defaultTabId = this.props.roomInfo.defaultTabId;
+
     let tabFound = false;
     let lastActiveTabId = localStorage.getItem(`lastActiveTab:${props.roomInfo.roomName}`);
+    lastActiveTabId = Number(lastActiveTabId);
     if (lastActiveTabId && tabStatusRegistry[lastActiveTabId]) {
       tabFound = true;
-      lastActiveTabId = Number(lastActiveTabId);
     }
 
     this.state = {
       // id -> tabState (high level state, such as tabStatus[loading,loaded etc.], badge etc.)
       tabStatusRegistry,
-      activeTabId: tabFound ? lastActiveTabId : 1,
+      activeTabId: tabFound ? lastActiveTabId : this.defaultTabId,
     };
     this.stateBuffer = this.state;
   }
@@ -255,10 +258,10 @@ class Spotlight extends Component {
 }
 
 Spotlight.propTypes = {
-  roomAPI: React.PropTypes.object,
-  dispatchRoomActivity: React.PropTypes.func,
-  connectedUsers: React.PropTypes.array,
-  roomInfo: React.PropTypes.object,
+  roomAPI: React.PropTypes.object.isRequired,
+  dispatchRoomActivity: React.PropTypes.func.isRequired,
+  connectedUsers: React.PropTypes.array.isRequired,
+  roomInfo: React.PropTypes.object.isRequired,
   uiSize: React.PropTypes.string.isRequired,
   streamContainerSize: React.PropTypes.string.isRequired,
 };

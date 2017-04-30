@@ -34,7 +34,6 @@ export default class GettingReady extends Component {
   configureStream() {
     const erizoStream = Erizo.Stream({ video: true, audio: true, videoSize: [320, 240, 640, 480] });
     erizoStream.addEventListener('access-accepted', () => {
-      console.log('Access to webcam and/or microphone granted');
       const streamSrc = URL.createObjectURL(this.erizoStream.stream);
       this.updateState({
         initialized: { $set: true },
@@ -62,7 +61,7 @@ export default class GettingReady extends Component {
         initialized: { $set: true },
         accessAccepted: { $set: false },
         streamError: { $set: true },
-        errorReason: { $set: 'Access to webcam and/or microphone rejected' },
+        errorReason: { $set: 'Could not access your webcam and/or microphone' },
       });
     });
     erizoStream.addEventListener('stream-ended', () => {
@@ -82,8 +81,10 @@ export default class GettingReady extends Component {
   }
 
   componentWillUnmount() {
-    this.speechEvents.stop();
-    this.erizoStream.close();
+    if (this.stateBuffer.initialized && !this.stateBuffer.streamError) {
+      this.speechEvents.stop();
+      this.erizoStream.close();
+    }
   }
 
   renderMediaPreview() {

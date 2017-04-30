@@ -98,6 +98,7 @@ Meteor.methods({
         NuveServiceName: Nuve.serviceName,
         owner: Meteor.userId() || null,
         roomName,
+        defaultTabId: 1,
         tabs, // currently loading all tabs.
         passwordEnabled,
         roomSecret,
@@ -303,6 +304,7 @@ Meteor.publish('room.info', (roomName, credentials) => {
   const roomCursor = Rooms.find({ roomName }, {
     fields: {
       roomName: 1,
+      defaultTabId: 1,
       tabs: 1,
       participants: 1,
       passwordEnabled: 1,
