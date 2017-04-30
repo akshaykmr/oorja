@@ -21,13 +21,14 @@ import StreamsContainer from '../../components/room/StreamsContainer/';
 // import Sidebar from '../components/room/Sidebar';
 import Spotlight from '../../components/room/Spotlight';
 
-// misc.
 import ActivityListener from '../../../modules/ActivityListener';
 import RoomAPI from './RoomAPI';
 import Messenger from './Messenger';
 import StreamManager from './StreamManager';
 
 import messageType from '../../components/room/constants/messageType';
+
+import { MEDIASTREAMS_RESET, MEDIASTREAMS_UPDATE } from '../../actions/mediaStreams';
 
 const roomMessageTypes = {
   SPEECH: 'SPEECH',
@@ -37,7 +38,6 @@ class Room extends Component {
 
   constructor(props) {
     super(props);
-
     this.roomName = props.roomInfo.roomName;
     this.erizoToken = localStorage.getItem(`erizoToken:${this.roomName}`);
 
@@ -99,25 +99,6 @@ class Room extends Component {
       roomConnectionStatus: status.TRYING_TO_CONNECT,
       primaryDataStreamStatus: status.TRYING_TO_CONNECT,
       primaryMediaStreamStatus: status.TRYING_TO_CONNECT,
-
-      mediaStreams: {}, // { streamId -> mediaStreamState }
-      /* e.g.
-          {
-           12: {
-              streamId: Number,
-              local: bool,
-              audio: bool,
-              video: bool,
-              status: status[TRYING_TO_CONNECT, ERROR, CONNECTED etc.]
-              screen: bool,
-              streamSrc: '',
-              errorReason: '',
-              warningReason: ''
-              speaking: bool,
-            },
-            ...
-          }
-        */
 
       uiSize: this.calculateUISize(),
       streamContainerSize: uiConfig.COMPACT,
@@ -210,8 +191,8 @@ class Room extends Component {
         roomConnectionStatus: { $set: status.DISCONNECTED },
         primaryDataStreamStatus: { $set: status.TRYING_TO_CONNECT },
         connectedUsers: { $set: [] },
-        mediaStreams: { $set: {} },
       });
+      this.props.resetMediaStreams();
       this.subscribedDataStreams = {};
       this.subscribedMediaStreams = {};
 
@@ -354,23 +335,21 @@ class Room extends Component {
         this.erizoRoom.subscribe(stream);
       }
 
-      this.updateState({
-        mediaStreams: {
-          [streamID]: {
-            $set: {
-              userId: user.userId,
-              streamId: streamID,
-              local: isLocal,
-              // connected when stream subscription is successfull
-              status: isLocal ? status.CONNECTED : status.TRYING_TO_CONNECT,
-              audio: stream.hasAudio(),
-              video: stream.hasVideo(),
-              screen: !!attributes.screenshare,
-              streamSrc,
-              errorReason: '',
-              warningReason: '',
-              speaking: false,
-            },
+      this.props.updateMediaStreams({
+        [streamID]: {
+          $set: {
+            userId: user.userId,
+            streamId: streamID,
+            local: isLocal,
+            // connected when stream subscription is successfull
+            status: isLocal ? status.CONNECTED : status.TRYING_TO_CONNECT,
+            audio: stream.hasAudio(),
+            video: stream.hasVideo(),
+            screen: !!attributes.screenshare,
+            streamSrc,
+            errorReason: '',
+            warningReason: '',
+            speaking: false,
           },
         },
       });
@@ -392,11 +371,9 @@ class Room extends Component {
     if (!stream.hasAudio()) console.error('stream has no audio');
     const tracker = hark(stream.stream); // the browser mediaStream object
     tracker.on('speaking', () => {
-      this.updateState({
-        mediaStreams: {
-          [stream.getID()]: {
-            speaking: { $set: true },
-          },
+      this.props.updateMediaStreams({
+        [stream.getID()]: {
+          speaking: { $set: true },
         },
       });
       this.roomAPI.sendMessage({
@@ -413,11 +390,9 @@ class Room extends Component {
     });
 
     tracker.on('stopped_speaking', () => {
-      this.updateState({
-        mediaStreams: {
-          [stream.getID()]: {
-            speaking: { $set: false },
-          },
+      this.props.updateMediaStreams({
+        [stream.getID()]: {
+          speaking: { $set: false },
         },
       });
       this.roomAPI.sendMessage({
@@ -452,12 +427,10 @@ class Room extends Component {
 
     const handleMediaSubscriptionSuccess = () => {
       const streamSrc = URL.createObjectURL(stream.stream);
-      this.updateState({
-        mediaStreams: {
-          [stream.getID()]: {
-            status: { $set: status.CONNECTED },
-            streamSrc: { $set: streamSrc },
-          },
+      this.props.updateMediaStreams({
+        [stream.getID()]: {
+          status: { $set: status.CONNECTED },
+          streamSrc: { $set: streamSrc },
         },
       });
       this.subscribedMediaStreams[stream.getID()] = stream;
@@ -504,10 +477,8 @@ class Room extends Component {
         this.disconnectUser(user);
         break;
       case PRIMARY_MEDIA_STREAM:
-        this.updateState({
-          mediaStreams: {
-            [stream.getID()]: { $set: null },
-          },
+        this.props.updateMediaStreams({
+          [stream.getID()]: { $set: null },
         });
         this.removeSpeechTracker(stream);
         break;
@@ -594,23 +565,19 @@ class Room extends Component {
       const streamId = eventDetail.streamId;
       switch (eventDetail.status) {
         case 'SPEAKING':
-          if (this.stateBuffer.mediaStreams[streamId]) {
-            this.updateState({
-              mediaStreams: {
-                [streamId]: {
-                  speaking: { $set: true },
-                },
+          if (this.props.mediaStreams[streamId]) {
+            this.props.updateMediaStreams({
+              [streamId]: {
+                speaking: { $set: true },
               },
             });
           }
           break;
         case 'STOPPED':
-          if (this.stateBuffer.mediaStreams[streamId]) {
-            this.updateState({
-              mediaStreams: {
-                [streamId]: {
-                  speaking: { $set: false },
-                },
+          if (this.props.mediaStreams[streamId]) {
+            this.props.updateMediaStreams({
+              [streamId]: {
+                speaking: { $set: false },
               },
             });
           }
@@ -665,6 +632,7 @@ class Room extends Component {
       <div className='room page' style={roomStyle}>
         <StreamsContainer
           uiSize={uiSize}
+          mediaStreams={this.props.mediaStreams}
           roomAPI={this.roomAPI}
           streamContainerSize={streamContainerSize}
           roomInfo={this.props.roomInfo}
@@ -685,7 +653,33 @@ Room.propTypes = {
   roomUserId: React.PropTypes.string.isRequired,
   roomInfo: React.PropTypes.object.isRequired,
   joinRoom: React.PropTypes.func.isRequired,
+  mediaStreams: React.PropTypes.object.isRequired,
+  resetMediaStreams: React.PropTypes.func.isRequired,
+  updateMediaStreams: React.PropTypes.func.isRequired,
 };
 
-export default connect(null, {})(Room);
+
+const mapStateToProps = state => ({
+  mediaStreams: state.mediaStreams,
+});
+
+
+const mapDispatchToProps = dispatch => ({
+  updateMediaStreams: (changes) => {
+    dispatch({
+      type: MEDIASTREAMS_UPDATE,
+      payload: {
+        changes,
+      },
+    });
+  },
+  resetMediaStreams: () => {
+    dispatch({
+      type: MEDIASTREAMS_RESET,
+    });
+  },
+});
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Room);
 

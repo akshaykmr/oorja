@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 import { routerReducer } from 'react-router-redux';
 
 // import roomConfigurationReducer from './roomConfiguration';
+import mediaStreamsReducer from './mediaStream';
 
 const rootReducer = combineReducers({
   /*
@@ -9,6 +10,13 @@ const rootReducer = combineReducers({
     with roomAPI and roomActivityListner is working well. Still keeeping it here in case I need it
     later.
   */
+
+  /*
+    moved media stream state here as they change very often ( esp. speaking: bool),
+    not many components need access to it and those who do may be quite deep,
+    makes sense to move it here and connect it wherever required to avoid extra computation.
+  */
+  mediaStreams: mediaStreamsReducer,
   routing: routerReducer,
   /*
     Keep the router in sync with application state
