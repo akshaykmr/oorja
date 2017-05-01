@@ -91,7 +91,15 @@ export default class GettingReady extends Component {
     if (!this.state.initialized) return null;
     else if (!this.state.accessAccepted) {
       return (
-        <div className="">Could not access media device, please check your browser settings</div>
+        <div className="">
+          Could not access media device, please check your browser settings.
+          <br/>
+          <br/>
+          oorja uses some of the newest features in web browsers,
+          which may not be supported by yours yet. Proceeding may result errorprone experience.
+          <br/> <br/>
+           please vist the room link using chrome or firefox for a better experience, thank you.
+        </div>
       );
     } else if (this.state.streamError) {
       return (
