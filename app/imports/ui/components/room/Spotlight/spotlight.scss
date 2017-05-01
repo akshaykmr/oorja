@@ -1,10 +1,16 @@
 $switcher-width: 60px;
 
+.spotlightContainer {
+  position: relative;
+  flex-grow: 100;
+}
+
 .spotlight {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
-  width: 100%;
+  right: 0;
+  bottom: 0;
 
   > .content-wrapper {
     background-color: #2e3136;
