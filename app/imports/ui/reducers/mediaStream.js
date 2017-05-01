@@ -23,7 +23,6 @@ const defaultState = {};
         */
 
 export default function (state = defaultState, action) {
-  console.log(action);
   switch (action.type) {
     case MEDIASTREAMS_RESET:
       return {};

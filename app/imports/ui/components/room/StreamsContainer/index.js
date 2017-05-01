@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import classNames from 'classnames';
-
 import { connect } from 'react-redux';
+import status from '../../room/constants/status';
 
 import Avatar from '../Avatar';
 
@@ -15,28 +15,109 @@ class StreamsContainer extends Component {
   constructor(props) {
     super(props);
     this.renderUserStreamBox = this.renderUserStreamBox.bind(this);
+
+    this.streamContainerStyle = {
+      COMPACT: {
+        height: '64px',
+      },
+      MEDIUM: {
+        height: uiConfig.streamContainerHeight.MEDIUM,
+        minHeight: '80px',
+      },
+      LARGE: {
+        height: uiConfig.streamContainerHeight.LARGE,
+        minHeight: '130px',
+      },
+    };
+  }
+
+  renderVideoStream(stream) {
+    const { TRYING_TO_CONNECT, WARNING } = status;
+    if (stream.status === TRYING_TO_CONNECT) return null;
+    const indicatorClassNames = classNames({
+      indicator: true,
+      speaking: stream.speaking,
+      warning: stream.status === WARNING,
+    });
+    return (
+      <div className="videoStream" key={stream.streamId}>
+        <video src={stream.streamSrc} autoPlay muted={stream.local ? 'muted' : ''}></video>
+        <div
+          className={indicatorClassNames}>
+        </div>
+      </div>
+    );
   }
 
   renderUserStreamBox(connectedUser) {
+    const { mediaStreams } = this.props;
+    const userMediaStreams = Object.keys(mediaStreams)
+      .map(streamId => mediaStreams[streamId])
+      .filter(stream => stream.userId === connectedUser.userId);
+
+    const atleastOnePlayingVideo = userMediaStreams.some((stream) => {
+      if (!stream.video) return false;
+      if (stream.status === status.TRYING_TO_CONNECT) return false;
+
+      return true;
+    });
+
+    const atleastOneSpeakingMediaStream = (userMediaStreams).some((stream) => {
+      if (stream.status === status.TRYING_TO_CONNECT) return false;
+      return stream.speaking;
+    });
+    const atleastOneSpeakingAudioStream = (userMediaStreams).some((stream) => {
+      if (stream.status === status.TRYING_TO_CONNECT) return false;
+      return (stream.speaking && !stream.video);
+    });
+
+    const { streamContainerSize } = this.props;
+    const { COMPACT, MEDIUM, LARGE } = uiConfig;
+
+    const streamBoxClassNames = classNames({
+      streamBox: true,
+      compact: streamContainerSize === COMPACT,
+      hasVideo: atleastOnePlayingVideo && (streamContainerSize !== COMPACT),
+      noVideo: !atleastOnePlayingVideo,
+      avatarGlow: streamContainerSize === COMPACT ?
+        atleastOneSpeakingMediaStream : atleastOneSpeakingAudioStream,
+    });
+
+    let avatarSize = '';
+    switch (streamContainerSize) {
+      case COMPACT: avatarSize = '50px';
+        break;
+      case MEDIUM: avatarSize = atleastOnePlayingVideo ? '30px' : '50px';
+        break;
+      case LARGE: avatarSize = atleastOnePlayingVideo ? '30px' : '80px';
+        break;
+      default:
+    }
+
     return (
-      <div className="streamBox" key={connectedUser.userId}>
-        <Avatar user={connectedUser} />
+      <div className={streamBoxClassNames} key={connectedUser.userId}>
+        {userMediaStreams.map(this.renderVideoStream)}
+        <Avatar user={connectedUser} size={avatarSize} />
       </div>
     );
   }
 
   render() {
     const { streamContainerSize } = this.props;
+    const { COMPACT, MEDIUM, LARGE } = uiConfig;
     const streamContainerClassNames = {
       streamContainer: true,
-      // compact: uiSize === uiConfig.COMPACT,
-      // default: uiSize !== uiConfig.COMPACT,
+      compact: streamContainerSize === COMPACT,
+      medium: streamContainerSize === MEDIUM,
+      large: streamContainerSize === LARGE,
     };
+
+    const streamContainerStyle = this.streamContainerStyle[streamContainerSize];
 
     return (
       <div
         className={classNames(streamContainerClassNames)}
-        style={{ height: streamContainerSize === uiConfig.LARGE ? '18%' : '60px' }}>
+        style={streamContainerStyle}>
         <CSSTransitionGroup
             transitionName="streamBox"
             transitionAppear={true}
@@ -51,9 +132,10 @@ class StreamsContainer extends Component {
  }
 
 StreamsContainer.propTypes = {
-  roomAPI: React.PropTypes.object,
-  roomInfo: React.PropTypes.object,
-  connectedUsers: React.PropTypes.array,
+  roomAPI: React.PropTypes.object.isRequired,
+  mediaStreams: React.PropTypes.object.isRequired,
+  roomInfo: React.PropTypes.object.isRequired,
+  connectedUsers: React.PropTypes.array.isRequired,
   uiSize: React.PropTypes.string.isRequired,
   streamContainerSize: React.PropTypes.string.isRequired,
 };

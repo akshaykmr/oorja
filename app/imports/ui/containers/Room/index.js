@@ -30,6 +30,8 @@ import messageType from '../../components/room/constants/messageType';
 
 import { MEDIASTREAMS_RESET, MEDIASTREAMS_UPDATE } from '../../actions/mediaStreams';
 
+import './room.scss';
+
 const roomMessageTypes = {
   SPEECH: 'SPEECH',
 };
@@ -92,6 +94,8 @@ class Room extends Component {
     this.setIncomingStreamListners = this.setIncomingStreamListners.bind(this);
     this.handleStreamRemoval = this.handleStreamRemoval.bind(this);
     this.handleStreamSubscriptionSucess = this.handleStreamSubscriptionSucess.bind(this);
+    this.incrementVideoStreamCount = this.incrementVideoStreamCount.bind(this);
+    this.decrementVideoStreamCount = this.decrementVideoStreamCount.bind(this);
 
     this.state = {
       connectedUsers: [],
@@ -100,8 +104,10 @@ class Room extends Component {
       primaryDataStreamStatus: status.TRYING_TO_CONNECT,
       primaryMediaStreamStatus: status.TRYING_TO_CONNECT,
 
+      videoStreamCount: 0,
+
       uiSize: this.calculateUISize(),
-      streamContainerSize: uiConfig.COMPACT,
+      streamContainerSize: uiConfig.MEDIUM,
       roomHeight: innerHeight,
       roomWidth: innerWidth,
 
@@ -353,6 +359,9 @@ class Room extends Component {
           },
         },
       });
+      if (isLocal && stream.hasVideo()) {
+        this.incrementVideoStreamCount();
+      }
     };
 
     switch (attributes.type) {
@@ -434,6 +443,7 @@ class Room extends Component {
         },
       });
       this.subscribedMediaStreams[stream.getID()] = stream;
+      if (stream.hasVideo()) this.incrementVideoStreamCount();
     };
     switch (attributes.type) {
       case PRIMARY_DATA_STREAM: handlePrimaryDataStreamSubscriptionSuccess();
@@ -477,10 +487,12 @@ class Room extends Component {
         this.disconnectUser(user);
         break;
       case PRIMARY_MEDIA_STREAM:
+        if (this.props.mediaStreams[stream.getID()].video) this.decrementVideoStreamCount();
         this.props.updateMediaStreams({
           [stream.getID()]: { $set: null },
         });
         this.removeSpeechTracker(stream);
+        this.subscribedMediaStreams[stream.getID()] = null;
         break;
       default: console.error('unexpected stream type');
     }
@@ -621,15 +633,18 @@ class Room extends Component {
     window.removeEventListener('resize', this.onWindowResize);
   }
 
+  incrementVideoStreamCount() {
+    this.updateState({ videoStreamCount: { $set: this.stateBuffer.videoStreamCount + 1 } });
+  }
+
+  decrementVideoStreamCount() {
+    this.updateState({ videoStreamCount: { $set: this.stateBuffer.videoStreamCount - 1 } });
+  }
+
   render() {
     const { uiSize, streamContainerSize } = this.state;
-
-    const roomStyle = {
-      height: '100vh',
-      width: '100vw',
-    };
     return (
-      <div className='room page' style={roomStyle}>
+      <div className='room page'>
         <StreamsContainer
           uiSize={uiSize}
           mediaStreams={this.props.mediaStreams}

@@ -1,11 +1,9 @@
+$speaking-indicator-color: #45b29d;
+
 $avatar-size: 50px;
 .streamContainer {
-  position: absolute;
   overflow-x: auto;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
+  width: 100%;
   padding: 5px;
   background-color: #2e3136;
   span {
@@ -17,19 +15,77 @@ $avatar-size: 50px;
     align-items: center;
     align-content: center;
   }
+
+  &.compact {
+    .videoStream {
+      display: none !important;
+    }
+  }
+
   .streamBox {
     height: 100%;
     min-width: 60px;
     position: relative;
     padding-left: 5px;
     padding-right: 5px;
-    .avatar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
+
+    &.noVideo, &.compact {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
+    .avatar {
+      border: 2px solid transparent;
+      transition: border-color 0.5s ease-out;
+      box-sizing: content-box !important
+    }
 
+    &.avatarGlow .avatar{
+      border-color: $speaking-indicator-color;
+    }
+
+    &.hasVideo .avatar {
+      position: absolute;
+      bottom: 0;
+      left: -10px;
+      z-index: 2;
+    }
+
+    .videoStream {
+      height: 100%;
+      width: auto;
+      position: relative;
+      display: inline-block;
+      margin-right: 5px;
+
+      video {
+        height: 100%;
+        width: auto;
+        max-height: 100%;
+        max-width: 100%;
+        border-radius: 5px;
+      }
+
+      .indicator {
+        opacity: 0;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 4px;
+        transition: opacity 0.5s ease-out;
+        border-radius: 3px;
+        background-color: $speaking-indicator-color;
+        &.speaking, &.warning {
+          opacity: 1;
+        }
+
+        &.warning {
+          background-color: yellow !important;
+        }      
+      }
+    }
   }
   .streamBox-enter {
     transform: translate3d(0, -100%, 0);

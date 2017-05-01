@@ -56,6 +56,11 @@ class RoomAPI {
 
   }
 
+  getStreamContainerSize() {
+    // COMPACT, MEDIUM, LARGE
+    return this.room.stateBuffer.streamContainerSize;
+  }
+
   resizeStreamContainer(size) {
     this.room.updateState({
       streamContainerSize: { $set: size },
