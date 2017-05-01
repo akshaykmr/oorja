@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Collapse } from '@blueprintjs/core';
 
 import './settings.scss';
 
