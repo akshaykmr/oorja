@@ -1,12 +1,26 @@
-export default [ // upsert contents to DB when this file gets big.
+export default [
+  // upsert contents to DB when this file gets big.
   {
     tabId: 1,
+
+    // must be without spaces (why? used to contain css, check out css for any of the tabs)
     name: 'Info',
     displayName: 'Room Information',
-    iconColor: '#fffad5',
-    bgColor: '#ffffff',
+  // icons are currently from ionic, maybe allow images or svgs later
+  // iconColor is for the tabSwitch when I was experimenting with them,
+  // but later on I stuck with a set color scheme instead of a custom one for each tab.
     icon: 'android-share-alt',
+    iconColor: '#fffad5',
+
+    // bgColor is the background color for the tab content
+    bgColor: '#ffffff',
+
     description: 'Invite others to this room',
+
+    // specify custom streamContainer size for this tab
+    // '' means auto (if there is any video stream [MEDIUM] else [COMPACT]),
+    //  else specify one of [COMPACT, MEDIUM, LARGE]
+    streamContainerSize: '',
   },
   {
     tabId: 10,
@@ -16,6 +30,7 @@ export default [ // upsert contents to DB when this file gets big.
     bgColor: '#2e3136',
     icon: 'videocamera',
     description: 'Video chat',
+    streamContainerSize: 'LARGE',
   },
   // {
   //   tabId: 30,
@@ -26,6 +41,7 @@ export default [ // upsert contents to DB when this file gets big.
   //   bgColor: '',
   //   icon: 'ios-settings',
   //   description: 'Configure your webcam and Room settings',
+  //   streamContainerSize: '',
   // },
   {
     tabId: 40,
@@ -35,6 +51,7 @@ export default [ // upsert contents to DB when this file gets big.
     bgColor: '#ffffff',
     icon: 'document-text',
     description: 'Shared Richtext document',
+    streamContainerSize: '',
   },
   {
     tabId: 41,
@@ -44,6 +61,7 @@ export default [ // upsert contents to DB when this file gets big.
     bgColor: '',
     icon: 'code-working',
     description: 'Shared Code editor',
+    streamContainerSize: '',
   },
   {
     tabId: 31,
@@ -53,6 +71,7 @@ export default [ // upsert contents to DB when this file gets big.
     bgColor: '#faebd7',
     icon: 'chatbubbles',
     description: 'Chat messaging',
+    streamContainerSize: '',
   },
   {
     tabId: 100,
@@ -62,5 +81,6 @@ export default [ // upsert contents to DB when this file gets big.
     bgColor: '#ffffff',
     icon: 'ios-plus',
     description: 'Discover more tabs',
+    streamContainerSize: '',
   },
 ];

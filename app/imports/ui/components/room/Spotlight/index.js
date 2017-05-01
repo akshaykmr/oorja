@@ -91,7 +91,7 @@ class Spotlight extends Component {
   }
 
   switchToTab(tabId) {
-    const { activeTabId } = this.state;
+    const { activeTabId } = this.stateBuffer;
     const from = activeTabId;
     const to = tabId;
     this.updateState({
@@ -99,6 +99,10 @@ class Spotlight extends Component {
     });
     localStorage.setItem(`lastActiveTab:${this.props.roomInfo.roomName}`, tabId);
     this.props.dispatchRoomActivity(roomActivities.TAB_SWITCH, { from, to });
+
+    // currently not resizing for custom StreamContainer | CSS did not work out :/
+    // const newActiveTab = tabStatusRegistry[tabId];
+    // this.props.resizeStreamContainer(newActiveTab.streamContainerSize);
   }
 
   /*

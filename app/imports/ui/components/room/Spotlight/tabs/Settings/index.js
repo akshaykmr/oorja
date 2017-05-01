@@ -9,21 +9,7 @@ class Settings extends Component {
     return (
       <div className={this.props.classNames} style={this.props.style}>
         <div className="settingsContainer">
-          <div className="setting">
-            <div className="title">Media</div>
-              <Collapse
-                isOpen={true} >
-                <div style={{ padding: '5px' }}>
-                <label className="pt-label" htmlFor="roomPassword">Password</label>
-                  <input className="pt-input" type="password" id="roomPassword"
-                    value={''}
-                  />
-                </div>
-              </Collapse>
-          </div>
-          <div className="setting">
-            <div className="title">Room</div>
-          </div>
+        WORK ON SETTINGS
         </div>
       </div>
     );

@@ -96,6 +96,8 @@ class Room extends Component {
     this.handleStreamSubscriptionSucess = this.handleStreamSubscriptionSucess.bind(this);
     this.incrementVideoStreamCount = this.incrementVideoStreamCount.bind(this);
     this.decrementVideoStreamCount = this.decrementVideoStreamCount.bind(this);
+    this.resizeStreamContainer = this.resizeStreamContainer.bind(this);
+    this.determineStreamContainerSize = this.determineStreamContainerSize.bind(this);
 
     this.state = {
       connectedUsers: [],
@@ -107,7 +109,6 @@ class Room extends Component {
       videoStreamCount: 0,
 
       uiSize: this.calculateUISize(),
-      streamContainerSize: uiConfig.MEDIUM,
       roomHeight: innerHeight,
       roomWidth: innerWidth,
 
@@ -489,7 +490,7 @@ class Room extends Component {
       case PRIMARY_MEDIA_STREAM:
         if (this.props.mediaStreams[stream.getID()].video) this.decrementVideoStreamCount();
         this.props.updateMediaStreams({
-          [stream.getID()]: { $set: null },
+          $unset: [stream.getID()],
         });
         this.removeSpeechTracker(stream);
         this.subscribedMediaStreams[stream.getID()] = null;
@@ -641,8 +642,33 @@ class Room extends Component {
     this.updateState({ videoStreamCount: { $set: this.stateBuffer.videoStreamCount - 1 } });
   }
 
+  determineStreamContainerSize() {
+    const { mediaStreams } = this.props;
+    if (!mediaStreams) return uiConfig.COMPACT;
+    const atleastOneVideoStream = Object.keys(mediaStreams)
+        .map(streamId => mediaStreams[streamId])
+        .some(stream => stream.video && (stream.status !== status.TRYING_TO_CONNECT));
+    if (atleastOneVideoStream) return uiConfig.MEDIUM;
+
+    return uiConfig.COMPACT;
+  }
+
+  // TODO
+  resizeStreamContainer(size) {
+    if (!size) {
+      this.resizeStreamContainer(this.determineStreamContainerSize());
+      return;
+    }
+    if (size === this.stateBuffer.streamContainerSize) return;
+
+    this.updateState({
+      streamContainerSize: { $set: size },
+    });
+  }
+
   render() {
-    const { uiSize, streamContainerSize } = this.state;
+    const { uiSize } = this.state;
+    const streamContainerSize = this.determineStreamContainerSize();
     return (
       <div className='room page'>
         <StreamsContainer

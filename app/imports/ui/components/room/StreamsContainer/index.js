@@ -22,7 +22,7 @@ class StreamsContainer extends Component {
       },
       MEDIUM: {
         height: uiConfig.streamContainerHeight.MEDIUM,
-        minHeight: '80px',
+        minHeight: '100px',
       },
       LARGE: {
         height: uiConfig.streamContainerHeight.LARGE,
@@ -96,7 +96,7 @@ class StreamsContainer extends Component {
 
     return (
       <div className={streamBoxClassNames} key={connectedUser.userId}>
-        {userMediaStreams.map(this.renderVideoStream)}
+        {userMediaStreams.filter(stream => stream.video).map(this.renderVideoStream)}
         <Avatar user={connectedUser} size={avatarSize} />
       </div>
     );

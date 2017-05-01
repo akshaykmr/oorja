@@ -55,17 +55,6 @@ class RoomAPI {
   removeActivityListener() {
 
   }
-
-  getStreamContainerSize() {
-    // COMPACT, MEDIUM, LARGE
-    return this.room.stateBuffer.streamContainerSize;
-  }
-
-  resizeStreamContainer(size) {
-    this.room.updateState({
-      streamContainerSize: { $set: size },
-    });
-  }
 }
 
 export default RoomAPI;
