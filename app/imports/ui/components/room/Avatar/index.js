@@ -132,9 +132,25 @@ class Avatar extends Component {
       backgroundImage: pictureSrc && loadComplete && !pictureError ? `url(${pictureSrc})` : null,
       backgroundColor: textAvatarColor,
     };
+    // supported sizes 30px, 50px default, 80px
+    const size = this.props.size || '50px';
+    let fontSize = '';
+    switch (size) { // I want it to look perfect....
+      case '30px': fontSize = '0.7em';
+        break;
+      case '80px': fontSize = '1.7em';
+        break;
+      default: fontSize = '1.0em';
+    }
+    const sizeStyle = {
+      height: size,
+      width: size,
+      lineHeight: size,
+      fontSize,
+    };
 
     return (
-      <div className="avatar" style={Object.assign(defaultStyle, avatarStyle)}>
+      <div className="avatar" style={Object.assign(defaultStyle, avatarStyle, sizeStyle)}>
         {!pictureSrc || pictureError || !loadComplete ? text : ''}
       </div>
     );
@@ -142,6 +158,7 @@ class Avatar extends Component {
 }
 
 Avatar.propTypes = {
+  size: React.PropTypes.string, // 30px, 50px, 80px
   user: React.PropTypes.object, // if user is passed as prop, pull the properties below from it.
   name: React.PropTypes.string,
   initials: React.PropTypes.string,
