@@ -29,6 +29,9 @@ class StreamsContainer extends Component {
         minHeight: '130px',
       },
     };
+
+    this.renderVideoStream = this.renderVideoStream.bind(this);
+    this.renderUserStreamBox = this.renderUserStreamBox.bind(this);
   }
 
   renderVideoStream(stream) {
@@ -36,7 +39,7 @@ class StreamsContainer extends Component {
     if (stream.status === TRYING_TO_CONNECT) return null;
     const indicatorClassNames = classNames({
       indicator: true,
-      speaking: stream.speaking,
+      speaking: this.props.streamSpeaking[stream.streamId],
       warning: stream.status === WARNING,
     });
     return (
@@ -50,7 +53,7 @@ class StreamsContainer extends Component {
   }
 
   renderUserStreamBox(connectedUser) {
-    const { mediaStreams } = this.props;
+    const { mediaStreams, streamSpeaking } = this.props;
     const userMediaStreams = Object.keys(mediaStreams)
       .map(streamId => mediaStreams[streamId])
       .filter(stream => stream.userId === connectedUser.userId);
@@ -64,11 +67,11 @@ class StreamsContainer extends Component {
 
     const atleastOneSpeakingMediaStream = (userMediaStreams).some((stream) => {
       if (stream.status === status.TRYING_TO_CONNECT) return false;
-      return stream.speaking;
+      return streamSpeaking[stream.streamId];
     });
     const atleastOneSpeakingAudioStream = (userMediaStreams).some((stream) => {
       if (stream.status === status.TRYING_TO_CONNECT) return false;
-      return (stream.speaking && !stream.video);
+      return (streamSpeaking[stream.streamId] && !stream.video);
     });
 
     const { streamContainerSize } = this.props;
@@ -131,13 +134,20 @@ class StreamsContainer extends Component {
   }
  }
 
+const mapStateToProps = state => ({
+  mediaStreams: state.mediaStreams,
+  streamSpeaking: state.streamSpeaking,
+});
+
+
 StreamsContainer.propTypes = {
   roomAPI: React.PropTypes.object.isRequired,
   mediaStreams: React.PropTypes.object.isRequired,
+  streamSpeaking: React.PropTypes.object.isRequired,
   roomInfo: React.PropTypes.object.isRequired,
   connectedUsers: React.PropTypes.array.isRequired,
   uiSize: React.PropTypes.string.isRequired,
   streamContainerSize: React.PropTypes.string.isRequired,
 };
 
-export default connect(null, {})(StreamsContainer);
+export default connect(mapStateToProps, {})(StreamsContainer);

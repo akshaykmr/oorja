@@ -29,6 +29,7 @@ import StreamManager from './StreamManager';
 import messageType from '../../components/room/constants/messageType';
 
 import { MEDIASTREAMS_RESET, MEDIASTREAMS_UPDATE } from '../../actions/mediaStreams';
+import { SPEAKING, SPEAKING_STOPPED } from '../../actions/streamSpeaking';
 
 import './room.scss';
 
@@ -357,7 +358,6 @@ class Room extends Component {
             streamSrc,
             errorReason: '',
             warningReason: '',
-            speaking: false,
           },
         },
       });
@@ -382,11 +382,7 @@ class Room extends Component {
     if (!stream.hasAudio()) console.error('stream has no audio');
     const tracker = hark(stream.stream); // the browser mediaStream object
     tracker.on('speaking', () => {
-      this.props.updateMediaStreams({
-        [stream.getID()]: {
-          speaking: { $set: true },
-        },
-      });
+      this.props.streamSpeaking(stream.getID());
       this.roomAPI.sendMessage({
         broadcast: true,
         type: messageType.ROOM_MESSAGE,
@@ -401,11 +397,7 @@ class Room extends Component {
     });
 
     tracker.on('stopped_speaking', () => {
-      this.props.updateMediaStreams({
-        [stream.getID()]: {
-          speaking: { $set: false },
-        },
-      });
+      this.props.streamSpeakingStopped(stream.getID());
       this.roomAPI.sendMessage({
         broadcast: true,
         type: messageType.ROOM_MESSAGE,
@@ -580,20 +572,12 @@ class Room extends Component {
       switch (eventDetail.status) {
         case 'SPEAKING':
           if (this.props.mediaStreams[streamId]) {
-            this.props.updateMediaStreams({
-              [streamId]: {
-                speaking: { $set: true },
-              },
-            });
+            this.props.streamSpeaking(streamId);
           }
           break;
         case 'STOPPED':
           if (this.props.mediaStreams[streamId]) {
-            this.props.updateMediaStreams({
-              [streamId]: {
-                speaking: { $set: false },
-              },
-            });
+            this.props.streamSpeakingStopped(streamId);
           }
           break;
         default: console.error('unrecognised speech status');
@@ -676,7 +660,6 @@ class Room extends Component {
       <div className='room page'>
         <StreamsContainer
           uiSize={uiSize}
-          mediaStreams={this.props.mediaStreams}
           roomAPI={this.roomAPI}
           streamContainerSize={streamContainerSize}
           roomInfo={this.props.roomInfo}
@@ -701,6 +684,8 @@ Room.propTypes = {
   mediaStreams: React.PropTypes.object.isRequired,
   resetMediaStreams: React.PropTypes.func.isRequired,
   updateMediaStreams: React.PropTypes.func.isRequired,
+  streamSpeaking: React.PropTypes.func.isRequired,
+  streamSpeakingStopped: React.PropTypes.func.isRequired,
 };
 
 
@@ -721,6 +706,22 @@ const mapDispatchToProps = dispatch => ({
   resetMediaStreams: () => {
     dispatch({
       type: MEDIASTREAMS_RESET,
+    });
+  },
+  streamSpeaking: (streamId) => {
+    dispatch({
+      type: SPEAKING,
+      payload: {
+        streamId,
+      },
+    });
+  },
+  streamSpeakingStopped: (streamId) => {
+    dispatch({
+      type: SPEAKING_STOPPED,
+      payload: {
+        streamId,
+      },
     });
   },
 });
