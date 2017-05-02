@@ -6,14 +6,18 @@ $avatar-size: 50px;
   width: 100%;
   padding: 5px;
   background-color: #2e3136;
+  overflow-y: hidden;
+
   span {
     height: 100%;
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
     align-content: center;
+    overflow-y: hidden;
+    overflow-x: auto;
   }
 
   &.compact {
@@ -28,6 +32,7 @@ $avatar-size: 50px;
     position: relative;
     padding-left: 5px;
     padding-right: 5px;
+    flex-shrink: 0;
 
 
     &.noVideo, &.compact {
@@ -37,7 +42,9 @@ $avatar-size: 50px;
     }
 
     .avatar {
+      position: relative;
       &::after {
+        position: absolute;
         border: 2px solid transparent;
         transition: border-color 0.5s ease-out;
         content: '';

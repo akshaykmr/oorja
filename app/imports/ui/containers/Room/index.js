@@ -96,8 +96,8 @@ class Room extends Component {
     this.handleStreamSubscriptionSucess = this.handleStreamSubscriptionSucess.bind(this);
     this.incrementVideoStreamCount = this.incrementVideoStreamCount.bind(this);
     this.decrementVideoStreamCount = this.decrementVideoStreamCount.bind(this);
-    this.resizeStreamContainer = this.resizeStreamContainer.bind(this);
     this.determineStreamContainerSize = this.determineStreamContainerSize.bind(this);
+    this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
 
     this.state = {
       connectedUsers: [],
@@ -106,6 +106,7 @@ class Room extends Component {
       primaryDataStreamStatus: status.TRYING_TO_CONNECT,
       primaryMediaStreamStatus: status.TRYING_TO_CONNECT,
 
+      customStreamContainerSize: false,
       videoStreamCount: 0,
 
       uiSize: this.calculateUISize(),
@@ -660,22 +661,17 @@ class Room extends Component {
     return uiConfig.COMPACT;
   }
 
-  // TODO
-  resizeStreamContainer(size) {
-    if (!size) {
-      this.resizeStreamContainer(this.determineStreamContainerSize());
-      return;
-    }
-    if (size === this.stateBuffer.streamContainerSize) return;
-
+  setCustomStreamContainerSize(size) {
     this.updateState({
-      streamContainerSize: { $set: size },
+      customStreamContainerSize: {
+        $set: size ? uiConfig[size] : false,
+      },
     });
   }
 
   render() {
-    const { uiSize } = this.state;
-    const streamContainerSize = this.determineStreamContainerSize();
+    const { uiSize, customStreamContainerSize } = this.state;
+    const streamContainerSize = customStreamContainerSize || this.determineStreamContainerSize();
     return (
       <div className='room page'>
         <StreamsContainer
@@ -691,7 +687,8 @@ class Room extends Component {
           roomAPI={this.roomAPI}
           dispatchRoomActivity={this.activityListener.dispatch}
           uiSize={uiSize}
-          streamContainerSize={streamContainerSize}/>
+          streamContainerSize={streamContainerSize}
+          setCustomStreamContainerSize={this.setCustomStreamContainerSize}/>
       </div>
     );
   }

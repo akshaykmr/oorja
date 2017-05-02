@@ -19,7 +19,7 @@ export default [
 
     // specify custom streamContainer size for this tab
     // '' means auto (if there is any video stream [MEDIUM] else [COMPACT]),
-    //  else specify one of [COMPACT, MEDIUM, LARGE]
+    //  else specify one of [COMPACT, MEDIUM]. CSS for LARGE is not working well atm.
     streamContainerSize: '',
   },
   {
@@ -30,7 +30,7 @@ export default [
     bgColor: '#2e3136',
     icon: 'videocamera',
     description: 'Video chat',
-    streamContainerSize: 'LARGE',
+    streamContainerSize: '',
   },
   // {
   //   tabId: 30,
@@ -81,6 +81,6 @@ export default [
     bgColor: '#ffffff',
     icon: 'ios-plus',
     description: 'Discover more tabs',
-    streamContainerSize: '',
+    streamContainerSize: 'COMPACT',
   },
 ];
