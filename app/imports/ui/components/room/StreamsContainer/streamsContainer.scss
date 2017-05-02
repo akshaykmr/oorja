@@ -84,10 +84,10 @@ $avatar-size: 50px;
       transition: transform 0.3s ease-out;
       
       &:hover {
-        transform: scale(1.05, 1.05);
+        transform: scale(1.03, 1.03);
       }
       &:active {
-        transform: scale(1.07, 1.07) translate3d(0, -5px, 0);
+        transform: scale(1.07, 1.07);;
       }
 
       video {

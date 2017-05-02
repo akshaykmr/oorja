@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import status from '../../room/constants/status';
 
 import Avatar from '../Avatar';
+import VideoStream from './VideoStream';
 
 import uiConfig from '../constants/uiConfig';
 
@@ -43,12 +44,12 @@ class StreamsContainer extends Component {
       warning: stream.status === WARNING,
     });
     return (
-      <div className="videoStream" key={stream.streamId}>
-        <video src={stream.streamSrc} autoPlay muted={stream.local ? 'muted' : ''}></video>
-        <div
-          className={indicatorClassNames}>
-        </div>
-      </div>
+      <VideoStream
+        key={stream.streamId}
+        streamSrc={stream.streamSrc}
+        muted={stream.local ? 'muted' : ''}
+        classNames={indicatorClassNames}>
+      </VideoStream>
     );
   }
 
