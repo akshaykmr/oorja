@@ -622,6 +622,10 @@ class Room extends Component {
     this.setRoomConnectionListeners();
     this.setRoomStreamListners();
     this.erizoRoom.connect();
+
+    // store body bg color and then change it.
+    this.originialBodyBackground = document.body.style.background;
+    document.body.style.backgroundColor = '#2e3136';
   }
 
   componentWillUnmount() {
@@ -632,6 +636,9 @@ class Room extends Component {
     }
     this.erizoRoom.disconnect();
     window.removeEventListener('resize', this.onWindowResize);
+
+    // restore original body bg color
+    document.body.style.backgroundColor = this.originialBodyBackground;
   }
 
   incrementVideoStreamCount() {

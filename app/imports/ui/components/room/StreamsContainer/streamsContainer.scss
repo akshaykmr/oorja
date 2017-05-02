@@ -37,12 +37,18 @@ $avatar-size: 50px;
     }
 
     .avatar {
-      border: 2px solid transparent;
-      transition: border-color 0.5s ease-out;
-      box-sizing: content-box !important
+      &::after {
+        border: 2px solid transparent;
+        transition: border-color 0.5s ease-out;
+        content: '';
+        display: block;
+        height: 100%;
+        width: 100%;
+        border-radius: 50%;
+      }
     }
 
-    &.avatarGlow .avatar{
+    &.avatarGlow .avatar::after{
       border-color: $speaking-indicator-color;
     }
 
