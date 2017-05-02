@@ -9,18 +9,30 @@ class ActivityListener {
     this.dispatch = this.dispatch.bind(this);
   }
 
-  listen(activity, listner) {
+  checkIfValidActivity(activity) {
     if (!(activity in this.listnerStore)) {
-      console.error('activity not found', activity);
-      return;
+      throw new Error(`activity not found: ${activity}`);
     }
+  }
+
+  listen(activity, listner) {
+    this.checkIfValidActivity(activity);
     this.listnerStore[activity].push(listner);
   }
 
   dispatch(activity, activityDetail) {
+    this.checkIfValidActivity(activity);
     this.listnerStore[activity].forEach((listner) => {
       listner(activityDetail);
     });
+  }
+
+  remove(activity, listner) {
+    this.checkIfValidActivity(activity);
+    // I have not verify this function yet.
+    this.listnerStore[activity] = this.listnerStore[activity].filter(
+      activityListener => activityListener !== listner
+    );
   }
 }
 

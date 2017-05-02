@@ -1,5 +1,5 @@
 import update from 'immutability-helper';
-import { SPEAKING, SPEAKING_STOPPED } from '../actions/streamSpeaking';
+import { SPEAKING, SPEAKING_STOPPED } from '../actions/stream';
 
 const defaultState = {};
 

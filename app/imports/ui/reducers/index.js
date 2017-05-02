@@ -3,6 +3,7 @@ import { routerReducer } from 'react-router-redux';
 
 import mediaStreamsReducer from './mediaStream';
 import streamSpeakingReducer from './streamSpeaking';
+import focussedStreamIdReducer from './focussedStreamIdReducer';
 
 const rootReducer = combineReducers({
   /*
@@ -21,6 +22,8 @@ const rootReducer = combineReducers({
   mediaStreams: mediaStreamsReducer,
 
   streamSpeaking: streamSpeakingReducer,
+
+  focussedStreamId: focussedStreamIdReducer,
 
   routing: routerReducer,
   /*

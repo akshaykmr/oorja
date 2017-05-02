@@ -18,7 +18,6 @@ import roomActivities from '../../components/room/constants/roomActivities';
 
 // room components
 import StreamsContainer from '../../components/room/StreamsContainer/';
-// import Sidebar from '../components/room/Sidebar';
 import Spotlight from '../../components/room/Spotlight';
 
 import ActivityListener from '../../../modules/ActivityListener';
@@ -29,7 +28,7 @@ import StreamManager from './StreamManager';
 import messageType from '../../components/room/constants/messageType';
 
 import { MEDIASTREAMS_RESET, MEDIASTREAMS_UPDATE } from '../../actions/mediaStreams';
-import { SPEAKING, SPEAKING_STOPPED } from '../../actions/streamSpeaking';
+import { SPEAKING, SPEAKING_STOPPED } from '../../actions/stream';
 
 import './room.scss';
 
@@ -376,47 +375,6 @@ class Room extends Component {
     }
   }
 
-  // to be used with media streams
-  // only use for local streams and broadcast the speech events over data stream.
-  addSpeechTracker(stream) {
-    if (!stream.hasAudio()) console.error('stream has no audio');
-    const tracker = hark(stream.stream); // the browser mediaStream object
-    tracker.on('speaking', () => {
-      this.props.streamSpeaking(stream.getID());
-      this.roomAPI.sendMessage({
-        broadcast: true,
-        type: messageType.ROOM_MESSAGE,
-        content: {
-          type: roomMessageTypes.SPEECH,
-          content: {
-            status: 'SPEAKING',
-            streamId: stream.getID(),
-          },
-        },
-      });
-    });
-
-    tracker.on('stopped_speaking', () => {
-      this.props.streamSpeakingStopped(stream.getID());
-      this.roomAPI.sendMessage({
-        broadcast: true,
-        type: messageType.ROOM_MESSAGE,
-        content: {
-          type: roomMessageTypes.SPEECH,
-          content: {
-            status: 'STOPPED',
-            streamId: stream.getID(),
-          },
-        },
-      });
-    });
-    this.speechTrackers[stream.getID()] = tracker;
-  }
-
-  removeSpeechTracker(stream) {
-    const speechTracker = this.speechTrackers[stream.getID()];
-    if (speechTracker) speechTracker.stop();
-  }
 
   handleStreamSubscriptionSucess(stream) {
     const attributes = stream.getAttributes();
@@ -590,6 +548,48 @@ class Room extends Component {
     }
   }
 
+  // to be used with media streams
+  // only use for local streams and broadcast the speech events over data stream.
+  addSpeechTracker(stream) {
+    if (!stream.hasAudio()) console.error('stream has no audio');
+    const tracker = hark(stream.stream); // the browser mediaStream object
+    tracker.on('speaking', () => {
+      this.props.streamSpeaking(stream.getID());
+      this.roomAPI.sendMessage({
+        broadcast: true,
+        type: messageType.ROOM_MESSAGE,
+        content: {
+          type: roomMessageTypes.SPEECH,
+          content: {
+            status: 'SPEAKING',
+            streamId: stream.getID(),
+          },
+        },
+      });
+    });
+
+    tracker.on('stopped_speaking', () => {
+      this.props.streamSpeakingStopped(stream.getID());
+      this.roomAPI.sendMessage({
+        broadcast: true,
+        type: messageType.ROOM_MESSAGE,
+        content: {
+          type: roomMessageTypes.SPEECH,
+          content: {
+            status: 'STOPPED',
+            streamId: stream.getID(),
+          },
+        },
+      });
+    });
+    this.speechTrackers[stream.getID()] = tracker;
+  }
+
+  removeSpeechTracker(stream) {
+    const speechTracker = this.speechTrackers[stream.getID()];
+    if (speechTracker) speechTracker.stop();
+  }
+
   onWindowResize(event) {
     const { innerHeight, innerWidth } = event.target.window;
     this.updateState({
@@ -691,6 +691,7 @@ Room.propTypes = {
 
 const mapStateToProps = state => ({
   mediaStreams: state.mediaStreams,
+  focussedStreamId: state.focussedStreamId,
 });
 
 

@@ -52,8 +52,8 @@ class RoomAPI {
     this.room.activityListener.listen(activity, listner);
   }
 
-  removeActivityListener() {
-
+  removeActivityListener(activity, listner) {
+    this.room.activityListener.remove(activity, listner);
   }
 }
 
