@@ -43,19 +43,6 @@ class Room extends Component {
     this.roomName = props.roomInfo.roomName;
     this.erizoToken = localStorage.getItem(`erizoToken:${this.roomName}`);
 
-    this.erizoRoom = Erizo.Room({ token: this.erizoToken });
-
-    // an erizo data stream to be used for sending 'data' by this user
-    this.primaryDataStream = Erizo.Stream({
-      data: true,
-      attributes: {
-        userId: props.roomUserId,
-        type: streamTypes.PRIMARY_DATA_STREAM,
-      },
-    });
-    this.setPrimaryDataStreamListners();
-    this.primaryDataStream.init();
-
     // subscribed incoming data streams
     this.subscribedDataStreams = {}; // id -> erizoStream
 
@@ -81,7 +68,7 @@ class Room extends Component {
     this.onWindowResize = this.onWindowResize.bind(this);
 
     this.updateState = this.updateState.bind(this);
-    this.tryToReconnect = this.tryToReconnect.bind(this);
+    this.tryToConnect = this.tryToConnect.bind(this);
     this.setRoomConnectionListeners = this.setRoomConnectionListeners.bind(this);
     this.setRoomStreamListners = this.setRoomStreamListners.bind(this);
     this.connectUser = this.connectUser.bind(this);
@@ -102,7 +89,7 @@ class Room extends Component {
     this.state = {
       connectedUsers: [],
 
-      roomConnectionStatus: status.TRYING_TO_CONNECT,
+      roomConnectionStatus: status.INITIALIZING,
       primaryDataStreamStatus: status.TRYING_TO_CONNECT,
       primaryMediaStreamStatus: status.TRYING_TO_CONNECT,
 
@@ -150,32 +137,49 @@ class Room extends Component {
     // override room settings with user's preferences if any
   }
 
-  tryToReconnect() {
+  tryToConnect() {
     if (this.stateBuffer.roomConnectionStatus === status.TRYING_TO_CONNECT
         || this.unmountInProgress) {
       return;
     }
-    console.info('trying to reconnect');
+    console.info('trying to connect');
     this.updateState({ roomConnectionStatus: { $set: status.TRYING_TO_CONNECT } });
+
+    const connectToErizo = ({ erizoToken }) => {
+      this.erizoToken = erizoToken;
+      /* eslint-disable new-cap */
+      this.sessionHash = _.random(1000);
+      this.erizoRoom = Erizo.Room({ token: this.erizoToken });
+      // an erizo data stream to be used for sending 'data' by this user
+      this.primaryDataStream = Erizo.Stream({
+        data: true,
+        attributes: {
+          userId: this.props.roomUserId,
+          type: streamTypes.PRIMARY_DATA_STREAM,
+        },
+      });
+      this.setPrimaryDataStreamListners();
+      this.primaryDataStream.init();
+      /* eslint-enable new-cap */
+      console.info('got a token, connecting...');
+      this.setRoomConnectionListeners();
+      this.setRoomStreamListners();
+      this.erizoRoom.connect();
+    };
+
+    if (this.stateBuffer.roomConnectionStatus === status.INITIALIZING) {
+      connectToErizo({ erizoToken: this.erizoToken });
+      return;
+    }
+
     this.props.joinRoom(this.props.roomInfo._id)
-      .then(({ erizoToken }) => {
-        this.erizoToken = erizoToken;
-        /* eslint-disable new-cap */
-        this.erizoRoom = Erizo.Room({ token: this.erizoToken });
-        /* eslint-enable new-cap */
-        this.setRoomConnectionListeners();
-        console.info('got new token, reconnecting');
-        this.setRoomConnectionListeners();
-        this.setRoomStreamListners();
-        this.erizoRoom.connect();
-      })
+      .then(connectToErizo)
       .catch(() => { location.reload(); });
   }
 
   setRoomConnectionListeners(erizoRoom = this.erizoRoom) {
     erizoRoom.addEventListener('room-connected', (roomEvent) => {
-      console.info('room connected', roomEvent);
-      console.log(erizoRoom);
+      console.info('room connected', roomEvent, erizoRoom);
       erizoRoom.publish(this.primaryDataStream);
       this.initializePrimaryMediaStream();
       this.updateState({ roomConnectionStatus: { $set: status.CONNECTED } });
@@ -200,6 +204,7 @@ class Room extends Component {
         primaryDataStreamStatus: { $set: status.TRYING_TO_CONNECT },
         connectedUsers: { $set: [] },
       });
+      this.primaryDataStream.stop();
       this.props.resetMediaStreams();
       this.subscribedDataStreams = {};
       this.subscribedMediaStreams = {};
@@ -208,7 +213,7 @@ class Room extends Component {
       Object.keys(this.speechTrackers).forEach(streamId => this.speechTrackers[streamId].stop());
       this.speechTrackers = {};
       setTimeout(() => {
-        this.tryToReconnect();
+        this.tryToConnect();
       }, 1000);
     });
   }
@@ -604,11 +609,8 @@ class Room extends Component {
   }
 
   componentDidMount() {
-    this.setRoomConnectionListeners();
-    this.setRoomStreamListners();
-    this.erizoRoom.connect();
-
     // store body bg color and then change it.
+    this.tryToConnect();
     this.originialBodyBackground = document.body.style.background;
     document.body.style.backgroundColor = '#2e3136';
   }

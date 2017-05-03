@@ -9,11 +9,10 @@
 class StreamManager {
   constructor(room) {
     this.room = room;
-    this.erizoRoom = room.erizoRoom;
   }
 
   isLocalStream(stream) {
-    return stream.getID() in this.erizoRoom.localStreams;
+    return stream.getID() in this.room.erizoRoom.localStreams;
   }
 
 }

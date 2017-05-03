@@ -30,7 +30,8 @@ class Messenger {
 
   I dont know which one is better tbh.
 
-  current approach is wasteful, but easy to manage.
+  current approach is wasteful, but easy to manage (in case of small amounts of data).
+  If the data were larger( say a file), it is terrible.
 
   second approach could be a hassle juggling streams and their event handlers for errors etc.
   also, as per current implementation same userId can have multiple sessions open;

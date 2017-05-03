@@ -1,5 +1,6 @@
 import update from 'immutability-helper';
 import { SPEAKING, SPEAKING_STOPPED } from '../actions/stream';
+import { MEDIASTREAMS_RESET } from '../actions/mediaStreams';
 
 const defaultState = {};
 
@@ -19,6 +20,8 @@ export default function (state = defaultState, action) {
           $set: false,
         },
       });
+    case MEDIASTREAMS_RESET:
+      return {};
     default: return state;
   }
 }
