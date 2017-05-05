@@ -47,10 +47,6 @@ class LicodeConnector extends AbstractConnector {
     super.reconnect();
   }
 
-
-  // probably would want to add options to the constructor later
-  // like a function that decides how to pack the message(source/destination)
-  // instead of being fixed
   send(recieverId, content) {
     const { connectorOptions } = this;
     const { tabId, name } = connectorOptions.tabInfo; // our own tab
@@ -58,7 +54,6 @@ class LicodeConnector extends AbstractConnector {
       type: messageType.TAB_MESSAGE,
       sourceTab: tabId,
       destinationTabs: [tabId],
-      from: connectorOptions.roomAPI.getUserId(),
       to: [recieverId],
       content,
     };
@@ -73,7 +68,6 @@ class LicodeConnector extends AbstractConnector {
       type: messageType.TAB_MESSAGE,
       sourceTab: tabId,
       destinationTabs: [tabId],
-      from: connectorOptions.roomAPI.getUserId(),
       broadcast: true,
       content,
     };

@@ -67,7 +67,7 @@ class Messenger {
       const { ROOM_MESSAGE, TAB_MESSAGE } = messageType;
       switch (message.type) {
         case ROOM_MESSAGE:
-          this.roomMessageHandler(message.content);
+          this.roomMessageHandler(message);
           break;
         case TAB_MESSAGE:
           message.destinationTabs.forEach((tabId) => {
@@ -99,7 +99,11 @@ class Messenger {
       this.recieve(message);
       return;
     }
-    this.room.primaryDataStream.sendData(message);
+    /* eslint-disable no-param-reassign*/
+    message.from = this.room.roomAPI.getUserId();
+    message.sessionId = this.room.sessionId;
+    /* eslint-disable no-param-reassign*/
+    this.room.dataBroadcastStream.sendData(message);
   }
 }
 

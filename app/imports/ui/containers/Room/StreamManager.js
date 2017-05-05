@@ -15,6 +15,16 @@ class StreamManager {
     return stream.getID() in this.room.erizoRoom.localStreams;
   }
 
+  getLocalStreamById(streamId) {
+    return this.room.erizoRoom.localStreams[streamId];
+  }
+
+  getRemoteStreamList() {
+    return Object.keys(this.room.erizoRoom.remoteStreams)
+            .map(streamIdString => Number(streamIdString))
+            .map(streamId => this.room.erizoRoom.remoteStreams[streamId]);
+  }
+
 }
 
 export default StreamManager;

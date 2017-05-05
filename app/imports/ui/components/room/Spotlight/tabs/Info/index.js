@@ -27,11 +27,7 @@ class Info extends Component {
   onCopy() {
     this.setState({ copied: true });
     SupremeToaster.show({
-      message: (
-        <div style={{ textAlign: 'center' }}>
-        Link Copied to Clipboard 👍
-        </div>
-      ),
+      message: 'Link Copied to Clipboard 👍',
       intent: Intent.SUCCESS,
     });
   }

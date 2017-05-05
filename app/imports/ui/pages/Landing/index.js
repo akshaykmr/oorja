@@ -17,10 +17,10 @@ const Landing = () => (
     </div>
     <section className="kickstart">
       <div className="tagline">
-        Connect and Collaborate
+        Connect and collaborate quickly and privately
       </div>
       <div className="minimalDescription">
-        Quick and secure Video, Voice chat and <strong>much more! </strong>
+        with video, voice chat and <strong>much more! </strong>
       </div>
       <RoomSetup />
     </section>
