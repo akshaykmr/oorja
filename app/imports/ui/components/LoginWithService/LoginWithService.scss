@@ -8,11 +8,44 @@ $icon-spacing: 10px;
   margin-top: 25px;
   transition: opacity 500ms ease;
 
-  // safari workaround ? wth yo
-  .ion-social-linkedin, .ion-social-twitter, .ion-social-facebook, .ion-social-googleplus {
-    display: initial !important;
+  .custom-ion {
+    display: inline-block;
+    font-family: "Ionicons";
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    text-rendering: auto;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
+  /*
+    why custom-ion, why custom icon names instead of ion-social-google etc. ?
+      - because adblockers will set display: none for them if detected.
+      - workaround is to use custom class and apply the same rules as ionicons does.  
+  */
+
+  .ion-googly::before {
+    content: '\f235';
+  }
+ .ion-book-of-faces::before {
+    content: '\f231';
+  }
+ .ion-blue-birdy::before {
+    content: '\f243';
+  }
+ .ion-spam-central::before {
+    content: '\f239';
+  }
+ .ion-git-hub::before {
+    content: '\f233';
+  }
+ .ion-twitchy::before {
+    content: '\f4ee';
+  }
   &.blur {
     opacity: 0.5;
   }
@@ -81,25 +114,6 @@ $icon-spacing: 10px;
   // -webkit-background-clip: padding-box; 
   // -moz-background-clip:    padding; 
   // background-clip:         padding-box;
-
-  &#Google {
-    color: #dd4b39;
-  }
-  &#Facebook {
-    color: #3b5998;
-  }
-  &#Twitter {
-    color: #1da1f2;
-  }
-  &#Github {
-    color: #24292e;
-  }
-  &#LinkedIn {
-    color: #0077b5;
-  }
-  &#Twitch {
-    color: #6441a4;
-  }
 
   &.active {
     transform: translate3d(0,0,0) scale(1.05, 1.05) !important; 

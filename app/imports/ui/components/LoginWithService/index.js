@@ -25,37 +25,37 @@ class LoginWithService extends Component {
       {
         service: 'Google',
         login: () => Meteor.loginWithGoogle({}, loginCallback),
-        icon: 'ion-social-googleplus',
+        icon: 'ion-googly',
         color: '#dd4b39',
       },
       {
         service: 'Facebook',
         login: () => Meteor.loginWithFacebook({}, loginCallback),
-        icon: 'ion-social-facebook',
+        icon: 'ion-book-of-faces',
         color: '#3b5998',
       },
       {
         service: 'Twitter',
         login: () => Meteor.loginWithTwitter({}, loginCallback),
-        icon: 'ion-social-twitter',
+        icon: 'ion-blue-birdy',
         color: '#1da1f2',
       },
       {
         service: 'LinkedIn',
         login: () => Meteor.loginWithLinkedIn({}, loginCallback),
-        icon: 'ion-social-linkedin',
+        icon: 'ion-spam-central',
         color: '#0077b5',
       },
       {
         service: 'Github',
         login: () => Meteor.loginWithGithub({}, loginCallback),
-        icon: 'ion-social-github',
+        icon: 'ion-git-hub',
         color: '#24292e',
       },
       {
         service: 'Twitch',
         login: () => Meteor.loginWithTwitch({}, loginCallback),
-        icon: 'ion-social-twitch',
+        icon: 'ion-twitchy',
         color: '#6441a4',
       },
     ];
@@ -94,7 +94,7 @@ class LoginWithService extends Component {
       return null;
     }
 
-    return this.services.map(({ service, login, icon }, index) => {
+    return this.services.map(({ service, login, icon, color }, index) => {
       const loginButtonClasses = classNames({
         loginButton: true,
         active: loggedIn && loginService === service,
@@ -102,7 +102,8 @@ class LoginWithService extends Component {
       });
 
       const button = (
-        <div key={index} className={loginButtonClasses} id={service}
+        <div key={index} className={loginButtonClasses}
+          style={{ color }}
           onClick={ loggedIn && loginService === service ? null : () => {
             this.setState({
               ...this.state,
@@ -110,7 +111,7 @@ class LoginWithService extends Component {
             });
             login();
           }}>
-          <i className={`icon ${icon}`}></i>
+          <i className={`icon custom-ion ${icon}`}></i>
         </div>
       );
       return button;
