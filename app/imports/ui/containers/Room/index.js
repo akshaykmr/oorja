@@ -356,9 +356,10 @@ class Room extends Component {
             [user.userId]: {
               [attributes.sessionId]: {
                 $set: {
-                  broadcastRecieve: status.INITIALIZING,
+                  broadcast: status.INITIALIZING,
                   p2pSend: status.DISCONNECTED,
                   p2pRecieve: status.DISCONNECTED,
+                  connectionStatus: status.DISCONNECTED,
                 },
               },
             },
@@ -387,12 +388,12 @@ class Room extends Component {
         return;
       }
       console.log(sessionConnectionState);
-      const { broadcastRecieve, p2pRecieve } = sessionConnectionState;
+      const { broadcast, p2pRecieve } = sessionConnectionState;
       if (p2pRecieve !== status.DISCONNECTED) {
         console.error('unexpected yo!');
         return;
       }
-      if (broadcastRecieve !== status.CONNECTED) return;
+      if (broadcast !== status.CONNECTED) return;
 
       this.updateState({
         connectionTable: {
@@ -524,6 +525,7 @@ class Room extends Component {
         },
       });
       notifySuccessfullSubscription(true);
+      this.updateUserConnection(user.userId, attributes.sessionId);
     };
 
     const handleMediaSubscriptionSuccess = () => {
@@ -582,20 +584,77 @@ class Room extends Component {
       return;
     }
 
-    switch (attributes.type) {
-      case DATA.BROADCAST:
-        // remove stream from subscribed streams
-        delete this.subscribedDataStreams[stream.getID()];
-        this.updateState({
-          connectionTable: {
-            [user.userId]: {
-              $unset: [attributes.sessionId],
+    const handleP2PStreamRemoval = () => {
+      const userConnectionState = this.stateBuffer.connectionTable[user.userId];
+      if (!userConnectionState) return;
+      const sessionConnectionState = userConnectionState[attributes.sessionId];
+      if (!sessionConnectionState) return;
+      if (!this.subscribedDataStreams[stream.getID()]) {
+        return;
+      }
+      this.updateState({
+        connectionTable: {
+          [user.userId]: {
+            [attributes.sessionId]: {
+              p2pRecieve: { $set: status.DISCONNECTED },
             },
           },
+        },
+      });
+      console.warn('p2p stream removed');
+      this.updateUserConnection(user.userId, attributes.sessionId);
+    };
+
+    const handleBroadcastStreamRemoval = () => {
+      if (!this.subscribedDataStreams[stream.getID()]) {
+        console.warn('stream was not subscribed earlier.');
+        return;
+      }
+      // remove stream from subscribed streams
+      delete this.subscribedDataStreams[stream.getID()];
+      Object.keys(this.subscribedDataStreams)
+        .map(subscribedDataStreamId => this.subscribedDataStreams[subscribedDataStreamId])
+        .filter((subscribedStream) => {
+          const subscribedStreamAttributes = subscribedStream.getAttributes();
+          return (
+            subscribedStreamAttributes.userId === user.userId &&
+            subscribedStreamAttributes.sessionId === attributes.sessionId &&
+            subscribedStreamAttributes.type === streamTypes.DATA.P2P
+          );
+        })
+        .forEach((p2pDataStream) => {
+          delete this.subscribedDataStreams[p2pDataStream.getID()];
         });
-        // this.disconnectUser(user);
+      const p2pStreams = this.streamManager.getLocalStreamList()
+        .filter((localStream) => {
+          const localStreamAttributes = localStream.getAttributes();
+          return (
+            localStreamAttributes.recepientUserId === user.userId &&
+            localStreamAttributes.recepientSessionId === attributes.sessionId &&
+            localStreamAttributes.type === streamTypes.DATA.P2P
+          );
+        });
+      if (p2pStreams.length > 1) {
+        console.error('more than 1 p2p stream found for this user');
+      } else {
+        p2pStreams.forEach((p2pStream) => {
+          this.erizoRoom.unpublish(p2pStream, (result, error) => {
+            if (error) {
+              console.error(error);
+            }
+          });
+        });
+      }
+
+      this.updateUserConnection(user.userId, attributes.sessionId, true);
+    };
+
+    switch (attributes.type) {
+      case DATA.BROADCAST:
+        handleBroadcastStreamRemoval();
         break;
-      case DATA.P2P: delete this.subscribedDataStreams[stream.getID()];
+      case DATA.P2P:
+        handleP2PStreamRemoval();
         break;
       case PRIMARY_MEDIA_STREAM:
         if (this.props.mediaStreams[stream.getID()].video) this.decrementVideoStreamCount();
@@ -639,6 +698,7 @@ class Room extends Component {
       this.updateState({
         connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
       });
+      // TODO dispatch session incremented, userId, sessionId
       console.info('incremented session', updatedUser);
     } else {
       this.updateState({
@@ -711,11 +771,12 @@ class Room extends Component {
           connectionTable: {
             [from]: {
               [sessionId]: {
-                broadcastRecieve: { $set: status.CONNECTED },
+                broadcast: { $set: status.CONNECTED },
               },
             },
           },
         });
+        this.updateUserConnection(from, sessionId);
         const p2pStreams = this.streamManager.getRemoteStreamList()
           .filter((stream) => {
             const attributes = stream.getAttributes();
@@ -739,6 +800,7 @@ class Room extends Component {
             },
           },
         });
+        this.updateUserConnection(from, sessionId);
       };
 
       if (publisherUserId === this.props.roomUserId && publisherSessionId === this.sessionId) {
@@ -763,6 +825,56 @@ class Room extends Component {
         break;
       default: console.error('unrecognised room message');
     }
+  }
+
+  updateUserConnection(userId, sessionId, reset = false) {
+    const user = this.roomAPI.getUserInfo(userId);
+    const previousConnectionStatus =
+      this.stateBuffer.connectionTable[userId][sessionId].connectionStatus;
+
+    if (reset) {
+      this.updateState({
+        connectionTable: {
+          [userId]: {
+            $unset: [sessionId],
+          },
+        },
+      });
+      if (previousConnectionStatus === status.CONNECTED) {
+        this.disconnectUser(user);
+      }
+      return;
+    }
+    const currentConnectionStatus = this.determineUserConnectionStatus(userId, sessionId);
+    this.updateState({
+      connectionTable: {
+        [userId]: {
+          [sessionId]: {
+            connectionStatus: { $set: currentConnectionStatus },
+          },
+        },
+      },
+    });
+    if (previousConnectionStatus === status.DISCONNECTED
+      && currentConnectionStatus === status.CONNECTED) {
+      this.connectUser(user);
+    } else if (previousConnectionStatus === status.CONNECTED
+      && currentConnectionStatus === status.DISCONNECTED) {
+      this.disconnectUser(user);
+    }
+  }
+
+  determineUserConnectionStatus(userId, sessionId) {
+    const userConnectionState = this.stateBuffer.connectionTable[userId];
+    if (!userConnectionState) return status.DISCONNECTED;
+    const sessionConnectionState = userConnectionState[sessionId];
+    if (!sessionConnectionState) return status.DISCONNECTED;
+    const { broadcast, p2pSend, p2pRecieve } = sessionConnectionState;
+    return (
+      broadcast === status.CONNECTED &&
+      p2pSend === status.CONNECTED &&
+      p2pRecieve === status.CONNECTED
+    ) ? status.CONNECTED : status.DISCONNECTED;
   }
 
   // to be used with media streams

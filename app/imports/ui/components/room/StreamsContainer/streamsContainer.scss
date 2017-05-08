@@ -58,7 +58,7 @@ $avatar-size: 50px;
       }
 
       &:active {
-        transform: translate3d(0, -5px, 0);
+        transform: scale(1.07, 1.07);
       }
 
       &:hover::after {
