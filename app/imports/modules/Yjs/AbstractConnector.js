@@ -9,7 +9,6 @@ import Y from 'yjs';
 function canRead (auth) { return auth === 'read' || auth === 'write' }
 function canWrite (auth) { return auth === 'write' }
 
-
 class AbstractConnector {
   /* ::
   y: YConfig;
@@ -22,7 +21,6 @@ class AbstractConnector {
   syncingClients: Array<UserId>;
   forwardToSyncingClients: boolean;
   debug: boolean;
-  broadcastedHB: boolean;
   syncStep2: Promise;
   userId: UserId;
   send: Function;
@@ -41,6 +39,11 @@ class AbstractConnector {
     if (opts == null) {
       opts = {}
     }
+    // Prefer to receive untransformed operations. This does only work if
+    // this client receives operations from only one other client.
+    // In particular, this does not work with y-webrtc.
+    // It will work with y-websockets-client
+    this.preferUntransformed = opts.preferUntransformed || false
     if (opts.role == null || opts.role === 'master') {
       this.role = 'master'
     } else if (opts.role === 'slave') {
@@ -48,6 +51,8 @@ class AbstractConnector {
     } else {
       throw new Error("Role must be either 'master' or 'slave'!")
     }
+    this.log = Y.debug('y:connector')
+    this.logMessage = Y.debug('y:connector-message')
     this.y.db.forwardAppliedOperations = opts.forwardAppliedOperations || false
     this.role = opts.role
     this.connections = {}
@@ -58,7 +63,6 @@ class AbstractConnector {
     this.syncingClients = []
     this.forwardToSyncingClients = opts.forwardToSyncingClients !== false
     this.debug = opts.debug === true
-    this.broadcastedHB = false
     this.syncStep2 = Promise.resolve()
     this.broadcastOpBuffer = []
     this.protocolVersion = 11
@@ -78,28 +82,30 @@ class AbstractConnector {
     }
   }
   reconnect () {
+    this.log('reconnecting..')
+    this.y.db.startGarbageCollector()
   }
   disconnect () {
+    this.log('discronnecting..')
     this.connections = {}
     this.isSynced = false
     this.currentSyncTarget = null
-    this.broadcastedHB = false
     this.syncingClients = []
     this.whenSyncedListeners = []
     return this.y.db.stopGarbageCollector()
   }
   repair () {
-    console.info('Repairing the state of Yjs. This can happen if messages get lost, and Yjs detects that something is wrong. If this happens often, please report an issue here: https://github.com/y-js/yjs/issues')
+    this.log('Repairing the state of Yjs. This can happen if messages get lost, and Yjs detects that something is wrong. If this happens often, please report an issue here: https://github.com/y-js/yjs/issues')
     for (var name in this.connections) {
       this.connections[name].isSynced = false
     }
     this.isSynced = false
     this.currentSyncTarget = null
-    this.broadcastedHB = false
     this.findNextSyncTarget()
   }
   setUserId (userId) {
     if (this.userId == null) {
+      this.log('Set userId to "%s"', userId)
       this.userId = userId
       return this.y.db.setUserId(userId)
     } else {
@@ -114,6 +120,7 @@ class AbstractConnector {
   }
   userLeft (user) {
     if (this.connections[user] != null) {
+      this.log('User left: %s', user)
       delete this.connections[user]
       if (user === this.currentSyncTarget) {
         this.currentSyncTarget = null
@@ -137,6 +144,7 @@ class AbstractConnector {
     if (this.connections[user] != null) {
       throw new Error('This user already joined!')
     }
+    this.log('User joined: %s', user)
     this.connections[user] = {
       isSynced: false,
       role: role
@@ -179,13 +187,17 @@ class AbstractConnector {
       this.y.db.requestTransaction(function *() {
         var stateSet = yield* this.getStateSet()
         var deleteSet = yield* this.getDeleteSet()
-        conn.send(syncUser, {
+        var answer = {
           type: 'sync step 1',
           stateSet: stateSet,
           deleteSet: deleteSet,
           protocolVersion: conn.protocolVersion,
           auth: conn.authInfo
-        })
+        }
+        if (conn.preferUntransformed && Object.keys(stateSet).length === 0) {
+          answer.preferUntransformed = true
+        }
+        conn.send(syncUser, answer)
       })
     } else {
       if (!conn.isSynced) {
@@ -205,9 +217,12 @@ class AbstractConnector {
     }
   }
   send (uid, message) {
-    if (this.debug) {
-      console.log(`send ${this.userId} -> ${uid}: ${message.type}`, message) // eslint-disable-line
-    }
+    this.log('Send \'%s\' to %s', message.type, uid)
+    this.logMessage('Message: %j', message)
+  }
+  broadcast (message) {
+    this.log('Broadcast \'%s\'', message.type)
+    this.logMessage('Message: %j', message)
   }
   /*
     Buffer operations, and broadcast them when ready.
@@ -244,11 +259,10 @@ class AbstractConnector {
     if (sender === this.userId) {
       return Promise.resolve()
     }
-    if (this.debug) {
-      console.log(`receive ${sender} -> ${this.userId}: ${message.type}`, JSON.parse(JSON.stringify(message))) // eslint-disable-line
-    }
+    this.log('Receive \'%s\' from %s', message.type, sender)
+    this.logMessage('Message: %j', message)
     if (message.protocolVersion != null && message.protocolVersion !== this.protocolVersion) {
-      console.error(
+      this.log(
         `You tried to sync with a yjs instance that has a different protocol version
         (You: ${this.protocolVersion}, Client: ${message.protocolVersion}).
         The sync was stopped. You need to upgrade your dependencies (especially Yjs & the Connector)!
@@ -289,15 +303,19 @@ class AbstractConnector {
             }
 
             var ds = yield* this.getDeleteSet()
-            var ops = yield* this.getOperations(m.stateSet)
-            conn.send(sender, {
+            var answer = {
               type: 'sync step 2',
-              os: ops,
               stateSet: currentStateSet,
               deleteSet: ds,
               protocolVersion: this.protocolVersion,
               auth: this.authInfo
-            })
+            }
+            if (message.preferUntransformed === true && Object.keys(m.stateSet).length === 0) {
+              answer.osUntransformed = yield* this.getOperationsUntransformed()
+            } else {
+              answer.os = yield* this.getOperations(m.stateSet)
+            }
+            conn.send(sender, answer)
             if (this.forwardToSyncingClients) {
               conn.syncingClients.push(sender)
               setTimeout(function () {
@@ -315,9 +333,6 @@ class AbstractConnector {
             }
           })
         } else if (message.type === 'sync step 2' && canWrite(auth)) {
-          let conn = this
-          var broadcastHB = !this.broadcastedHB
-          this.broadcastedHB = true
           var db = this.y.db
           var defer = {}
           defer.promise = new Promise(function (resolve) {
@@ -327,7 +342,15 @@ class AbstractConnector {
           let m /* :MessageSyncStep2 */ = message
           db.requestTransaction(function * () {
             yield* this.applyDeleteSet(m.deleteSet)
-            this.store.apply(m.os)
+            if (m.osUntransformed != null) {
+              yield* this.applyOperationsUntransformed(m.osUntransformed, m.stateSet)
+            } else {
+              this.store.apply(m.os)
+            }
+            /*
+              * This just sends the complete hb after some time
+              * Mostly for debugging..
+              *
             db.requestTransaction(function * () {
               var ops = yield* this.getOperations(m.stateSet)
               if (ops.length > 0) {
@@ -341,8 +364,9 @@ class AbstractConnector {
                   conn.broadcastOps(ops)
                 }
               }
-              defer.resolve()
             })
+            */
+            defer.resolve()
           })
         } else if (message.type === 'sync done') {
           var self = this

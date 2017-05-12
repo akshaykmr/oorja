@@ -74,7 +74,7 @@
     "immutability-helper": "^2.2.0",
     "jwt-simple": "^0.5.1",
     "lodash": "^4.17.2",
-    "prop-types": "^15.5.8",
+    "prop-types": "^15.5.9",
     "quill": "^1.2.2",
     "react": "^15.5.4",
     "react-addons-css-transition-group": "^15.5.2",
@@ -90,12 +90,12 @@
     "redux-thunk": "^2.1.0",
     "remarkable": "^1.7.1",
     "sentencer": "^0.1.5",
-    "y-array": "^10.0.7",
+    "y-array": "^10.1.0",
     "y-indexeddb": "^8.1.9",
-    "y-map": "^10.0.5",
+    "y-map": "^10.1.0",
     "y-memory": "^8.0.8",
     "y-richtext": "^9.0.8",
     "y-text": "^9.2.2",
-    "yjs": "^12.2.1"
+    "yjs": "^12.3.0"
   }
 }
