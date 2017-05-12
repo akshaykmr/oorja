@@ -1,4 +1,4 @@
-$switcher-width: 60px;
+$switcher-width: 62px;
 
 .spotlightContainer {
   position: relative;
@@ -146,10 +146,12 @@ $switcher-width: 60px;
         height: 100%;
         width: 100%;
         border-radius: 30%;
-        display: flex;
-        align-content: center;
-        align-items: center;
-        justify-content: center;
+        line-height: 45px;
+        text-align: center;
+        // display: flex;
+        // align-content: center;
+        // align-items: center;
+        // justify-content: center;
         opacity: 0.5;
       }
 
@@ -164,9 +166,9 @@ $switcher-width: 60px;
       &:hover {
         .tabIcon {
           border: 3px solid #3e606f;    
+          line-height: 39px;
           opacity: 0.8;
-        }
-        
+        }        
       }
 
       &.active {
@@ -176,6 +178,7 @@ $switcher-width: 60px;
 
         .tabIcon {
           border: 4px solid #3e606f;
+          line-height: 37px;
           transform: scale(1.07);
           opacity: 1.0;
         }
@@ -188,7 +191,7 @@ $switcher-width: 60px;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 60px;
+    height: 62px;
 
     > span {
       padding-left: 25px;

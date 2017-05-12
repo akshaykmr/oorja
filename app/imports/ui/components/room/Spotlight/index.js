@@ -208,6 +208,8 @@ class Spotlight extends Component {
 
       const tabContentStyle = {
         backgroundColor: tab.bgColor || '#36393e', // defaults, move them to settings later.
+        borderTopLeftRadius: this.props.uiSize !== uiConfig.COMPACT ? '5px' : '0px',
+        borderColor: '#2e3136',
       };
 
       const updateBadge = (badgeState) => {
