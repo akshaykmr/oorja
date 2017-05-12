@@ -35,7 +35,7 @@ class QuillPad extends Component {
         name: 'indexeddb',
       },
       connector: {
-        name: 'licodeConnector', // use webrtc connector
+        name: 'oorjaConnector', // use webrtc connector
         room: `${roomInfo.roomName}:${tabInfo.name}`, // clients connecting to the same room share data
         role: 'slave',
         syncMethod: 'syncAll',

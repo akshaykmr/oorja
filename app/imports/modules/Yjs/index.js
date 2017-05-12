@@ -8,10 +8,10 @@ import yText from 'y-text';
 import yRichtext from 'y-richtext';
 import yIndexDB from 'y-indexeddb';
 
-import LicodeConnector from './LicodeConnector';
+import OorjaConnector from './OorjaConnector';
 
 Y.extend(yArray, yMemory, yMap, yText, yRichtext, yIndexDB);
-Y.extend('licodeConnector', LicodeConnector);
+Y.extend('oorjaConnector', OorjaConnector);
 
 export default Y;
 

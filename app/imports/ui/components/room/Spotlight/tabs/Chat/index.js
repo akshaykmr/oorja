@@ -72,7 +72,7 @@ class Chat extends Component {
         name: 'indexeddb',
       },
       connector: {
-        name: 'licodeConnector',
+        name: 'oorjaConnector',
         room: `${roomInfo.roomName}:${tabInfo.name}`,
         role: 'slave',
         syncMethod: 'syncAll',

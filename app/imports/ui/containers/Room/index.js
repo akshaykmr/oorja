@@ -241,8 +241,8 @@ class Room extends Component {
       console.info('stream subscribed', streamEvent, streamEvent.stream.getAttributes());
       this.handleStreamSubscriptionSucess(streamEvent.stream);
     });
-    // I don't know whether a failed stream would trigger a stream-removed later
-    // need to keep this in mind for later
+
+
     erizoRoom.addEventListener('stream-failed', (streamEvent) => {
       // so far none of the streams have failed. however it will definitely
       // be more likely in deployements
@@ -316,7 +316,7 @@ class Room extends Component {
         this.updateState({ dataBroadcastStreamStatus: { $set: status.CONNECTED } });
         console.info('dataBroadcastStream successfully added to the room.');
         this.connectUser(user, this.sessionId);
-        // this.initializePrimaryMediaStream();
+        this.initializePrimaryMediaStream();
 
         // subscribe all remote data broadcast streams prexisting  in the room
         console.info('subscribing all remote data broadcast streams prexisting in the room');

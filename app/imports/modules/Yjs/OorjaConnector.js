@@ -3,7 +3,7 @@ import AbstractConnector from './AbstractConnector';
 import messageType from '../../ui/components/room/constants/messageType';
 import roomActivities from '../../ui/components/room/constants/roomActivities';
 
-class LicodeConnector extends AbstractConnector {
+class OorjaConnector extends AbstractConnector {
   constructor(yConfig, connectorOptions) {
     super(yConfig, connectorOptions);
     this.connectorOptions = connectorOptions;
@@ -94,4 +94,4 @@ class LicodeConnector extends AbstractConnector {
   }
 }
 
-export default LicodeConnector;
+export default OorjaConnector;
