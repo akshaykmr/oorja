@@ -1,6 +1,5 @@
 import { Meteor } from 'meteor/meteor';
 import _ from 'lodash';
-import status from '../../components/room/constants/status';
 import roomActivities from '../../components/room/constants/roomActivities';
 
 class RoomAPI {
@@ -12,12 +11,12 @@ class RoomAPI {
     this.activityListener = room.activityListener;
   }
 
-  primaryDataStreamConnected() {
-    return this.room.stateBuffer.primaryDataStreamStatus === status.CONNECTED;
-  }
-
   getUserId() {
     return this.room.props.roomUserId;
+  }
+
+  getSessionId() {
+    return this.room.sessionId;
   }
 
   getUserInfo(userId) {
@@ -26,10 +25,6 @@ class RoomAPI {
   }
 
   sendMessage(message) {
-    if (message.local) {
-      this.messenger.recieve(message);
-      return;
-    }
     this.messenger.send(message);
   }
 

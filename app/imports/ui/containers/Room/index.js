@@ -6,6 +6,8 @@ import { connect } from 'react-redux';
 import update from 'immutability-helper';
 import _ from 'lodash';
 
+// TODO: move stream handling related functions to streamManager.js
+
 // import Erizo from '../../modules/Erizo';
 
 import hark from 'hark';
@@ -49,6 +51,9 @@ class Room extends Component {
 
     this.subscribedMediaStreams = {}; // streamId -> erizoStream
     // note: erizoStream.stream would be of type MediaStream(the browser's MediaStream object)
+
+    this.outgoingDataStreams = {};
+
     this.speechTrackers = {}; // id -> hark instance
 
     this.messageHandler = this.messageHandler.bind(this);
@@ -152,7 +157,7 @@ class Room extends Component {
       this.updateState({ roomConnectionStatus: { $set: status.TRYING_TO_CONNECT } });
       this.erizoToken = erizoToken;
       /* eslint-disable new-cap */
-      this.sessionId = _.random(5000);
+      this.sessionId = `${this.props.roomUserId}:${_.random(5000)}`;
       this.erizoRoom = Erizo.Room({ token: this.erizoToken });
       // an erizo data stream to be used for sending 'data' by this user
       this.dataBroadcastStream = Erizo.Stream({
@@ -200,7 +205,7 @@ class Room extends Component {
       this.stateBuffer.connectedUsers.forEach((user) => {
         let sessionCount = user.sessionCount;
         while (sessionCount--) {
-          this.disconnectUser(user);
+          this.disconnectUser(user, this.sessionId);
         }
         console.info('disconnected user', user);
       });
@@ -213,6 +218,7 @@ class Room extends Component {
       this.props.resetMediaStreams();
       this.subscribedDataStreams = {};
       this.subscribedMediaStreams = {};
+      this.outgoingDataStreams = {};
 
       // stop speechTrackers
       Object.keys(this.speechTrackers).forEach(streamId => this.speechTrackers[streamId].stop());
@@ -273,7 +279,7 @@ class Room extends Component {
       data: false,
       attributes: {
         userId: this.props.roomUserId,
-        type: streamTypes.PRIMARY_MEDIA_STREAM,
+        type: streamTypes.MEDIA.BROADCAST,
       },
     });
     const mediaStream = this.primaryMediaStream;
@@ -298,7 +304,7 @@ class Room extends Component {
     const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
     if (!user) throw new Meteor.Error('stream publisher not found');
 
-    const { DATA, PRIMARY_MEDIA_STREAM, MEDIA_STREAM } = streamTypes;
+    const { DATA, MEDIA } = streamTypes;
 
     const subscribeDataBroadcastStream = () => {
       // just a check If I run into this later
@@ -309,16 +315,19 @@ class Room extends Component {
         // do not subscribe our own data stream.
         this.updateState({ dataBroadcastStreamStatus: { $set: status.CONNECTED } });
         console.info('dataBroadcastStream successfully added to the room.');
-        this.connectUser(user);
+        this.connectUser(user, this.sessionId);
         // this.initializePrimaryMediaStream();
 
-        // subscribe all remote data broadcast stream prexisting streams in the room
-        console.info('subscribing all remote data broadcast stream prexisting streams in the room');
+        // subscribe all remote data broadcast streams prexisting  in the room
+        console.info('subscribing all remote data broadcast streams prexisting in the room');
         const currentStreamId = stream.getID();
         this.streamManager.getRemoteStreamList()
           .forEach((remoteStream) => {
             if (remoteStream.getID() !== currentStreamId) {
-              if (remoteStream.getAttributes().type === DATA.BROADCAST) {
+              const remoteStreamAttributes = remoteStream.getAttributes();
+              if ((remoteStreamAttributes.type === DATA.BROADCAST) ||
+              remoteStreamAttributes.type === MEDIA.BROADCAST ||
+              remoteStreamAttributes.type === MEDIA.P2P) {
                 this.handleStreamSubscription(remoteStream);
               }
             }
@@ -417,7 +426,7 @@ class Room extends Component {
       const isLocal = this.streamManager.isLocalStream(stream);
       let streamSrc = '';
       if (isLocal) {
-        if (attributes.type === PRIMARY_MEDIA_STREAM) {
+        if (attributes.type === MEDIA.BROADCAST) {
           streamSrc = URL.createObjectURL(this.primaryMediaStream.stream);
           this.updateState({
             primaryMediaStream: { $set: status.CONNECTED },
@@ -426,6 +435,11 @@ class Room extends Component {
         }
         console.info('adding local media stream');
       } else {
+        if (user.userId === this.props.roomUserId) {
+          // stream may be from a different session, do not subscribe.
+          // probably best to ask users
+          // return;
+        }
         this.setIncomingStreamListners(stream);
         this.erizoRoom.subscribe(stream);
       }
@@ -436,6 +450,7 @@ class Room extends Component {
             userId: user.userId,
             streamId,
             local: isLocal,
+            type: attributes.type,
             // connected when stream subscription is successfull
             status: isLocal ? status.CONNECTED : status.TRYING_TO_CONNECT,
             audio: stream.hasAudio(),
@@ -457,8 +472,8 @@ class Room extends Component {
         break;
       case DATA.P2P: subscribeP2PDataStream();
         break;
-      case MEDIA_STREAM:
-      case PRIMARY_MEDIA_STREAM: subscribeMediaStream();
+      case MEDIA.BROADCAST:
+      case MEDIA.P2P: subscribeMediaStream();
         break;
       default: console.error('unexpected stream type');
     }
@@ -468,7 +483,7 @@ class Room extends Component {
   handleStreamSubscriptionSucess(stream) {
     const attributes = stream.getAttributes();
     const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
-    const { DATA, PRIMARY_MEDIA_STREAM, MEDIA_STREAM } = streamTypes;
+    const { DATA, MEDIA } = streamTypes;
 
     const notifySuccessfullSubscription = (broadcast = false, to) => {
       this.roomAPI.sendMessage({
@@ -498,6 +513,11 @@ class Room extends Component {
           type: streamTypes.DATA.P2P,
         },
       });
+      if (!this.outgoingDataStreams[user.userId]) {
+        this.outgoingDataStreams[user.userId] = {};
+      }
+      this.outgoingDataStreams[user.userId][attributes.sessionId] = p2pStream;
+
       this.updateState({
         connectionTable: {
           [user.userId]: {
@@ -545,8 +565,8 @@ class Room extends Component {
         break;
       case DATA.P2P: handleP2PDataStreamSubscriptionSuccess();
         break;
-      case PRIMARY_MEDIA_STREAM:
-      case MEDIA_STREAM:
+      case MEDIA.BROADCAST:
+      case MEDIA.P2P:
         handleMediaSubscriptionSuccess();
         break;
       default: console.error('unexpected stream type');
@@ -555,17 +575,21 @@ class Room extends Component {
 
   setIncomingStreamListners(stream) {
     const attributes = stream.getAttributes();
-    const { DATA, PRIMARY_MEDIA_STREAM } = streamTypes;
+    const { DATA, MEDIA } = streamTypes;
     switch (attributes.type) {
       case DATA.BROADCAST :
         // set listners for data
         stream.addEventListener('stream-data', (streamEvent) => {
-          this.messenger.recieve(streamEvent.msg);
+          this.messenger.recieve(attributes.userId, attributes.sessionId, streamEvent.msg);
         });
         break;
       case DATA.P2P:
+        stream.addEventListener('stream-data', (streamEvent) => {
+          this.messenger.recieve(attributes.userId, attributes.sessionId, streamEvent.msg);
+        });
         break;
-      case PRIMARY_MEDIA_STREAM:
+      case MEDIA.BROADCAST:
+      case MEDIA.P2P:
         break;
       default: console.error('unexpected stream type');
     }
@@ -577,7 +601,7 @@ class Room extends Component {
     const attributes = stream.getAttributes();
     const isLocal = this.streamManager.isLocalStream(stream);
     const user = this.roomAPI.getUserInfo(attributes.userId);
-    const { DATA, PRIMARY_MEDIA_STREAM } = streamTypes;
+    const { DATA, MEDIA } = streamTypes;
 
     if (isLocal) {
       console.warn('need to handle this case when I give that option to the user.');
@@ -625,26 +649,16 @@ class Room extends Component {
         .forEach((p2pDataStream) => {
           delete this.subscribedDataStreams[p2pDataStream.getID()];
         });
-      const p2pStreams = this.streamManager.getLocalStreamList()
-        .filter((localStream) => {
-          const localStreamAttributes = localStream.getAttributes();
-          return (
-            localStreamAttributes.recepientUserId === user.userId &&
-            localStreamAttributes.recepientSessionId === attributes.sessionId &&
-            localStreamAttributes.type === streamTypes.DATA.P2P
-          );
-        });
-      if (p2pStreams.length > 1) {
-        console.error('more than 1 p2p stream found for this user');
-      } else {
-        p2pStreams.forEach((p2pStream) => {
-          this.erizoRoom.unpublish(p2pStream, (result, error) => {
-            if (error) {
-              console.error(error);
-            }
-          });
-        });
-      }
+
+      const p2pStream = this.outgoingDataStreams[user.userId][attributes.sessionId];
+      if (!p2pStream) throw new Error('p2p stream not found');
+
+      this.erizoRoom.unpublish(p2pStream, (result, error) => {
+        if (error) {
+          console.error(error);
+        }
+        delete this.outgoingDataStreams[user.userId][attributes.sessionId];
+      });
 
       this.updateUserConnection(user.userId, attributes.sessionId, true);
     };
@@ -656,7 +670,8 @@ class Room extends Component {
       case DATA.P2P:
         handleP2PStreamRemoval();
         break;
-      case PRIMARY_MEDIA_STREAM:
+      case MEDIA.BROADCAST:
+      case MEDIA.P2P:
         if (this.props.mediaStreams[stream.getID()].video) this.decrementVideoStreamCount();
         this.props.updateMediaStreams({
           $unset: [stream.getID()],
@@ -673,7 +688,7 @@ class Room extends Component {
     }
   }
 
-  connectUser(user) {
+  connectUser(user, sessionId) {
     // adds user to connectedUsers list in state, increments sessionCount if already there.
     const connectedUser = _.find(
       this.stateBuffer.connectedUsers,
@@ -685,31 +700,29 @@ class Room extends Component {
         this.stateBuffer.connectedUsers,
         { userId: connectedUser.userId }
       );
-      if (connectedUserIndex === -1) {
-        throw new Meteor.Error("this shouldn't happen, but just in case");
-      }
 
       const updatedUser = update(
         connectedUser,
         {
           sessionCount: { $set: connectedUser.sessionCount + 1 },
+          sessionList: { $push: [sessionId] },
         }
       );
       this.updateState({
         connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
       });
-      // TODO dispatch session incremented, userId, sessionId
+      this.activityListener.dispatch(roomActivities.USER_SESSION_ADDED, { user, sessionId });
       console.info('incremented session', updatedUser);
     } else {
       this.updateState({
-        connectedUsers: { $push: [{ ...user, sessionCount: 1 }] },
+        connectedUsers: { $push: [{ ...user, sessionCount: 1, sessionList: [sessionId] }] },
       });
-      this.activityListener.dispatch(roomActivities.USER_JOINED, user);
+      this.activityListener.dispatch(roomActivities.USER_JOINED, { user, sessionId });
     }
   }
 
   // decrements sessionCount for user. removing from connectUsers if reaches 0.
-  disconnectUser(user) {
+  disconnectUser(user, sessionId) {
     const connectedUserIndex = _.findIndex(
       this.stateBuffer.connectedUsers,
       { userId: user.userId }
@@ -719,25 +732,30 @@ class Room extends Component {
     }
 
     const connectedUser = this.stateBuffer.connectedUsers[connectedUserIndex];
+    if (connectedUser.sessionList.indexOf(sessionId) === -1) {
+      throw new Error('session not found');
+    }
     if (connectedUser.sessionCount > 1) {
       const updatedUser = update(
         connectedUser,
         {
           sessionCount: { $set: connectedUser.sessionCount - 1 },
+          sessionList: { $set: connectedUser.sessionList.filter(id => id !== sessionId) },
         }
       );
 
       this.updateState({
         connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
       });
-      console.info('decremented uses sessions', updatedUser);
+      this.activityListener.dispatch(roomActivities.USER_SESSION_REMOVED, { user, sessionId });
+      console.info('decremented user session', updatedUser);
     } else {
       this.updateState({
         connectedUsers: {
           $splice: [[connectedUserIndex, 1]],
         },
       });
-      this.activityListener.dispatch(roomActivities.USER_LEFT, user);
+      this.activityListener.dispatch(roomActivities.USER_LEFT, { user, sessionId });
     }
   }
 
@@ -763,20 +781,20 @@ class Room extends Component {
     };
 
     const handleSuccessfulSubscriptionFromRemotePeer = () => {
-      const { from, sessionId } = message;
+      const { userId, sessionId } = message.from;
       const eventDetail = roomMessage.content;
       const { publisherUserId, publisherSessionId, streamId } = eventDetail;
       const acknowledgeBroadcastSubscription = () => {
         this.updateState({
           connectionTable: {
-            [from]: {
+            [userId]: {
               [sessionId]: {
                 broadcast: { $set: status.CONNECTED },
               },
             },
           },
         });
-        this.updateUserConnection(from, sessionId);
+        this.updateUserConnection(userId, sessionId);
         const p2pStreams = this.streamManager.getRemoteStreamList()
           .filter((stream) => {
             const attributes = stream.getAttributes();
@@ -793,14 +811,14 @@ class Room extends Component {
       const acknowledgeP2PDataStreamSubscriptionSuccess = () => {
         this.updateState({
           connectionTable: {
-            [from]: {
+            [userId]: {
               [sessionId]: {
                 p2pSend: { $set: status.CONNECTED },
               },
             },
           },
         });
-        this.updateUserConnection(from, sessionId);
+        this.updateUserConnection(userId, sessionId);
       };
 
       if (publisherUserId === this.props.roomUserId && publisherSessionId === this.sessionId) {
@@ -841,7 +859,7 @@ class Room extends Component {
         },
       });
       if (previousConnectionStatus === status.CONNECTED) {
-        this.disconnectUser(user);
+        this.disconnectUser(user, sessionId);
       }
       return;
     }
@@ -857,10 +875,10 @@ class Room extends Component {
     });
     if (previousConnectionStatus === status.DISCONNECTED
       && currentConnectionStatus === status.CONNECTED) {
-      this.connectUser(user);
+      this.connectUser(user, sessionId);
     } else if (previousConnectionStatus === status.CONNECTED
       && currentConnectionStatus === status.DISCONNECTED) {
-      this.disconnectUser(user);
+      this.disconnectUser(user, sessionId);
     }
   }
 

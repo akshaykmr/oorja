@@ -33,9 +33,9 @@ $avatar-size: 50px;
     padding-left: 5px;
     padding-right: 5px;
     flex-shrink: 0;
+    display: flex;
 
     &.noVideo, &.compact {
-      display: flex;
       flex-direction: column;
       justify-content: center;
     }

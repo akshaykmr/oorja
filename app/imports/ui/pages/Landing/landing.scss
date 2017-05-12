@@ -29,9 +29,9 @@ $landing-primary : white;
     padding-bottom: 40px;
 
     .tagline {
+      padding-left: 10px;
+      padding-right: 10px;
       color: #474747;
-      height: 60px;
-      line-height: 60px;
       font-weight: 200;
       text-align: center;
       font-size: 1.8em;
@@ -39,6 +39,7 @@ $landing-primary : white;
     }
 
     .minimalDescription {
+      padding-top: 10px;
       text-align: center;
       color: #797979;
     }

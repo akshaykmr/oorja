@@ -5,39 +5,52 @@ import roomActivities from '../../ui/components/room/constants/roomActivities';
 
 class LicodeConnector extends AbstractConnector {
   constructor(yConfig, connectorOptions) {
-    // console.log(yConfig, connectorOptions);
     super(yConfig, connectorOptions);
     this.connectorOptions = connectorOptions;
     const { roomAPI, connectedUsers, tabInfo } = connectorOptions;
     const tabName = tabInfo.name;
 
-    // TODO:
-    // this should be unique I guess. eg. when a user logs in with
-    // same account from different devices.
-    this.setUserId(roomAPI.getUserId());
-
+    const ownSessionId = roomAPI.getSessionId();
+    this.ownSessionId = ownSessionId;
+    this.setUserId(ownSessionId);
     const self = this;
-    roomAPI.addActivityListener(roomActivities.USER_JOINED, (user) => {
-      if (user.userId !== roomAPI.getUserId()) {
-        self.userJoined(user.userId, 'slave');
-        console.info(tabName, 'user joined');
-      }
+    this.addressBook = {};
+
+    const yUserJoined = ({ sessionId }) => {
+      if (sessionId === ownSessionId) return;
+      this.addressBook[sessionId] = this.unpackIdentifier(sessionId);
+      self.userJoined(sessionId, 'slave');
+      console.info(tabName, 'user joined');
+    };
+    connectedUsers.forEach((user) => {
+      user.sessionList.forEach((sessionId) => {
+        yUserJoined({ sessionId });
+      });
     });
-    roomAPI.addActivityListener(roomActivities.USER_LEFT, (user) => {
+
+    roomAPI.addActivityListener(roomActivities.USER_JOINED, yUserJoined);
+
+    roomAPI.addActivityListener(roomActivities.USER_SESSION_ADDED, yUserJoined);
+
+    const yUserLeft = ({ sessionId }) => {
       console.info(tabName, 'user left');
-      self.userLeft(user.userId);
-    });
+      self.userLeft(sessionId);
+    };
+    roomAPI.addActivityListener(roomActivities.USER_LEFT, yUserLeft);
+    roomAPI.addActivityListener(roomActivities.USER_SESSION_REMOVED, yUserLeft);
 
     roomAPI.addMessageHandler(tabInfo.tabId, (message) => {
       console.info(tabName, 'message recieved');
-      self.receiveMessage(message.from, message.content);
+      self.receiveMessage(message.from.sessionId, message.content);
     });
+  }
 
-    connectedUsers.forEach((user) => {
-      if (user.userId !== roomAPI.getUserId()) {
-        this.userJoined(user.userId, 'slave');
-      }
-    });
+  unpackIdentifier(sessionId) {
+    const split = sessionId.split(':');
+    return {
+      userId: split[0],
+      sessionId,
+    };
   }
 
   disconnect() {
@@ -54,10 +67,11 @@ class LicodeConnector extends AbstractConnector {
       type: messageType.TAB_MESSAGE,
       sourceTab: tabId,
       destinationTabs: [tabId],
-      to: [recieverId],
+      local: recieverId === this.ownSessionId,
+      to: [this.addressBook[recieverId]],
       content,
     };
-    console.info(name, 'sending message');
+    console.info(name, 'sending message', message);
     connectorOptions.roomAPI.sendMessage(message);
   }
 

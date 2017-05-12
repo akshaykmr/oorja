@@ -1,47 +1,28 @@
+import _ from 'lodash';
 import messageType from '../../components/room/constants/messageType';
 
 class Messenger {
-/*
-  this class is responsible for delivering messages between tabs.
-  recepient tabs may be local(if message.local is true) or remote.
-  eg. message
-  {
-    type: // switching behavior for handling. will probably add this later.
-    from: userId,
-    to: [userId, ...],
-    sourceTab: tabId,
-    destinationTabs: [tabId, ...],
-    broadcast: bool,
-    local: bool
-    content: js obj.
-  }
 
-  currently each peer publishes a broadcast stream (primaryDataStream) and every peer subscribes to
-  another peers primaryDataStream, for a total of n such streams.
-  message is sent to all the peers in the room even if a userId isn't in "to" field of the message.
-  then, upon recieving the message, reciever discards the message if it doesn't find it's own userId
-  in the "to" field. i.e. reciever only processes the message if it has its own userId
-  specified in "to" field, or the message is a broadcast.
+  /* eg. message
+    {
+      type: // reqd. switching behavior for handling. from messageType.js
+            // tabs must use messageType.TAB_MESSAGE
+      from: // { userId, sessionId }  added by messenger.,
+      to: [ {userId, sessionId}, ...]  required if not broadcast or local,
+                                       if sessionId is not specified. all sessions of that
+                                       particular userId will recieve the message.
+      broadcast: bool,
+      local: bool // process this message in our own room. ie. not sent to any other user or sesion.
+      content: js obj.
 
-  another way would be for each peer to publish 1 stream for every other peer.
-  this way irrelevant data is not sent to other peers.
-  (n-1) streams eminating from one peer, and total of n*(n-1) such streams in
-  a room.
+      // specific keys for messageType.TAB_MESSAGE type message
+      sourceTab: tabId  (required, could detect it automatically, but the simple logic
+                          would be spread over closures. got to trust app code anyway),
+      destinationTabs: [tabId, ...] (required),
+    }
 
-  I dont know which one is better tbh.
-
-  current approach is wasteful, but easy to manage (in case of small amounts of data).
-  If the data were larger( say a file), it is terrible.
-
-  second approach could be a hassle juggling streams and their event handlers for errors etc.
-  also, as per current implementation same userId can have multiple sessions open;
-  selectively subscribing streams would be another problem to solve.
-
-  should probaly ask licode guys. In any case, the implementation could be changed here later
-  with minimal side effects(I hope).
-  TODO: create a branch to try out other approach.
-*/
-
+    full message object is passed on to the handlr function..
+  */
   constructor(room, roomMessageHandler) {
     this.room = room;
     this.roomMessageHandler = roomMessageHandler;
@@ -61,7 +42,15 @@ class Messenger {
       .filter(handler => handler !== handlerToBeRemoved);
   }
 
-  recieve(message) {
+  recieve(userId, sessionId, message) {
+    /* eslint-disable no-param-reassign*/
+    // get this data from stream attributes locally and append to the message
+    // instead of having it being sent everytime.
+    message.from = {
+      userId,
+      sessionId,
+    };
+    /* eslint-enable no-param-reassign*/
     const { messageHandlers } = this;
     const callHandlers = () => {
       const { ROOM_MESSAGE, TAB_MESSAGE } = messageType;
@@ -87,8 +76,8 @@ class Messenger {
       callHandlers();
       return;
     }
-    const isRecepient = message.to.indexOf(this.room.roomAPI.getUserId()) > -1;
-    console.log('isRecepient', isRecepient);
+    const isRecepient = !!(_.find(message.to, { userId: this.room.roomAPI.getUserId() }));
+    console.log('isRecepient');
     if (isRecepient) {
       callHandlers();
     }
@@ -96,14 +85,32 @@ class Messenger {
 
   send(message) {
     if (message.local) {
-      this.recieve(message);
+      this.recieve(
+        this.room.roomAPI.getUserId(),
+        this.room.sessionId,
+        message
+      );
       return;
     }
-    /* eslint-disable no-param-reassign*/
-    message.from = this.room.roomAPI.getUserId();
-    message.sessionId = this.room.sessionId;
-    /* eslint-disable no-param-reassign*/
-    this.room.dataBroadcastStream.sendData(message);
+
+    if (message.broadcast) {
+      this.room.dataBroadcastStream.sendData(message);
+      return;
+    }
+
+    message.to.forEach((recepient) => {
+      if (!recepient.sessionId) {
+        // send to all sessions of this user.
+        Object.keys(this.room.outgoingDataStreams[recepient.userId])
+          .map(sessionId => this.room.outgoingDataStreams[recepient.userId][sessionId])
+          .forEach((p2pStream) => {
+            p2pStream.sendData(message);
+          });
+      } else {
+        const p2pStream = this.room.outgoingDataStreams[recepient.userId][recepient.sessionId];
+        p2pStream.sendData(message);
+      }
+    });
   }
 }
 

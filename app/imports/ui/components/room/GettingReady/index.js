@@ -96,7 +96,8 @@ export default class GettingReady extends Component {
           <br/>
           <br/>
           oorja uses some of the newest features in web browsers,
-          which may not be supported by yours yet. Proceeding may result errorprone experience.
+          which may not be supported by yours yet. Proceeding may result in
+          an errorprone experience.
           <br/> <br/>
            please vist the room link using chrome or firefox for a better experience, thank you.
         </div>

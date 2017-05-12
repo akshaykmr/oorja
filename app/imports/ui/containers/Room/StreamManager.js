@@ -17,7 +17,6 @@ class StreamManager {
 
   getLocalStreamList() {
     return Object.keys(this.room.erizoRoom.localStreams)
-            .map(streamIdString => Number(streamIdString))
             .map(streamId => this.room.erizoRoom.localStreams[streamId]);
   }
 
@@ -27,7 +26,6 @@ class StreamManager {
 
   getRemoteStreamList() {
     return Object.keys(this.room.erizoRoom.remoteStreams)
-            .map(streamIdString => Number(streamIdString))
             .map(streamId => this.room.erizoRoom.remoteStreams[streamId]);
   }
 
