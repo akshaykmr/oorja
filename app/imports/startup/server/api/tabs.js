@@ -83,4 +83,14 @@ export default [
     description: 'Discover more tabs',
     streamContainerSize: 'COMPACT',
   },
+  {
+    tabId: 35,
+    name: 'Reacteroids',
+    displayName: 'Reacteroids',
+    iconColor: '#7dd3f5',
+    bgColor: '#ffffff',
+    icon: 'planet',
+    description: 'Play a game while you wait',
+    streamContainerSize: 'COMPACT',
+  },
 ];

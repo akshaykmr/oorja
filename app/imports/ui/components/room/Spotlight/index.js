@@ -20,6 +20,7 @@ import CodePad from './tabs/CodePad';
 import Chat from './tabs/Chat';
 import VideoChat from './tabs/VideoChat';
 import DiscoverTabs from './tabs/DiscoverTabs';
+import Reacteroids from './tabs/Reacteroids';
 
 // constants
 import tabStatus from './tabStatus';
@@ -40,6 +41,7 @@ class Spotlight extends Component {
       41: CodePad,
       31: Chat,
       100: DiscoverTabs,
+      35: Reacteroids,
     };
 
     const defaultTabs = props.roomInfo.tabs;
