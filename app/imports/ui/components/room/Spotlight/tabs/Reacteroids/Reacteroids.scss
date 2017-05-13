@@ -13,21 +13,33 @@
   font-family: 'PT Mono', serif;
   color: #ffffff;
 
+  .gameContainer {
+    border-top-left-radius: 5px;
+    background-color: black;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center
+  }
+
   &.compact {
+    .gameContainer {
+      border-top-left-radius: initial;
+    }
     canvas {
       border-top-left-radius: initial;
     }
   }
 
   canvas {
+    border: 2px dashed dimgray;
     border-top-left-radius: 5px;
     display: block;
     background-color: #000000;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    max-height: 500px;
+    max-width: 500px;
     width: 100%;
     height: 100%;
   }
