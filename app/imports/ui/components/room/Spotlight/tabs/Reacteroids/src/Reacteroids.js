@@ -3,6 +3,8 @@ import Ship from './Ship';
 import Asteroid from './Asteroid';
 import { randomNumBetweenExcluding } from './helpers'
 
+import roomActivities from '../../../../constants/roomActivities';
+
 const KEY = {
   LEFT:  37,
   RIGHT: 39,
@@ -14,8 +16,8 @@ const KEY = {
 };
 
 export class Reacteroids extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       screen: {
         width: window.innerWidth,
@@ -39,6 +41,17 @@ export class Reacteroids extends Component {
     this.asteroids = [];
     this.bullets = [];
     this.particles = [];
+
+    this.isPaused = !props.onTop;
+
+    this.props.roomAPI.addActivityListener(roomActivities.TAB_SWITCH, ({ to }) => {
+      if (to === this.props.tabId) {
+        this.isPaused = false;
+        this.update();
+      } else {
+        this.isPaused = true;
+      }
+    });
   }
 
   handleResize(value, e){
@@ -52,6 +65,7 @@ export class Reacteroids extends Component {
   }
 
   handleKeys(value, e){
+    if (this.isPaused) return;
     let keys = this.state.keys;
     if(e.keyCode === KEY.LEFT   || e.keyCode === KEY.A) keys.left  = value;
     if(e.keyCode === KEY.RIGHT  || e.keyCode === KEY.D) keys.right = value;
@@ -71,8 +85,7 @@ export class Reacteroids extends Component {
     this.setState({ context: context });
     this.startGame();
     requestAnimationFrame(() => {
-      if(!this.props.paused)
-       this.update();
+      this.update();
     });
   }
 
@@ -83,6 +96,8 @@ export class Reacteroids extends Component {
   }
 
   update() {
+    if (this.isPaused) return;
+
     const context = this.state.context;
     const keys = this.state.keys;
     const ship = this.ship[0];
@@ -117,8 +132,7 @@ export class Reacteroids extends Component {
 
     // Next frame
     requestAnimationFrame(() => {
-      if(!this.props.paused)
-        this.update();
+      this.update();
     });
   }
 
