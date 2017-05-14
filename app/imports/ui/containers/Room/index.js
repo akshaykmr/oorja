@@ -900,34 +900,28 @@ class Room extends Component {
   addSpeechTracker(stream) {
     if (!stream.hasAudio()) console.error('stream has no audio');
     const tracker = hark(stream.stream); // the browser mediaStream object
-    tracker.on('speaking', () => {
-      this.props.streamSpeaking(stream.getID());
+
+    const broadcastSpeechEvent = (action) => {
       this.roomAPI.sendMessage({
         broadcast: true,
         type: messageType.ROOM_MESSAGE,
         content: {
           type: roomMessageTypes.SPEECH,
           content: {
-            action: SPEAKING,
+            action,
             streamId: stream.getID(),
           },
         },
       });
+    };
+    tracker.on('speaking', () => {
+      this.props.streamSpeaking(stream.getID());
+      broadcastSpeechEvent(SPEAKING);
     });
 
     tracker.on('stopped_speaking', () => {
       this.props.streamSpeakingStopped(stream.getID());
-      this.roomAPI.sendMessage({
-        broadcast: true,
-        type: messageType.ROOM_MESSAGE,
-        content: {
-          type: roomMessageTypes.SPEECH,
-          content: {
-            action: SPEAKING_STOPPED,
-            streamId: stream.getID(),
-          },
-        },
-      });
+      broadcastSpeechEvent(SPEAKING_STOPPED);
     });
     this.speechTrackers[stream.getID()] = tracker;
   }
