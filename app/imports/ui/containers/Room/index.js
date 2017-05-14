@@ -768,11 +768,13 @@ class Room extends Component {
       switch (eventDetail.action) {
         case SPEAKING:
           if (this.props.mediaStreams[streamId]) {
+            this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_START, streamId);
             this.props.streamSpeaking(streamId);
           }
           break;
         case SPEAKING_STOPPED:
           if (this.props.mediaStreams[streamId]) {
+            this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_END, streamId);
             this.props.streamSpeakingStopped(streamId);
           }
           break;
@@ -900,7 +902,7 @@ class Room extends Component {
   addSpeechTracker(stream) {
     if (!stream.hasAudio()) console.error('stream has no audio');
     const tracker = hark(stream.stream); // the browser mediaStream object
-
+    const streamId = stream.getID();
     const broadcastSpeechEvent = (action) => {
       this.roomAPI.sendMessage({
         broadcast: true,
@@ -909,18 +911,20 @@ class Room extends Component {
           type: roomMessageTypes.SPEECH,
           content: {
             action,
-            streamId: stream.getID(),
+            streamId,
           },
         },
       });
     };
     tracker.on('speaking', () => {
-      this.props.streamSpeaking(stream.getID());
+      this.props.streamSpeaking(streamId);
+      this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_START, streamId);
       broadcastSpeechEvent(SPEAKING);
     });
 
     tracker.on('stopped_speaking', () => {
-      this.props.streamSpeakingStopped(stream.getID());
+      this.props.streamSpeakingStopped(streamId);
+      this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_END, streamId);
       broadcastSpeechEvent(SPEAKING_STOPPED);
     });
     this.speechTrackers[stream.getID()] = tracker;
@@ -1000,6 +1004,7 @@ class Room extends Component {
           uiSize={uiSize}
           roomAPI={this.roomAPI}
           streamContainerSize={streamContainerSize}
+          dispatchRoomActivity={this.activityListener.dispatch}
           roomInfo={this.props.roomInfo}
           connectedUsers={this.state.connectedUsers}/>
         <Spotlight

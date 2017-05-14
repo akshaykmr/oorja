@@ -144,6 +144,7 @@ const mapStateToProps = state => ({
 StreamsContainer.propTypes = {
   roomAPI: React.PropTypes.object.isRequired,
   mediaStreams: React.PropTypes.object.isRequired,
+  dispatchRoomActivity: React.PropTypes.func.isRequired,
   streamSpeaking: React.PropTypes.object.isRequired,
   roomInfo: React.PropTypes.object.isRequired,
   connectedUsers: React.PropTypes.array.isRequired,

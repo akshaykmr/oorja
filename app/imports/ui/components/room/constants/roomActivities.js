@@ -6,7 +6,9 @@ export default {
   USER_SESSION_ADDED: 'USER_SESSION_ADDED', // user, sessionId
   USER_SESSION_REMOVED: 'USER_SESSION_REMOVED', // user, sessionId
 
-  MESSAGE_RECIEVED: 'MESSAGE_RECIEVED', // not used atm.
+
+  STREAM_SPEAKING_START: 'STREAM_SPEAKING_START', // streamId, the stream is obviously a mediaStream
+  STREAM_SPEAKING_END: 'STREAM_SPEAKING_END',
 
   TAB_SWITCH: 'TAB_SWITCH', // { from: tab_id, to: tab_id }
 };

@@ -99,7 +99,8 @@ Meteor.methods({
         owner: Meteor.userId() || null,
         roomName,
         defaultTabId: 1,
-        tabs, // currently loading all tabs.
+        // tabs, // currently loading all tabs.
+        tabs: tabs.filter(tab => [1, 10].indexOf(tab.tabId) !== -1),
         passwordEnabled,
         roomSecret,
         password,

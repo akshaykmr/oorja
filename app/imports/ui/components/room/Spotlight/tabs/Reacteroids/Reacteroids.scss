@@ -66,6 +66,9 @@
     font-size: 11px;
     text-align: center;
     line-height: 1.6;
+    @media only screen and (max-width: 550px) { 
+      display: none;
+    }
   }
   .endgame{
     position: absolute;
