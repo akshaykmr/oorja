@@ -5,6 +5,7 @@ export default {
   tabInfo: React.PropTypes.object,
   tabStatusRegistry: React.PropTypes.object.isRequired,
   updateBadge: React.PropTypes.func.isRequired,
+  switchToTab: React.PropTypes.func.isRequired,
   roomAPI: React.PropTypes.object.isRequired,
   connectedUsers: React.PropTypes.array.isRequired,
   roomInfo: React.PropTypes.object.isRequired,

@@ -227,6 +227,7 @@ class Spotlight extends Component {
         key={tab.tabId}
         tabInfo={tab}
         updateBadge={updateBadge.bind(this)}
+        switchToTab={this.switchToTab.bind(this)}
         tabStatusRegistry={this.state.tabStatusRegistry}
         roomInfo={this.props.roomInfo}
         connectedUsers={this.props.connectedUsers}

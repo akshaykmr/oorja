@@ -1,0 +1,28 @@
+.content.VideoChat {
+  &.onTop {
+
+  }
+
+  &.compact {
+    .header button, .header .text {
+      position: initial;
+      right: initial;
+    }
+  }
+
+  color: #ffffff;
+
+  .header {
+    padding: 30px;
+    text-align: center;
+    font-size: 1.4em;
+    .text , button {
+      position: relative;
+      right: 30px;
+    }
+
+    button {
+      margin-top: 30px;
+    }
+  }
+}
