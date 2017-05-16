@@ -12,6 +12,8 @@ import roomActivities from '../../../constants/roomActivities';
 import Y from '../../../../../../modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
 
+import Spinner from '../../Spinner';
+
 import './chat.scss';
 
 class Chat extends Component {
@@ -276,7 +278,7 @@ class Chat extends Component {
           </div>
         </ul>
         <form className="chat-input-form" onSubmit={this.handleSubmit}>
-          <this.props.Spinner show={this.props.onTop && isSyncing}/>
+          <Spinner show={this.props.onTop && isSyncing}/>
           <input className="chat-input"
                  name="chat-input"
                  placeholder= "Write a message..."

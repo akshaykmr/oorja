@@ -34,6 +34,7 @@ import './codepad.scss';
 
 import Sidebar from '../../../Sidebar/';
 import SettingsTab from './SettingsTab';
+import Spinner from '../../Spinner';
 
 class CodePad extends Component {
 
@@ -166,7 +167,7 @@ class CodePad extends Component {
     return (
       <div className={this.props.classNames} style={this.props.style}>
         <Sidebar tabList={this.state.tabList}></Sidebar>
-        <this.props.Spinner show={this.props.onTop && isSyncing}/>
+        <Spinner show={this.props.onTop && isSyncing}/>
         <div id="codepad-editor" style={editorStyle}>
         </div>
       </div>

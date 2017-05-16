@@ -70,6 +70,10 @@ $avatar-size: 50px;
       border-color: $speaking-indicator-color;
     }
 
+    &.hasVideo {
+      margin-left: 10px;
+    }
+
     &.hasVideo .avatar {
       position: absolute;
       bottom: 0px;

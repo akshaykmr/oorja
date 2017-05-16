@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 // import uiConfig from '../../../constants/uiConfig';
 
 // import Avatar from '../../../Avatar';
@@ -33,11 +34,13 @@ class VideoChat extends Component {
 
     const determineContent = () => {
       if (this.allLocalStreams(streamList)) {
-        const alone = this.props.connectedUsers.length <= 1;
-        if (alone) {
+        const userCount = this.props.connectedUsers.length;
+        if (userCount <= 1) {
           return (
             <div className="header nobodyHere">
-              <div className="text">It doesn't look like there is anyone else in the room</div>
+              <div className="text">It doesn't look like there is anyone
+               {userCount === 0 ? '' : ' else'} in the room
+              </div>
               <button onClick = {() => this.props.switchToTab(1)}
                 type="button" className="pt-button pt-intent-success">
                 Invite People 👋
@@ -58,7 +61,14 @@ class VideoChat extends Component {
 
     return (
       <div className={this.props.classNames} style={this.props.style}>
+      <CSSTransitionGroup
+        transitionName="fade"
+        transitionAppear={true}
+        transitionAppearTimeout={500}
+        transitionEnterTimeout={500}
+        transitionLeaveTimeout={300}>
         {determineContent()}
+      </CSSTransitionGroup>
       </div>
     );
   }

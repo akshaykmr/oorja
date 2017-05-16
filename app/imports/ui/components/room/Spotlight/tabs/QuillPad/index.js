@@ -15,6 +15,8 @@ import roomActivities from '../../../constants/roomActivities';
 
 import './quillpad.scss';
 
+import Spinner from '../../Spinner';
+
 // Quill.register('modules/imageResize', ImageResize);
 // Quill.register('modules/imageDrop', ImageDrop);
 
@@ -115,7 +117,7 @@ class QuillPad extends Component {
     const isSyncing = (!this.state.initialSyncComplete) && (this.props.connectedUsers.length > 1);
     return (
       <div className={this.props.classNames} style={this.props.style}>
-        <this.props.Spinner show={this.props.onTop && isSyncing }/>
+        <Spinner show={this.props.onTop && isSyncing }/>
         <div id="quillpad-editor" style={{ height: 'calc(100% - 68px)' }}>
         </div>
       </div>

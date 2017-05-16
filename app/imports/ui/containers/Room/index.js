@@ -98,8 +98,16 @@ class Room extends Component {
 
       roomConnectionStatus: status.INITIALIZING,
       dataBroadcastStreamStatus: status.TRYING_TO_CONNECT,
-      primaryMediaStreamStatus: status.TRYING_TO_CONNECT,
-
+      primaryMediaStreamState: {
+        video: true,
+        audio: true,
+        mutedAudio: false,
+        mutedVideo: false,
+        status: status.DISCONNECTED,
+      },
+      screenSharingStreamState: {
+        status: status.DISCONNECTED,
+      },
       customStreamContainerSize: false,
       videoStreamCount: 0,
 
@@ -274,26 +282,36 @@ class Room extends Component {
     // get config and initialize new stream
     // assume this config for now.
     this.primaryMediaStream = Erizo.Stream({
-      audio: true,
-      video: true,
+      audio: this.state.primaryMediaStreamState.audio,
+      video: this.state.primaryMediaStreamState.video,
       data: false,
       attributes: {
         userId: this.props.roomUserId,
+        sessionId: this.sessionId,
         type: streamTypes.MEDIA.BROADCAST,
       },
     });
     const mediaStream = this.primaryMediaStream;
     mediaStream.addEventListener('access-accepted', () => {
       this.erizoRoom.publish(mediaStream);
+      this.updateState({
+        primaryMediaStreamState: {
+          status: { $set: status.TRYING_TO_CONNECT },
+        },
+      });
     });
     mediaStream.addEventListener('access-denied', () => {
       this.updateState({
-        primaryMediaStream: { $set: status.ERROR },
+        primaryMediaStreamState: {
+          status: { $set: status.ERROR },
+        },
       });
     });
     mediaStream.addEventListener('stream-ended', () => {
       this.updateState({
-        primaryMediaStream: { $set: status.DISCONNECTED },
+        primaryMediaStreamState: {
+          status: { $set: status.DISCONNECTED },
+        },
       });
     });
     mediaStream.init();
@@ -429,7 +447,9 @@ class Room extends Component {
         if (attributes.type === MEDIA.BROADCAST) {
           streamSrc = URL.createObjectURL(this.primaryMediaStream.stream);
           this.updateState({
-            primaryMediaStream: { $set: status.CONNECTED },
+            primaryMediaStreamState: {
+              status: { $set: status.CONNECTED },
+            },
           });
           this.addSpeechTracker(this.primaryMediaStream);
         }
@@ -917,12 +937,14 @@ class Room extends Component {
       });
     };
     tracker.on('speaking', () => {
+      if (this.unmountInProgress) return;
       this.props.streamSpeaking(streamId);
       this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_START, streamId);
       broadcastSpeechEvent(SPEAKING);
     });
 
     tracker.on('stopped_speaking', () => {
+      if (this.unmountInProgress) return;
       this.props.streamSpeakingStopped(streamId);
       this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_END, streamId);
       broadcastSpeechEvent(SPEAKING_STOPPED);
@@ -1012,6 +1034,8 @@ class Room extends Component {
           connectedUsers={this.state.connectedUsers}
           roomAPI={this.roomAPI}
           dispatchRoomActivity={this.activityListener.dispatch}
+          primaryMediaStreamState={this.state.primaryMediaStreamState}
+          screenSharingStreamState={this.state.screenSharingStreamState}
           uiSize={uiSize}
           streamContainerSize={streamContainerSize}
           setCustomStreamContainerSize={this.setCustomStreamContainerSize}/>

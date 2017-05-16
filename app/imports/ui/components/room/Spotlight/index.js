@@ -9,7 +9,6 @@ import uiConfig from '../constants/uiConfig';
 import roomActivities from '../constants/roomActivities';
 
 import './spotlight.scss';
-import Spinner from './Spinner';
 
 // tabs
 import Info from './tabs/Info';
@@ -234,7 +233,8 @@ class Spotlight extends Component {
         roomAPI={this.props.roomAPI}
         uiSize={this.props.uiSize}
         onTop={onTop}
-        Spinner={Spinner}
+        primaryMediaStreamState={this.props.primaryMediaStreamState}
+        screenSharingStreamState={this.props.screenSharingStreamState}
         classNames={classNames(tabContentClassNames)}
         style={tabContentStyle}/>;
     };
@@ -272,6 +272,8 @@ Spotlight.propTypes = {
   uiSize: React.PropTypes.string.isRequired,
   streamContainerSize: React.PropTypes.string.isRequired,
   setCustomStreamContainerSize: React.PropTypes.func.isRequired,
+  primaryMediaStreamState: React.PropTypes.object.isRequired,
+  screenSharingStreamState: React.PropTypes.object.isRequired,
 };
 
 

@@ -10,8 +10,9 @@ export default {
   connectedUsers: React.PropTypes.array.isRequired,
   roomInfo: React.PropTypes.object.isRequired,
   classNames: React.PropTypes.string,
-  Spinner: React.PropTypes.func,
   style: React.PropTypes.object,
   uiSize: React.PropTypes.string.isRequired,
   onTop: React.PropTypes.bool.isRequired,
+  primaryMediaStreamState: React.PropTypes.object.isRequired,
+  screenSharingStreamState: React.PropTypes.object.isRequired,
 };
