@@ -210,6 +210,7 @@ class Room extends Component {
 
     erizoRoom.addEventListener('room-disconnected', (roomEvent) => {
       console.info('room disconnected', roomEvent);
+      this.updateState({ roomConnectionStatus: { $set: status.DISCONNECTED } });
       this.stateBuffer.connectedUsers.forEach((user) => {
         let sessionCount = user.sessionCount;
         while (sessionCount--) {
@@ -937,16 +938,16 @@ class Room extends Component {
       });
     };
     tracker.on('speaking', () => {
-      if (this.unmountInProgress) return;
       this.props.streamSpeaking(streamId);
       this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_START, streamId);
+      if (this.state.roomConnectionStatus !== status.CONNECTED) return;
       broadcastSpeechEvent(SPEAKING);
     });
 
     tracker.on('stopped_speaking', () => {
-      if (this.unmountInProgress) return;
       this.props.streamSpeakingStopped(streamId);
       this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_END, streamId);
+      if (this.state.roomConnectionStatus !== status.CONNECTED) return;
       broadcastSpeechEvent(SPEAKING_STOPPED);
     });
     this.speechTrackers[stream.getID()] = tracker;
