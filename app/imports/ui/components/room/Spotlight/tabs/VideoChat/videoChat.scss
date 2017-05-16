@@ -1,30 +1,94 @@
 .content.VideoChat {
+
+  color: #ffffff;
   &.onTop {
 
   }
 
   &.compact {
-    .header button, .header .text {
-      position: initial;
-      right: initial;
+    .controls {
+      height: 200px;
+      width: 50px;
+
+      left: initial;
+      right: 25px;
+      top: calc(50% - 75px);
+
+      .control {
+        display: block;
+        border-bottom: 1px solid black;
+      }
     }
   }
-
-  color: #ffffff;
 
   .header {
     padding: 30px;
     text-align: center;
-    font-size: 1.4em;
-    .text , button {
-      position: relative;
-      right: 30px;
+    font-size: 1.3em;
+
+    @media only screen and (max-width: 550px) { 
+      font-size: 1.1em;
     }
 
     button {
       margin-top: 30px;
     }
   }
+
+  .controls {
+    width: 200px;
+    margin: 0 auto;
+    background-color: black;
+    border-radius: 10px;
+    height: 50px;
+    position: absolute;
+    bottom: 25px;
+    left: calc(50% - 75px);
+    overflow: hidden;
+    transition: opacity 1s ease;
+    opacity: 1;
+
+    &.hidden {
+      opacity: 0;
+    }
+
+  
+    .control {
+      cursor: pointer;
+      display: inline-block;
+      height: 50px;
+      width: 50px;
+      text-align: center;
+      line-height: 50px;
+      font-size: 1.5em;
+      // transition: background-color 0.4s ease;
+      border-right: 1px solid black;
+      &.error {
+        background-color: darkred;
+      }
+
+      &:last-child {
+        border: none !important;
+      }
+
+      &.muted {
+        background-color: indianred !important;
+      }
+
+      &:hover {
+        background-color: darkslateblue;
+      }
+
+      &.loading {
+        background-color: dimgray;
+      }
+
+      &.active {
+        background-color: mediumseagreen;
+      }
+    }
+  }
+
 
   .fade-enter {
     opacity: 0.01;

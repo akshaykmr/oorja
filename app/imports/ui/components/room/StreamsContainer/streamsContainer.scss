@@ -5,8 +5,14 @@ $avatar-size: 50px;
   overflow-x: auto;
   width: 100%;
   padding: 5px;
+  padding-left: 62px;
   background-color: #2e3136;
   overflow-y: hidden;
+
+
+  &.compactUI {
+    padding-left: 5px;
+  }
 
   span {
     height: 100%;

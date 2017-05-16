@@ -3,10 +3,6 @@
   // background-image: url('/images/geo.png');
   &.compact {
     border-top-left-radius: initial;
-    .container {
-      position: initial;
-      left: initial;
-    }
   }
   
   > .container {
@@ -15,8 +11,6 @@
     width: 90%;
     margin: 0 auto;
     height: 100%;
-    position: relative;
-    left: -30px;
     display: flex;
     flex-direction: column;
 

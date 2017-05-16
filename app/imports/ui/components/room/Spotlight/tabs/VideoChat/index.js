@@ -4,9 +4,10 @@ import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 // import uiConfig from '../../../constants/uiConfig';
 
 // import Avatar from '../../../Avatar';
-
+import classNames from 'classnames';
 
 import tabPropTypes from '../tabPropTypes';
+import status from '../../../constants/status';
 import './videoChat.scss';
 
 class VideoChat extends Component {
@@ -27,6 +28,72 @@ class VideoChat extends Component {
 
   allLocalStreams(streamList = this.getMediaStreamList()) {
     return streamList.every(stream => stream.local);
+  }
+
+  renderControls() {
+    const { primaryMediaStreamState, screenSharingStreamState } = this.props;
+    const primaryMediaStreamConnected = primaryMediaStreamState.status === status.CONNECTED;
+    const primaryMediaStreamConnecting =
+      primaryMediaStreamState.status === status.TRYING_TO_CONNECT;
+    const primaryMediaStreamError = primaryMediaStreamState.status === status.ERROR;
+    const screenSharingStreamConnecting =
+      screenSharingStreamState.status === status.TRYING_TO_CONNECT;
+    const screenSharingStreamConnected = screenSharingStreamState.status === status.CONNECTED;
+    const screenSharingStreamError = screenSharingStreamState.status === status.ERROR;
+
+    const controlButtons = [
+      {
+        name: 'add',
+        icon: 'ion-ios-personadd',
+        classNames: 'control',
+      },
+      {
+        name: 'video',
+        icon: 'ion-ios-videocam',
+        classNames: classNames({
+          control: true,
+          video: true,
+          loading: primaryMediaStreamConnecting,
+          active: primaryMediaStreamState.video && primaryMediaStreamConnected,
+          error: primaryMediaStreamError,
+          muted: primaryMediaStreamState.mutedVideo,
+        }),
+      },
+      {
+        name: 'mic',
+        icon: primaryMediaStreamState.mutedAudio ? 'ion-ios-mic-off' : 'ion-ios-mic',
+        classNames: classNames({
+          control: true,
+          mic: true,
+          loading: primaryMediaStreamConnecting,
+          active: primaryMediaStreamState.audio && primaryMediaStreamConnected,
+          error: primaryMediaStreamError,
+          muted: primaryMediaStreamState.mutedAudio,
+        }),
+      },
+      {
+        name: 'screenshare',
+        icon: 'ion-ios-monitor',
+        classNames: classNames({
+          control: true,
+          screen: true,
+          loading: screenSharingStreamConnecting,
+          active: screenSharingStreamConnected,
+          error: screenSharingStreamError,
+        }),
+      },
+    ];
+    return (
+      <div className="controls">
+        {controlButtons.map(control => (
+          <div
+            className={control.classNames}
+            key={control.name}>
+              <i className={`icon ${control.icon}`}></i>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   render() {
@@ -69,6 +136,7 @@ class VideoChat extends Component {
         transitionLeaveTimeout={300}>
         {determineContent()}
       </CSSTransitionGroup>
+      {this.renderControls()}
       </div>
     );
   }

@@ -111,6 +111,7 @@ class StreamsContainer extends Component {
     const { COMPACT, MEDIUM, LARGE } = uiConfig;
     const streamContainerClassNames = {
       streamContainer: true,
+      compactUI: this.props.uiSize === COMPACT,
       compact: streamContainerSize === COMPACT,
       medium: streamContainerSize === MEDIUM,
       large: streamContainerSize === LARGE,

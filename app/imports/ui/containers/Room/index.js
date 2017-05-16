@@ -282,6 +282,11 @@ class Room extends Component {
     }
     // get config and initialize new stream
     // assume this config for now.
+    this.updateState({
+      primaryMediaStreamState: {
+        status: { $set: status.TRYING_TO_CONNECT },
+      },
+    });
     this.primaryMediaStream = Erizo.Stream({
       audio: this.state.primaryMediaStreamState.audio,
       video: this.state.primaryMediaStreamState.video,
@@ -295,11 +300,6 @@ class Room extends Component {
     const mediaStream = this.primaryMediaStream;
     mediaStream.addEventListener('access-accepted', () => {
       this.erizoRoom.publish(mediaStream);
-      this.updateState({
-        primaryMediaStreamState: {
-          status: { $set: status.TRYING_TO_CONNECT },
-        },
-      });
     });
     mediaStream.addEventListener('access-denied', () => {
       this.updateState({

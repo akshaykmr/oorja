@@ -18,19 +18,12 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    position: relative;
-    right: 30px;
 
     &:hover .copyButton{
       transform: scale(1.05, 1.05);
       box-shadow: 0px 5px 15px -6px rgba(0, 0, 0, 0.81);
       background-color: mediumaquamarine;
     }
-  }
-
-  &.compact .shareRoom {
-    position: initial;
-    right: initial;
   }
 
   .copyButton {
