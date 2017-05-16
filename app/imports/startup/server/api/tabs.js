@@ -27,7 +27,7 @@ export default [
     name: 'VideoChat',
     displayName: 'Video chat',
     iconColor: '#fffad5',
-    bgColor: '#2e3136',
+    bgColor: '#25272a',
     icon: 'videocamera',
     description: 'Video chat',
     streamContainerSize: '',

@@ -17,6 +17,7 @@
       .control {
         display: block;
         border-bottom: 1px solid black;
+        border-right: initial;
       }
     }
   }
@@ -25,6 +26,11 @@
     padding: 30px;
     text-align: center;
     font-size: 1.3em;
+
+    .hand {
+      font-size: 1.3em;
+      margin-left: 2px;
+    }
 
     @media only screen and (max-width: 550px) { 
       font-size: 1.1em;
@@ -61,10 +67,11 @@
       text-align: center;
       line-height: 50px;
       font-size: 1.5em;
+      user-select: none;
       // transition: background-color 0.4s ease;
       border-right: 1px solid black;
       &.error {
-        background-color: darkred;
+        background-color: darkred !important;
       }
 
       &:last-child {

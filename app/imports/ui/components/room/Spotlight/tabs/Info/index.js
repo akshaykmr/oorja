@@ -43,7 +43,7 @@ class Info extends Component {
               <i className="icon ion-ios-copy-outline"></i>
             </div>
             <div className="copyText">
-              Click to copy room link 👋
+              Click to copy room link <span className='hand'>👋</span>
             </div>
             <div className="roomLink">
                 <a onClick={ event => event.preventDefault()}

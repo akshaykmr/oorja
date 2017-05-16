@@ -19,6 +19,8 @@ class VideoChat extends Component {
     this.state = {
 
     };
+
+    this.goToInfoTab = this.goToInfoTab.bind(this);
   }
 
   getMediaStreamList() {
@@ -28,6 +30,10 @@ class VideoChat extends Component {
 
   allLocalStreams(streamList = this.getMediaStreamList()) {
     return streamList.every(stream => stream.local);
+  }
+
+  goToInfoTab() {
+    this.props.switchToTab(1);
   }
 
   renderControls() {
@@ -46,6 +52,7 @@ class VideoChat extends Component {
         name: 'add',
         icon: 'ion-ios-personadd',
         classNames: 'control',
+        onClick: this.goToInfoTab,
       },
       {
         name: 'video',
@@ -88,6 +95,7 @@ class VideoChat extends Component {
         {controlButtons.map(control => (
           <div
             className={control.classNames}
+            onClick={control.onClick}
             key={control.name}>
               <i className={`icon ${control.icon}`}></i>
           </div>
@@ -108,9 +116,9 @@ class VideoChat extends Component {
               <div className="text">It doesn't look like there is anyone
                {userCount === 0 ? '' : ' else'} in the room
               </div>
-              <button onClick = {() => this.props.switchToTab(1)}
+              <button onClick = {this.goToInfoTab}
                 type="button" className="pt-button pt-intent-success">
-                Invite People 👋
+                Invite People <span className="hand">👋</span>
               </button>
             </div>
           );
