@@ -12,7 +12,7 @@
 
       left: initial;
       right: 25px;
-      top: calc(50% - 75px);
+      top: calc(50% - 100px);
 
       .control {
         display: block;
@@ -49,9 +49,10 @@
     height: 50px;
     position: absolute;
     bottom: 25px;
-    left: calc(50% - 75px);
+    left: calc(50% - 100px);
     overflow: hidden;
     transition: opacity 1s ease;
+    user-select: none;
     opacity: 1;
 
     &.hidden {
@@ -67,7 +68,12 @@
       text-align: center;
       line-height: 50px;
       font-size: 1.5em;
-      user-select: none;
+      opacity: 0.95;
+
+      &:active {
+        opacity: 1.0;
+      }
+      
       // transition: background-color 0.4s ease;
       border-right: 1px solid black;
       &.error {
