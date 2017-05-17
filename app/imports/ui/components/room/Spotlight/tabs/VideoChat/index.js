@@ -21,6 +21,7 @@ class VideoChat extends Component {
     };
 
     this.goToInfoTab = this.goToInfoTab.bind(this);
+    this.handleScreenShareClick = this.handleScreenShareClick.bind(this);
   }
 
   getMediaStreamList() {
@@ -34,6 +35,17 @@ class VideoChat extends Component {
 
   goToInfoTab() {
     this.props.switchToTab(1);
+  }
+
+  handleScreenShareClick() {
+    const { screenSharingStreamState } = this.props;
+    if (screenSharingStreamState.status === status.CONNECTED ||
+      screenSharingStreamState.status === status.TRYING_TO_CONNECT) {
+      this.props.roomAPI.stopScreenShare();
+      return;
+    }
+
+    this.props.roomAPI.shareScreen();
   }
 
   renderControls() {
@@ -88,6 +100,7 @@ class VideoChat extends Component {
           active: screenSharingStreamConnected,
           error: screenSharingStreamError,
         }),
+        onClick: this.handleScreenShareClick,
       },
     ];
     return (

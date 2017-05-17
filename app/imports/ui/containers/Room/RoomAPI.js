@@ -28,6 +28,15 @@ class RoomAPI {
     this.messenger.send(message);
   }
 
+  shareScreen() {
+    this.room.initializeScreenSharingStream();
+  }
+
+  stopScreenShare() {
+    this.room.screenSharingStream.close();
+    this.room.screenSharingStream = null;
+  }
+
   addMessageHandler(tabId, handler) {
     /*
         tabId, handler

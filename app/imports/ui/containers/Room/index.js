@@ -11,11 +11,12 @@ import _ from 'lodash';
 // import Erizo from '../../modules/Erizo';
 
 import hark from 'hark';
-
+import { Intent } from '@blueprintjs/core';
 // constants
 import uiConfig from '../../components/room/constants/uiConfig';
 import status from '../../components/room/constants/status';
 import streamTypes from '../../components/room/constants/streamType';
+import mediaStreamPurpose from '../../components/room/constants/mediaStreamPurpose';
 import roomActivities from '../../components/room/constants/roomActivities';
 
 // room components
@@ -31,6 +32,8 @@ import messageType from '../../components/room/constants/messageType';
 
 import { MEDIASTREAMS_RESET, MEDIASTREAMS_UPDATE } from '../../actions/mediaStreams';
 import { SPEAKING, SPEAKING_STOPPED } from '../../actions/stream';
+
+import SupremeToaster from '../../components/Toaster';
 
 import './room.scss';
 
@@ -276,6 +279,55 @@ class Room extends Component {
     });
   }
 
+  initializeScreenSharingStream() {
+    if (this.screenSharingStream) {
+      // unpublish and destroy
+    }
+    this.updateState({
+      screenSharingStreamState: {
+        status: { $set: status.TRYING_TO_CONNECT },
+      },
+    });
+
+    this.screenSharingStream = Erizo.Stream({
+      screen: true,
+      extensionId: Meteor.settings.public.screenShareExtensionId,
+      attributes: {
+        userId: this.props.roomUserId,
+        sessionId: this.sessionId,
+        type: streamTypes.MEDIA.BROADCAST,
+        purpose: mediaStreamPurpose.SCREEN_SHARE_STREAM,
+      },
+    });
+    const handleStopSharing = () => {
+      this.updateState({
+        screenSharingStreamState: {
+          status: { $set: status.DISCONNECTED },
+        },
+      });
+      this.screenSharingStream.close();
+      this.screenSharingStream = null;
+    };
+    const mediaStream = this.screenSharingStream;
+    mediaStream.addEventListener('access-accepted', () => {
+      this.erizoRoom.publish(mediaStream);
+      mediaStream.stream.getVideoTracks()[0].onended = handleStopSharing;
+    });
+    mediaStream.addEventListener('access-denied', () => {
+      SupremeToaster.show({
+        message: 'could not access your screen 😕',
+        intent: Intent.DANGER,
+      });
+      this.updateState({
+        screenSharingStreamState: {
+          status: { $set: status.ERROR },
+        },
+      });
+    });
+    mediaStream.addEventListener('stream-ended', handleStopSharing);
+    mediaStream.init();
+  }
+
   initializePrimaryMediaStream() {
     if (this.primaryMediaStream) {
       // unpublish and destroy
@@ -295,6 +347,7 @@ class Room extends Component {
         userId: this.props.roomUserId,
         sessionId: this.sessionId,
         type: streamTypes.MEDIA.BROADCAST,
+        purpose: mediaStreamPurpose.PRIMARY_MEDIA_STREAM,
       },
     });
     const mediaStream = this.primaryMediaStream;
@@ -302,6 +355,10 @@ class Room extends Component {
       this.erizoRoom.publish(mediaStream);
     });
     mediaStream.addEventListener('access-denied', () => {
+      SupremeToaster.show({
+        message: 'could not access your media device 😕',
+        intent: Intent.DANGER,
+      });
       this.updateState({
         primaryMediaStreamState: {
           status: { $set: status.ERROR },
@@ -445,7 +502,7 @@ class Room extends Component {
       const isLocal = this.streamManager.isLocalStream(stream);
       let streamSrc = '';
       if (isLocal) {
-        if (attributes.type === MEDIA.BROADCAST) {
+        if (attributes.purpose === mediaStreamPurpose.PRIMARY_MEDIA_STREAM) {
           streamSrc = URL.createObjectURL(this.primaryMediaStream.stream);
           this.updateState({
             primaryMediaStreamState: {
@@ -453,6 +510,13 @@ class Room extends Component {
             },
           });
           this.addSpeechTracker(this.primaryMediaStream);
+        } else if (attributes.purpose === mediaStreamPurpose.SCREEN_SHARE_STREAM) {
+          streamSrc = URL.createObjectURL(this.screenSharingStream.stream);
+          this.updateState({
+            screenSharingStreamState: {
+              status: { $set: status.CONNECTED },
+            },
+          });
         }
         console.info('adding local media stream');
       } else {
@@ -464,7 +528,7 @@ class Room extends Component {
         this.setIncomingStreamListners(stream);
         this.erizoRoom.subscribe(stream);
       }
-
+      const isScreenShare = attributes.purpose === mediaStreamPurpose.SCREEN_SHARE_STREAM;
       this.props.updateMediaStreams({
         [streamId]: {
           $set: {
@@ -472,11 +536,12 @@ class Room extends Component {
             streamId,
             local: isLocal,
             type: attributes.type,
+            purpose: attributes.purpose,
             // connected when stream subscription is successfull
             status: isLocal ? status.CONNECTED : status.TRYING_TO_CONNECT,
-            audio: stream.hasAudio(),
-            video: stream.hasVideo(),
-            screen: !!attributes.screenshare,
+            audio: !!stream.hasAudio(),
+            video: !!stream.hasVideo() || isScreenShare,
+            screen: isScreenShare,
             streamSrc,
             errorReason: '',
             warningReason: '',
