@@ -315,7 +315,7 @@ class Room extends Component {
     });
     mediaStream.addEventListener('access-denied', () => {
       SupremeToaster.show({
-        message: 'could not access your screen 😕',
+        message: 'could not access your screen for sharing 😕',
         intent: Intent.DANGER,
       });
       this.updateState({
