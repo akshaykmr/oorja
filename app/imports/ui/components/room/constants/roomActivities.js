@@ -1,6 +1,11 @@
 // activity types in a Room
 // activity name, payload example
 export default {
+
+  ROOM_CONNECTED: 'ROOM_CONNECTED',
+  ROOM_DISCONNECTED: 'ROOM_DISCONNECTED',
+  ROOM_ERROR: 'ROOM_ERROR',
+
   USER_JOINED: 'USER_JOINED', // user, sessionId
   USER_LEFT: 'USER_LEFT', // user, sessionId
   USER_SESSION_ADDED: 'USER_SESSION_ADDED', // user, sessionId

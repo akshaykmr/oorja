@@ -202,17 +202,20 @@ class Room extends Component {
   setRoomConnectionListeners(erizoRoom = this.erizoRoom) {
     erizoRoom.addEventListener('room-connected', (roomEvent) => {
       console.info('room connected', roomEvent, erizoRoom);
+      this.activityListener.dispatch(roomActivities.ROOM_CONNECTED);
       erizoRoom.publish(this.dataBroadcastStream);
       this.updateState({ roomConnectionStatus: { $set: status.CONNECTED } });
     });
 
     erizoRoom.addEventListener('room-error', (roomEvent) => {
       console.error('room connection error', roomEvent);
+      this.activityListener.dispatch(roomActivities.ROOM_ERROR);
       this.updateState({ roomConnectionStatus: { $set: status.ERROR } });
     });
 
     erizoRoom.addEventListener('room-disconnected', (roomEvent) => {
       console.info('room disconnected', roomEvent);
+      this.activityListener.dispatch(roomActivities.ROOM_DISCONNECTED);
       this.updateState({ roomConnectionStatus: { $set: status.DISCONNECTED } });
       this.stateBuffer.connectedUsers.forEach((user) => {
         let sessionCount = user.sessionCount;
@@ -282,6 +285,7 @@ class Room extends Component {
   initializeScreenSharingStream() {
     if (this.screenSharingStream) {
       // unpublish and destroy
+      this.screenSharingStream.close();
     }
     this.updateState({
       screenSharingStreamState: {
@@ -331,14 +335,11 @@ class Room extends Component {
   initializePrimaryMediaStream() {
     if (this.primaryMediaStream) {
       // unpublish and destroy
+      this.primaryMediaStream.close();
     }
     // get config and initialize new stream
     // assume this config for now.
-    this.updateState({
-      primaryMediaStreamState: {
-        status: { $set: status.TRYING_TO_CONNECT },
-      },
-    });
+
     this.primaryMediaStream = Erizo.Stream({
       audio: this.state.primaryMediaStreamState.audio,
       video: this.state.primaryMediaStreamState.video,
@@ -352,6 +353,13 @@ class Room extends Component {
     });
     const mediaStream = this.primaryMediaStream;
     mediaStream.addEventListener('access-accepted', () => {
+      this.updateState({
+        primaryMediaStreamState: {
+          status: { $set: status.TRYING_TO_CONNECT },
+          audio: { $set: this.primaryMediaStream.stream.getAudioTracks().length > 0 },
+          video: { $set: this.primaryMediaStream.stream.getVideoTracks().length > 0 },
+        },
+      });
       this.erizoRoom.publish(mediaStream);
     });
     mediaStream.addEventListener('access-denied', () => {
@@ -375,6 +383,27 @@ class Room extends Component {
     mediaStream.init();
   }
 
+  formMediaStreamState(user, stream, attributes, isLocal = false) {
+    const streamId = stream.getID();
+    const localStream = isLocal ? this.erizoRoom.localStreams[streamId] : null;
+    const isScreenShare = attributes.purpose === mediaStreamPurpose.SCREEN_SHARE_STREAM;
+    return {
+      userId: user.userId,
+      streamId,
+      local: isLocal,
+      type: attributes.type,
+      purpose: attributes.purpose,
+      // connected when stream subscription is successfull
+      status: isLocal ? status.CONNECTED : status.TRYING_TO_CONNECT,
+      audio: isLocal ? localStream.stream.getAudioTracks().length > 0 : stream.hasAudio(),
+      video: isLocal ? localStream.stream.getVideoTracks().length > 0 : stream.hasVideo(),
+      screen: isScreenShare,
+      streamSrc: isLocal ? URL.createObjectURL(localStream.stream) : null,
+      errorReason: '',
+      warningReason: '',
+    };
+  }
+
   handleStreamSubscription(stream) {
     const attributes = stream.getAttributes();
     const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
@@ -392,7 +421,9 @@ class Room extends Component {
         this.updateState({ dataBroadcastStreamStatus: { $set: status.CONNECTED } });
         console.info('dataBroadcastStream successfully added to the room.');
         this.connectUser(user, this.sessionId);
-        this.initializePrimaryMediaStream();
+        setTimeout(() => {
+          this.initializePrimaryMediaStream();
+        }, 1000);
 
         // subscribe all remote data broadcast streams prexisting  in the room
         console.info('subscribing all remote data broadcast streams prexisting in the room');
@@ -500,10 +531,8 @@ class Room extends Component {
         throw new Meteor.Error('over here!');
       }
       const isLocal = this.streamManager.isLocalStream(stream);
-      let streamSrc = '';
       if (isLocal) {
         if (attributes.purpose === mediaStreamPurpose.PRIMARY_MEDIA_STREAM) {
-          streamSrc = URL.createObjectURL(this.primaryMediaStream.stream);
           this.updateState({
             primaryMediaStreamState: {
               status: { $set: status.CONNECTED },
@@ -511,7 +540,6 @@ class Room extends Component {
           });
           this.addSpeechTracker(this.primaryMediaStream);
         } else if (attributes.purpose === mediaStreamPurpose.SCREEN_SHARE_STREAM) {
-          streamSrc = URL.createObjectURL(this.screenSharingStream.stream);
           this.updateState({
             screenSharingStreamState: {
               status: { $set: status.CONNECTED },
@@ -528,24 +556,10 @@ class Room extends Component {
         this.setIncomingStreamListners(stream);
         this.erizoRoom.subscribe(stream);
       }
-      const isScreenShare = attributes.purpose === mediaStreamPurpose.SCREEN_SHARE_STREAM;
+
       this.props.updateMediaStreams({
         [streamId]: {
-          $set: {
-            userId: user.userId,
-            streamId,
-            local: isLocal,
-            type: attributes.type,
-            purpose: attributes.purpose,
-            // connected when stream subscription is successfull
-            status: isLocal ? status.CONNECTED : status.TRYING_TO_CONNECT,
-            audio: !!stream.hasAudio(),
-            video: !!stream.hasVideo() || isScreenShare,
-            screen: isScreenShare,
-            streamSrc,
-            errorReason: '',
-            warningReason: '',
-          },
+          $set: this.formMediaStreamState(user, stream, attributes, isLocal),
         },
       });
       if (isLocal && stream.hasVideo()) {
@@ -640,6 +654,8 @@ class Room extends Component {
         [stream.getID()]: {
           status: { $set: status.CONNECTED },
           streamSrc: { $set: streamSrc },
+          audio: { $set: stream.stream.getAudioTracks().length > 0 },
+          video: { $set: stream.stream.getVideoTracks().length > 0 },
         },
       });
       this.subscribedMediaStreams[stream.getID()] = stream;

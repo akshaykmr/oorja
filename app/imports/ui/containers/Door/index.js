@@ -69,12 +69,12 @@ class Door extends Component {
 
     this.SleepTracker = setInterval(() => {
       const currentTime = (new Date()).getTime();
-      if (currentTime > (this.lastActiveTime + 5000)) {  // check every 3 seconds
+      if (currentTime > (this.lastActiveTime + 7500)) {
         // resumed from sleep ?
         location.reload();
       }
       this.lastActiveTime = currentTime;
-    }, 3000);
+    }, 3000); // check every 3 seconds
   }
 
   updateState(changes, buffer = this.stateBuffer) {

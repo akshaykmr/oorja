@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import _ from 'lodash';
 // import uiConfig from '../../../constants/uiConfig';
 
 // import Avatar from '../../../Avatar';
@@ -15,9 +16,9 @@ class VideoChat extends Component {
   constructor(props) {
     super(props);
 
-
     this.state = {
-
+      pinnedStream: false,
+      focussedStreamId: null,
     };
 
     this.goToInfoTab = this.goToInfoTab.bind(this);
@@ -117,12 +118,32 @@ class VideoChat extends Component {
     );
   }
 
+  renderFocussedStream(streamList) {
+    if (streamList.length === 0) return null;
+    const { focussedStreamId } = this.state;
+    const focussedStream = focussedStreamId ?
+      this.props.mediaStreams[focussedStreamId] : streamList[_.random(streamList.length - 1)];
+    return (
+      <div className="focussedStream">
+        {
+          focussedStream.video || focussedStream.screen ?
+          (
+            <video
+              src={focussedStream.streamSrc}
+              muted='muted'
+              autoPlay>
+            </video>
+          ) : null
+        }
+      </div>
+    );
+  }
+
   render() {
     const streamList = this.getMediaStreamList();
-
     const determineContent = () => {
+      const userCount = this.props.connectedUsers.length;
       if (this.allLocalStreams(streamList)) {
-        const userCount = this.props.connectedUsers.length;
         if (userCount <= 1) {
           return (
             <div className="header nobodyHere">
@@ -143,8 +164,7 @@ class VideoChat extends Component {
           </div>
         );
       }
-
-      return null;
+      return this.renderFocussedStream(streamList);
     };
 
     return (
