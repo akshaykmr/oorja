@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import update from 'immutability-helper';
 import classNames from 'classnames';
-import { Button, Intent, Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
+import { Button, Intent } from '@blueprintjs/core';
 import hark from 'hark';
 
 import SupremeToaster from '../../Toaster';
