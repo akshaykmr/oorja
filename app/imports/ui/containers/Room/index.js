@@ -95,6 +95,16 @@ class Room extends Component {
     this.determineStreamContainerSize = this.determineStreamContainerSize.bind(this);
     this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
 
+    this.videoQualitySetting = {
+      '240p': [320, 240, 480, 360],
+      '360p': [480, 360, 640, 480],
+      '480p': [640, 480, 1280, 720],
+      '720p': [1280, 720, 1440, 900],
+      '1080p': [1920, 1080, 2560, 1440],
+    };
+
+    this.mediaDeviceSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings'));
+
     this.state = {
       connectionTable: {},
       connectedUsers: [],
@@ -337,18 +347,23 @@ class Room extends Component {
       // unpublish and destroy
       this.primaryMediaStream.close();
     }
+
+    const { mediaDeviceSettings } = this;
     // get config and initialize new stream
     // assume this config for now.
 
     this.primaryMediaStream = Erizo.Stream({
       audio: this.state.primaryMediaStreamState.audio,
       video: this.state.primaryMediaStreamState.video,
+      videoSize: this.videoQualitySetting[mediaDeviceSettings.videoQuality],
       data: false,
       attributes: {
         userId: this.props.roomUserId,
         sessionId: this.sessionId,
         type: streamTypes.MEDIA.BROADCAST,
         purpose: mediaStreamPurpose.PRIMARY_MEDIA_STREAM,
+        mutedAudio: mediaDeviceSettings.mutedAudio,
+        mutedVideo: mediaDeviceSettings.mutedVideo,
       },
     });
     const mediaStream = this.primaryMediaStream;
@@ -360,6 +375,7 @@ class Room extends Component {
           video: { $set: this.primaryMediaStream.stream.getVideoTracks().length > 0 },
         },
       });
+      this.streamManager.muteBeforePublish(mediaStream, mediaDeviceSettings);
       this.erizoRoom.publish(mediaStream);
     });
     mediaStream.addEventListener('access-denied', () => {
@@ -397,6 +413,8 @@ class Room extends Component {
       status: isLocal ? status.CONNECTED : status.TRYING_TO_CONNECT,
       audio: isLocal ? localStream.stream.getAudioTracks().length > 0 : stream.hasAudio(),
       video: isLocal ? localStream.stream.getVideoTracks().length > 0 : stream.hasVideo(),
+      mutedAudio: !!attributes.mutedAudio,
+      mutedVideo: !!attributes.mutedVideo,
       screen: isScreenShare,
       streamSrc: isLocal ? URL.createObjectURL(localStream.stream) : null,
       errorReason: '',

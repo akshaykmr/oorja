@@ -5,10 +5,31 @@ import roomActivities from '../../components/room/constants/roomActivities';
 class RoomAPI {
   constructor(room) {
     // room will be directly accessible to whoever has a refernce to
-    // this object, since there are no private properties in jaaavaascriipptt..
+    // this object, since there are no private properties in javascript. hmm...
     this.room = room;
     this.messenger = room.messenger;
     this.activityListener = room.activityListener;
+
+
+    // is there a better way to do this?
+    // bind all methods as they may be invoked with different context such as onClick handler
+    // things like this make me doubt If I'm doing something wrong
+    this.getUserId = this.getUserId.bind(this);
+    this.getSessionId = this.getSessionId.bind(this);
+    this.getUserInfo = this.getUserInfo.bind(this);
+    this.sendMessage = this.sendMessage.bind(this);
+    this.shareScreen = this.shareScreen.bind(this);
+    this.stopScreenShare = this.stopScreenShare.bind(this);
+    this.addMessageHandler = this.addMessageHandler.bind(this);
+    this.removeMessageHandler = this.removeMessageHandler.bind(this);
+    this.addActivityListener = this.addActivityListener.bind(this);
+    this.removeActivityListener = this.removeActivityListener.bind(this);
+    this.togglePrimaryMediaStreamVideo = this.togglePrimaryMediaStreamVideo.bind(this);
+    this.togglePrimaryMediaStreamAudio = this.togglePrimaryMediaStreamAudio.bind(this);
+    this.mutePrimaryMediaStreamAudio = this.mutePrimaryMediaStreamAudio.bind(this);
+    this.unmutePrimaryMediaStreamAudio = this.unmutePrimaryMediaStreamAudio.bind(this);
+    this.mutePrimaryMediaStreamVideo = this.mutePrimaryMediaStreamVideo.bind(this);
+    this.unmutePrimaryMediaStreamVideo = this.unmutePrimaryMediaStreamVideo.bind(this);
   }
 
   getUserId() {
@@ -58,6 +79,61 @@ class RoomAPI {
 
   removeActivityListener(activity, listner) {
     this.room.activityListener.remove(activity, listner);
+  }
+
+
+  // stream related
+
+  togglePrimaryMediaStreamVideo() {
+    if (this.room.state.primaryMediaStreamState.mutedVideo) {
+      this.unmutePrimaryMediaStreamVideo();
+      return;
+    }
+    this.mutePrimaryMediaStreamVideo();
+  }
+
+  togglePrimaryMediaStreamAudio() {
+    if (this.room.state.primaryMediaStreamState.mutedAudio) {
+      this.unmutePrimaryMediaStreamAudio();
+      return;
+    }
+    this.mutePrimaryMediaStreamAudio();
+  }
+
+  mutePrimaryMediaStreamAudio() {
+    this.room.updateState({
+      primaryMediaStreamState: {
+        mutedAudio: { $set: true },
+      },
+    });
+    this.room.streamManager.muteAudio(this.room.primaryMediaStream);
+  }
+
+  unmutePrimaryMediaStreamAudio() {
+    this.room.updateState({
+      primaryMediaStreamState: {
+        mutedAudio: { $set: false },
+      },
+    });
+    this.room.streamManager.unmuteAudio(this.room.primaryMediaStream);
+  }
+
+  mutePrimaryMediaStreamVideo() {
+    this.room.updateState({
+      primaryMediaStreamState: {
+        mutedVideo: { $set: true },
+      },
+    });
+    this.room.streamManager.muteVideo(this.room.primaryMediaStream);
+  }
+
+  unmutePrimaryMediaStreamVideo() {
+    this.room.updateState({
+      primaryMediaStreamState: {
+        mutedVideo: { $set: false },
+      },
+    });
+    this.room.streamManager.unmuteVideo(this.room.primaryMediaStream);
   }
 }
 

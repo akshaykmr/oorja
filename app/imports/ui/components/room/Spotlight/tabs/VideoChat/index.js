@@ -78,6 +78,7 @@ class VideoChat extends Component {
           error: primaryMediaStreamError,
           muted: primaryMediaStreamState.mutedVideo,
         }),
+        onClick: this.props.roomAPI.togglePrimaryMediaStreamVideo,
       },
       {
         name: 'mic',
@@ -90,6 +91,7 @@ class VideoChat extends Component {
           error: primaryMediaStreamError,
           muted: primaryMediaStreamState.mutedAudio,
         }),
+        onClick: this.props.roomAPI.togglePrimaryMediaStreamAudio,
       },
       {
         name: 'screenshare',
