@@ -62,7 +62,13 @@ body {
   font-family: "Noto Sans", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", sans-serif, "Icons16";
   font-size: 15px;
   font-weight: 400;
+  margin: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   color: #333333; }
+
+body .pt-toast-message {
+    text-align:  center;}
 
 small {
   font-size: 12px; }

@@ -4,11 +4,6 @@ import { Tracker } from 'meteor/tracker';
 let intervalId = null;
 
 const reconnectToServer = (timeOut, verbose = Meteor.isDevelopment) => {
-  // Continual Reconnect Sequence
-  if (verbose) {
-    console.log('Initialized Reconnect Sequence');
-  }
-
   Tracker.autorun(() => {
     // Start Pinging For Reconnect On Interval, only if status is failing and intervalId is null
     if (intervalId === null) {

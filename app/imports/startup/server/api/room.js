@@ -111,7 +111,7 @@ Meteor.methods({
       };
 
       if (Rooms.findOne({ roomName })) {
-        throw new Meteor.Error(errorTopic, 'Room with same name exists (；一_一)', PASS_TO_CLIENT);
+        throw new Meteor.Error(errorTopic, 'A room with same name exists (；一_一)', PASS_TO_CLIENT);
       }
       // Add schema validation later.
       const roomId = Rooms.insert(roomDocument);
