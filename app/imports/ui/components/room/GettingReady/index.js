@@ -25,7 +25,6 @@ export default class GettingReady extends Component {
     this.stateBuffer = this.state;
     this.configureStream();
 
-
     this.reinitializeStream = this.reinitializeStream.bind(this);
     this.muteAudio = this.muteAudio.bind(this);
     this.muteVideo = this.muteVideo.bind(this);
@@ -39,16 +38,35 @@ export default class GettingReady extends Component {
     this.setState(this.stateBuffer);
   }
 
+  saveMediaDeviceSettings() {
+    const toBeSaved = [ // store these keys from state into local storage upon changes.
+      'videoQuality',
+      'lastGoodVideoQuality',
+      'mutedAudio',
+      'mutedVideo',
+    ];
+
+    /* eslint-disable no-param-reassign */
+    const settings = toBeSaved
+      .reduce((partialSettings, currentKey) => {
+        partialSettings[currentKey] = this.stateBuffer[currentKey];
+        return partialSettings;
+      }, {});
+    /* eslint-enable no-param-reassign */
+    localStorage.setItem('mediaDeviceSettings', JSON.stringify(settings));
+  }
+
   getDefaultState() {
+    const savedSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings'));
     return {
-      videoQuality: '480p',
+      videoQuality: savedSettings ? savedSettings.videoQuality : '480p',
       lastGoodVideoQuality: '240p',
       initialized: false,
       accessAccepted: false,
       audio: false,
       video: false,
-      mutedAudio: false,
-      mutedVideo: false,
+      mutedAudio: savedSettings ? savedSettings.mutedAudio : false,
+      mutedVideo: savedSettings ? savedSettings.mutedVideo : false,
       streamSrc: '',
       streamError: false,
       errorReason: '',
@@ -62,6 +80,7 @@ export default class GettingReady extends Component {
     this.updateState({
       mutedAudio: { $set: true },
     });
+    this.saveMediaDeviceSettings();
   }
 
   unmuteAudio() {
@@ -69,6 +88,7 @@ export default class GettingReady extends Component {
     this.updateState({
       mutedAudio: { $set: false },
     });
+    this.saveMediaDeviceSettings();
   }
 
   muteVideo() {
@@ -76,6 +96,7 @@ export default class GettingReady extends Component {
     this.updateState({
       mutedVideo: { $set: true },
     });
+    this.saveMediaDeviceSettings();
   }
 
   unmuteVideo() {
@@ -83,6 +104,7 @@ export default class GettingReady extends Component {
     this.updateState({
       mutedVideo: { $set: false },
     });
+    this.saveMediaDeviceSettings();
   }
 
   configureStream(options = {}) {
@@ -106,6 +128,7 @@ export default class GettingReady extends Component {
         streamError: { $set: false },
         streamSrc: { $set: streamSrc },
       });
+      this.saveMediaDeviceSettings();
       console.log(erizoStream);
       const speechEvents = hark(this.erizoStream.stream);
 
@@ -298,7 +321,7 @@ export default class GettingReady extends Component {
           </h5>
           <div className="detail" style={{ textAlign: 'left' }}>
             <ul style={{ paddingLeft: '20px' }}>
-            <li>It is also possible that access to the devices has been blocked. If so
+            <li>It is possible that access to the devices has been blocked. If so
               please check your browser settings. You can always mute the devices if you
               do not need them</li>
             <li> oorja uses some of the newest features in web browsers,
