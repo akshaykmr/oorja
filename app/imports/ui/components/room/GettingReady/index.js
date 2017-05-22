@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import update from 'immutability-helper';
 import classNames from 'classnames';
-import { Button, Intent } from '@blueprintjs/core';
+import { Button, Intent, Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
 import hark from 'hark';
 
 import SupremeToaster from '../../Toaster';
@@ -14,15 +14,24 @@ export default class GettingReady extends Component {
   constructor(props) {
     super(props);
 
-    this.configureStream();
+    this.videoQualitySetting = {
+      '240p': [320, 240, 480, 360],
+      '360p': [480, 360, 640, 480],
+      '480p': [640, 480, 1280, 720],
+      '720p': [1280, 720, 1440, 900],
+      '1080p': [1920, 1080, 2560, 1440],
+    };
     this.state = this.getDefaultState();
     this.stateBuffer = this.state;
+    this.configureStream();
 
-    this.retryStreamInitialization = this.retryStreamInitialization.bind(this);
+
+    this.reinitializeStream = this.reinitializeStream.bind(this);
     this.muteAudio = this.muteAudio.bind(this);
     this.muteVideo = this.muteVideo.bind(this);
     this.unmuteAudio = this.unmuteAudio.bind(this);
     this.unmuteVideo = this.unmuteVideo.bind(this);
+    this.handleVideoQualityChange = this.handleVideoQualityChange.bind(this);
   }
 
   updateState(changes, buffer = this.stateBuffer) {
@@ -32,6 +41,8 @@ export default class GettingReady extends Component {
 
   getDefaultState() {
     return {
+      videoQuality: '480p',
+      lastGoodVideoQuality: '240p',
       initialized: false,
       accessAccepted: false,
       audio: false,
@@ -82,7 +93,7 @@ export default class GettingReady extends Component {
     const erizoStream = Erizo.Stream({
       video: true,
       audio: true,
-      // videoSize: [1920, 1080, 1920, 1080],
+      videoSize: this.videoQualitySetting[this.stateBuffer.videoQuality],
     });
     erizoStream.addEventListener('access-accepted', () => {
       const streamSrc = URL.createObjectURL(this.erizoStream.stream);
@@ -90,6 +101,7 @@ export default class GettingReady extends Component {
         initialized: { $set: true },
         audio: { $set: erizoStream.stream.getAudioTracks().length > 0 },
         video: { $set: erizoStream.stream.getVideoTracks().length > 0 },
+        lastGoodVideoQuality: { $set: this.stateBuffer.videoQuality },
         accessAccepted: { $set: true },
         streamError: { $set: false },
         streamSrc: { $set: streamSrc },
@@ -112,6 +124,19 @@ export default class GettingReady extends Component {
       this.speechEvents = speechEvents;
     });
     erizoStream.addEventListener('access-denied', (streamEvent) => {
+      if (options.videoQualityChange) {
+        SupremeToaster.show({
+          message: 'Unable to change video quality',
+          intent: Intent.WARNING,
+        });
+        this.updateState({
+          accessAccepted: { $set: false },
+          videoQuality: { $set: this.stateBuffer.lastGoodVideoQuality },
+        });
+        this.erizoStream = null;
+        this.reinitializeStream();
+        return;
+      }
       if (options.retryAttempt) {
         SupremeToaster.show({
           message: 'Sorry. Could not access camera or microphone',
@@ -147,13 +172,20 @@ export default class GettingReady extends Component {
     }
   }
 
-  retryStreamInitialization() {
-    this.stateBuffer = this.getDefaultState();
-    this.setState(this.stateBuffer);
+  reinitializeStream(options = {}) {
+    let delay = 0;
+    if (options.retryAttempt) {
+      this.stateBuffer = this.getDefaultState();
+      this.setState(this.stateBuffer);
+      delay = 2000;
+    }
     setTimeout(() => {
-      this.configureStream({ retryAttempt: true });
+      this.configureStream({
+        retryAttempt: options.default,
+        videoQualityChange: options.videoQualityChange,
+      });
       this.erizoStream.init();
-    }, 2000);
+    }, delay);
   }
 
   renderVideoControlButtons() {
@@ -233,19 +265,23 @@ export default class GettingReady extends Component {
         type: 'button',
         text: 'Try Again ?',
         intent: Intent.WARNING,
-        onClick: this.retryStreamInitialization,
+        onClick: () => { this.reinitializeStream({ retryAttempt: true }); },
       };
       return (
         <div className="pt-callout pt-intent-warning">
-          <h5>Could not access camera or microphone 😕
+          <h5>Could not access camera or microphone
             <Button {...retryButtonAttr} />
           </h5>
-          <div className="detail">
-            oorja uses some of the newest features in web browsers,
-            Which may not be supported by yours yet. Proceeding will likely result in
-            an errorprone experience.
-            <br/> <br/>
-            please vist the room link using Chrome or Firefox for a better experience, thank you.
+          <div className="detail" style={{ textAlign: 'left' }}>
+            <ul>
+            <li>It is also possible that access to the devices has been blocked. If so
+              please check your browser settings. You can always mute the devices if you
+              do not need them</li>
+            <li> oorja uses some of the newest features in web browsers,
+             which may not be supported by yours yet.
+             Vist the room link using Chrome or Firefox
+            </li>
+            </ul>
           </div>
         </div>
       );
@@ -283,11 +319,79 @@ export default class GettingReady extends Component {
     );
   }
 
+  renderInfoContent() {
+    return (
+      <div className="mediaPreviewPopoverContent">
+        Test your camera and microphone before joining the room
+        <div className="pt-callout pt-intent-primary" style={{ marginTop: '10px' }}>
+          <h6>Tips</h6>
+          <ul style={{ paddingLeft: '20px' }}>
+            <li> Choose a high resolution video quality, else select
+            low quality for more performance </li>
+            <li> You may mute devices before joining the room and enable them
+            later when needed</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  handleVideoQualityChange(event) {
+    this.updateState({
+      videoQuality: { $set: event.target.value },
+    });
+    this.reinitializeStream({ videoQualityChange: true });
+  }
+
+  renderSettingContent() {
+    return (
+      <div className="mediaPreviewPopoverContent">
+        <h6>Settings</h6> <br/>
+        <label className="pt-label">
+          Video quality
+          <div className="pt-select">
+            <select value={this.state.videoQuality} onChange={this.handleVideoQualityChange}>
+              {Object.keys(this.videoQualitySetting).map((quality, index) => (
+                <option key={index} value={quality}>{quality}</option>
+              ))}
+            </select>
+          </div>
+        </label>
+      </div>
+    );
+  }
+
+  renderPopovers() {
+    return (
+      <div className="popOverButtons">
+        <Popover
+            content={this.renderInfoContent()}
+            interactionKind={PopoverInteractionKind.CLICK}
+            popoverClassName="pt-popover-content-sizing"
+            position={Position.LEFT_TOP}>
+            <div className="information">
+              <i className="icon ion-ios-help"></i>
+            </div>
+        </Popover>
+        <Popover
+            content={this.renderSettingContent()}
+            interactionKind={PopoverInteractionKind.CLICK}
+            popoverClassName="pt-popover-content-sizing"
+            position={Position.LEFT_TOP}>
+            <div className="settings">
+              <i className="icon ion-ios-gear"></i>
+            </div>
+        </Popover>
+      </div>
+    );
+  }
+
   render() {
     return (
       <div className="page">
         <div className={`mediaPreview ${this.state.video ? 'hasVideo' : ''}`}>
           {this.renderMediaPreview()}
+          {this.renderPopovers()}
         </div>
         <JoinRoomForm
           roomInfo={this.props.roomInfo}
