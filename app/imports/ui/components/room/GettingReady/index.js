@@ -204,10 +204,18 @@ export default class GettingReady extends Component {
         classNames: classNames({
           control: true,
           video: true,
+          error: !this.state.video,
           active: this.state.video,
           muted: this.state.mutedVideo,
         }),
         onClick: () => {
+          if (!this.state.video) {
+            SupremeToaster.show({
+              message: 'no video found 😕',
+              intent: Intent.WARNING,
+            });
+            return;
+          }
           if (this.state.mutedVideo) this.unmuteVideo();
           else this.muteVideo();
         },
@@ -218,10 +226,18 @@ export default class GettingReady extends Component {
         classNames: classNames({
           control: true,
           mic: true,
+          error: !this.state.audio,
           active: this.state.audio,
           muted: this.state.mutedAudio,
         }),
         onClick: () => {
+          if (!this.state.audio) {
+            SupremeToaster.show({
+              message: 'no audio found 😕',
+              intent: Intent.WARNING,
+            });
+            return;
+          }
           if (this.state.mutedAudio) this.unmuteAudio();
           else this.muteAudio();
         },
@@ -257,6 +273,12 @@ export default class GettingReady extends Component {
     );
   }
   renderMediaPreview() {
+    const retryButtonAttr = {
+      type: 'button',
+      text: 'Try Again ?',
+      intent: Intent.WARNING,
+      onClick: () => { this.reinitializeStream({ retryAttempt: true }); },
+    };
     if (!this.state.initialized) {
       return (
         <div className="pt-callout">
@@ -269,12 +291,6 @@ export default class GettingReady extends Component {
         </div>
       );
     } else if (!this.state.accessAccepted) {
-      const retryButtonAttr = {
-        type: 'button',
-        text: 'Try Again ?',
-        intent: Intent.WARNING,
-        onClick: () => { this.reinitializeStream({ retryAttempt: true }); },
-      };
       return (
         <div className="pt-callout pt-intent-warning">
           <h5>Could not access camera or microphone
@@ -317,12 +333,23 @@ export default class GettingReady extends Component {
           {this.renderVideoControlButtons()}
         </div>
       );
+    } else if (this.state.audio) {
+      return (
+        <div className="audioStream">
+          {this.renderMicrophoneTest()}
+          <audio src={this.state.streamSrc} autoPlay muted></audio>
+        </div>
+      );
     }
-    // only audio stream
+    // access accepted but no video or audio
     return (
-      <div className="audioStream">
-        {this.renderMicrophoneTest()}
-        <audio src={this.state.streamSrc} autoPlay muted></audio>
+      <div>
+        <div className="pt-callout" style={{ textAlign: 'center' }}>
+          <div className="detail">
+            Camera and microphone not found <br/>
+          </div>
+          <div><Button {...retryButtonAttr} /></div>
+        </div>
       </div>
     );
   }

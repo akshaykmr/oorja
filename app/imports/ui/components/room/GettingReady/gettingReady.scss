@@ -134,6 +134,10 @@
         &.active {
           background-color: mediumseagreen;
         }
+
+        &.error {
+          background-color: darkred !important;
+        }
       }
     }
   }
