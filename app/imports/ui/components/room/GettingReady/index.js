@@ -172,6 +172,14 @@ export default class GettingReady extends Component {
     }
   }
 
+  handleVideoQualityChange(event) {
+    this.updateState({
+      videoQuality: { $set: event.target.value },
+    });
+    this.reinitializeStream({ videoQualityChange: true });
+  }
+
+
   reinitializeStream(options = {}) {
     let delay = 0;
     if (options.retryAttempt) {
@@ -273,7 +281,7 @@ export default class GettingReady extends Component {
             <Button {...retryButtonAttr} />
           </h5>
           <div className="detail" style={{ textAlign: 'left' }}>
-            <ul>
+            <ul style={{ paddingLeft: '20px' }}>
             <li>It is also possible that access to the devices has been blocked. If so
               please check your browser settings. You can always mute the devices if you
               do not need them</li>
@@ -334,13 +342,6 @@ export default class GettingReady extends Component {
         </div>
       </div>
     );
-  }
-
-  handleVideoQualityChange(event) {
-    this.updateState({
-      videoQuality: { $set: event.target.value },
-    });
-    this.reinitializeStream({ videoQualityChange: true });
   }
 
   renderSettingContent() {
