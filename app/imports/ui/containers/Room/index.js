@@ -37,6 +37,8 @@ import SupremeToaster from '../../components/Toaster';
 
 import './room.scss';
 
+const { defaultMaxVideoBW, defaultMaxAudioBW } = Meteor.settings;
+
 const roomMessageTypes = {
   SPEECH: 'SPEECH',
   STREAM_SUBSCRIBE_SUCCESS: 'STREAM_SUBSCRIBE_SUCCESS',
@@ -376,7 +378,10 @@ class Room extends Component {
         },
       });
       this.streamManager.muteBeforePublish(mediaStream, mediaDeviceSettings);
-      this.erizoRoom.publish(mediaStream);
+      this.erizoRoom.publish(
+        mediaStream,
+        { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW }
+      );
     });
     mediaStream.addEventListener('access-denied', () => {
       SupremeToaster.show({
@@ -1194,6 +1199,7 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
+export { roomMessageTypes };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Room);
 
