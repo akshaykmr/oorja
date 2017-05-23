@@ -71,7 +71,7 @@
     "classnames": "^2.2.5",
     "hark": "^1.1.3",
     "highlight.js": "^9.10.0",
-    "immutability-helper": "^2.2.0",
+    "immutability-helper": "^2.2.2",
     "jwt-simple": "^0.5.1",
     "lodash": "^4.17.2",
     "prop-types": "^15.5.10",

@@ -887,7 +887,8 @@ class Room extends Component {
   }
 
   messageHandler(message) {
-    const { SPEECH, STREAM_SUBSCRIBE_SUCCESS } = roomMessageTypes;
+    const { SPEECH, STREAM_SUBSCRIBE_SUCCESS, MUTE_AUDIO, UNMUTE_AUDIO,
+      MUTE_VIDEO, UNMUTE_VIDEO } = roomMessageTypes;
     const roomMessage = message.content;
     const handleSpeechMessage = () => {
       const eventDetail = roomMessage.content;
@@ -965,10 +966,32 @@ class Room extends Component {
         }
       }
     };
+
+
+    // meh this func doest look so good, refactor this later.
+    const handleMuteUnmuteChange = (AVKey, value) => { // AVKey = 'muteAudio' | 'muteVideo'
+      const { streamId } = message.content.eventDetail;
+      if (!this.subscribedMediaStreams[streamId]) {
+        return;
+      }
+      this.props.updateMediaStreams({
+        [streamId]: {
+          [AVKey]: { $set: value },
+        },
+      });
+    };
     switch (roomMessage.type) {
       case SPEECH: handleSpeechMessage();
         break;
       case STREAM_SUBSCRIBE_SUCCESS: handleSuccessfulSubscriptionFromRemotePeer();
+        break;
+      case MUTE_AUDIO: handleMuteUnmuteChange('mutedAudio', true);
+        break;
+      case UNMUTE_AUDIO: handleMuteUnmuteChange('mutedAudio', false);
+        break;
+      case MUTE_VIDEO: handleMuteUnmuteChange('mutedVideo', true);
+        break;
+      case UNMUTE_VIDEO: handleMuteUnmuteChange('mutedVideo', false);
         break;
       default: console.error('unrecognised room message');
     }
