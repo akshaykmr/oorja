@@ -60,7 +60,7 @@ class StreamsContainer extends Component {
       .filter(stream => stream.userId === connectedUser.userId);
 
     const atleastOnePlayingVideo = userMediaStreams.some((stream) => {
-      if (!stream.video) return false;
+      if (!stream.video || stream.mutedVideo) return false;
       if (stream.status === status.TRYING_TO_CONNECT) return false;
 
       return true;
@@ -81,7 +81,7 @@ class StreamsContainer extends Component {
     const streamBoxClassNames = classNames({
       streamBox: true,
       compact: streamContainerSize === COMPACT,
-      hasVideo: atleastOnePlayingVideo && (streamContainerSize !== COMPACT),
+      showVideo: atleastOnePlayingVideo && (streamContainerSize !== COMPACT),
       noVideo: !atleastOnePlayingVideo,
       avatarGlow: streamContainerSize === COMPACT ?
         atleastOneSpeakingMediaStream : atleastOneSpeakingAudioStream,

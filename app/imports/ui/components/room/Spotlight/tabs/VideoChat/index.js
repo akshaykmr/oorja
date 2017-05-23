@@ -60,6 +60,15 @@ class VideoChat extends Component {
     const screenSharingStreamConnected = screenSharingStreamState.status === status.CONNECTED;
     const screenSharingStreamError = screenSharingStreamState.status === status.ERROR;
 
+    const handleAudioVideoClick = (options = {}) => {
+      const streamStatus = this.props.primaryMediaStreamState.status;
+      if (streamStatus === status.DISCONNECTED || streamStatus === status.ERROR) {
+        this.props.roomAPI.initializePrimaryMediaStream();
+        return;
+      }
+      if (options.video) this.props.roomAPI.togglePrimaryMediaStreamVideo();
+      if (options.audio) this.props.roomAPI.togglePrimaryMediaStreamAudio();
+    };
     const controlButtons = [
       {
         name: 'add',
@@ -78,7 +87,7 @@ class VideoChat extends Component {
           error: primaryMediaStreamError,
           muted: primaryMediaStreamState.mutedVideo,
         }),
-        onClick: this.props.roomAPI.togglePrimaryMediaStreamVideo,
+        onClick: () => handleAudioVideoClick({ video: true }),
       },
       {
         name: 'mic',
@@ -91,7 +100,7 @@ class VideoChat extends Component {
           error: primaryMediaStreamError,
           muted: primaryMediaStreamState.mutedAudio,
         }),
-        onClick: this.props.roomAPI.togglePrimaryMediaStreamAudio,
+        onClick: () => handleAudioVideoClick({ audio: true }),
       },
       {
         name: 'screenshare',

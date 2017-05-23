@@ -7,18 +7,18 @@ class VideoStream extends Component {
 
     this.state = {
       height: '100% !important',
-      width: undefined,
+      width: 'auto',
     };
   }
 
   setResizeListner() { // fail :/
-    this.videoElement.onresize = (event) => {
-      if (this.unmountInProgress) return;
-      const { clientWidth } = event.target;
-      this.setState({
-        ...this.state,
-        width: clientWidth,
-      });
+    this.videoElement.onresize = () => {
+      // if (this.unmountInProgress) return;
+      // const { clientWidth } = event.target;
+      // this.setState({
+      //   ...this.state,
+      //   width: clientWidth,
+      // });
     };
   }
 

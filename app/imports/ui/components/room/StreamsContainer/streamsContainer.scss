@@ -26,12 +26,6 @@ $avatar-size: 50px;
     overflow-x: auto;
   }
 
-  &.compact {
-    .videoStream {
-      display: none !important;
-    }
-  }
-
   .streamBox {
     height: 100%;
     min-width: 60px;
@@ -44,6 +38,9 @@ $avatar-size: 50px;
     &.noVideo, &.compact {
       flex-direction: column;
       justify-content: center;
+      .videoStream {
+        display: none !important;
+      }
     }
 
     .avatar {
@@ -76,11 +73,11 @@ $avatar-size: 50px;
       border-color: $speaking-indicator-color;
     }
 
-    &.hasVideo {
+    &.showVideo {
       margin-left: 10px;
     }
 
-    &.hasVideo .avatar {
+    &.showVideo .avatar {
       position: absolute;
       bottom: 0px;
       left: -10px;

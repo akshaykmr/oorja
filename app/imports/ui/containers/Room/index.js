@@ -42,6 +42,10 @@ const { defaultMaxVideoBW, defaultMaxAudioBW } = Meteor.settings;
 const roomMessageTypes = {
   SPEECH: 'SPEECH',
   STREAM_SUBSCRIBE_SUCCESS: 'STREAM_SUBSCRIBE_SUCCESS',
+  MUTE_VIDEO: 'MUTE_VIDEO',
+  UNMUTE_VIDEO: 'UNMUTE_VIDEO',
+  MUTE_AUDIO: 'MUTE_AUDIO',
+  UNMUTE_AUDIO: 'UNMUTE_AUDIO',
 };
 
 class Room extends Component {
@@ -105,7 +109,7 @@ class Room extends Component {
       '1080p': [1920, 1080, 2560, 1440],
     };
 
-    this.mediaDeviceSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings'));
+    this.mediaDeviceSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings')) || {};
 
     this.state = {
       connectionTable: {},
@@ -332,7 +336,7 @@ class Room extends Component {
     mediaStream.addEventListener('access-denied', () => {
       SupremeToaster.show({
         message: 'could not access your screen for sharing 😕',
-        intent: Intent.DANGER,
+        intent: Intent.WARNING,
       });
       this.updateState({
         screenSharingStreamState: {
@@ -347,6 +351,7 @@ class Room extends Component {
   initializePrimaryMediaStream() {
     if (this.primaryMediaStream) {
       // unpublish and destroy
+      this.speechTrackers[this.primaryMediaStream.getID()].stop();
       this.primaryMediaStream.close();
     }
 
@@ -385,21 +390,18 @@ class Room extends Component {
     });
     mediaStream.addEventListener('access-denied', () => {
       SupremeToaster.show({
-        message: 'could not access your media device 😕',
-        intent: Intent.DANGER,
+        message: 'could not access your camera or microphone 😕',
+        intent: Intent.WARNING,
       });
       this.updateState({
         primaryMediaStreamState: {
           status: { $set: status.ERROR },
         },
       });
+      this.primaryMediaStream = null;
     });
-    mediaStream.addEventListener('stream-ended', () => {
-      this.updateState({
-        primaryMediaStreamState: {
-          status: { $set: status.DISCONNECTED },
-        },
-      });
+    mediaStream.addEventListener('stream-ended', (streamEvent) => {
+      console.info(streamEvent);
     });
     mediaStream.init();
   }
@@ -1108,7 +1110,8 @@ class Room extends Component {
     if (!mediaStreams) return uiConfig.COMPACT;
     const atleastOneVideoStream = Object.keys(mediaStreams)
         .map(streamId => mediaStreams[streamId])
-        .some(stream => stream.video && (stream.status !== status.TRYING_TO_CONNECT));
+        .some(stream =>
+          stream.video && !stream.mutedVideo && (stream.status !== status.TRYING_TO_CONNECT));
     if (atleastOneVideoStream) return uiConfig.MEDIUM;
 
     return uiConfig.COMPACT;

@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import _ from 'lodash';
 import roomActivities from '../../components/room/constants/roomActivities';
+import status from '../../components/room/constants/status';
 
 class RoomAPI {
   constructor(room) {
@@ -24,6 +25,7 @@ class RoomAPI {
     this.removeMessageHandler = this.removeMessageHandler.bind(this);
     this.addActivityListener = this.addActivityListener.bind(this);
     this.removeActivityListener = this.removeActivityListener.bind(this);
+    this.initializePrimaryMediaStream = this.initializePrimaryMediaStream.bind(this);
     this.togglePrimaryMediaStreamVideo = this.togglePrimaryMediaStreamVideo.bind(this);
     this.togglePrimaryMediaStreamAudio = this.togglePrimaryMediaStreamAudio.bind(this);
     this.mutePrimaryMediaStreamAudio = this.mutePrimaryMediaStreamAudio.bind(this);
@@ -83,6 +85,14 @@ class RoomAPI {
 
 
   // stream related
+
+  initializePrimaryMediaStream() {
+    const streamStatus = this.room.state.primaryMediaStreamState.status;
+    if (streamStatus === status.CONNECTED || streamStatus === status.TRYING_TO_CONNECT) {
+      return;
+    }
+    this.room.initializePrimaryMediaStream();
+  }
 
   togglePrimaryMediaStreamVideo() {
     if (this.room.state.primaryMediaStreamState.mutedVideo) {
