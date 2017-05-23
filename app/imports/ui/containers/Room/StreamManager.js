@@ -44,15 +44,35 @@ class StreamManager {
     });
   }
 
-  sendMuteUnmuteMessage(mediaStream, type) {
+  sendMuteUnmuteMessage(mediaStream, actionType) {
     this.room.roomAPI.sendMessage({
       type: messageType.ROOM_MESSAGE,
       broadcast: true,
       content: {
-        type: roomMessageTypes[type],
+        type: roomMessageTypes[actionType],
         eventDetail: { streamId: mediaStream.getID() },
       },
     });
+
+    this.saveMediaDeviceSettings(actionType);
+  }
+
+  saveMediaDeviceSettings(action) {
+    const mediaDeviceSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings'));
+    if (!mediaDeviceSettings) return;
+    const { MUTE_AUDIO, UNMUTE_AUDIO, MUTE_VIDEO, UNMUTE_VIDEO } = roomMessageTypes;
+    switch (action) {
+      case MUTE_AUDIO: mediaDeviceSettings.mutedAudio = true;
+        break;
+      case UNMUTE_AUDIO: mediaDeviceSettings.mutedAudio = false;
+        break;
+      case MUTE_VIDEO: mediaDeviceSettings.mutedVideo = true;
+        break;
+      case UNMUTE_VIDEO: mediaDeviceSettings.mutedVideo = false;
+        break;
+      default:
+    }
+    localStorage.setItem('mediaDeviceSettings', JSON.stringify(mediaDeviceSettings));
   }
 
   muteVideo(mediaStream) {
