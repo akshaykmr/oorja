@@ -66,6 +66,9 @@ class StreamsContainer extends Component {
       return true;
     });
 
+    const atleastOneSpeakingMutedVideo = userMediaStreams.some(stream =>
+      (stream.video && stream.mutedVideo && streamSpeaking[stream.streamId])
+    );
     const atleastOneSpeakingMediaStream = (userMediaStreams).some((stream) => {
       if (stream.status === status.TRYING_TO_CONNECT) return false;
       return streamSpeaking[stream.streamId];
@@ -84,7 +87,8 @@ class StreamsContainer extends Component {
       showVideo: atleastOnePlayingVideo && (streamContainerSize !== COMPACT),
       noVideo: !atleastOnePlayingVideo,
       avatarGlow: streamContainerSize === COMPACT ?
-        atleastOneSpeakingMediaStream : atleastOneSpeakingAudioStream,
+        atleastOneSpeakingMediaStream :
+        (atleastOneSpeakingAudioStream || atleastOneSpeakingMutedVideo),
     });
 
     let avatarSize = '';

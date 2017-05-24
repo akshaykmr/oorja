@@ -859,9 +859,6 @@ class Room extends Component {
     }
 
     const connectedUser = this.stateBuffer.connectedUsers[connectedUserIndex];
-    if (connectedUser.sessionList.indexOf(sessionId) === -1) {
-      throw new Error('session not found');
-    }
     if (connectedUser.sessionCount > 1) {
       const updatedUser = update(
         connectedUser,

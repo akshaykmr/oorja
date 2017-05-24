@@ -8,44 +8,6 @@ $icon-spacing: 10px;
   margin-top: 25px;
   transition: opacity 500ms ease;
 
-  .custom-ion {
-    display: inline-block;
-    font-family: "Ionicons";
-    speak: none;
-    font-style: normal;
-    font-weight: normal;
-    font-variant: normal;
-    text-transform: none;
-    text-rendering: auto;
-    line-height: 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  /*
-    why custom-ion, why custom icon names instead of ion-social-google etc. ?
-      - because adblockers will set display: none for them if detected.
-      - workaround is to use custom class and apply the same rules as ionicons does.  
-  */
-
-  .ion-googly::before {
-    content: '\f235';
-  }
- .ion-book-of-faces::before {
-    content: '\f231';
-  }
- .ion-blue-birdy::before {
-    content: '\f243';
-  }
- .ion-spam-central::before {
-    content: '\f239';
-  }
- .ion-git-hub::before {
-    content: '\f233';
-  }
- .ion-twitchy::before {
-    content: '\f4ee';
-  }
   &.blur {
     opacity: 0.5;
   }

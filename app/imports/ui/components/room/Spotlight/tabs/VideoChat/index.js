@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import _ from 'lodash';
+import classNames from 'classnames';
 // import uiConfig from '../../../constants/uiConfig';
 
-// import Avatar from '../../../Avatar';
-import classNames from 'classnames';
+import Avatar from '../../../Avatar';
 
 import tabPropTypes from '../tabPropTypes';
 import status from '../../../constants/status';
@@ -19,6 +19,33 @@ class VideoChat extends Component {
     this.state = {
       pinnedStream: false,
       focussedStreamId: null,
+    };
+
+    this.services = {
+      Google: {
+        icon: 'ion-googly',
+        color: '#dd4b39',
+      },
+      Facebook: {
+        icon: 'ion-book-of-faces',
+        color: '#3b5998',
+      },
+      Twitter: {
+        icon: 'ion-blue-birdy',
+        color: '#1da1f2',
+      },
+      LinkedIn: {
+        icon: 'ion-spam-central',
+        color: '#0077b5',
+      },
+      Github: {
+        icon: 'ion-git-hub',
+        color: '#24292e',
+      },
+      Twitch: {
+        icon: 'ion-twitchy',
+        color: '#6441a4',
+      },
     };
 
     this.goToInfoTab = this.goToInfoTab.bind(this);
@@ -129,15 +156,36 @@ class VideoChat extends Component {
     );
   }
 
+  renderLogo(loginService) {
+    if (!loginService) return null;
+    const service = this.services[loginService];
+    const { color, icon } = service;
+    return (
+      <div className="" style={{ color }}>
+        <i className={`icon custom-ion ${icon}`}></i>
+      </div>
+    );
+  }
+
   renderFocussedStream(streamList) {
-    if (streamList.length === 0) return null;
+    const ownUserId = this.props.roomAPI.getUserId();
+    const remoteStreams = streamList.filter(stream => stream.userId !== ownUserId);
     const { focussedStreamId } = this.state;
     const focussedStream = focussedStreamId ?
-      this.props.mediaStreams[focussedStreamId] : streamList[_.random(streamList.length - 1)];
+      this.props.mediaStreams[focussedStreamId] : remoteStreams[_.random(remoteStreams.length - 1)];
+
+    const noVideo = !(focussedStream.video || focussedStream.screen) || focussedStream.mutedVideo;
+    const userInfoCardClasses = classNames({
+      userInfoCard: true,
+      visible: true,
+      positionCenter: noVideo,
+      positionSidelines: !noVideo,
+    });
+    const user = this.props.roomAPI.getUserInfo(focussedStream.userId);
     return (
-      <div className="focussedStream">
+      <div className={`focussedStream ${noVideo ? 'empty' : ''}`}>
         {
-          focussedStream.video || focussedStream.screen ?
+          (focussedStream.video || focussedStream.screen) && !focussedStream.mutedVideo ?
           (
             <video
               src={focussedStream.streamSrc}
@@ -146,6 +194,15 @@ class VideoChat extends Component {
             </video>
           ) : null
         }
+        <div className={userInfoCardClasses}>
+          <Avatar user={user}></Avatar>
+          <div className="name">
+            {`${user.firstName} ${user.lastName ? user.lastName : ''}`}
+          </div>
+          <div className="loginService">
+            { this.renderLogo(user.loginService) }
+          </div>
+        </div>
       </div>
     );
   }

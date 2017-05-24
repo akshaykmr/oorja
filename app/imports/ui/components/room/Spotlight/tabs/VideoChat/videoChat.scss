@@ -1,9 +1,6 @@
 .content.VideoChat {
 
   color: #ffffff;
-  &.onTop {
-
-  }
 
   &.compact {
     .controls {
@@ -51,11 +48,45 @@
     background-color: black;
     border-top-left-radius: 5px;
 
+    &.empty {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
     video {
       height: 100%;
       width: 100%;
       max-height: 100%;
       max-width: 100%;
+    }
+  }
+
+  .userInfoCard {
+    padding: 10px;
+    color: white;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background-color: black;
+    .avatar, .name, .loginService {
+      display: inline-block;
+    }
+    .name {
+      padding: 10px;
+    }
+    .loginService {
+      font-size: 1.5em;
+    }
+
+    &.positionSidelines {
+      position: absolute;
+      left: 0;
+      bottom: 20px;
+    }
+
+    &.positionCenter {
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
     }
   }
 
