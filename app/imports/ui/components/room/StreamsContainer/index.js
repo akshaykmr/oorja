@@ -9,6 +9,8 @@ import VideoStream from './VideoStream';
 
 import uiConfig from '../constants/uiConfig';
 
+import roomActivities from '../constants/roomActivities';
+
 import './streamsContainer.scss';
 
 class StreamsContainer extends Component {
@@ -45,6 +47,12 @@ class StreamsContainer extends Component {
     });
     return (
       <VideoStream
+        onClick={() => {
+          this.props.dispatchRoomActivity(
+            roomActivities.STREAM_CLICKED,
+            stream.streamId
+          );
+        }}
         key={stream.streamId}
         streamSrc={stream.streamSrc}
         muted={stream.local ? 'muted' : ''}
@@ -105,7 +113,13 @@ class StreamsContainer extends Component {
     return (
       <div className={streamBoxClassNames} key={connectedUser.userId}>
         {userMediaStreams.filter(stream => stream.video).map(this.renderVideoStream)}
-        <Avatar user={connectedUser} size={avatarSize} />
+        <Avatar user={connectedUser} size={avatarSize}
+          onClick={() => {
+            this.props.dispatchRoomActivity(
+              roomActivities.USER_CLICKED,
+              connectedUser.userId
+            );
+          }} />
       </div>
     );
   }

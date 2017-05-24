@@ -330,7 +330,10 @@ class Room extends Component {
     };
     const mediaStream = this.screenSharingStream;
     mediaStream.addEventListener('access-accepted', () => {
-      this.erizoRoom.publish(mediaStream);
+      this.erizoRoom.publish(
+        mediaStream,
+        { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW }
+      );
       mediaStream.stream.getVideoTracks()[0].onended = handleStopSharing;
     });
     mediaStream.addEventListener('access-denied', () => {
@@ -893,13 +896,15 @@ class Room extends Component {
       switch (eventDetail.action) {
         case SPEAKING:
           if (this.props.mediaStreams[streamId]) {
-            this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_START, streamId);
+            this.activityListener
+              .dispatch(roomActivities.STREAM_SPEAKING_START, { streamId, remote: true });
             this.props.streamSpeaking(streamId);
           }
           break;
         case SPEAKING_STOPPED:
           if (this.props.mediaStreams[streamId]) {
-            this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_END, streamId);
+            this.activityListener
+              .dispatch(roomActivities.STREAM_SPEAKING_END, { streamId, remote: true });
             this.props.streamSpeakingStopped(streamId);
           }
           break;
@@ -1065,14 +1070,16 @@ class Room extends Component {
     };
     tracker.on('speaking', () => {
       this.props.streamSpeaking(streamId);
-      this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_START, streamId);
+      this.activityListener
+        .dispatch(roomActivities.STREAM_SPEAKING_START, { streamId, remote: false });
       if (this.state.roomConnectionStatus !== status.CONNECTED) return;
       broadcastSpeechEvent(SPEAKING);
     });
 
     tracker.on('stopped_speaking', () => {
       this.props.streamSpeakingStopped(streamId);
-      this.activityListener.dispatch(roomActivities.STREAM_SPEAKING_END, streamId);
+      this.activityListener
+        .dispatch(roomActivities.STREAM_SPEAKING_END, { streamId, remote: false });
       if (this.state.roomConnectionStatus !== status.CONNECTED) return;
       broadcastSpeechEvent(SPEAKING_STOPPED);
     });

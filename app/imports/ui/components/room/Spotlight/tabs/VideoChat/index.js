@@ -6,6 +6,7 @@ import classNames from 'classnames';
 // import uiConfig from '../../../constants/uiConfig';
 
 import Avatar from '../../../Avatar';
+import roomActivities from '../../../constants/roomActivities';
 
 import tabPropTypes from '../tabPropTypes';
 import status from '../../../constants/status';
@@ -17,7 +18,8 @@ class VideoChat extends Component {
     super(props);
 
     this.state = {
-      pinnedStream: false,
+      pin: false,
+      pinnedStreamId: null,
       focussedStreamId: null,
       idle: false,
     };
@@ -79,6 +81,34 @@ class VideoChat extends Component {
 
     this.goToInfoTab = this.goToInfoTab.bind(this);
     this.handleScreenShareClick = this.handleScreenShareClick.bind(this);
+    this.updateFocussedMediaStream = _.throttle(this.updateFocussedMediaStream, 2000);
+    this.temporaryPin = false;
+    this.pinTimeoutId = null;
+    this.props.roomAPI.addActivityListener(roomActivities.STREAM_CLICKED, (streamId) => {
+      if (this.pinTimeoutId) clearTimeout(this.pinTimeoutId);
+      this.setState({
+        ...this.state,
+        pin: true,
+        pinnedStreamId: streamId,
+      });
+      setTimeout(() => this.setState({ ...this.state, pin: false }), 10000);
+    });
+    this.props.roomAPI.addActivityListener(roomActivities.USER_CLICKED, () => {
+      console.log('click again bitch!');
+    });
+    this.props.roomAPI
+      .addActivityListener(roomActivities.STREAM_SPEAKING_START, ({ streamId, remote }) => {
+        if (remote) {
+          this.updateFocussedMediaStream(streamId);
+        }
+      });
+  }
+
+  updateFocussedMediaStream(streamId) {
+    this.setState({
+      ...this.state,
+      focussedStreamId: streamId,
+    });
   }
 
   resetTimer() {
@@ -209,9 +239,11 @@ class VideoChat extends Component {
   renderFocussedStream(streamList) {
     const ownUserId = this.props.roomAPI.getUserId();
     const remoteStreams = streamList.filter(stream => stream.userId !== ownUserId);
-    const { focussedStreamId } = this.state;
-    const focussedStream = focussedStreamId ?
-      this.props.mediaStreams[focussedStreamId] : remoteStreams[_.random(remoteStreams.length - 1)];
+    let { focussedStreamId } = this.state;
+    const { pin, pinnedStreamId } = this.state;
+    if (pin) focussedStreamId = pinnedStreamId;
+    let focussedStream = focussedStreamId ? this.props.mediaStreams[focussedStreamId] : null;
+    if (!focussedStream) focussedStream = remoteStreams[_.random(remoteStreams.length - 1)];
 
     const noVideo = !(focussedStream.video || focussedStream.screen) || focussedStream.mutedVideo;
     const userInfoCardClasses = classNames({

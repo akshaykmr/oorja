@@ -150,7 +150,8 @@ class Avatar extends Component {
     };
 
     return (
-      <div className="avatar" style={Object.assign(defaultStyle, avatarStyle, sizeStyle)}>
+      <div className="avatar" style={Object.assign(defaultStyle, avatarStyle, sizeStyle)}
+        onClick={this.props.onClick}>
         {!pictureSrc || pictureError || !loadComplete ? text : ''}
       </div>
     );
@@ -165,6 +166,7 @@ Avatar.propTypes = {
   textAvatarColor: React.PropTypes.string,
   picture: React.PropTypes.string,
   avatarStyle: React.PropTypes.object,
+  onClick: React.PropTypes.func,
 };
 
 

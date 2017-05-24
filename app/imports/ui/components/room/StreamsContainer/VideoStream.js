@@ -32,7 +32,7 @@ class VideoStream extends Component {
 
   render() {
     return (
-      <div className="videoStream" style={this.state}>
+      <div className="videoStream" style={this.state} onClick={this.props.onClick}>
         <video
           src={this.props.streamSrc}
           autoPlay
@@ -53,6 +53,7 @@ VideoStream.propTypes = {
   streamSrc: React.PropTypes.string.isRequired,
   muted: React.PropTypes.string,
   classNames: React.PropTypes.string,
+  onClick: React.PropTypes.func,
 };
 
 export default VideoStream;
