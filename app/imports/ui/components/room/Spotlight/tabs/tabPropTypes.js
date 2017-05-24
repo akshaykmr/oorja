@@ -15,4 +15,5 @@ export default {
   onTop: React.PropTypes.bool.isRequired,
   primaryMediaStreamState: React.PropTypes.object.isRequired,
   screenSharingStreamState: React.PropTypes.object.isRequired,
+  touchDevice: React.PropTypes.bool.isRequired,
 };

@@ -66,6 +66,8 @@ class Spotlight extends Component {
       activeTabId: tabFound ? lastActiveTabId : this.defaultTabId,
     };
     this.stateBuffer = this.state;
+    function isTouchDevice() { return ('ontouchstart' in document.documentElement); }
+    this.touchDevice = isTouchDevice();
   }
 
   initialTabState(tab) {
@@ -233,6 +235,7 @@ class Spotlight extends Component {
         roomAPI={this.props.roomAPI}
         uiSize={this.props.uiSize}
         onTop={onTop}
+        touchDevice={this.touchDevice}
         primaryMediaStreamState={this.props.primaryMediaStreamState}
         screenSharingStreamState={this.props.screenSharingStreamState}
         classNames={classNames(tabContentClassNames)}

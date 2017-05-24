@@ -71,6 +71,8 @@ class CodePad extends Component {
       ],
     };
     this.stateBuffer = this.state;
+    function isTouchDevice() { return ('ontouchstart' in document.documentElement); }
+    this.touchDevice = isTouchDevice();
   }
 
   updateState(changes, buffer = this.stateBuffer) {
@@ -121,7 +123,7 @@ class CodePad extends Component {
       // add activity listner to focus editor when user switches to this tab.
       roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
         if (payload.to === tabInfo.tabId) {
-          editor.focus();
+          if (!this.props.touchDevice) editor.focus();
 
           if (this.props.tabInfo.badge.visible) {
             this.props.updateBadge({

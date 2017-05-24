@@ -52,6 +52,9 @@ class Chat extends Component {
     };
 
     this.stateBuffer = this.state;
+
+    function isTouchDevice() { return ('ontouchstart' in document.documentElement); }
+    this.touchDevice = isTouchDevice();
   }
 
   updateState(changes, buffer = this.stateBuffer) {
@@ -113,7 +116,7 @@ class Chat extends Component {
 
       roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
         if (payload.to === tabInfo.tabId) {
-          if (this.chatInput) { // input element is mounted
+          if (this.chatInput && !this.props.touchDevice) { // input element is mounted
             this.chatInput.focus();
           }
           if (this.stateBuffer.newMessageCount > 0 && this.isScrolledToBottom()) {

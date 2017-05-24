@@ -80,7 +80,7 @@ class QuillPad extends Component {
 
       roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
         if (payload.to === tabInfo.tabId) {
-          this.quill.focus();
+          if (!this.props.touchDevice) this.quill.focus();
           if (this.props.tabInfo.badge.visible) {
             this.props.updateBadge({
               visible: false,
