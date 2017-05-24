@@ -93,9 +93,6 @@ class VideoChat extends Component {
       });
       setTimeout(() => this.setState({ ...this.state, pin: false }), 10000);
     });
-    this.props.roomAPI.addActivityListener(roomActivities.USER_CLICKED, () => {
-      console.log('click again bitch!');
-    });
     this.props.roomAPI
       .addActivityListener(roomActivities.STREAM_SPEAKING_START, ({ streamId, remote }) => {
         if (remote) {
