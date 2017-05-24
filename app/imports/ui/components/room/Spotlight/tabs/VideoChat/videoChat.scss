@@ -15,6 +15,10 @@
         border-bottom: 1px solid black;
         border-right: initial;
       }
+
+      &.hidden {
+        opacity: 0;
+      }
     }
 
     .focussedStream {
@@ -68,6 +72,10 @@
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
     background-color: black;
+
+    &.hidden {
+      opacity: 0;
+    }
     .avatar, .name, .loginService {
       display: inline-block;
     }

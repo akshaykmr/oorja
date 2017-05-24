@@ -19,7 +19,36 @@ class VideoChat extends Component {
     this.state = {
       pinnedStream: false,
       focussedStreamId: null,
+      idle: false,
     };
+
+    this.resetTimer = this.resetTimer.bind(this);
+
+    this.idleTimeout = 5.0; // seconds
+    this.idleSecondsCounter = 0;
+    window.addEventListener('click', this.resetTimer);
+
+    window.addEventListener('mousemove', this.resetTimer);
+
+    window.addEventListener('keypress', this.resetTimer);
+
+    const checkIdleTime = () => {
+      this.idleSecondsCounter += 500;
+      if (this.idleSecondsCounter > this.idleTimeout * 1000) {
+        this.setState({
+          ...this.state,
+          idle: true,
+        });
+      } else if (this.state.idle) {
+        this.setState({
+          ...this.state,
+          idle: false,
+        });
+      }
+    };
+
+
+    this.windowIntervalId = setInterval(checkIdleTime, 500);
 
     this.services = {
       Google: {
@@ -52,6 +81,16 @@ class VideoChat extends Component {
     this.handleScreenShareClick = this.handleScreenShareClick.bind(this);
   }
 
+  resetTimer() {
+    this.idleSecondsCounter = 0;
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.windowIntervalId);
+    window.removeEventListener('onclick', this.resetTimer);
+    window.removeEventListener('onmousemove', this.resetTimer);
+    window.removeEventListener('onkeypress', this.resetTimer);
+  }
   getMediaStreamList() {
     return Object.keys(this.props.mediaStreams)
       .map(streamId => this.props.mediaStreams[streamId]);
@@ -143,7 +182,7 @@ class VideoChat extends Component {
       },
     ];
     return (
-      <div className="controls">
+      <div className={`controls ${this.state.idle ? 'hidden' : ''}`}>
         {controlButtons.map(control => (
           <div
             className={control.classNames}
@@ -177,7 +216,7 @@ class VideoChat extends Component {
     const noVideo = !(focussedStream.video || focussedStream.screen) || focussedStream.mutedVideo;
     const userInfoCardClasses = classNames({
       userInfoCard: true,
-      visible: true,
+      hidden: this.state.idle,
       positionCenter: noVideo,
       positionSidelines: !noVideo,
     });

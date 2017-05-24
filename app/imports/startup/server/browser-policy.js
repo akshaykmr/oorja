@@ -4,5 +4,5 @@ import { BrowserPolicy } from 'meteor/browser-policy-common';
 BrowserPolicy.content.allowSameOriginForAll();
 BrowserPolicy.content.allowDataUrlForAll();
 BrowserPolicy.content.allowOriginForAll('blob:');
-BrowserPolicy.content.allowConnectOrigin('https://*.oorja.io');
+BrowserPolicy.content.allowConnectOrigin('*');
 BrowserPolicy.content.allowImageOrigin('*');
