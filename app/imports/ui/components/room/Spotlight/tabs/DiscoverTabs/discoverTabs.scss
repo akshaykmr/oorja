@@ -48,6 +48,9 @@
       width: 70%;
     }
 
+    .custom-delay {
+      animation-delay: 0s; // spin-infinite animation, override default delay with 0 delay
+    }
     .status {
       width: 50px;
       position: absolute;

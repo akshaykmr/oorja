@@ -76,6 +76,7 @@ $landing-primary : white;
   }
 
   .about {
+    font-size: 1.1em;
     min-height: 50vh;
     background-color: rebeccapurple;
     color: white;
@@ -83,10 +84,12 @@ $landing-primary : white;
 
     .status-text {
       margin: 0 auto;
-      max-width: 500px;
+      max-width: 540px;
     }
     a {
-      color: white;
+      color: greenyellow;
+    }
+    #about {
       font-size: 1.4em;
       text-decoration: underline;
     }

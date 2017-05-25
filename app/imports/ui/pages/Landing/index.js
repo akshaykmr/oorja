@@ -27,9 +27,9 @@ const Landing = () => (
     <section className="about">
       <div className="status-text">
         This project is currently in development mode, and hosted here for
-        testing purposes. If you are here please feel free to give it a spin
-        but don't use for anything serious. I repeat this is an alpha version with
-        a long way to go..
+        testing purposes. If you are here, well I can use some feedback,
+        please feel free to give it a spin but don't use it for anything serious.
+        I repeat this is an alpha version with a long way to go..
         <br/>
         <br/>
         <b>About:</b> oorja is built upon some of the latest technologies in modern
@@ -54,7 +54,14 @@ const Landing = () => (
         It's exciting to think of the tabs people will develop.
         <br/>
         <br/>
-        Note: This app is not made with mobile in mind. Its quite resource intensive, for which
+        <b>Note:</b> If you are using chrome you will need to install the
+        <a
+          target="_blank"
+          href="https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff?hl=en-US"> screensharing
+          extension
+        </a> to be able to share your screen.
+        <br/><br/>
+        This app is not made with mobile in mind. Its quite resource intensive, for which
         a laptop/desktop is suitable.
         <br/>
         If you experience connectivity issues it may be because of firewalls or corporate
@@ -63,9 +70,11 @@ const Landing = () => (
         <br/><br/>
         Got some feedback or something to say?
         <br/>
-        mail me at <b>oorja.akshay@gmail.com</b> or tweet <b>@uberakshay</b>
+        send a mail:
+        <a href="mailto:oorja.akshay@gmail.com?Subject=Hello%20Akshay"> oorja.akshay@gmail.com </a>
+         or find me on twitter <a href="https://twitter.com/uberakshay" target="_blank">@uberakshay</a>
         <br/><br/>
-        <a href="http://akshay.oorja.io">About me</a>
+        <a href="http://akshay.oorja.io" target="_blank" id='about'>About me</a>
       </div>
     </section>
   </div>

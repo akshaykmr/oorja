@@ -83,7 +83,7 @@ class DiscoverTabs extends Component {
           {tab.description}
         </div>
         <div
-          className={`status ${loading ? 'spin-infinite' : ''}`}
+          className={`status ${loading ? 'spin-infinite custom-delay' : ''}`}
           style={{ color: iconColor }} onClick={handleClick}>
           <i className={`icon ${icon}`}></i>
         </div>
