@@ -38,22 +38,23 @@ const Landing = () => (
         Simply create a room and invite others,
         then you can communicate p2p using video/audio and collaborate using
         mini-apps in the room (called tabs). Each tab adds a new capability to the
-        room. Below are some examples of tab.
+        room. Below are some examples of tabs.
         <ul>
           <li>Code editor: a text editor that is synced realtime between all participants</li>
           <li>Chat: send chat messages, supports some markdown as well</li>
-          <li>quillpad: a synced rich text editor</li>
+          <li>Quillpad: a synced rich text editor</li>
           <li>and more</li>
         </ul>
-        The tabs are react components using a simple but powerful mini-api available to them
-        (using props and some event listners) to add capability to the room.
+        The tabs are react components using a simple but powerful mini-api
+        (using props and some event listners) to add more capabilities to the room.
         This is the coolest feature of this project.
         It aids in easily configurable rooms during creation with features relevant to your
         purpose, while also being able to add more later
         (they are loaded dynamically so they won't take much time to load 🚀 ).
         It's exciting to think of the tabs people will develop.
         <br/>
-        Note this app is not made with mobile in mind. Its quite resource intensive, for which
+        <br/>
+        Note: This app is not made with mobile in mind. Its quite resource intensive, for which
         a laptop/desktop is suitable.
         <br/>
         If you experience connectivity issues it may be because of firewalls or corporate
