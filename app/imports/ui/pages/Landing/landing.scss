@@ -76,8 +76,20 @@ $landing-primary : white;
   }
 
   .about {
-    height: 50vh;
-    background-color: teal;
+    min-height: 50vh;
+    background-color: rebeccapurple;
+    color: white;
+    padding: 40px;
+
+    .status-text {
+      margin: 0 auto;
+      max-width: 500px;
+    }
+    a {
+      color: white;
+      font-size: 1.4em;
+      text-decoration: underline;
+    }
   }
 }
 
