@@ -33,7 +33,9 @@ const Landing = () => (
         <br/>
         <br/>
         <b>About:</b> oorja is built upon some of the latest technologies in modern
-        web browsers namely webrtc. Simply create a room and invite others,
+        web browsers namely webrtc that enables p2p communication. (it may not be supported
+        in your browser eg. safari, chrome on ios) <br/><br/>
+        Simply create a room and invite others,
         then you can communicate p2p using video/audio and collaborate using
         mini-apps in the room (called tabs). Each tab adds a new capability to the
         room. Below are some examples of tab.
