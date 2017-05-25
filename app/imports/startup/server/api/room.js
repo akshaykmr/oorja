@@ -94,7 +94,7 @@ Meteor.methods({
       const now = new Moment();
       const nuveResponse = N.API.createRoom(roomName, { p2p: true });
 
-      const defaultTabs = [1, 10, 31, 100];
+      const defaultTabs = [1, 10, 100];
       const roomDocument = {
         _id: nuveResponse.data._id,
         NuveServiceName: Nuve.serviceName,
@@ -314,7 +314,6 @@ Meteor.methods({
     const tabs = room.tabs;
     if (_.find(tabs, { tabId })) return;
     tabs.push(tabRegistry[tabId]);
-    console.log({ tabs });
     Rooms.update(roomId, {
       $set: { tabs },
     });

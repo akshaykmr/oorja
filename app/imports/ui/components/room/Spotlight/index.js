@@ -111,10 +111,23 @@ class Spotlight extends Component {
   /*
     nextProps
   */
-  componentWillReceiveProps() {
-    // find if any new tabs were added
-    // by finding difference between props.roomInfo.tabs with nextProps.roomInfo.tabs
-    // for each of these tabs, get their initalState and push it to state.tabs
+  componentWillReceiveProps(nextProps) {
+    const currentTabList = this.props.roomInfo.tabs;
+    const newTabList = nextProps.roomInfo.tabs;
+    if (currentTabList.length === newTabList.length) return;
+
+    newTabList.forEach((tab) => {
+      const { tabId } = tab;
+      if (this.state.tabStatusRegistry[tabId]) return;
+      const tabState = this.initialTabState(tab);
+      tabState.status = tabStatus.LOADING;
+      this.updateState({
+        tabStatusRegistry: {
+          [tabId]: { $set: tabState },
+        },
+      });
+      this.fetchTabComponent(tabId);
+    });
   }
 
   fetchTabComponent(tabId) {
