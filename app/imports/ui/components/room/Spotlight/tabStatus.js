@@ -1,4 +1,5 @@
 export default {
+  INITIALIZING: 'INITIALIZING',
   LOADED: 'LOADED',
   LOADING: 'LOADING',
   ERROR: 'ERROR',

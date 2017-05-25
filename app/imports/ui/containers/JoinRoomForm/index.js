@@ -207,12 +207,12 @@ class JoinRoomForm extends Component {
     return (
       <div className='JoinRoomForm'>
       <form onSubmit={this.handleSubmit}>
-        <LoginWithService
-          extraClasses={loginContainerClasses} />
-        {renderPreview()}
         <div className="joinButtonWrapper">
           <Button {...buttonAttr} />
         </div>
+        <LoginWithService
+          extraClasses={loginContainerClasses} />
+        {renderPreview()}
       </form>
       </div>
     );
