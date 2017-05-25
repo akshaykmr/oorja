@@ -51,7 +51,8 @@ const Landing = () => (
         It aids in easily configurable rooms during creation with features relevant to your
         purpose, while also being able to add more later
         (they are loaded dynamically so they won't take much time to load 🚀 ).
-        It's exciting to think of the tabs people will develop.
+        It's exciting to think of the tabs people will develop leveraging the
+        super easy p2p interace/api in oorja.
         <br/>
         <br/>
         <b>Note:</b> If you are using chrome you will need to install the
