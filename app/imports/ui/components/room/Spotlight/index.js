@@ -2,11 +2,16 @@ import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import update from 'immutability-helper';
 import classNames from 'classnames';
-
 import { Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
 
 import uiConfig from '../constants/uiConfig';
 import roomActivities from '../constants/roomActivities';
+
+import { addTab } from '../../../actions/roomConfiguration';
+
+/*eslint-disable*/
+import tabRegistry from './tabRegistry';
+/*eslint-enable*/
 
 import './spotlight.scss';
 
@@ -14,12 +19,6 @@ import './spotlight.scss';
 import Info from './tabs/Info';
 // import Settings from './tabs/Settings';
 // import ExperimentTab from './tabs/ExperimentTab';
-import QuillPad from './tabs/QuillPad';
-import CodePad from './tabs/CodePad';
-import Chat from './tabs/Chat';
-import VideoChat from './tabs/VideoChat';
-import DiscoverTabs from './tabs/DiscoverTabs';
-import Reacteroids from './tabs/Reacteroids';
 
 // constants
 import tabStatus from './tabStatus';
@@ -34,19 +33,18 @@ class Spotlight extends Component {
 
     this.tabComponents = {  // id -> reactComponent(tab)
       1: Info,
-      10: VideoChat,
-      // 30: Settings,
-      40: QuillPad,
-      41: CodePad,
-      31: Chat,
-      100: DiscoverTabs,
-      35: Reacteroids,
     };
 
     const defaultTabs = props.roomInfo.tabs;
     /* eslint-disable no-param-reassign*/
     const tabStatusRegistry = defaultTabs.reduce((registry, tab) => {
-      registry[tab.tabId] = this.initialTabState(tab);
+      const tabState = this.initialTabState(tab);
+      if (tabState.status === tabStatus.INITIALIZING) {
+        this.fetchTabComponent(tab.tabId);
+        tabState.status = tabStatus.LOADING;
+      }
+      registry[tab.tabId] = tabState;
+
       return registry;
     }, {});
     /* eslint-enable no-param-reassign*/
@@ -68,13 +66,17 @@ class Spotlight extends Component {
     this.stateBuffer = this.state;
     function isTouchDevice() { return ('ontouchstart' in document.documentElement); }
     this.touchDevice = isTouchDevice();
+
+    this.fetchTabComponent = this.fetchTabComponent.bind(this);
+    this.switchToTab = this.switchToTab.bind(this);
+    this.addTabToRoom = this.addTabToRoom.bind(this);
   }
 
   initialTabState(tab) {
     return {
       ...tab,
       // is the tab component loaded ?
-      status: this.tabComponents[tab.tabId] ? tabStatus.LOADED : tabStatus.LOADING,
+      status: this.tabComponents[tab.tabId] ? tabStatus.LOADED : tabStatus.INITIALIZING,
 
       // badge shown alongside switch
       badge: {
@@ -115,21 +117,35 @@ class Spotlight extends Component {
     // for each of these tabs, get their initalState and push it to state.tabs
   }
 
-  /*
-    prevProps, prevState
-  */
-  componentDidUpdate() {
-    this.fetchComponents();
+  fetchTabComponent(tabId) {
+    const tab = tabRegistry[tabId];
+    tab.load((module) => {
+      const tabComponent = module.default;
+      this.tabComponents[tabId] = tabComponent;
+      this.updateState({
+        tabStatusRegistry: {
+          [tabId]: { status: { $set: tabStatus.LOADED } },
+        },
+      });
+    });
   }
 
-  fetchComponents() {
-    // for each tab in LOADING state, fetch that tab component from server,
-    // dynamic import with promise
-    // insert it to this.tabComponents and set tab state to LOADED
-  }
-
-  componentDidMount() {
-    this.fetchComponents();
+  addTabToRoom(tabId) {
+    const tab = tabRegistry[tabId];
+    const tabState = this.initialTabState(tab);
+    tabState.status = tabStatus.LOADING;
+    this.updateState({
+      tabStatusRegistry: {
+        [tabId]: { $set: tabState },
+      },
+    });
+    if (tab.local) {
+      this.fetchTabComponent(tabId);
+      return;
+    }
+    addTab(this.props.roomInfo._id, tabId).then(
+      () => { this.fetchTabComponent(tabId); }
+    );
   }
 
   render() {
@@ -228,7 +244,8 @@ class Spotlight extends Component {
         key={tab.tabId}
         tabInfo={tab}
         updateBadge={updateBadge.bind(this)}
-        switchToTab={this.switchToTab.bind(this)}
+        switchToTab={this.switchToTab}
+        addTabToRoom={this.addTabToRoom}
         tabStatusRegistry={this.state.tabStatusRegistry}
         roomInfo={this.props.roomInfo}
         connectedUsers={this.props.connectedUsers}

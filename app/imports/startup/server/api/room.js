@@ -10,7 +10,7 @@ import sentencer from 'sentencer';
 
 import { Rooms } from '../../../collections/common';
 import N from '../../../modules/NuveClient/';
-import tabs from './tabs';
+import tabRegistry from './tabRegistry';
 
 const { private: { saltRounds, Nuve, JWTsecret, JWTalgo, tokenVersion } } = Meteor.settings;
 
@@ -27,6 +27,7 @@ function validTokenPayload(payload, roomDocument) {
 // Common error handling
 const PASS_TO_CLIENT = 'PASS_TO_CLIENT';
 const GENERIC_ERROR_MESSAGE = 'Something went wrong... ☹️';
+
 
 Meteor.methods({
 
@@ -93,14 +94,17 @@ Meteor.methods({
       const now = new Moment();
       const nuveResponse = N.API.createRoom(roomName, { p2p: true });
 
+      const defaultTabs = [1, 10, 31, 100];
       const roomDocument = {
         _id: nuveResponse.data._id,
         NuveServiceName: Nuve.serviceName,
         owner: Meteor.userId() || null,
         roomName,
         defaultTabId: 1,
-        // tabs, // currently loading all tabs.
-        tabs: tabs.filter(tab => [1, 10].indexOf(tab.tabId) !== -1),
+        tabs: defaultTabs.reduce((tabList, tabId) => {
+          tabList.push(tabRegistry[tabId]);
+          return tabList;
+        }, []),
         passwordEnabled,
         roomSecret,
         password,
@@ -288,9 +292,32 @@ Meteor.methods({
     };
   },
 
-  getTabList() {
-    // make range based when tabList gets big.
-    return tabs;
+  addTab(roomId, credentials, tabId) {
+    check(roomId, String);
+    check(credentials, Match.ObjectIncluding({
+      roomSecret: String,
+      roomAccessToken: String,
+    }));
+    check(tabId, Number);
+    const room = Rooms.findOne(roomId);
+    if (!room.passwordEnabled) {
+      if (room.roomSecret !== credentials.roomSecret) {
+        throw new Meteor.Error('Unauthorized');
+      }
+    } else {
+      const payload = jwt.decode(credentials.roomAccessToken, JWTsecret);
+      if (!validTokenPayload(payload, room)) {
+        throw new Meteor.Error('Unauthorized');
+      }
+    }
+
+    const tabs = room.tabs;
+    if (_.find(tabs, { tabId })) return;
+    tabs.push(tabRegistry[tabId]);
+    console.log({ tabs });
+    Rooms.update(roomId, {
+      $set: { tabs },
+    });
   },
 });
 

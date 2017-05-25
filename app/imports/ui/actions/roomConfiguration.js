@@ -163,6 +163,14 @@ export const checkPassword = (roomName, password) =>
       (error) => { unexpectedError({ dispatch, error, roomName }); },
     );
 
+
+const getRoomCredentials = roomName =>
+  ({
+    roomSecret: localStorage.getItem(`roomSecret:${roomName}`) || '',
+    roomAccessToken: localStorage.getItem(`roomAccessToken:${roomName}`) || '',
+    userToken: localStorage.getItem(`roomUserToken:${roomName}`) || '',
+  });
+
 export const joinRoom = (roomId, name = '', textAvatarColor = '') =>
   (dispatch) => {
     const room = Rooms.findOne({ _id: roomId });
@@ -171,11 +179,7 @@ export const joinRoom = (roomId, name = '', textAvatarColor = '') =>
       return Promise.resolve();
     }
     const roomName = room.roomName;
-    const credentials = {
-      roomSecret: localStorage.getItem(`roomSecret:${roomName}`) || '',
-      roomAccessToken: localStorage.getItem(`roomAccessToken:${roomName}`) || '',
-      userToken: localStorage.getItem(`roomUserToken:${roomName}`) || '',
-    };
+    const credentials = getRoomCredentials(roomName);
     return Meteor.callPromise('joinRoom', roomId, credentials, name, textAvatarColor).then(
       ({ erizoToken, userId, newUserToken }) => {
         const action = storeErizoToken(roomName, erizoToken);
@@ -190,4 +194,13 @@ export const joinRoom = (roomId, name = '', textAvatarColor = '') =>
       (error) => { unexpectedError({ dispatch, error, roomName }); },
     );
   };
+
+export const addTab = (roomId, tabId) => {
+  const room = Rooms.findOne({ _id: roomId });
+  const credentials = getRoomCredentials(room.roomName);
+  return Meteor.callPromise('addTab', room._id, credentials, tabId).then(
+    () => Promise.resolve(),
+    () => Promise.reject()
+  );
+};
 
