@@ -1,6 +1,7 @@
 .DS_Store
 settings-development.json
 settings-production.json
+deployment
 npm-debug.log
 
 node_modules
