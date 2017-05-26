@@ -41,12 +41,14 @@ const Landing = () => (
         room. Below are some examples of tabs.
         <ul>
           <li>Code editor: a text editor that is synced realtime between all participants</li>
+          <li>Video chat: duh.. also adds ability for screensharing</li>
           <li>Chat: send chat messages, supports some markdown as well</li>
           <li>Quillpad: a synced rich text editor</li>
-          <li>and more</li>
+          <li>Reactoroids: A game that you can play while you wait for other people to join.</li>
+          <li>many more to come</li>
         </ul>
         The tabs are react components using a simple but powerful mini-api
-        (using props and some event listners) to add more capabilities to the room.
+        (using props and some event listeners) to add more capabilities to the room.
         This is the coolest feature of this project.
         It aids in easily configurable rooms during creation with features relevant to your
         purpose, while also being able to add more later
@@ -63,10 +65,10 @@ const Landing = () => (
         </a> to be able to share your screen.
         <br/><br/>
         This app is not made with mobile in mind. Its quite resource intensive, for which
-        a laptop/desktop is suitable.
+        a laptop/desktop is more suitable.
         <br/>
-        If you experience connectivity issues it may be because of firewalls or corporate
-        network configuration.
+        If you experience connectivity issues, well, remember that the app is still alpha version.
+        Also, It may be because of firewalls or some corporate network configuration.
 
         <br/><br/>
         Got some feedback or something to say?

@@ -90,7 +90,7 @@
     "redux-thunk": "^2.1.0",
     "remarkable": "^1.7.1",
     "sentencer": "^0.1.5",
-    "y-array": "^10.1.1",
+    "y-array": "^10.1.2",
     "y-indexeddb": "^8.1.9",
     "y-map": "^10.1.0",
     "y-memory": "^8.0.8",
