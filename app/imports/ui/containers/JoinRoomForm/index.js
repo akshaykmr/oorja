@@ -197,8 +197,10 @@ class JoinRoomForm extends Component {
             <input type="text" {...inputAttr}
             ref={
               (input) => {
-                this.interactiveInput = input;
-                if (goAnon) input.focus();
+                if (input) {
+                  this.interactiveInput = input;
+                  this.interactiveInput.focus();
+                }
               }
             }/>
           </div>
