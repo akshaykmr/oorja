@@ -3,5 +3,9 @@
 @import "module/adblockWorkaround";
 
 * {
-  box-sizing: border-box !important;
+  box-sizing: border-box;
 }
+
+
+body .pt-toast-message {
+    text-align:  center;}
