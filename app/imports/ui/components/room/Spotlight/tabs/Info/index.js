@@ -16,8 +16,7 @@ class Info extends Component {
   constructor(props) {
     super(props);
     this.onCopy = this.onCopy.bind(this);
-    const { host, pathname, search } = location;
-    const roomLink = host + pathname + search;
+    const roomLink = location.href;
     this.state = {
       roomLink,
       copied: false,

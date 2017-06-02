@@ -28,6 +28,12 @@
 
   .pt-callout {
     text-align: center;
+    max-height: 100%;
+
+    &.pt-intent-warning {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
 
     .detail {
       display: flex;

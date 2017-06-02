@@ -194,7 +194,13 @@ class JoinRoomForm extends Component {
         return (
           <div className="interactiveInput">
             {renderAvatar()}
-            <input type="text" {...inputAttr}/>
+            <input type="text" {...inputAttr}
+            ref={
+              (input) => {
+                this.interactiveInput = input;
+                if (goAnon) input.focus();
+              }
+            }/>
           </div>
         );
       }

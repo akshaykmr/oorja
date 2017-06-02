@@ -94,7 +94,7 @@ Meteor.methods({
       const now = new Moment();
       const nuveResponse = N.API.createRoom(roomName, { p2p: true });
 
-      const defaultTabs = [1, 10, 100];
+      const defaultTabs = [1, 10, 100, 40, 31];
       const roomDocument = {
         _id: nuveResponse.data._id,
         NuveServiceName: Nuve.serviceName,
