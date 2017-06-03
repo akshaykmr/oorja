@@ -12,14 +12,14 @@ class VideoStream extends Component {
   }
 
   setResizeListner() { // fail :/
-    this.videoElement.onresize = () => {
-      // if (this.unmountInProgress) return;
-      // const { clientWidth } = event.target;
-      // this.setState({
-      //   ...this.state,
-      //   width: clientWidth,
-      // });
-    };
+    // this.videoElement.onresize = () => {
+    //   if (this.unmountInProgress) return;
+    //   const { clientWidth } = event.target;
+    //   this.setState({
+    //     ...this.state,
+    //     width: clientWidth,
+    //   });
+    // };
   }
 
   componentWillUnmount() {
@@ -32,7 +32,7 @@ class VideoStream extends Component {
 
   render() {
     return (
-      <div className="videoStream" style={this.state} onClick={this.props.onClick}>
+      <div className={this.props.videoClassNames} style={this.state} onClick={this.props.onClick}>
         <video
           src={this.props.streamSrc}
           autoPlay
@@ -42,7 +42,7 @@ class VideoStream extends Component {
           }}>
         </video>
         <div
-          className={this.props.classNames}>
+          className={this.props.indicatorClassNames}>
         </div>
       </div>
     );
@@ -52,7 +52,8 @@ class VideoStream extends Component {
 VideoStream.propTypes = {
   streamSrc: React.PropTypes.string.isRequired,
   muted: React.PropTypes.string,
-  classNames: React.PropTypes.string,
+  videoClassNames: React.PropTypes.string,
+  indicatorClassNames: React.PropTypes.string,
   onClick: React.PropTypes.func,
 };
 

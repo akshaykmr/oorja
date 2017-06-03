@@ -99,6 +99,10 @@ $avatar-size: 50px;
         transform: scale(1.07, 1.07);;
       }
 
+      &.mutedVideo {
+        display: none !important;
+      }
+
       video {
         height: 100%;
         min-width: 100px;

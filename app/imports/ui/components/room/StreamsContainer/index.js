@@ -45,6 +45,10 @@ class StreamsContainer extends Component {
       speaking: this.props.streamSpeaking[stream.streamId],
       warning: stream.status === WARNING,
     });
+    const videoClassNames = classNames({
+      videoStream: true,
+      mutedVideo: stream.mutedVideo,
+    });
     return (
       <VideoStream
         onClick={() => {
@@ -56,7 +60,8 @@ class StreamsContainer extends Component {
         key={stream.streamId}
         streamSrc={stream.streamSrc}
         muted={stream.local ? 'muted' : ''}
-        classNames={indicatorClassNames}>
+        videoClassNames={videoClassNames}
+        indicatorClassNames={indicatorClassNames}>
       </VideoStream>
     );
   }
