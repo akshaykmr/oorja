@@ -2,7 +2,7 @@ import React from 'react';
 
 // common proptypes for tab components
 export default {
-  tabInfo: React.PropTypes.object,
+  tabInfo: React.PropTypes.object.isRequired,
   tabStatusRegistry: React.PropTypes.object.isRequired,
   updateBadge: React.PropTypes.func.isRequired,
   switchToTab: React.PropTypes.func.isRequired,

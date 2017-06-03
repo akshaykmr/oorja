@@ -15,10 +15,9 @@ import tabRegistry from './tabRegistry';
 
 import './spotlight.scss';
 
-// tabs
+// tabs. only import those which need to be displayed instantly.
+// rest are dynamically imported.z
 import Info from './tabs/Info';
-// import Settings from './tabs/Settings';
-// import ExperimentTab from './tabs/ExperimentTab';
 
 // constants
 import tabStatus from './tabStatus';

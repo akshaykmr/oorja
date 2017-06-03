@@ -325,8 +325,8 @@ export default class GettingReady extends Component {
               please check your browser settings. You can always mute the devices if you
               do not need them</li>
             <li> oorja uses some of the newest features in web browsers,
-             which may not be supported by yours yet.
-             Vist the room link using Chrome or Firefox
+             which may not be supported by yours yet. Proceeding may result in an erroneous
+             experience. Vist the room link using Chrome or Firefox
             </li>
             </ul>
           </div>
