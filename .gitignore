@@ -2,3 +2,5 @@ playground/
 
 
 npm-debug.log
+
+app/package-lock.json

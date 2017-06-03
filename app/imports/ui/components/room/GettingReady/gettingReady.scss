@@ -150,8 +150,8 @@
 
   .popOverButtons {
     height: 90px;
-    width: 40px;
-    right: -40px;
+    width: 25px;
+    right: -28px;
     position: absolute;
     top: calc(50% - 40px);
     z-index: 60000;
@@ -160,7 +160,7 @@
       display: block;
       position: relative;
       height: 40px;
-      width: 40px;
+      width: 25px;
       text-align: center;
       font-size: 1.8em;
       line-height: 40px;

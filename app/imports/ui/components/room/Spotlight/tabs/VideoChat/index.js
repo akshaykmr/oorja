@@ -300,6 +300,7 @@ class VideoChat extends Component {
           </div>
         );
       }
+      if (!this.props.onTop) return null;
       return this.renderFocussedStream(streamList);
     };
 
