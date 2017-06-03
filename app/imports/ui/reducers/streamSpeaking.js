@@ -4,7 +4,7 @@ import { MEDIASTREAMS_RESET } from '../actions/mediaStreams';
 
 const defaultState = {};
 
-// { streamId -> { speaking: bool } }
+// { streamId -> speaking: bool }
 
 export default function (state = defaultState, action) {
   switch (action.type) {
