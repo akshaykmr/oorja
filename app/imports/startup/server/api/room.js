@@ -112,9 +112,10 @@ Meteor.methods({
         participants: [],
         createdAt: now.toDate().getTime(),
         validTill: now.add(4, 'days').toDate().getTime(),
+        archived: false,
       };
 
-      if (Rooms.findOne({ roomName })) {
+      if (Rooms.findOne({ roomName, archived: false })) {
         throw new Meteor.Error(errorTopic, 'A room with same name exists (；一_一)', PASS_TO_CLIENT);
       }
       // Add schema validation later.
@@ -151,7 +152,7 @@ Meteor.methods({
     /* eslint-disable new-cap*/
     check(userToken, Match.Maybe(String));
     /* eslint-enable new-cap */
-    const room = Rooms.findOne({ roomName });
+    const room = Rooms.findOne({ roomName, archived: false });
     if (!room) {
       return null;
     }
@@ -171,7 +172,7 @@ Meteor.methods({
     check(roomName, String);
     check(password, String);
 
-    const roomDocument = Rooms.findOne({ roomName });
+    const roomDocument = Rooms.findOne({ roomName, archived: false });
     if (!roomDocument) {
       throw new Meteor.Error('Room not found');
     } else if (comparePassword(password, roomDocument.password)) {
@@ -201,6 +202,7 @@ Meteor.methods({
 
     const room = Rooms.findOne({
       _id: roomId,
+      archived: false,
     });
 
     if (!room) {
@@ -328,7 +330,7 @@ Meteor.publish('room.info', (roomName, credentials) => {
     roomAccessToken: String,
   }));
 
-  const roomCursor = Rooms.find({ roomName }, {
+  const roomCursor = Rooms.find({ roomName, archived: false }, {
     fields: {
       roomName: 1,
       defaultTabId: 1,
@@ -353,4 +355,15 @@ Meteor.publish('room.info', (roomName, credentials) => {
   } else if (roomDocument.roomSecret === credentials.roomSecret) return roomCursor;
 
   return null;
+});
+
+
+Meteor.startup(() => {
+  Rooms._ensureIndex({
+    roomName: 1,
+    roomSecret: 1,
+    validTill: 1,
+    archived: 1,
+    passwordEnabled: 1,
+  });
 });

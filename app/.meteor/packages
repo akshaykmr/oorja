@@ -42,3 +42,4 @@ http@1.2.12
 fourseven:scss
 pauli:accounts-linkedin
 dynamic-import@0.1.0
+percolate:synced-cron
