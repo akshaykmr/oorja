@@ -2,7 +2,7 @@
 <span>Alpha version</span>
 
 
-[![CircleCI](https://circleci.com/gh/akshayKMR/oorja/tree/master.svg?style=svg&circle-token=4a0bb88da10bed1c0242fbd0a050f1dab2986e2b)](https://circleci.com/gh/akshayKMR/oorja/tree/master) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) <span class="badge-patreon"><a href="" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
+[![CircleCI](https://circleci.com/gh/akshayKMR/oorja/tree/master.svg?style=svg&circle-token=4a0bb88da10bed1c0242fbd0a050f1dab2986e2b)](https://circleci.com/gh/akshayKMR/oorja/tree/master) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) <span class="badge-patreon"><a href="#donate" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
 <span class="badge-bitcoin"><a href="#donate" title="Donate once-off to this project using Bitcoin"><img src="https://img.shields.io/badge/bitcoin-donate-yellow.svg" alt="Bitcoin donate button" /></a></span>
 
 
@@ -36,7 +36,7 @@
 You are awesome! In order to contribute please go through the following docs in the given order. It's very easy to make tabs (you only need to know some react, which can itself be picked up in a weekend).
 
 
-The docs may seem too much at first but the info is there to give you the big picture and context to feel more confident.
+The docs may seem too much at first but the info is there to give you the big picture and context to make you feel more confident.
 The docs start with a high level overview, followed by how to get the project running and finally how you can tinker and improve it.
  - [Architecture overview](docs/architecture-overview.md)
  - [Project Setup](docs/project-setup.md)
@@ -44,7 +44,7 @@ The docs start with a high level overview, followed by how to get the project ru
 
 ### License
 oorja is licensed under Apache 2.0 <br>
-It is a personal project, but I feel it can be made much better with help of a few contributors, and for that reason I've chosen this OSS license; not to forget it is made possible only by leveraging other OSS projects.
+It is a personal project, but I feel it can be made much better with help of a few contributors, and for that reason I've chosen this OSS license; not to forget, it is made possible only by leveraging other OSS projects.
 
 ##### Donate
 As mentioned earlier this is a personal project. There are no ads, tracking, premium paid features etc. To continue it's development and finance the server costs of [oorja.io](https://oorja.io) I would really appreciate your financial backing
