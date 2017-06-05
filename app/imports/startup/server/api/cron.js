@@ -16,7 +16,6 @@ SyncedCron.add({
       $set: { archived: true },
     };
     const updatedDocuments = Rooms.update(selector, modifier, { multi: true });
-    console.log(updatedDocuments);
     return updatedDocuments;
   },
 });

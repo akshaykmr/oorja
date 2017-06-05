@@ -46,8 +46,8 @@ The docs start with a high level overview, followed by how to get the project ru
 oorja is licensed under Apache 2.0 <br>
 It is a personal project, but I feel it can be made much better with help of a few contributors, and for that reason I've chosen this OSS license; not to forget, it is made possible only by leveraging other OSS projects.
 
-##### Donate
-As mentioned earlier this is a personal project. There are no ads, tracking, premium paid features etc. To continue it's development and finance the server costs of [oorja.io](https://oorja.io) I would really appreciate your financial backing
+### Donate
+As mentioned earlier this is a personal project. There are no ads, tracking, premium paid features etc. To continue its development and finance the server costs of [oorja.io](https://oorja.io) I would really appreciate your financial backing
 
 <span class="badge-patreon"><a href="" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
 <br>

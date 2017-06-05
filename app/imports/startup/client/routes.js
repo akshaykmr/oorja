@@ -44,12 +44,11 @@ const onEnterDoor = (nextState, replace, callback) => {
 
 Meteor.startup(() => {
   render(
-    <Provider store={store}
-    >
+    <Provider store={store}>
       <Router history={ history }>
         <Route path="/" component={ App }>
           <IndexRoute name="Landing" component={ Landing } />
-          <Route path="/kek" component={ NotFound }/>
+          <Route path="/not-found" component={ NotFound }/>
           <Route path="/:roomName" component={ Door } onEnter={onEnterDoor} />
         </Route>
       </Router>
