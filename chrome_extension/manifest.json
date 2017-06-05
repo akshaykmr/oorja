@@ -1,0 +1,28 @@
+{
+   "manifest_version": 2,
+   "minimum_chrome_version": "34",
+   "name": "oorja screensharing",
+   "permissions": [ "desktopCapture" ],
+   "short_name": "Screen sharing for oorja",
+   "version": "0.0.0.3",
+
+   "background": {
+      "persistent": true,
+      "scripts": [ "script.js" ]
+   },
+   "description": "Extension to allow screen sharing in oorja",
+   "externally_connectable": {
+      "matches": [
+         "*://*.oorja.io/*"
+      ]
+   },
+   "icons": {
+      "128": "oorja_icon_128.png",
+      "16": "oorja_icon_16.png",
+      "48": "oorja_icon_48.png"
+   },
+   "browser_action":{
+     "default_icon": "oorja_icon_128.png"
+   }
+}
+
