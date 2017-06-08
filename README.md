@@ -33,14 +33,14 @@
 ---
 
 ### How to contribute ?
-You are awesome! In order to contribute please go through the following docs in the given order. It's very easy to make tabs (you only need to know some react, which can itself be picked up in a weekend).
-
+You are welcome to contribute! In order to do so please go through the following docs in the given order.
+Also, It's quite easy to make tabs (you only need to know some react, which can itself be picked up in a weekend).
 
 The docs may seem too much at first but the info is there to give you the big picture and context to make you feel more confident.
 The docs start with a high level overview, followed by how to get the project running and finally how you can tinker and improve it.
- - [Architecture overview](docs/architecture-overview.md)
- - [Project Setup](docs/project-setup.md)
- - [Making a Tab](docs/make-a-tab.md)
+ 1. [Architecture overview](docs/architecture-overview.md)
+ 2. [Project Setup](docs/project-setup.md)
+ 3. [Making a Tab](docs/make-a-tab.md)
 
 ### License
 oorja is licensed under Apache 2.0 <br>

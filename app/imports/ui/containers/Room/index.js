@@ -354,7 +354,8 @@ class Room extends Component {
   initializePrimaryMediaStream() {
     if (this.primaryMediaStream) {
       // unpublish and destroy
-      this.speechTrackers[this.primaryMediaStream.getID()].stop();
+      const speechTracker = this.speechTrackers[this.primaryMediaStream.getID()];
+      if (speechTracker) speechTracker.stop();
       this.primaryMediaStream.close();
     }
 

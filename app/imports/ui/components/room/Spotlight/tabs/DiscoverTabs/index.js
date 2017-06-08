@@ -65,9 +65,10 @@ class DiscoverTabs extends Component {
         return;
       } else if (localTab) {
         SupremeToaster.show({
-          message: 'This tab is already part of the room',
+          message: `${tab.displayName} is already part of the room`,
           intent: Intent.PRIMARY,
         });
+        this.props.switchToTab(tab.tabId);
         return;
       }
       this.props.addTabToRoom(tab.tabId);

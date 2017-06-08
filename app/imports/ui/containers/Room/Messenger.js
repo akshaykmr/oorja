@@ -127,8 +127,11 @@ class Messenger {
             p2pStream.sendData(message);
           });
       } else {
-        const p2pStream = this.room.outgoingDataStreams[recepient.userId][recepient.sessionId];
-        p2pStream.sendData(message);
+        const dataStreams = this.room.outgoingDataStreams[recepient.userId];
+        if (dataStreams) { // the user may have disconnected.
+          const p2pStream = dataStreams[recepient.sessionId];
+          if (p2pStream) p2pStream.sendData(message);
+        }
       }
     });
   }

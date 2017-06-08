@@ -27,6 +27,7 @@ class Spotlight extends Component {
   constructor(props) {
     super(props);
 
+    this.fetchTabComponent = this.fetchTabComponent.bind(this);
     this.updateState = this.updateState.bind(this);
     this.initialTabState = this.initialTabState.bind(this);
 
@@ -65,8 +66,6 @@ class Spotlight extends Component {
     this.stateBuffer = this.state;
     function isTouchDevice() { return ('ontouchstart' in document.documentElement); }
     this.touchDevice = isTouchDevice();
-
-    this.fetchTabComponent = this.fetchTabComponent.bind(this);
     this.switchToTab = this.switchToTab.bind(this);
     this.addTabToRoom = this.addTabToRoom.bind(this);
   }
@@ -129,8 +128,12 @@ class Spotlight extends Component {
     });
   }
 
-  fetchTabComponent(tabId) {
+  fetchTabComponent(tabId, switchAfterFetch = false) {
     const tab = tabRegistry[tabId];
+
+    // when fetch component was callled
+    const thenActiveTabId = switchAfterFetch ? this.stateBuffer.activeTabId : null;
+
     tab.load((module) => {
       const tabComponent = module.default;
       this.tabComponents[tabId] = tabComponent;
@@ -139,6 +142,8 @@ class Spotlight extends Component {
           [tabId]: { status: { $set: tabStatus.LOADED } },
         },
       });
+      const currentActiveTabId = this.stateBuffer.activeTabId;
+      if (switchAfterFetch && (thenActiveTabId === currentActiveTabId)) this.switchToTab(tabId);
     });
   }
 
@@ -152,11 +157,11 @@ class Spotlight extends Component {
       },
     });
     if (tab.local) {
-      this.fetchTabComponent(tabId);
+      this.fetchTabComponent(tabId, true);
       return;
     }
     addTab(this.props.roomInfo._id, tabId).then(
-      () => { this.fetchTabComponent(tabId); }
+      () => { this.fetchTabComponent(tabId, true); }
     );
   }
 
