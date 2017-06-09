@@ -142,21 +142,29 @@ class StreamsContainer extends Component {
 
     const streamContainerStyle = this.streamContainerStyle[streamContainerSize];
     const tryingToConnect = this.props.connectedUsers.length === 0;
+
+    if (tryingToConnect) {
+      return (
+        <div
+          className={classNames(streamContainerClassNames)}
+          style={streamContainerStyle}>
+          <span>
+            <div className="tryingToConnect animate blink">Connecting</div>
+          </span>
+        </div>
+      );
+    }
     return (
       <div
         className={classNames(streamContainerClassNames)}
         style={streamContainerStyle}>
         <CSSTransitionGroup
-            transitionName={`${tryingToConnect ? '' : 'streamBox'}`}
+            transitionName='streamBox'
             transitionAppear={true}
             transitionAppearTimeout={200}
             transitionEnterTimeout={1000}
             transitionLeaveTimeout={400}>
-            {
-               tryingToConnect ?
-               (<div className="tryingToConnect animate blink">Connecting</div>) :
-               this.props.connectedUsers.map(this.renderUserStreamBox)
-            }
+            {this.props.connectedUsers.map(this.renderUserStreamBox)}
         </CSSTransitionGroup>
       </div>
     );
