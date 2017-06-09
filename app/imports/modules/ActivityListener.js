@@ -29,7 +29,7 @@ class ActivityListener {
 
   remove(activity, listner) {
     this.checkIfValidActivity(activity);
-    // I have not verify this function yet.
+    console.warn('TODO: I have not verified this function yet.');
     this.listnerStore[activity] = this.listnerStore[activity].filter(
       activityListener => activityListener !== listner
     );
