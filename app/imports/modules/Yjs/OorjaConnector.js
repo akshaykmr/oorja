@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import AbstractConnector from './AbstractConnector';
 
 import messageType from '../../ui/components/room/constants/messageType';
@@ -56,7 +54,7 @@ class OorjaConnector extends AbstractConnector {
         console.info(tabName, 'user left');
         self.userLeft(sessionId);
       }
-      delete this.addressBook[sessionId];      
+      delete this.addressBook[sessionId];
     };
     roomAPI.addActivityListener(roomActivities.USER_LEFT, disconnectFromY);
     roomAPI.addActivityListener(roomActivities.USER_SESSION_REMOVED, disconnectFromY);
