@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import AbstractConnector from './AbstractConnector';
 
 import messageType from '../../ui/components/room/constants/messageType';
@@ -16,33 +18,48 @@ class OorjaConnector extends AbstractConnector {
     const self = this;
     this.addressBook = {};
 
-    const yUserJoined = ({ sessionId }) => {
-      if (sessionId === ownSessionId) return;
-      this.addressBook[sessionId] = this.unpackIdentifier(sessionId);
-      self.userJoined(sessionId, 'slave');
-      console.info(tabName, 'user joined');
-    };
-    connectedUsers.forEach((user) => {
-      user.sessionList.forEach((sessionId) => {
-        yUserJoined({ sessionId });
-      });
-    });
-
-    roomAPI.addActivityListener(roomActivities.USER_JOINED, yUserJoined);
-
-    roomAPI.addActivityListener(roomActivities.USER_SESSION_ADDED, yUserJoined);
-
-    const yUserLeft = ({ sessionId }) => {
-      console.info(tabName, 'user left');
-      self.userLeft(sessionId);
-    };
-    roomAPI.addActivityListener(roomActivities.USER_LEFT, yUserLeft);
-    roomAPI.addActivityListener(roomActivities.USER_SESSION_REMOVED, yUserLeft);
 
     roomAPI.addMessageHandler(tabInfo.tabId, (message) => {
       console.info(tabName, 'message recieved');
       self.receiveMessage(message.from.sessionId, message.content);
     });
+
+    const connectToY = (sessionId) => {
+      this.addressBook[sessionId] = this.unpackIdentifier(sessionId);
+      self.userJoined(sessionId, 'slave');
+      console.info(tabName, 'user joined');
+    };
+
+    const connectIfTabIsReady = ({ sessionId }) => {
+      // connect user(sessionId) to Y if the the remote users tab is ready
+      if (sessionId === ownSessionId) return;
+      const activeTabs = roomAPI.getActiveRemoteTabs(sessionId);
+      if (activeTabs.indexOf(tabInfo.tabId) !== -1) {
+        connectToY(sessionId);
+      }
+    };
+
+    connectedUsers.forEach((user) => {
+      user.sessionList.forEach((sessionId) => {
+        connectIfTabIsReady({ sessionId });
+      });
+    });
+
+    roomAPI.addActivityListener(roomActivities.USER_JOINED, connectIfTabIsReady);
+    roomAPI.addActivityListener(roomActivities.USER_SESSION_ADDED, connectIfTabIsReady);
+    roomAPI.addActivityListener(roomActivities.REMOTE_TAB_READY, ({ tabId, sessionId }) => {
+      if (tabId === tabInfo.tabId) connectToY(sessionId);
+    });
+
+    const disconnectFromY = ({ sessionId }) => {
+      if (this.addressBook[sessionId]) {
+        console.info(tabName, 'user left');
+        self.userLeft(sessionId);
+      }
+      delete this.addressBook[sessionId];      
+    };
+    roomAPI.addActivityListener(roomActivities.USER_LEFT, disconnectFromY);
+    roomAPI.addActivityListener(roomActivities.USER_SESSION_REMOVED, disconnectFromY);
   }
 
   unpackIdentifier(sessionId) {

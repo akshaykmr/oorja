@@ -267,6 +267,7 @@ class Spotlight extends Component {
         roomInfo={this.props.roomInfo}
         connectedUsers={this.props.connectedUsers}
         roomAPI={this.props.roomAPI}
+        setTabReady={() => { this.props.tabReady(tab.tabId); }}
         uiSize={this.props.uiSize}
         onTop={onTop}
         touchDevice={this.touchDevice}
@@ -306,6 +307,7 @@ Spotlight.propTypes = {
   dispatchRoomActivity: React.PropTypes.func.isRequired,
   connectedUsers: React.PropTypes.array.isRequired,
   roomInfo: React.PropTypes.object.isRequired,
+  tabReady: React.PropTypes.func.isRequired,
   uiSize: React.PropTypes.string.isRequired,
   streamContainerSize: React.PropTypes.string.isRequired,
   setCustomStreamContainerSize: React.PropTypes.func.isRequired,

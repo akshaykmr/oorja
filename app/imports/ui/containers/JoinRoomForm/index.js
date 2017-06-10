@@ -145,7 +145,7 @@ class JoinRoomForm extends Component {
       = this.state;
 
     const inputAttr = {
-      disabled: loggedIn || !!this.existingUser,
+      disabled: loggedIn || !!this.existingUser || waiting,
       value: name,
       onChange: this.handleNameChange,
       className: classNames({ nameInput: true, active: !!name, errorState: !validName }),

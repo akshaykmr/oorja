@@ -31,7 +31,7 @@ class QuillPad extends Component {
     };
   }
   componentDidMount() {
-    const { roomAPI, connectedUsers, tabInfo, roomInfo } = this.props;
+    const { roomAPI, connectedUsers, tabInfo, roomInfo, setTabReady } = this.props;
     new Y({
       db: {
         name: 'indexeddb',
@@ -106,6 +106,7 @@ class QuillPad extends Component {
         });
         console.info(tabInfo.name, 'synced');
       });
+      setTabReady();
     });
   }
 

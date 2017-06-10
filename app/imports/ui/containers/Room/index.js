@@ -69,6 +69,8 @@ class Room extends Component {
     // for passing messages to and from tabs | local or remote(other users)
     this.messenger = new Messenger(this, this.messageHandler);
 
+    this.activeRemoteTabsRegistry = {}; // userSessionId -> [ tabId, ... ]  of tabs set as ready
+
     // Listens for activities in the room, such as user entering, leaving etc.
     // not naming it roomEvent because that naming is used in the Erizo room.
     this.activityListener = new ActivityListener(roomActivities);
@@ -100,8 +102,11 @@ class Room extends Component {
     this.decrementVideoStreamCount = this.decrementVideoStreamCount.bind(this);
     this.determineStreamContainerSize = this.determineStreamContainerSize.bind(this);
     this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
+    this.tabReady = this.tabReady.bind(this);
 
     this.videoQualitySetting = {
+      // this is how erizo expects it
+      // [minWidth, minHeight, maxWidth, maxHeight]
       '240p': [320, 240, 480, 360],
       '360p': [480, 360, 640, 480],
       '480p': [640, 480, 1280, 720],
@@ -193,6 +198,9 @@ class Room extends Component {
           userId: this.props.roomUserId,
           sessionId: this.sessionId,
           type: streamTypes.DATA.BROADCAST,
+
+           // [tabId, ...]  list of tabs that are loaded / ready to listen for messages
+          activeTabs: [],
         },
       });
       this.setDataBroadcastStreamListners();
@@ -213,6 +221,19 @@ class Room extends Component {
         connectToErizo(erizoToken, true);
       })
       .catch(() => { location.reload(); });
+  }
+
+  // to be only called once when tab is ready
+  // indicate that the tab is ready to be discovered by other connected users/their tabs etc.
+  tabReady(tabId) {
+    const attributes = this.dataBroadcastStream.getAttributes();
+    if (_.find(attributes.activeTabs, tabId)) {
+      throw new Error('tab already set as ready');
+    }
+    attributes.activeTabs.push(tabId);
+    this.dataBroadcastStream.setAttributes({
+      ...attributes,
+    });
   }
 
   setRoomConnectionListeners(erizoRoom = this.erizoRoom) {
@@ -248,6 +269,7 @@ class Room extends Component {
       this.dataBroadcastStream.stop();
       this.props.resetMediaStreams();
       this.subscribedDataStreams = {};
+      this.activeRemoteTabsRegistry = {};
       this.subscribedMediaStreams = {};
       this.outgoingDataStreams = {};
 
@@ -272,7 +294,6 @@ class Room extends Component {
       console.info('stream subscribed', streamEvent, streamEvent.stream.getAttributes());
       this.handleStreamSubscriptionSucess(streamEvent.stream);
     });
-
 
     erizoRoom.addEventListener('stream-failed', (streamEvent) => {
       // so far none of the streams have failed. however it will definitely
@@ -632,6 +653,7 @@ class Room extends Component {
 
     const handleDataBroadcastStreamSubscriptionSuccess = () => {
       this.subscribedDataStreams[stream.getID()] = stream;
+      this.activeRemoteTabsRegistry[attributes.sessionId] = attributes.activeTabs;
       const p2pStream = Erizo.Stream({
         data: true,
         attributes: {
@@ -713,6 +735,20 @@ class Room extends Component {
         stream.addEventListener('stream-data', (streamEvent) => {
           this.messenger.recieve(attributes.userId, attributes.sessionId, streamEvent.msg);
         });
+        stream.addEventListener('stream-attributes-update', () => {
+          const updatedAttributes = stream.getAttributes();
+          const previousActiveTabs = this.activeRemoteTabsRegistry[attributes.sessionId];
+          const currentActiveTabs = updatedAttributes.activeTabs;
+          const readyTabs = _.difference(currentActiveTabs, previousActiveTabs);
+          this.activeRemoteTabsRegistry[attributes.sessionId] = currentActiveTabs;
+          if (readyTabs.length > 1) console.warn('more than one tab ready');// just a check
+          readyTabs.forEach((tabId) => {
+            this.activityListener.dispatch(roomActivities.REMOTE_TAB_READY, {
+              sessionId: attributes.sessionId,
+              tabId,
+            });
+          });
+        });
         break;
       case DATA.P2P:
         stream.addEventListener('stream-data', (streamEvent) => {
@@ -790,8 +826,8 @@ class Room extends Component {
         }
         delete this.outgoingDataStreams[user.userId][attributes.sessionId];
       });
-
-      this.updateUserConnection(user.userId, attributes.sessionId, true);
+      delete this.activeRemoteTabsRegistry[attributes.sessionId];
+      this.updateUserConnection(user.userId, attributes.sessionId, true); // reset
     };
 
     switch (attributes.type) {
@@ -1169,6 +1205,7 @@ class Room extends Component {
           roomInfo={this.props.roomInfo}
           connectedUsers={this.state.connectedUsers}
           roomAPI={this.roomAPI}
+          tabReady={this.tabReady}
           dispatchRoomActivity={this.activityListener.dispatch}
           primaryMediaStreamState={this.state.primaryMediaStreamState}
           screenSharingStreamState={this.state.screenSharingStreamState}

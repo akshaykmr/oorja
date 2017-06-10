@@ -71,7 +71,7 @@ class Chat extends Component {
   }
 
   componentDidMount() {
-    const { roomAPI, connectedUsers, tabInfo, roomInfo } = this.props;
+    const { roomAPI, connectedUsers, tabInfo, roomInfo, setTabReady } = this.props;
     new Y({
       db: {
         name: 'indexeddb',
@@ -126,6 +126,7 @@ class Chat extends Component {
           }
         }
       });
+      setTabReady();
     });
   }
 

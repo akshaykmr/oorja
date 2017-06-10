@@ -8,6 +8,7 @@ export default {
   switchToTab: React.PropTypes.func.isRequired,
   addTabToRoom: React.PropTypes.func.isRequired,
   roomAPI: React.PropTypes.object.isRequired,
+  setTabReady: React.PropTypes.func.isRequired,
   connectedUsers: React.PropTypes.array.isRequired,
   roomInfo: React.PropTypes.object.isRequired,
   classNames: React.PropTypes.string,

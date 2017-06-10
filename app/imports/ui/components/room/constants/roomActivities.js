@@ -6,11 +6,12 @@ export default {
   ROOM_DISCONNECTED: 'ROOM_DISCONNECTED',
   ROOM_ERROR: 'ROOM_ERROR',
 
-  USER_JOINED: 'USER_JOINED', // ( user, sessionId)
-  USER_LEFT: 'USER_LEFT', // (user, sessionId)
-  USER_SESSION_ADDED: 'USER_SESSION_ADDED', // (user, sessionId)
-  USER_SESSION_REMOVED: 'USER_SESSION_REMOVED', // (user, sessionId)
+  USER_JOINED: 'USER_JOINED', // {user, sessionId}
+  USER_LEFT: 'USER_LEFT', // {user, sessionId}
+  USER_SESSION_ADDED: 'USER_SESSION_ADDED', // {user, sessionId}
+  USER_SESSION_REMOVED: 'USER_SESSION_REMOVED', // {user, sessionId}
 
+  REMOTE_TAB_READY: 'REMOTE_TAB_READY', // {sessionId, tabId}
 
   STREAM_SPEAKING_START: 'STREAM_SPEAKING_START', // { streamId, remote: bool }
   STREAM_SPEAKING_END: 'STREAM_SPEAKING_END', // { streamId, remote: bool }

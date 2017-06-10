@@ -88,7 +88,7 @@ class CodePad extends Component {
   }
 
   componentDidMount() {
-    const { roomAPI, connectedUsers, tabInfo, roomInfo } = this.props;
+    const { roomAPI, connectedUsers, tabInfo, roomInfo, setTabReady } = this.props;
     new Y({
       db: {
         name: 'indexeddb',
@@ -148,6 +148,7 @@ class CodePad extends Component {
         });
         console.info(tabInfo.name, 'synced');
       });
+      setTabReady();
     });
   }
 
