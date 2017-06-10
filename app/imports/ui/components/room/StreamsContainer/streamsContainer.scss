@@ -26,6 +26,11 @@ $avatar-size: 50px;
     overflow-x: auto;
   }
 
+  .displayText {
+    position: relative;
+    top: -100%;
+  }
+
   .tryingToConnect {
     color: white;
   }
