@@ -71,7 +71,7 @@ class Door extends Component {
       const currentTime = (new Date()).getTime();
       if (currentTime > (this.lastActiveTime + 7500)) {
         // resumed from sleep ?
-        location.reload();
+        if (Meteor.settings.public.refreshOnWake) location.reload();
       }
       this.lastActiveTime = currentTime;
     }, 3000); // check every 3 seconds
