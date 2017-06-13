@@ -128,7 +128,7 @@ Erizo.GetUserMedia = function (config, callback, error) {
                               return;
                           }
                           var theId = response.streamId;
-                          if(config.video.mandatory !== undefined){
+                          if(config.video && config.video.mandatory !== undefined){
                               theConfig.video = config.video;
                               theConfig.video.mandatory.chromeMediaSource = 'desktop';
                               theConfig.video.mandatory.chromeMediaSourceId = theId;

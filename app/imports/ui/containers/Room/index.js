@@ -483,8 +483,7 @@ class Room extends Component {
             if (remoteStream.getID() !== currentStreamId) {
               const remoteStreamAttributes = remoteStream.getAttributes();
               if ((remoteStreamAttributes.type === DATA.BROADCAST) ||
-              remoteStreamAttributes.type === MEDIA.BROADCAST ||
-              remoteStreamAttributes.type === MEDIA.P2P) {
+              remoteStreamAttributes.type === MEDIA.BROADCAST) {
                 this.handleStreamSubscription(remoteStream);
               }
             }
@@ -522,7 +521,8 @@ class Room extends Component {
             [user.userId]: {
               [attributes.sessionId]: {
                 $set: {
-                  broadcast: status.INITIALIZING,
+                  broadcastSend: status.INITIALIZING,
+                  broadcastRecieve: status.INITIALIZING,
                   p2pSend: status.DISCONNECTED,
                   p2pRecieve: status.DISCONNECTED,
                   connectionStatus: status.DISCONNECTED,
@@ -534,44 +534,6 @@ class Room extends Component {
         this.setIncomingStreamListners(stream);
         this.erizoRoom.subscribe(stream);
       }
-    };
-
-    const subscribeP2PDataStream = () => {
-      if (this.streamManager.isLocalStream(stream)) return;
-      if (this.stateBuffer.dataBroadcastStreamStatus !== status.CONNECTED) return;
-      const { recepientUserId, recepientSessionId } = attributes;
-      if (recepientUserId !== this.props.roomUserId || recepientSessionId !== this.sessionId) {
-        return;
-      }
-      const userConnectionState = this.stateBuffer.connectionTable[user.userId];
-      if (!userConnectionState) {
-        console.error('user should have been in connection table');
-        return;
-      }
-      const sessionConnectionState = userConnectionState[attributes.sessionId];
-      if (!sessionConnectionState) {
-        console.error('could not find user session in conn. table');
-        return;
-      }
-      console.log(sessionConnectionState);
-      const { broadcast, p2pRecieve } = sessionConnectionState;
-      if (p2pRecieve !== status.DISCONNECTED) {
-        console.error('unexpected yo!');
-        return;
-      }
-      if (broadcast !== status.CONNECTED) return;
-
-      this.updateState({
-        connectionTable: {
-          [user.userId]: {
-            [attributes.sessionId]: {
-              p2pRecieve: { $set: status.INITIALIZING },
-            },
-          },
-        },
-      });
-      this.setIncomingStreamListners(stream);
-      this.erizoRoom.subscribe(stream);
     };
 
     const subscribeMediaStream = () => {
@@ -620,7 +582,7 @@ class Room extends Component {
     switch (attributes.type) {
       case DATA.BROADCAST : subscribeDataBroadcastStream();
         break;
-      case DATA.P2P: subscribeP2PDataStream();
+      case DATA.P2P: // subscribeP2PDataStream();
         break;
       case MEDIA.BROADCAST:
       case MEDIA.P2P: subscribeMediaStream();
@@ -636,7 +598,7 @@ class Room extends Component {
     const { DATA, MEDIA } = streamTypes;
 
     const notifySuccessfullSubscription = (broadcast = false, to) => {
-      this.roomAPI.sendMessage({
+      const message = {
         type: messageType.ROOM_MESSAGE,
         to,
         broadcast,
@@ -648,54 +610,28 @@ class Room extends Component {
             publisherSessionId: attributes.sessionId,
           },
         },
-      });
+      };
+      console.warn(message);
+      this.roomAPI.sendMessage(message);
     };
 
     const handleDataBroadcastStreamSubscriptionSuccess = () => {
       this.subscribedDataStreams[stream.getID()] = stream;
       this.activeRemoteTabsRegistry[attributes.sessionId] = attributes.activeTabs;
-      const p2pStream = Erizo.Stream({
-        data: true,
-        attributes: {
-          userId: this.props.roomUserId,
-          sessionId: this.sessionId,
-          recepientUserId: user.userId,
-          recepientSessionId: attributes.sessionId,
-          type: streamTypes.DATA.P2P,
-        },
-      });
-      if (!this.outgoingDataStreams[user.userId]) {
-        this.outgoingDataStreams[user.userId] = {};
-      }
-      this.outgoingDataStreams[user.userId][attributes.sessionId] = p2pStream;
+      // recieving broadcast
 
       this.updateState({
         connectionTable: {
           [user.userId]: {
             [attributes.sessionId]: {
-              p2pSend: { $set: status.INITIALIZING },
+              broadcastRecieve: { $set: status.CONNECTED },
             },
           },
         },
       });
-      notifySuccessfullSubscription(true); // use broadcast.
-      // todo setup listners for failure etc.
-      this.erizoRoom.publish(p2pStream);
-      // this.connectUser(user);
-    };
-
-    const handleP2PDataStreamSubscriptionSuccess = () => {
-      this.subscribedDataStreams[stream.getID()] = stream;
-      this.updateState({
-        connectionTable: {
-          [user.userId]: {
-            [attributes.sessionId]: {
-              p2pRecieve: { $set: status.CONNECTED },
-            },
-          },
-        },
-      });
-      notifySuccessfullSubscription(true);
+      setTimeout(() => {
+        notifySuccessfullSubscription(true); // use broadcast.
+      }, 3000); // not a good approach. TODO
       this.updateUserConnection(user.userId, attributes.sessionId);
     };
 
@@ -716,7 +652,7 @@ class Room extends Component {
     switch (attributes.type) {
       case DATA.BROADCAST: handleDataBroadcastStreamSubscriptionSuccess();
         break;
-      case DATA.P2P: handleP2PDataStreamSubscriptionSuccess();
+      case DATA.P2P: // handleP2PDataStreamSubscriptionSuccess();
         break;
       case MEDIA.BROADCAST:
       case MEDIA.P2P:
@@ -775,27 +711,6 @@ class Room extends Component {
       return;
     }
 
-    const handleP2PStreamRemoval = () => {
-      const userConnectionState = this.stateBuffer.connectionTable[user.userId];
-      if (!userConnectionState) return;
-      const sessionConnectionState = userConnectionState[attributes.sessionId];
-      if (!sessionConnectionState) return;
-      if (!this.subscribedDataStreams[stream.getID()]) {
-        return;
-      }
-      this.updateState({
-        connectionTable: {
-          [user.userId]: {
-            [attributes.sessionId]: {
-              p2pRecieve: { $set: status.DISCONNECTED },
-            },
-          },
-        },
-      });
-      console.warn('p2p stream removed');
-      this.updateUserConnection(user.userId, attributes.sessionId);
-    };
-
     const handleBroadcastStreamRemoval = () => {
       if (!this.subscribedDataStreams[stream.getID()]) {
         console.warn('stream was not subscribed earlier.');
@@ -803,29 +718,6 @@ class Room extends Component {
       }
       // remove stream from subscribed streams
       delete this.subscribedDataStreams[stream.getID()];
-      Object.keys(this.subscribedDataStreams)
-        .map(subscribedDataStreamId => this.subscribedDataStreams[subscribedDataStreamId])
-        .filter((subscribedStream) => {
-          const subscribedStreamAttributes = subscribedStream.getAttributes();
-          return (
-            subscribedStreamAttributes.userId === user.userId &&
-            subscribedStreamAttributes.sessionId === attributes.sessionId &&
-            subscribedStreamAttributes.type === streamTypes.DATA.P2P
-          );
-        })
-        .forEach((p2pDataStream) => {
-          delete this.subscribedDataStreams[p2pDataStream.getID()];
-        });
-
-      const p2pStream = this.outgoingDataStreams[user.userId][attributes.sessionId];
-      if (!p2pStream) throw new Error('p2p stream not found');
-
-      this.erizoRoom.unpublish(p2pStream, (result, error) => {
-        if (error) {
-          console.error(error);
-        }
-        delete this.outgoingDataStreams[user.userId][attributes.sessionId];
-      });
       delete this.activeRemoteTabsRegistry[attributes.sessionId];
       this.updateUserConnection(user.userId, attributes.sessionId, true); // reset
     };
@@ -835,7 +727,7 @@ class Room extends Component {
         handleBroadcastStreamRemoval();
         break;
       case DATA.P2P:
-        handleP2PStreamRemoval();
+        // handleP2PStreamRemoval();
         break;
       case MEDIA.BROADCAST:
       case MEDIA.P2P:
@@ -958,31 +850,7 @@ class Room extends Component {
           connectionTable: {
             [userId]: {
               [sessionId]: {
-                broadcast: { $set: status.CONNECTED },
-              },
-            },
-          },
-        });
-        this.updateUserConnection(userId, sessionId);
-        const p2pStreams = this.streamManager.getRemoteStreamList()
-          .filter((stream) => {
-            const attributes = stream.getAttributes();
-            return (
-              attributes.recepientUserId === this.props.roomUserId &&
-              attributes.recepientSessionId === this.sessionId &&
-              attributes.type === streamTypes.DATA.P2P &&
-              !this.subscribedDataStreams[stream.getID()]
-            );
-          });
-        p2pStreams.forEach(stream => this.handleStreamSubscription(stream));
-      };
-
-      const acknowledgeP2PDataStreamSubscriptionSuccess = () => {
-        this.updateState({
-          connectionTable: {
-            [userId]: {
-              [sessionId]: {
-                p2pSend: { $set: status.CONNECTED },
+                broadcastSend: { $set: status.CONNECTED },
               },
             },
           },
@@ -999,7 +867,7 @@ class Room extends Component {
         switch (stream.getAttributes().type) {
           case DATA.BROADCAST: acknowledgeBroadcastSubscription();
             break;
-          case DATA.P2P: acknowledgeP2PDataStreamSubscriptionSuccess();
+          case DATA.P2P: // acknowledgeP2PDataStreamSubscriptionSuccess();
             break;
           default: console.error('unexpected stream type');
         }
@@ -1078,11 +946,12 @@ class Room extends Component {
     if (!userConnectionState) return status.DISCONNECTED;
     const sessionConnectionState = userConnectionState[sessionId];
     if (!sessionConnectionState) return status.DISCONNECTED;
-    const { broadcast, p2pSend, p2pRecieve } = sessionConnectionState;
+    const { broadcastSend, broadcastRecieve } = sessionConnectionState;
     return (
-      broadcast === status.CONNECTED &&
-      p2pSend === status.CONNECTED &&
-      p2pRecieve === status.CONNECTED
+      broadcastSend === status.CONNECTED &&
+      broadcastRecieve === status.CONNECTED
+      // p2pSend === status.CONNECTED &&
+      // p2pRecieve === status.CONNECTED
     ) ? status.CONNECTED : status.DISCONNECTED;
   }
 

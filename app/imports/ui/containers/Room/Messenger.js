@@ -22,24 +22,11 @@ import messageType from '../../components/room/constants/messageType';
 */
 
 /*
-  History:
-  Earlier implementation used to depend on on data stream (broadcast) from each peer.
-  This means a total of N streams in the room. The message format was the same, only each message
-  would obviously be sent to each peer beacuse of the broadcast stream. Then it was
-  rejected/not processed by the recepient if the message was not meant for him (not listed in
-  `to` field of the message).
-  This implementation was simple albiet wasteful in some scenarios.
-
-  Current implementation uses a pair of p2p streams send/recieve between each pair of peers.
-  This means a total for N^2 data streams in the room with each peer concerned with a total of
-  2N streams. No extra data is sent to other peers, However the setup is complex and I need to
-  handle the case of failure.
-
-  Perhaps a better option would be to go back to one broadcast stream and to only setup the pair of
-  p2p streams when required (e.g. when a considerably large amount of data is to be sent).
-
-  In any case I should be able to change the implementation in Room and Messenger without any
-  changes elsewhere.
+  Bummer: found out that p2p data streams in licode use the ErizoController socket.io
+  server for sending data between peers. Current implementation is using the licode stream,
+  one broadcast stream from each peer, subscribed by every other peer. hmm...
+  This means I cannot use it for heavy p2p purposes.
+  I will have to look into establishing a RTCDataChannel between the peers.
 */
 
 class Messenger {
@@ -113,27 +100,28 @@ class Messenger {
       return;
     }
 
-    if (message.broadcast) {
-      this.room.dataBroadcastStream.sendData(message);
-      return;
-    }
+    // if (message.broadcast) {
+    this.room.dataBroadcastStream.sendData(message);
+    return;
+    // }
 
-    message.to.forEach((recepient) => {
-      if (!recepient.sessionId) {
-        // send to all sessions of this user.
-        Object.keys(this.room.outgoingDataStreams[recepient.userId])
-          .map(sessionId => this.room.outgoingDataStreams[recepient.userId][sessionId])
-          .forEach((p2pStream) => {
-            p2pStream.sendData(message);
-          });
-      } else {
-        const dataStreams = this.room.outgoingDataStreams[recepient.userId];
-        if (dataStreams) { // the user may have disconnected.
-          const p2pStream = dataStreams[recepient.sessionId];
-          if (p2pStream) p2pStream.sendData(message);
-        }
-      }
-    });
+
+    // message.to.forEach((recepient) => {
+    //   if (!recepient.sessionId) {
+    //     // send to all sessions of this user.
+    //     Object.keys(this.room.outgoingDataStreams[recepient.userId])
+    //       .map(sessionId => this.room.outgoingDataStreams[recepient.userId][sessionId])
+    //       .forEach((p2pStream) => {
+    //         p2pStream.sendData(message);
+    //       });
+    //   } else {
+    //     const dataStreams = this.room.outgoingDataStreams[recepient.userId];
+    //     if (dataStreams) { // the user may have disconnected.
+    //       const p2pStream = dataStreams[recepient.sessionId];
+    //       if (p2pStream) p2pStream.sendData(message);
+    //     }
+    //   }
+    // });
   }
 }
 

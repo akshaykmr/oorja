@@ -43,3 +43,5 @@ fourseven:scss
 pauli:accounts-linkedin
 dynamic-import@0.1.0
 percolate:synced-cron
+cultofcoders:redis-oplog
+disable-oplog
