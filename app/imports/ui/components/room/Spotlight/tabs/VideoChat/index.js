@@ -91,7 +91,7 @@ class VideoChat extends Component {
         pin: true,
         pinnedStreamId: streamId,
       });
-      setTimeout(() => this.setState({ ...this.state, pin: false }), 15000);
+      setTimeout(() => this.setState({ ...this.state, pin: false }), 30000);
     });
     this.props.roomAPI
       .addActivityListener(roomActivities.STREAM_SPEAKING_START, ({ streamId, remote }) => {
