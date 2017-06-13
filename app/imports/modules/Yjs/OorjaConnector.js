@@ -16,21 +16,29 @@ class OorjaConnector extends AbstractConnector {
     const self = this;
     this.addressBook = {};
 
-
-    roomAPI.addMessageHandler(tabInfo.tabId, (message) => {
-      console.info(tabName, 'message recieved');
-      self.receiveMessage(message.from.sessionId, message.content);
-    });
-
     const connectToY = (sessionId) => {
+      if (this.addressBook[sessionId]) return;
       this.addressBook[sessionId] = this.unpackIdentifier(sessionId);
       self.userJoined(sessionId, 'slave');
       console.info(tabName, 'user joined');
     };
 
+    roomAPI.addMessageHandler(tabInfo.tabId, (message) => {
+      console.info(tabName, 'message recieved');
+      if (!this.addressBook[message.from.sessionId]) {
+        // the event listeners below should have sufficed for this case, but
+        // they don't. There is definitely something wrong with my logic for setting
+        // and checking `readyness` of remote tabs.
+        connectToY(message.from.sessionId);
+      }
+      self.receiveMessage(message.from.sessionId, message.content);
+    });
+
     const connectIfTabIsReady = ({ sessionId }) => {
       // connect user(sessionId) to Y if the the remote users tab is ready
-      if (sessionId === ownSessionId) return;
+      if (sessionId === ownSessionId) {
+        return;
+      }
       const activeTabs = roomAPI.getActiveRemoteTabs(sessionId);
       if (activeTabs.indexOf(tabInfo.tabId) !== -1) {
         connectToY(sessionId);

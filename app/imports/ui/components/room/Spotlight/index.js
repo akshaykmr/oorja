@@ -168,7 +168,7 @@ class Spotlight extends Component {
   render() {
     const { tabStatusRegistry, activeTabId } = this.state;
     const activeTab = tabStatusRegistry[activeTabId];
-    const { uiSize } = this.props;
+    const { uiSize, roomReady } = this.props;
 
     // change styling here for mobile later.
     const spotlightClassNames = {
@@ -179,7 +179,7 @@ class Spotlight extends Component {
 
     const renderSwitch = (tabId) => {
       const tab = tabStatusRegistry[tabId];
-      if (tab.status !== tabStatus.LOADED) return null;
+      if (tab.status !== tabStatus.LOADED || (tab.tabId !== 1 && !roomReady)) return null;
       const onTop = tab.tabId === activeTab.tabId;
       const switchClassNames = {
         switch: true,
@@ -232,7 +232,7 @@ class Spotlight extends Component {
 
     const renderTabContent = (tabId) => {
       const tab = tabStatusRegistry[tabId];
-      if (tab.status !== tabStatus.LOADED) return null;
+      if (tab.status !== tabStatus.LOADED || (tab.tabId !== 1 && !roomReady)) return null;
       const onTop = tab.tabId === activeTab.tabId;
       const tabContentClassNames = {
         content: true,
@@ -265,6 +265,7 @@ class Spotlight extends Component {
         addTabToRoom={this.addTabToRoom}
         tabStatusRegistry={this.state.tabStatusRegistry}
         roomInfo={this.props.roomInfo}
+        roomReady={this.props.roomReady}
         connectedUsers={this.props.connectedUsers}
         roomAPI={this.props.roomAPI}
         setTabReady={() => { this.props.tabReady(tab.tabId); }}
@@ -307,6 +308,7 @@ Spotlight.propTypes = {
   dispatchRoomActivity: React.PropTypes.func.isRequired,
   connectedUsers: React.PropTypes.array.isRequired,
   roomInfo: React.PropTypes.object.isRequired,
+  roomReady: React.PropTypes.bool.isRequired,
   tabReady: React.PropTypes.func.isRequired,
   uiSize: React.PropTypes.string.isRequired,
   streamContainerSize: React.PropTypes.string.isRequired,

@@ -61,7 +61,7 @@ class Info extends Component {
           <div className="arrowPointer">
             <Arrow />
           </div>
-          <div className="text">
+          <div className="text" style={{ opacity: this.props.roomReady ? 1 : 0 }}>
             {
               this.props.uiSize === uiConfig.COMPACT ?
                 (<div> Explore <i className="icon ion-arrow-down-c"></i></div>)

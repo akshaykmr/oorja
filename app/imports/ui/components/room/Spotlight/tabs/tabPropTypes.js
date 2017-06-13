@@ -11,6 +11,7 @@ export default {
   setTabReady: React.PropTypes.func.isRequired,
   connectedUsers: React.PropTypes.array.isRequired,
   roomInfo: React.PropTypes.object.isRequired,
+  roomReady: React.PropTypes.bool.isRequired,
   classNames: React.PropTypes.string,
   style: React.PropTypes.object,
   uiSize: React.PropTypes.string.isRequired,

@@ -227,7 +227,7 @@ class Room extends Component {
   // indicate that the tab is ready to be discovered by other connected users/their tabs etc.
   tabReady(tabId) {
     const attributes = this.dataBroadcastStream.getAttributes();
-    if (_.find(attributes.activeTabs, tabId)) {
+    if (attributes.activeTabs.indexOf(tabId) !== -1) {
       throw new Error('tab already set as ready');
     }
     attributes.activeTabs.push(tabId);
@@ -611,7 +611,6 @@ class Room extends Component {
           },
         },
       };
-      console.warn(message);
       this.roomAPI.sendMessage(message);
     };
 
@@ -677,8 +676,9 @@ class Room extends Component {
           const currentActiveTabs = updatedAttributes.activeTabs;
           const readyTabs = _.difference(currentActiveTabs, previousActiveTabs);
           this.activeRemoteTabsRegistry[attributes.sessionId] = currentActiveTabs;
-          if (readyTabs.length > 1) console.warn('more than one tab ready');// just a check
+          if (readyTabs.length > 1) console.warn('more than one tab ready', readyTabs);// just a check
           readyTabs.forEach((tabId) => {
+            console.info('remote-tab-ready', attributes.sessionId, tabId);
             this.activityListener.dispatch(roomActivities.REMOTE_TAB_READY, {
               sessionId: attributes.sessionId,
               tabId,
@@ -1071,6 +1071,7 @@ class Room extends Component {
           roomInfo={this.props.roomInfo}
           connectedUsers={this.state.connectedUsers}/>
         <Spotlight
+          roomReady={this.state.dataBroadcastStreamStatus === status.CONNECTED }
           roomInfo={this.props.roomInfo}
           connectedUsers={this.state.connectedUsers}
           roomAPI={this.roomAPI}
