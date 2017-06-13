@@ -68,6 +68,7 @@
   .exploreContainer {
     margin-left: 10px;
     position: relative;
+    transition: opacity 0.5s ease-out;
     top: -40px;
 
     .arrowPointer {
@@ -81,7 +82,7 @@
       color: #666666;
       margin-top: 20px;
       margin-left: 10px;
-      transition: opacity 0.5s ease-out;
+   
     }
   }
 

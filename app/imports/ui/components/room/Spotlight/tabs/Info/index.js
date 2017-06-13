@@ -57,11 +57,11 @@ class Info extends Component {
           </div>
         </CopyToClipboard>
 
-        <div className="exploreContainer">
+        <div className="exploreContainer" style={{ opacity: this.props.roomReady ? 1 : 0 }}>
           <div className="arrowPointer">
             <Arrow />
           </div>
-          <div className="text" style={{ opacity: this.props.roomReady ? 1 : 0 }}>
+          <div className="text">
             {
               this.props.uiSize === uiConfig.COMPACT ?
                 (<div> Explore <i className="icon ion-arrow-down-c"></i></div>)
