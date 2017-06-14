@@ -1,0 +1,80 @@
+{
+  "public": {
+    "screenShareExtensionId": "kobkjhijljmjkobadoknmhakgfpkhiff",
+    "defaultMaxVideoBW": 300,
+    "defaultMaxAudioBW": 300,
+    "refreshOnWake": false
+  },
+  "private": {
+
+    "roomConfig": {
+      "defaultComms": "video"
+    },
+
+    "JWTsecret": "super-secret",
+    "JWTalgo": "HS512",
+    "tokenVersion": 1,
+    "saltRounds": 11,
+    "enableBugsnag": false,
+    "bugsnagKey": "123",
+
+    "Nuve": {
+      "serviceName": "ss1",
+      "serviceId": "1",
+      "serviceKey": "2",
+      "host": "https://10.20.23.14/"
+    },
+
+    "redisOplog": {
+      "redis": {
+        "port": 6379,
+        "host": "127.0.0.1"
+      },
+      "mutationDefaults": {
+        "optimistic": false,
+        "pushToRedis": true
+      },
+      "debug": true,
+      "overridePublishFunction": true
+    },
+
+    "github": {
+      "clientId": "id",
+      "secret": "secret"
+    },
+
+    "google": {
+      "clientId": "id",
+      "secret": "secret"
+    },
+
+    "facebook": {
+      "clientId": "id",
+      "secret": "secret"
+    },
+
+    "twitter": {
+      "consumerKey": "id",
+      "secret": "secret"
+    },
+    "linkedin": {
+      "clientId": "id",
+      "secret": "secret"
+    },
+
+    "reddit": {
+      "clientId": "id",
+      "secret": "secret"
+    },
+
+    "twitch": {
+      "clientId": "id",
+      "secret": "secret"
+    },
+
+    "weibo": {
+      "clientId": "",
+      "secret": ""
+    }
+  }
+}

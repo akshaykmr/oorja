@@ -1,6 +1,6 @@
 # Project overview
 
-The purpose of this document is to give you a nice overview of the project and its components. If you haven't already, [try the app](https://oorja.io) before reading further. I will try to be brief with enough links for more information wherever needed.
+The purpose of this document is to give you a high level overview of the project and its components. If you haven't already, [try the app](https://oorja.io) before reading further. I will try to be brief with enough links for more information wherever needed.
 
 oorja is a single page web application made with a [React](https://facebook.github.io/react/) frontend and [Meteor js](https://www.meteor.com/) at backend.
 
