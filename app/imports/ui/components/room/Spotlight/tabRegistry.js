@@ -118,4 +118,23 @@ export default {
       import('./tabs/Reacteroids').then(callback);
     },
   },
+  999: {
+    tabId: 999,
+    name: 'BlankSlate',
+    displayName: 'Blank Slate',
+    bgColor: '#ffffff',
+    icon: 'lightbulb',
+    description: 'For developers: A blank slate tab to be used as boilerplate for developing new tabs',
+    streamContainerSize: 'COMPACT',
+    local: true,
+    load: (callback) => {
+      import('./tabs/BlankSlate').then(callback);
+    },
+  },
+  // add your tab description in a similar fashion
+  // here as well as in app/imports/startup/server/api/tabRegistry.js
+
+  // I could have made them refer to the same file however for dynamic imports to work
+  // this will work.
+  // Not using symlink as well since it is os dependent. 
 };
