@@ -22,7 +22,7 @@
       "serviceName": "ss1",
       "serviceId": "1",
       "serviceKey": "2",
-      "host": "https://10.20.23.14/"
+      "host": "https://10.20.23.14:3000/"
     },
 
     "redisOplog": {

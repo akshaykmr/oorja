@@ -42,7 +42,7 @@ Once you have setup licode, run it in the background. Now you will need to put i
       "serviceName": "any-name",  // just a name for your nuve service
       "serviceId": "1",           // from from licode_config.js
       "serviceKey": "2",          // from from licode_config.js 
-      "host": "https://10.20.23.14/"  // host address of your nuve server
+      "host": "https://10.20.23.14:3000/"  // host address of your nuve server
     },
 ```
 do not put any comments in config file (it's not valid json)
@@ -54,6 +54,28 @@ VPS Gotchas:
 
 
 #### Run the app
-- With all settings in place the app should be able to run 🙏. `meteor npm start` Don't worry if some error comes up (I am expecting it), reach out to me and I'll try to update the docs accordingly.
+- With all settings in place the app should be able to run 🙏. `meteor npm start` Don't worry if some error comes up (I am expecting it), reach out to me and I'll try my best to update the docs accordingly.
 
 [**more details on settings-development.json**](./settings-development.md)
+
+
+
+#### Dev setup
+
+- I would recommend you use [visual studio code](https://code.visualstudio.com/) with the following extensions
+    + babel es6/es7
+    + color highlight
+    + eslint
+    + npm intellisense
+    + path autocomplete
+    + sass
+    + scss intellisense
+    + stylelint
+    + sublime babel
+
+eslint plugin is vital. Without it your build won't pass so ensure that it works properly.
+
+<img src="http://i.imgur.com/rEr5Q3j.png" alt="eslint-test" height="140px" width="480px">
+
+For running the lint test manually: `meteor npm run lint`
+
