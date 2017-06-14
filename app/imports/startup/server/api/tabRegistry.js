@@ -97,4 +97,14 @@ export default {
     local: true,
 
   },
+  999: {
+    tabId: 999,
+    name: 'BlankSlate',
+    displayName: 'Blank Slate',
+    bgColor: '#ffffff',
+    icon: 'lightbulb',
+    description: 'For developers: A blank slate tab to be used as boilerplate for developing new tabs',
+    streamContainerSize: 'COMPACT',
+    local: true,
+  },
 };

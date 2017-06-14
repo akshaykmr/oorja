@@ -1,0 +1,11 @@
+.content.BlankSlate {
+  padding-top: 50px;
+  font-size: 1.2em;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+
+  p {
+    max-width: 400px;
+  }
+}
