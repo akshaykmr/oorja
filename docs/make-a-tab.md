@@ -33,9 +33,10 @@ I should introduce the badge first. Each tab has a badge that can be used for so
 
 <img src="http://imgur.com/dZEEkGO.png" alt="badge example" height="160px">
 
-The props passed to your tab are in `tabPropTypes.js`. Below I will try to describe each props purpose. It may not be immediately clear how they are used so I will try and give an examples from where its been used and why. Though it would be best to read the code of existing tabs.
-  - **roomInfo**: Contains room info such as name, participants, tabs etc.
+The props passed to your tab are in `tabPropTypes.js`. Below I will try to describe each props purpose. It may not be immediately clear how they are used so I will try and give an examples from where its been used and why. Though it would be best to read the code of existing tabs. 
 Use the React developer tools extension to browse these props in detail.
+
+  - **roomInfo**: Contains room info such as name, participants, tabs etc.
   - **connectedUsers**: The roomInfo object shows all users that have access to the room but this list shows the currently connected ones along with their active session list.
   - **roomReady**: A boolean, whether or not room is connected.
   - **onTop**: bool, whether this tab is currently `onTop` or the current active tab. eg. If the tab is not currently on top you may want to stop unecessary rendering or animation since its not visible to the user.
