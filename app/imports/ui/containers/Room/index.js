@@ -104,6 +104,7 @@ class Room extends Component {
     this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
     this.tabReady = this.tabReady.bind(this);
     this.toggleFullscreen = this.toggleFullscreen.bind(this);
+    this.stopScreenSharingStream = this.stopScreenSharingStream.bind(this);
 
     this.videoQualitySetting = {
       // this is how erizo expects it
@@ -320,6 +321,16 @@ class Room extends Component {
     });
   }
 
+  stopScreenSharingStream() {
+    this.updateState({
+      screenSharingStreamState: {
+        status: { $set: status.DISCONNECTED },
+      },
+    });
+    this.screenSharingStream.close();
+    this.screenSharingStream = null;
+  }
+
   initializeScreenSharingStream() {
     if (this.screenSharingStream) {
       // unpublish and destroy
@@ -341,22 +352,13 @@ class Room extends Component {
         purpose: mediaStreamPurpose.SCREEN_SHARE_STREAM,
       },
     });
-    const handleStopSharing = () => {
-      this.updateState({
-        screenSharingStreamState: {
-          status: { $set: status.DISCONNECTED },
-        },
-      });
-      this.screenSharingStream.close();
-      this.screenSharingStream = null;
-    };
     const mediaStream = this.screenSharingStream;
     mediaStream.addEventListener('access-accepted', () => {
       this.erizoRoom.publish(
         mediaStream,
         { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW }
       );
-      mediaStream.stream.getVideoTracks()[0].onended = handleStopSharing;
+      mediaStream.stream.getVideoTracks()[0].onended = this.stopScreenSharingStream;
     });
     mediaStream.addEventListener('access-denied', () => {
       SupremeToaster.show({
@@ -369,7 +371,7 @@ class Room extends Component {
         },
       });
     });
-    mediaStream.addEventListener('stream-ended', handleStopSharing);
+    mediaStream.addEventListener('stream-ended', this.stopScreenSharingStream);
     mediaStream.init();
   }
 

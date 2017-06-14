@@ -64,8 +64,9 @@ class RoomAPI {
   }
 
   stopScreenShare() {
-    this.room.screenSharingStream.close();
-    this.room.screenSharingStream = null;
+    if (this.room.screenSharingStream) {
+      this.room.stopScreenSharingStream();
+    }
   }
 
   addMessageHandler(tabId, handler) {
