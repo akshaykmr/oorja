@@ -39,7 +39,7 @@ I will use comments for explanation alongside each value, but remember that this
       "serviceName": "ss1",      // just a name for identifying nuve service
       "serviceId": "1",          // service Id from licode_config.js
       "serviceKey": "2",         // service key
-      "host": "https://10.20.23.14/" // host address for nuve
+      "host": "https://10.20.23.14:3000/" // host address for nuve
     },
 
     // see: https://github.com/cult-of-coders/redis-oplog
