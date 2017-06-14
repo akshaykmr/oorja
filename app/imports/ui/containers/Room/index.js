@@ -1,4 +1,4 @@
-/* global location window Erizo URL*/
+/* global location document window Erizo URL*/
 import { Meteor } from 'meteor/meteor';
 
 import React, { Component } from 'react';
@@ -103,6 +103,7 @@ class Room extends Component {
     this.determineStreamContainerSize = this.determineStreamContainerSize.bind(this);
     this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
     this.tabReady = this.tabReady.bind(this);
+    this.toggleFullscreen = this.toggleFullscreen.bind(this);
 
     this.videoQualitySetting = {
       // this is how erizo expects it
@@ -1058,11 +1059,41 @@ class Room extends Component {
     });
   }
 
+  toggleFullscreen() {
+    const element = this.roomDiv;
+    const requestFullscreen =
+      element.requestFullscreen ||
+      element.webkitRequestFullscreen ||
+      element.mozRequestFullScreen ||
+      element.msRequestFullscreen;
+
+    const exitFullscreen =
+      document.exitFullscreen ||
+      document.webkitExitFullscreen ||
+      document.mozCancelFullScreen ||
+      document.msExitFullscreen;
+
+    const fullscreenElement =
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement;
+
+    if (!fullscreenElement) {
+      requestFullscreen.call(element);
+    } else if (exitFullscreen) {
+      exitFullscreen.call(document);
+    }
+  }
+
   render() {
     const { uiSize, customStreamContainerSize } = this.state;
     const streamContainerSize = customStreamContainerSize || this.determineStreamContainerSize();
     return (
-      <div className='room page'>
+      <div className='room page' ref={ (div) => { this.roomDiv = div; } }>
+        <div className="fullscreenButton" onClick={this.toggleFullscreen}>
+          <i className="icon ion-android-expand"></i>
+        </div>
         <StreamsContainer
           uiSize={uiSize}
           roomAPI={this.roomAPI}

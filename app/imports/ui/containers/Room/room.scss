@@ -4,4 +4,24 @@
   display: flex;
   flex-direction: column;
   position: initial;
+
+  .fullscreenButton {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    z-index: 100;
+    background-color: cornflowerblue;
+    line-height: 30px;
+    text-align: center;
+    font-size: 1.4em;
+    cursor: pointer;
+    color: white;
+    left: 16px;
+    top: 18px;
+    border-radius: 5px;
+
+    &:active {
+     transform: scale(1.05, 1.05);
+    }
+  }
 }

@@ -3,11 +3,16 @@ $scrollbar-width: 10px;
 
 .loading.page {
   height: 100vh;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   .loader {
-    margin: 200px auto;
-    height: 100px;
-    width: 100px;
+    position: relative;
+    top: -100px;
+    height: 40px;
+    width: 40px;
   }
 }
 
