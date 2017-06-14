@@ -7,6 +7,9 @@ In brief you would be
  - filling the development settings in `settings-development.json`
  - phew! running the App! 🙏
 
+**Fork the repo.** If you aren't used to forking model [this page is a good start.](https://help.github.com/articles/working-with-forks/)
+Now clone your fork and continue.
+
 ### File structure
 
 `/app` contains the meteor app.
@@ -21,7 +24,7 @@ All the commands to run the project etc. are to be executed in this directory.
 
 ## Lets get started
 
-#### setting up the web app
+#### Setting up the web app
 
 - `cd /app`
 - [install the meteor tool](https://www.meteor.com/install)
@@ -29,13 +32,12 @@ All the commands to run the project etc. are to be executed in this directory.
 - Now in order to configure the environment settings for the application a file called `settings-development.json` is needed. A sample file called `settings-example.json` is provided. simply copy it's contents into a new file named `settings-development.json` in the same directory.  We will fill in it's contents later.
 - Try running the app. `meteor npm start` This should start the development server at `localhost:3000`. Do not try using the app though as we still need to setup licode and configure it's settings in `settings-development.json`
 
-#### setting up licode
+#### Setting up licode
 
 You can install licode with [docker](http://licode.readthedocs.io/en/master/docker/) or [build it from source](http://licode.readthedocs.io/en/master/from_source/). It may take some time for you to set this up but remember you only need to do it once.
 
-Personally, I built it from source. I would recommend that you install licode on a cheap vps from aws/gce/digital-ocean etc. That way you can test the app on different devices amoung other advantages. Once you have setup licode, keep it running there using tmux or some other tool.
-
-Once you have setup licode, run it in the background. Now you will need to put in the configuration settings in `settings-development.json`
+Personally, I built it from source. I would recommend that you install licode on a cheap vps ubuntu 14.04 from aws/gce/digital-ocean etc. That way you can test the app on different devices amoung other advantages. Once you have setup licode, keep it running there using tmux or some other tool.
+Now you will need to put in the configuration settings in `settings-development.json`
 
 ```
     "Nuve": {
@@ -54,10 +56,10 @@ VPS Gotchas:
 
 
 #### Run the app
-- With all settings in place the app should be able to run 🙏. `meteor npm start` Don't worry if some error comes up (I am expecting it), reach out to me and I'll try my best to update the docs accordingly.
+- With all settings in place the app should be able to run 🙏. `meteor npm start` Don't worry if some error comes up, reach out to me and I'll try my best to update the docs accordingly.
+- To simulate joining the with another user use a incognito window to open the same room link. Since the session is not shared you can test 2 users interacting locally.
 
 [**more details on settings-development.json**](./settings-development.md)
-
 
 
 #### Dev setup
@@ -75,7 +77,9 @@ VPS Gotchas:
 
 eslint plugin is vital. Without it your build won't pass so ensure that it works properly.
 
-<img src="http://i.imgur.com/rEr5Q3j.png" alt="eslint-test" height="140px" width="480px">
+<img src="http://i.imgur.com/rEr5Q3j.png" alt="eslint-test" height="140px">
+
+>shows a linting error in vscode
 
 For running the lint test manually: `meteor npm run lint`
 
