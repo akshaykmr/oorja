@@ -8,7 +8,10 @@ export default {
     // must be without spaces (used to contain css, check out css for any of the tabs)
     name: 'Info',
     displayName: 'Room Information',
-    // icons are currently from ionic, maybe allow images or svgs later
+
+    // the badge icon on the left for this tab.
+    // icons are currently from ionic, maybe will allow images or svgs later
+    // choose from http://ionicons.com/
     // iconColor is for the tabSwitch when I was experimenting with them,
     // but later on I stuck with a set color scheme instead of a custom one for each tab.
     icon: 'android-share-alt',
@@ -126,15 +129,16 @@ export default {
     icon: 'lightbulb',
     description: 'For developers: A blank slate tab to be used as boilerplate for developing new tabs',
     streamContainerSize: 'COMPACT',
-    local: true,
+    local: false,
     load: (callback) => {
       import('./tabs/BlankSlate').then(callback);
     },
   },
   // add your tab description in a similar fashion
-  // here as well as in app/imports/startup/server/api/tabRegistry.js
+  // here as well as in app/imports/startup/server/api/tabRegistry.js since the server
+  // also needs a tabRegistry
 
   // I could have made them refer to the same file however for dynamic imports to work
-  // this will work.
+  // it needs to be this way.
   // Not using symlink as well since it is os dependent. 
 };

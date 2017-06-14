@@ -105,6 +105,6 @@ export default {
     icon: 'lightbulb',
     description: 'For developers: A blank slate tab to be used as boilerplate for developing new tabs',
     streamContainerSize: 'COMPACT',
-    local: true,
+    local: false,
   },
 };
