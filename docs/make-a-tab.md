@@ -98,7 +98,6 @@ example of using uiSize and added css rules:
         * STREAM_CLICKED: a click registered on the stream in the top stream container. eg. used by videoChat tab to temporarily pin the clicked stream into focus.
         * USER_CLICKED: user avatar clicked in streams container. not used anywhere as of yet. There for added interactivity in future work.
         * TAB_SWITCH: indicates a switch between tabs. payload contains previous tab and the newly active tab.
-        * 
   - **touchDevice**: boolean to check if the device is a touch enabled.
   - **updateBadge**: A function to set contents of the badge or toggle its visibility. 
   - **tabInfo**: Gives the tab information, badge information.
@@ -118,5 +117,14 @@ example of using uiSize and added css rules:
         }
       });
  ```
+
+Over time more examples from existing tabs will be added alongside each prop or roomAPI, although after reading this you should be able to tackle how existing tabs work and make your own.
+
+#### Handling shared editing on structure data
+Since no data stored on the server for tabs (such as chat, or codePad etc.) you might be wondering how syncing of data works. oorja uses [yjs](http://y-js.org/) for this purpose with a custom connector. You might want to make use of it in your tabs.
+
+
+#### A note on sending messages
+For sending messages a licode data stream is used by each participant. However I found out later that it is not p2p and uses erizoController(a socket.io server) instead for delivering messages. So it is advisable to use it judiciously, in future an RTCDataChannel will be established between peers for streaming data transfer.
 
 
