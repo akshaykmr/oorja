@@ -32,7 +32,7 @@ import tabPropTypes from '../tabPropTypes';
 
 import './codepad.scss';
 
-import Sidebar from '../../../Sidebar/';
+import Sidebar from '../../Sidebar/';
 import SettingsTab from './SettingsTab';
 import Spinner from '../../Spinner';
 
