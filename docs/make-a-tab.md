@@ -160,9 +160,11 @@ Reuse existing components in the app, some of them are listed below
 
 
 #### Other thoughts
-I'd recommend reading the code of existing tabs to have better understanding. Also the props and roomAPI are not rigid, they are merely information and actions that can be utilized by other tabs as well. If you feel some pattern(esp. for messaging) or utility could be helpful for other tabs, you are welcome to propose the change.
+I'd recommend reading the code of existing tabs to have better understanding. Also, the props and roomAPI are not rigid, they are merely information and actions that I thought could be utilized by other tabs as well. If you feel some pattern(esp. for messaging) or utility could be helpful for other tabs as well, you are welcome to propose the additions or changes.
 
 #### What to make?
-Well remember the component is just a blank slate you can make anything possible in the web browser to render in it (you may use canvas, http calls to external api's etc.) A tab may be local as well as specified in `tabRegistry.js`, when local it is only loaded locally for the user that adds it to the room. eg. Reacteroids game tab must be added individually by users choice. It doesn't use messaging at all and is just a simple game.
+Well remember the tab component is just a blank slate you can make anything possible in the web browser to render in it (you may use canvas, http calls to external api's etc.) The room api and props are just there for the tab to interact with the room if need be.
+A tab may be local as well as specified in `tabRegistry.js`, when local it is only loaded locally for the user that adds it to the room. eg. Reacteroids game tab must be added individually by users choice. It doesn't use messaging at all and is just a simple game.
+Design the tab well and keep it minimal. Personally I've got 2 tabs on my mind right now. one is a settings tab for configuring webcam, room etc. the other is a helpcenter which will keep help articles for reference(each tab will be able to register its own articles and switch to them with a function call).
 
-The room api and props are just there for the tab to interact with the room if need be. Design the tab well and keep it minimal. Personally I've got 2 tabs on my mind right now. one is a settings tab for configuring webcam, room etc. the other is a helpcenter which will keep help articles for reference(each tab will be able to register its own articles and switch to them with a function call).
+That's it for now. Go give it a spin.
