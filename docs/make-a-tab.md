@@ -59,10 +59,12 @@ Use the React developer tools extension to browse these props in detail.
         // ui is compact apply appropriate css rules
       }
     }
- ```
-example of using uiSize and added css rules: 
+ ``` 
+<p align="center">
+example of using uiSize and added css rules:
 
 <img src="http://imgur.com/8TyopNG.png" alt="" height="400px"> <img src="http://imgur.com/vejg67C.png" alt="" height="400px">
+</p>
 
   - **setTabReady**: Tabs can be dynamically added to the room. before messaging can take place a tab must mark itself ready so that it can be discovered by others(tabs, local or remote) in the room. To be only called once. Used in collaborative tabs such as codepad, chat etc. Kind of wonky at the moment.
   - **switchToTab(tabId)**: switches to the tab with given id. eg. Video Chat tab uses a click handler for *inviting users to the room* and switches to Room Info tab where user can copy the room link. Also Discover tab also switches to newly loaded tab when its added.
@@ -84,8 +86,8 @@ example of using uiSize and added css rules:
     + initializePrimaryMediaStream: initialize webcam/audio stream.
     + **sendMessage(message)**: each tab can send and recieve json serializable messages. To see the message format see `Messenger.js`
     + **addMessageHandler(tabId, handler)**: The tab must register a message handler to process messages. just search the project for `roomAPI.addMessageHandler` for use cases.
-    + removeMessageHandler(tabId, handler): removes previosly registered handler.
-    + **addActivityListener(activityName, listner)**: add listeners for various events happening in the room. check out `roomActivities.js` for list of roomActivities. eg. `roomAPI.addActivityListener(roomActivities.TAB_SWITCH, myfunction);` List of room activities is given below. Their payload can be found in `roomActivities.js` (the payload is the data passed to your handler and contains details of interest)
+    + removeMessageHandler(tabId, handler): removes previously registered handler.
+    + **addActivityListener(activityName, listner)**: add listeners for various events happening in the room. check out `roomActivities.js` for list of roomActivities. eg. `roomAPI.addActivityListener(roomActivities.TAB_SWITCH, myfunction);` List of room activities is given below. Their payload can be found in `roomActivities.js` (the payload is the data passed to your handler and contains details of the activity)
         * ROOM_CONNECTED
         * ROOM_DISCONNECTED
         * ROOM_ERROR
@@ -121,11 +123,46 @@ example of using uiSize and added css rules:
 
 Over time more examples from existing tabs will be added alongside each prop or roomAPI, although after reading this you should be able to tackle how existing tabs work and make your own.
 
-#### Handling shared editing on structure data
+#### Handling shared editing on structured data
 Since no data stored on the server for tabs (such as chat, or codePad etc.) you might be wondering how syncing of data works. oorja uses [yjs](http://y-js.org/) for this purpose with a custom connector. You might want to make use of it in your tabs.
 
 
-#### A note on sending messages
+#### Regarding messaging
+For properly recieving/sending messages you need to take care that the recepient remote tab is ready. When initializing your tab iterate through `connectedUsers` and their `sessions`, get the list of their active tabs through `getActiveRemoteTabs(sessionId)` then *connect* them in your logic if they are ready. For tabs that get loaded later, listen for `roomActivities.REMOTE_TAB_READY` and *connect* accordingly. Also do not forget to call `tabReady` after the setup to indicate that your tab is now ready.
+
 For sending messages a licode data stream is used by each participant. However I found out later that it is not p2p and uses erizoController(a socket.io server) instead for delivering messages. So it is advisable to use it judiciously, in future an RTCDataChannel will be established between peers for streaming data transfer.
 
 
+#### Some additional props
+Some additional props are also available by connecting your component to the redux store
+- mediaStreams(a collection of audio video streams and their state)
+- streamSpeaking (whether a stream with given streamId is speaking)
+
+see videoChat tab to see how these props are connected.
+
+#### Reuse existing components
+Reuse existing components in the app, some of them are listed below
+
+- **Avatar**: renders a circular avatar of users display picture from social login or initials of his/her name if not available. Just pass the users information to this component. eg. used in chat tab to render avatar alongside chat bubbles.
+<p align="center">
+<img src="http://imgur.com/ekh3go8.png" alt="" height="240px">
+</p>
+
+- **Sidebar**: a drawer for additional content. Pass it the component that needs to be rendered in the sidebar with some additional info. eg. used in CodePad tab for changing editor settings(theme, syntax)
+
+<p align="center">
+<img src="http://imgur.com/dDi2qRR.png" alt="" height="500px">
+</p>
+
+- **Spinner**: a spinning logo for oorja. displayed in chat, codepad, quillpad when syncing initial data between peers
+
+- **[Blueprint components](http://blueprintjs.com/)**: A collection of React UI components that cover the majority of the common interface elements, patterns, and interactions on the web. Its already included, just import and use it.
+
+
+#### Other thoughts
+I'd recommend reading the code of existing tabs to have better understanding. Also the props and roomAPI are not rigid, they are merely information and actions that can be utilized by other tabs as well. If you feel some pattern(esp. for messaging) or utility could be helpful for other tabs, you are welcome to propose the change.
+
+#### What to make?
+Well remember the component is just a blank slate you can make anything possible in the web browser to render in it (you may use canvas, http calls to external api's etc.) A tab may be local as well as specified in `tabRegistry.js`, when local it is only loaded locally for the user that adds it to the room. eg. Reacteroids game tab must be added individually by users choice. It doesn't use messaging at all and is just a simple game.
+
+The room api and props are just there for the tab to interact with the room if need be. Design the tab well and keep it minimal. Personally I've got 2 tabs on my mind right now. one is a settings tab for configuring webcam, room etc. the other is a helpcenter which will keep help articles for reference(each tab will be able to register its own articles and switch to them with a function call).
