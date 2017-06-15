@@ -83,3 +83,4 @@ eslint plugin is vital. Without it your build won't pass so ensure that it works
 
 For running the lint test manually: `meteor npm run lint`
 
+That's it. Up next, [Make a tab!](./make-a-tab.md)
