@@ -11,7 +11,7 @@ class BlankSlate extends Component {
     return (
       <div className={this.props.classNames} style={this.props.style}>
         <p>
-        If you are a developer you can extend functionality of oorja by developing a
+        Are you a developer? You can extend functionality of oorja by developing a
         custom tab. oorja is open source and could use your skills !
         <br/>
         <a href="https://github.com/akshayKMR/oorja" target="_blank">Join us at GitHub</a>
