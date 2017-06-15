@@ -42,6 +42,8 @@ The docs start with a high level overview, followed by how to get the project ru
  2. [Project Setup](docs/project-setup.md)
  3. [Making a Tab](docs/make-a-tab.md)
 
+[Other notes](docs/other-notes.md)
+
 ### License
 oorja is licensed under Apache 2.0 <br>
 It is a personal project, but I feel it can be made much better with help of a few contributors, and for that reason I've chosen this OSS license; not to forget, it is made possible only by leveraging other OSS projects.

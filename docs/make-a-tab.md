@@ -136,7 +136,7 @@ For sending messages a licode data stream is used by each participant. However I
 #### Some additional props
 Some additional props are also available by connecting your component to the redux store
 - mediaStreams(a collection of audio video streams and their state)
-- streamSpeaking (whether a stream with given streamId is speaking)
+- streamSpeaking (whether a stream with given streamId is speaking) eg. used in streams container to add a glowing bottom border for video or a glowing border around the avatar for muted video.
 
 see videoChat tab to see how these props are connected.
 
