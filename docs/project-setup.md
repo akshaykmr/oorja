@@ -36,6 +36,8 @@ All the commands to run the project etc. are to be executed in this directory.
 
 You can install licode with [docker](http://licode.readthedocs.io/en/master/docker/) or [build it from source](http://licode.readthedocs.io/en/master/from_source/). It may take some time for you to set this up but remember you only need to do it once.
 
+[More information on licode architecture](https://github.com/lynckia/licode/issues/335#issuecomment-127547113)
+
 Personally, I built it from source. I would recommend that you install licode on a cheap vps ubuntu 14.04 from aws/gce/digital-ocean etc. That way you can test the app on different devices amoung other advantages. Once you have setup licode, keep it running there using tmux or some other tool.
 Now you will need to put in the configuration settings in `settings-development.json`
 

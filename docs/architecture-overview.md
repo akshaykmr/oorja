@@ -13,8 +13,16 @@ Why Meteor? Well tbh it started with laziness of not having to setup/configure t
 oorja also uses some of the latest technology in web browser namely 
 [WebRTC](http://webrtc-security.github.io/) which allows for Real time communications between browsers. This is used for sharing video/audio and data between room participants. The previously linked page describes a typical webrtc application with signalling server and some involved technologies such as ICE, STUN and TURN. For the webRTC part of this project oorja uses another open source project [licode](http://lynckia.com/licode/index.html). Rather than implementing a custom signalling server oorja uses licode since it offers more benefits such as 
  - Abstracted API for managing streams (not having to deal with cross browser quirks).
- - In active development, distributed and helps in seperation of concerns.
+ - active development and bug fixes
+ - distributed
+ - helps in seperation of concerns.
  - Apart from videoconferencing it can be used for streaming and recording.
- - By default oorja uses p2p model which gives good quality 1:1 video calls, but quality is likely to degrade with many more people. If needed the mcu of licode can be used to relay video stream to other clients. This results in less cpu usage (full mesh vs star topology) for each client albiet more server costs(due to the relay server, hence disabled for now).
+ - By default oorja uses p2p mode which gives good quality 1:1 video calls, but quality is likely to degrade with many more people. If needed the mcu of licode can be used to relay video stream to other clients. This results in less cpu usage (star vs full mesh) for each client albeit more server costs(due to the mcu, hence disabled for now).
+
+<p align="center">
+
+<img src="http://imgur.com/IGygpxu.png" alt="diagram" height="400px">
+
+</p>
 
 That's it. Up next, [project setup](./project-setup.md)

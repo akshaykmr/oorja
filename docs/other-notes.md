@@ -9,6 +9,7 @@ This place is really just a collection of random thoughts, ideas and improvement
 - Room info tab only allows to copy room link to share room access. Maybe explore more available options using the api integrations from OAuth service used for login.
 - Maybe play a little sound when users join/leave.
 - need to rethink the logic for selecting focussed video stream in video chat tab.
+- indexeddb may not be supported in private mode of the browser. need to see how to handle this.
 
 #### Frontend
 - Need to utilize RTCDataChannel for sending messages between peers. Currently erizoController is being used. This change should not have any effect on RoomAPI, and should cause minimal changes in Messenger.js file. Romm.js ought to experience most of the changes.
@@ -19,10 +20,12 @@ This place is really just a collection of random thoughts, ideas and improvement
 - Extend Room API to allow publishing custom Erizo.Streams (you can stream video files with it as well)
 - Explore recording option available in licode for non-p2p rooms.
 - reorganize files for more relevance
+- dynamic import of tabs works well on local development but doesn't work on production deployment for safari. need to look into this (safari is not supported as it doesn't have webrtc support, but this issue could indicate some problem in my code) Should probably try making a sample app to test dynamic import quickly for it.
 
 
 #### Backend
 - Allow for more customization in room creation method (inital tabs, login restrictions etc.)
+- look into user roles for selectively allowing publish/subscribe of media streams.
 - Make use of API integrations from the login services used (github, facebook, linkedIn, goodle) to expose more available actions for the user in RoomAPI?
 - Expose an api for Room Creation ?  eg POST /new
 ``` 

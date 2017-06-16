@@ -26,27 +26,26 @@ const Landing = () => (
     </section>
     <section className="about">
       <div className="status-text">
-        This project is currently in development mode, and hosted here for
-        testing purposes. If you are here, well I can use some feedback,
-        please feel free to give it a spin but don't use it for anything serious.
-        I repeat this is an alpha version with a long way to go..
-        <br/>
-        <br/>
-        <b>About:</b> oorja is built upon some of the latest technologies in modern
-        web browsers namely webrtc that enables p2p communication. (it may not be supported
-        in your browser eg. safari, chrome on ios) <br/><br/>
+        <b>About:</b> oorja allows you to quickly connect and collaborate with people effortlessly.
         Simply create a room and share the link to invite others,
-        then you can communicate p2p using video/audio and collaborate using
+        then you can communicate peer to peer using video/audio and collaborate using
         mini-apps in the room (called tabs). Each tab adds a new capability to the
         room. Below are some examples of tabs.
         <ul>
+          <li>Video chat with screensharing</li>
           <li>Code editor: a text editor that is synced realtime between all participants</li>
-          <li>Video chat: duh.. also adds ability for screensharing</li>
           <li>Chat: send chat messages, supports some markdown as well</li>
           <li>Quillpad: a synced rich text editor</li>
           <li>Reactoroids: A game that you can play while you wait for other people to join.</li>
           <li>many more to come</li>
         </ul>
+
+        oorja is built upon some of the latest technologies in modern
+        web browsers namely webrtc, (it may not be supported
+        in your browser eg. safari, chrome on iOS. It is <b>recommended to use Chrome
+        on Desktop</b>)
+
+        <br/><br/>
         The tabs are react components using a simple but powerful mini-api
         (using props and some event listeners) to add more capabilities to the room.
         This is the coolest feature of this project.
@@ -64,20 +63,18 @@ const Landing = () => (
           extension
         </a> to be able to share your screen.
         <br/><br/>
-        This app is not made with mobile in mind. Its quite resource intensive, for which
-        a laptop/desktop is more suitable.
-        <br/>
         If you experience connectivity issues, well, remember that the app is still alpha version.
         Also, It may be because of firewalls or some corporate network configuration.
-
         <br/><br/>
+        <a href="https://github.com/akshayKMR/oorja" target="_blank">oorja is open source ❤️</a>
+        <br/> <br/>
         Got some feedback or something to say?
         <br/>
         send a mail:
         <a href="mailto:oorja.akshay@gmail.com?Subject=Hello%20Akshay"> oorja.akshay@gmail.com </a>
          or find me on twitter <a href="https://twitter.com/uberakshay" target="_blank">@uberakshay</a>
         <br/><br/>
-        <a href="http://akshay.oorja.io" target="_blank" id='about'>About me</a>
+        <a href="https://akshay.oorja.io" target="_blank" id='about'>About me</a>
       </div>
     </section>
   </div>
