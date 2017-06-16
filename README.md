@@ -38,7 +38,7 @@ Also, It's quite easy to make tabs (you only need to know some react, which can 
 
 The docs may seem too much at first but the info is there to give you the big picture and context to make you feel more confident.
 The docs start with a high level overview, followed by how to get the project running and finally how you can tinker and improve it.
- 1. [Architecture overview](docs/architecture-overview.md)
+ 1. [Project overview](docs/project-overview.md)
  2. [Project Setup](docs/project-setup.md)
  3. [Making a Tab](docs/make-a-tab.md)
 

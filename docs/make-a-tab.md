@@ -71,23 +71,23 @@ example of using uiSize and added css rules:
   - **addTabToRoom(tabId)**: used to add a tab to the room. If the tab is not `local` then its loaded for all room participants. Used in Discover tab to dynamically add tabs to the room.
   - **tabStatusRegistry**: information of other tabs in the room and their state[initializing, loading, loaded ].
   - **roomAPI**: An object to interact with the room. properties are described below
-    + getUserId: gives own userId
-    + getSessionId: gives own sessionId. **minor detour** - A user can have multiple sessions active thus sessionId identifies the unique user. This is purely for ux reasons and has some effects on activityListeners which will be described shortly.
+    + getUserId(): gives own userId
+    + getSessionId(): gives own sessionId. **minor detour** - A user can have multiple sessions active thus sessionId identifies the unique user. This is purely for ux reasons and has some effects on activityListeners which will be described shortly.
     + getUserInfo(userId): gives user information for the given userId 
     + getActiveRemoteTabs(sessionId): gives the list of remote tabs set as ready by sessionId(unique user session)
-    + shareScreen: start sceen sharing
-    + stopScreenShare: stop screen sharing
-    + mutePrimaryMediaStreamVideo
-    + unmutePrimaryMediaStreamVideo
-    + mutePrimaryMediaStreamAudio
-    + unmutePrimaryMediaStreamAudio
-    + togglePrimaryMediaStreamAudio
-    + togglePrimaryMediaStreamVideo
-    + initializePrimaryMediaStream: initialize webcam/audio stream.
-    + **sendMessage(message)**: each tab can send and recieve json serializable messages. To see the message format see `Messenger.js`
-    + **addMessageHandler(tabId, handler)**: The tab must register a message handler to process messages. just search the project for `roomAPI.addMessageHandler` for use cases.
+    + shareScreen(): start sceen sharing
+    + stopScreenShare(): stop screen sharing
+    + mutePrimaryMediaStreamVideo()
+    + unmutePrimaryMediaStreamVideo()
+    + mutePrimaryMediaStreamAudio()
+    + unmutePrimaryMediaStreamAudio()
+    + togglePrimaryMediaStreamAudio()
+    + togglePrimaryMediaStreamVideo()
+    + initializePrimaryMediaStream(): initialize webcam/audio stream.
+    + **sendMessage(message)**: each tab can send and recieve json serializable messages. To see the message format see `Messenger.js`. With this you can send messages to any tabs local or remote(loaded by another room participant). In the message you need to specify the recipient users, and the recipient tabs. When a message is recieved the handler registered by the recipient tab will be called with the message contents.
+    + **addMessageHandler(tabId, handler)**: The tab must register a message handler to process messages. Use the message handler to change state, trigger actions in your tab etc. just search the project for `roomAPI.addMessageHandler` for use cases. 
     + removeMessageHandler(tabId, handler): removes previously registered handler.
-    + **addActivityListener(activityName, listner)**: add listeners for various events happening in the room. check out `roomActivities.js` for list of roomActivities. eg. `roomAPI.addActivityListener(roomActivities.TAB_SWITCH, myfunction);` List of room activities is given below. Their payload can be found in `roomActivities.js` (the payload is the data passed to your handler and contains details of the activity)
+    + **addActivityListener(activityName, listener)**: add listeners for various events happening in the room. check out `roomActivities.js` for list of roomActivities. eg. `roomAPI.addActivityListener(roomActivities.TAB_SWITCH, myfunction);` List of room activities is given below. Their payload can be found in `roomActivities.js` (the payload is the data passed to your handler and contains details of the activity)
         * ROOM_CONNECTED
         * ROOM_DISCONNECTED
         * ROOM_ERROR
@@ -102,10 +102,11 @@ example of using uiSize and added css rules:
         * USER_CLICKED: user avatar clicked in streams container. not used anywhere as of yet. There for added interactivity in future work.
         * TAB_SWITCH: indicates a switch between tabs. payload contains previous tab and the newly active tab.
   - **touchDevice**: boolean to check if the device is a touch enabled.
-  - **updateBadge**: A function to set contents of the badge or toggle its visibility. 
-  - **tabInfo**: Gives the tab information, badge information.
+  - **updateBadge(options)**: A function to set contents of the badge or toggle its visibility. 
+  - **tabInfo**: Gives own tab information, badge information.
 
-  eg. `TAB_SWITCH` event in the room gives the tabId of the previous tab and the newly active tab. tabInfo.tabId in the event listner of CodePad tab to focus the editor if its on top now.
+  eg. `TAB_SWITCH` event in the room gives the tabId of the previous tab and the newly active tab. tabInfo.tabId in the event listner of CodePad tab to focus the editor if its on top (and ingore if the device is touch enabled).
+  It also clears the badge contents when tab is focussed.
 
   ``` jsx
         roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
@@ -124,11 +125,11 @@ example of using uiSize and added css rules:
 Over time more examples from existing tabs will be added alongside each prop or roomAPI, although after reading this you should be able to tackle how existing tabs work and make your own.
 
 #### Handling shared editing on structured data
-Since no data stored on the server for tabs (such as chat, or codePad etc.) you might be wondering how syncing of data works. oorja uses [yjs](http://y-js.org/) for this purpose with a custom connector. You might want to make use of it in your tabs.
+Since no data stored on the server for tabs (such as chat, or codePad etc.) you might be wondering how syncing of data works. oorja uses [yjs](http://y-js.org/) for this purpose with a custom connector. You might want to make use of it in your tabs. See code for Chat, quillpad, code pad to see how it's been used. tab idea: make a shared drawing area using canvas and yjs.
 
 
 #### Regarding messaging
-For properly recieving/sending messages you need to take care that the recepient remote tab is ready. When initializing your tab iterate through `connectedUsers` and their `sessions`, get the list of their active tabs through `getActiveRemoteTabs(sessionId)` then *connect* them in your logic if they are ready. For tabs that get loaded later, listen for `roomActivities.REMOTE_TAB_READY` and *connect* accordingly. Also do not forget to call `tabReady` after the setup to indicate that your tab is now ready.
+For properly recieving/sending messages you need to take care that the recipient remote tab is ready. When initializing your tab iterate through `connectedUsers` and their `sessions`, get the list of their active tabs through `getActiveRemoteTabs(sessionId)` then *connect* them in your logic if they are ready. For tabs that get loaded later, listen for `roomActivities.REMOTE_TAB_READY` and *connect* accordingly. Also do not forget to call `tabReady` after the setup to indicate that your tab is now ready.
 
 For sending messages a licode data stream is used by each participant. However I found out later that it is not p2p and uses erizoController(a socket.io server) instead for delivering messages. So it is advisable to use it judiciously, in future an RTCDataChannel will be established between peers for streaming data transfer.
 
