@@ -19,6 +19,7 @@ these do not sound that welcoming haha. Need to filter out only positive adjecti
 
 #### Frontend
 - Need to utilize RTCDataChannel for sending messages between peers. Currently erizoController is being used. This change should not have any effect on RoomAPI, and should cause minimal changes in Messenger.js file. Room.js ought to experience most of the changes.
+- When in fullscreen mode the toast message would not be visible as the room div is set to fullscreen whereas blueprint toast mounts on the html body. eg. toast would not be visible when room link is copied to clipboard.
 - The `tabReady` function and `REMOTE_TAB_READY` event logic needs to be probed for accuracy. They are kind of wonky which could lead to erroneous messaging.
 - The React Developer tools extension reports development mode when running in production on oorja.io. Need to configure it for production mode - will likely see smaller bundle size and some improved performance.
 - Room.js file has gotten quite big, need to move streamHandling logic to a different file.
@@ -32,6 +33,7 @@ these do not sound that welcoming haha. Need to filter out only positive adjecti
 
 #### Backend
 - Allow for more customization in room creation method (inital tabs, login restrictions etc.)
+- work on optimizing bandwidth settings for streams.
 - look into user roles for selectively allowing publish/subscribe of media streams.
 - Make use of API integrations from the login services used (github, facebook, linkedIn, goodle) to expose more available actions for the user in RoomAPI?
 - Expose an api for Room Creation ?  eg POST /new
