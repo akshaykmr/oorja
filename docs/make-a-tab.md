@@ -165,6 +165,7 @@ I'd recommend reading the code of existing tabs to have better understanding. Al
 
 #### What to make?
 Well remember the tab component is just a blank slate you can make anything possible in the web browser to render in it (you may use canvas, http calls to external api's etc.) The room api and props are just there for the tab to interact with the room if need be.
+If you wish to make external api calls use [the http module](https://docs.meteor.com/api/http.html). 
 A tab may be local as well as specified in `tabRegistry.js`, when local it is only loaded locally for the user that adds it to the room. eg. Reacteroids game tab must be added individually by users choice. It doesn't use messaging at all and is just a simple game.
 Design the tab well and keep it minimal. Personally I've got 2 tabs on my mind right now. one is a settings tab for configuring webcam, room etc. the other is a helpcenter which will keep help articles for reference(each tab will be able to register its own articles and switch to them with a function call).
 
