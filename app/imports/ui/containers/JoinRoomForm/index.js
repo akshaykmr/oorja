@@ -24,8 +24,8 @@ class JoinRoomForm extends Component {
     super(props);
 
     // a set of colors used to style avatar.
-    this.colors = ['#c78ae1', '#f4d448', '#66aee3', '#ffaf51', '#7bcd52', '#23bfb0',
-      '#e5176f', '#d784a6'];
+    this.colors = ['#c78ae1', '#f4d448', '#e6cb71', '#66aee3', '#7bcd52',
+      '#e5176f', '#d784a6', '#a693e9', '#f078ae', '#457fd1'];
 
     this.initialState = this.initialState.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);

@@ -99,7 +99,7 @@ example of using uiSize and added css rules:
         * STREAM_SPEAKING_START: indicates start of speech in media stream. eg. used in videoChat tab to focus the current speaker.
         * STREAM_SPEAKING_END
         * STREAM_CLICKED: a click registered on the stream in the top stream container. eg. used by videoChat tab to temporarily pin the clicked stream into focus.
-        * USER_CLICKED: user avatar clicked in streams container. not used anywhere as of yet. There for added interactivity in future work.
+        * USER_CLICKED: user avatar clicked in streams container. not used anywhere as of yet. There for added interactivity in future work. eg. consider a step which involves selecting a user in your tab, clicking on his avatar in the above stream container would be quite easy.
         * TAB_SWITCH: indicates a switch between tabs. payload contains previous tab and the newly active tab.
   - **touchDevice**: boolean to check if the device is a touch enabled.
   - **updateBadge(options)**: A function to set contents of the badge or toggle its visibility. 
