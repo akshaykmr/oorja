@@ -26,7 +26,7 @@ For boilerplate or quickly testing something, use the already made tab `BlankSla
 ### Props and RoomAPI
 
 Now that we know how tabs are rendered lets see what we can do with them.
-The idea is simple, using the provided props and event listners to your tab component add a simple functionality to the room.
+The idea is simple, using the provided props and event listeners to your tab component add a simple functionality to the room.
 
 ##### Tab badge
 I should introduce the badge first. Each tab has a badge that can be used for some minimal content and added ux. This is not a part of the tab component just some content that can be changed by calling a prop function in your tab (in this case `updateBadge`). For example the following picture shows unread message count in chat tab  and new content in code-editor tab when they are not in focus.
@@ -39,17 +39,17 @@ Use the React developer tools extension to browse these props in detail.
   - **roomInfo**: Contains room info such as name, participants, tabs etc.
   - **connectedUsers**: The roomInfo object shows all users that have access to the room but this list shows the currently connected ones along with their active session list.
   - **roomReady**: A boolean, whether or not room is connected.
-  - **onTop**: bool, whether this tab is currently `onTop` or the current active tab. eg. If the tab is not currently on top you may want to stop unecessary rendering or animation since its not visible to the user.
+  - **onTop**: bool, whether this tab is currently `onTop` or the current active tab. eg. If the tab is not currently on top you may want to stop unnecessary rendering or animation since its not visible to the user.
   - **primaryMediaStreamState**: The primary media stream is webcams audio/video stream. This object describes its state. eg. used by video chat tab to toggle mic/video when respective control buttons are clicked.
   - **screenSharingStreamState**: The stream state for the screen sharing stream.
-  - **uiSize**: You will find some constants used throughtout the code base most of these are in `/room/constants/` they are their to avoid magic strings in the code. uiSize value is one of these constants found in `/room/constants/uiConfig.js` uiSize is used to determine whether the ui is compact or large. eg. used to position Arrow in in Room Info tab.
+  - **uiSize**: You will find some constants used throughout the code base most of these are in `/room/constants/` they are their to avoid magic strings in the code. uiSize value is one of these constants found in `/room/constants/uiConfig.js` uiSize is used to determine whether the ui is compact or large. eg. used to position Arrow in in Room Info tab.
   - **classNames** and **style**: each tab component applies these props to their main div for proper positioning and styling, yours must as well. If you see any of the tabs its main render block contains code like this: 
   ``` jsx
   <div className={this.props.classNames} style={this.props.style}>
     content goes here
   </div>
  ```
- There is something more to notice here as well. Your main div recieves some classes namely `.onTop` if on top, `.compact` if UI is compact, `.$tabName` your tab name. Using these classes you can apply appropriate css rules for these conditions easily (check out any other tabs scss file). the `$tabName` is used to contain your tabs css rules.
+ There is something more to notice here as well. Your main div receives some classes namely `.onTop` if on top, `.compact` if UI is compact, `.$tabName` your tab name. Using these classes you can apply appropriate css rules for these conditions easily (check out any other tabs scss file). the `$tabName` is used to contain your tabs css rules.
  ``` scss
     .myTab {
       .containedRule {
@@ -75,7 +75,7 @@ example of using uiSize and added css rules:
     + getSessionId(): gives own sessionId. **minor detour** - A user can have multiple sessions active thus sessionId identifies the unique user. This is purely for ux reasons and has some effects on activityListeners which will be described shortly.
     + getUserInfo(userId): gives user information for the given userId 
     + getActiveRemoteTabs(sessionId): gives the list of remote tabs set as ready by sessionId(unique user session)
-    + shareScreen(): start sceen sharing
+    + shareScreen(): start screen sharing
     + stopScreenShare(): stop screen sharing
     + mutePrimaryMediaStreamVideo()
     + unmutePrimaryMediaStreamVideo()
@@ -84,7 +84,7 @@ example of using uiSize and added css rules:
     + togglePrimaryMediaStreamAudio()
     + togglePrimaryMediaStreamVideo()
     + initializePrimaryMediaStream(): initialize webcam/audio stream.
-    + **sendMessage(message)**: each tab can send and recieve json serializable messages. To see the message format see `Messenger.js`. With this you can send messages to any tabs local or remote(loaded by another room participant). In the message you need to specify the recipient users, and the recipient tabs. When a message is recieved the handler registered by the recipient tab will be called with the message contents.
+    + **sendMessage(message)**: each tab can send and receive json serializable messages. To see the message format see `Messenger.js`. With this you can send messages to any tabs local or remote(loaded by another room participant). In the message you need to specify the recipient users, and the recipient tabs. When a message is received the handler registered by the recipient tab will be called with the message contents.
     + **addMessageHandler(tabId, handler)**: The tab must register a message handler to process messages. Use the message handler to change state, trigger actions in your tab etc. just search the project for `roomAPI.addMessageHandler` for use cases. 
     + removeMessageHandler(tabId, handler): removes previously registered handler.
     + **addActivityListener(activityName, listener)**: add listeners for various events happening in the room. check out `roomActivities.js` for list of roomActivities. eg. `roomAPI.addActivityListener(roomActivities.TAB_SWITCH, myfunction);` List of room activities is given below. Their payload can be found in `roomActivities.js` (the payload is the data passed to your handler and contains details of the activity)
@@ -95,7 +95,7 @@ example of using uiSize and added css rules:
         * USER_LEFT
         * USER_SESSION_ADDED: another session of the user has become active. different device or maybe a new browser tab.
         * USER_SESSION_REMOVED
-        * REMOTE_TAB_READY: a remote tab is now ready for recieving messages.
+        * REMOTE_TAB_READY: a remote tab is now ready for receiving messages.
         * STREAM_SPEAKING_START: indicates start of speech in media stream. eg. used in videoChat tab to focus the current speaker.
         * STREAM_SPEAKING_END
         * STREAM_CLICKED: a click registered on the stream in the top stream container. eg. used by videoChat tab to temporarily pin the clicked stream into focus.
@@ -105,7 +105,7 @@ example of using uiSize and added css rules:
   - **updateBadge(options)**: A function to set contents of the badge or toggle its visibility. 
   - **tabInfo**: Gives own tab information, badge information.
 
-  eg. `TAB_SWITCH` event in the room gives the tabId of the previous tab and the newly active tab. tabInfo.tabId in the event listner of CodePad tab to focus the editor if its on top (and ingore if the device is touch enabled).
+  eg. `TAB_SWITCH` event in the room gives the tabId of the previous tab and the newly active tab. tabInfo.tabId in the event listener of CodePad tab to focus the editor if its on top (and ignore if the device is touch enabled).
   It also clears the badge contents when tab is focussed.
 
   ``` jsx
@@ -129,7 +129,7 @@ Since no data stored on the server for tabs (such as chat, or codePad etc.) you 
 
 
 #### Regarding messaging
-For properly recieving/sending messages you need to take care that the recipient remote tab is ready. When initializing your tab iterate through `connectedUsers` and their `sessions`, get the list of their active tabs through `getActiveRemoteTabs(sessionId)` then *connect* them in your logic if they are ready. For tabs that get loaded later, listen for `roomActivities.REMOTE_TAB_READY` and *connect* accordingly. Also do not forget to call `tabReady` after the setup to indicate that your tab is now ready.
+For properly receiving/sending messages you need to take care that the recipient remote tab is ready. When initializing your tab iterate through `connectedUsers` and their `sessions`, get the list of their active tabs through `getActiveRemoteTabs(sessionId)` then *connect* them in your logic if they are ready. For tabs that get loaded later, listen for `roomActivities.REMOTE_TAB_READY` and *connect* accordingly. Also do not forget to call `tabReady` after the setup to indicate that your tab is now ready.
 
 For sending messages a licode data stream is used by each participant. However I found out later that it is not p2p and uses erizoController(a socket.io server) instead for delivering messages. So it is advisable to use it judiciously, in future an RTCDataChannel will be established between peers for streaming data transfer.
 
