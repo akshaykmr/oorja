@@ -2,7 +2,7 @@
 <span>Alpha version</span>
 
 
-[![CircleCI](https://circleci.com/gh/akshayKMR/oorja/tree/master.svg?style=svg&circle-token=4a0bb88da10bed1c0242fbd0a050f1dab2986e2b)](https://circleci.com/gh/akshayKMR/oorja/tree/master) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) <span class="badge-patreon"><a href="#donate" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
+[![CircleCI](https://circleci.com/gh/akshayKMR/oorja/tree/master.svg?style=svg&circle-token=4a0bb88da10bed1c0242fbd0a050f1dab2986e2b)](https://circleci.com/gh/akshayKMR/oorja/tree/master) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) <span class="badge-patreon"><a href="https://www.patreon.com/oorja" target="_blank" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
 <span class="badge-bitcoin"><a href="#donate" title="Donate once-off to this project using Bitcoin"><img src="https://img.shields.io/badge/bitcoin-donate-yellow.svg" alt="Bitcoin donate button" /></a></span>
 
 
@@ -15,11 +15,25 @@
 - Before joining the room you may test your webcam/mic with option to mute them.
 - Sign in is optional and not restriced to one service. Anyone with access to the room can join anonymously or by using their existing account from Twitter, Facebook, Google, Github etc.
 - This is where things get exciting. Now that you are in the room, There is a concept of mini-applications called tabs each of which add a unique capability to the room.
-    + Video Chat (Added by default) 
-    + QuillPad (a synced rich text editor)
-    + Chat (a minimal chat box with support for some markdown content)
-    + CodePad (a synced code editor, only syntax highlighting for now)
+    + Video chat with screensharing
+        <img height="500px" src="http://imgur.com/oYNdefL.png" alt=""/>
+
+
+    + Quillpad, a synced rich text editor
+        <img height="350px" src="http://imgur.com/ouc1Y37.gif" alt=""/>
+
+
+    + Chat, simple and private. supports some markdown as well
+
+        <img height="400px" src="http://imgur.com/AVSXJ3s.gif" alt=""/>
+
+
+    + CodePad with syntax highligting. synced realtime between all participants
+        <img height="350px" src="http://imgur.com/Mh5Kyl1.gif" alt=""/>
+
+
     + Discover Tabs (Add tabs dynamically to the room when needed with a click of a button 🙌)
+        <img height="400px" src="http://imgur.com/6gpnI9d.gif" alt=""/>
 
 - Some tabs are added by default and more can be added later. In future there will be more customization available when creating the room. Also, most of the current tabs are strictly p2p, i.e. no data in the CodePad/ Chat / QuillPad etc. is stored on the server. The content is synced peer to peer between the room participants.
 
@@ -48,14 +62,14 @@ The docs start with a high level overview, followed by how to get the project ru
 oorja is licensed under Apache 2.0 <br>
 It is a personal project, but I feel it can be made much better with help of a few contributors, and for that reason I've chosen this OSS license; not to forget, it is made possible only by leveraging other OSS projects.
 
-### Donate
+### Donate ❤️
 As mentioned earlier this is a personal project. There are no ads, tracking, premium paid features etc. To continue its development and finance the server costs of [oorja.io](https://oorja.io) I would really appreciate your financial backing
 
-<span class="badge-patreon"><a href="" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
+<span class="badge-patreon"><a href="https://www.patreon.com/oorja" target="_blank" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
 <br>
-<span class="badge-bitcoin"><a href="#donate" title="Donate once-off to this project using Bitcoin"><img src="https://img.shields.io/badge/bitcoin-donate-yellow.svg" alt="Bitcoin donate button" /></a></span>  1FzAAeMPxdBBhcuXH8XDfXKq5GTcBUncHT
+<span class="badge-bitcoin"><a id="donate" href="#donate" title="Donate once-off to this project using Bitcoin"><img src="https://img.shields.io/badge/bitcoin-donate-yellow.svg" alt="Bitcoin donate button" /></a></span>  1FzAAeMPxdBBhcuXH8XDfXKq5GTcBUncHT
 
 
-#### Contact
+### Contact
 You can reach me at oorja.akshay@gmail.com or <a href="https://twitter.com/uberakshay/">Twitter</a> 
-#### [About me](http://akshay.oorja.io/)
+### [About me](http://akshay.oorja.io/)

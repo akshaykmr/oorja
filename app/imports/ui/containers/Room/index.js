@@ -362,7 +362,14 @@ class Room extends Component {
     });
     mediaStream.addEventListener('access-denied', () => {
       SupremeToaster.show({
-        message: 'could not access your screen for sharing 😕',
+        message: (
+          <div>
+            could not access your screen for sharing 😕
+            <br/>
+            Note: Currently works on
+            chrome, <a style={{ color: 'greenyellow' }} target="_blank" href="https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff?hl=en-US"> install this extension</a>
+          </div>
+        ),
         intent: Intent.WARNING,
       });
       this.updateState({
