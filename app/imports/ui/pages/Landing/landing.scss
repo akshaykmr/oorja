@@ -76,22 +76,113 @@ $landing-primary : white;
   }
 
   .about {
+
+    h2 {
+      text-align: center;
+      color: #474747;
+    }
     line-height: 1.4em;
     font-size: 1.2em;
     min-height: 50vh;
-    background-color: darkcyan;
-    color: white;
-    padding: 40px;
+    background-color: white;
+    color: #333333;
+    padding-top: 0px;
+    padding-bottom: 60px;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    .extraInfo {
+      color: #666666;
+    }
+
+    .patreonButton {
+
+      img {
+        margin-top: 10px;
+        box-shadow: 0px 13px 30px -14px rgba(0, 0, 0, 0.63);
+        height: 50px;
+        border-radius: 4px;
+        transition: transform 0.2s ease;
+        &:hover, &:active {
+          transform: scale(1.05, 1.05);
+        }
+      }
+    }
+
+    #donate {
+      .opensource {
+        font-size: 1.2em;
+      }
+    }
+
+    .bitcoin {
+      display: inline-block;
+      margin-top: 10px;
+      .bitcoinLink {
+        font-size: 1.3em;
+      }
+      .bitcoinAddress {
+        code {
+          display: inline-block;
+          font-size: 1.1em;
+        }
+      }
+    }
+
+    li {
+      padding-top: 10px;
+      padding-bottom: 30px;
+      list-style: none;
+      .title {
+        text-align: center;
+        font-size: 14px;
+        color: #797979;
+      }
+
+      .preview {
+        text-align: center;
+        img {
+          max-height: 100%;
+          max-width: 100%;
+          border-radius: 5px;
+          box-shadow: 0px 13px 30px -14px rgba(0, 0, 0, 0.63);
+          &.gif {
+            max-height: 400px;
+          }
+        }
+      }
+    }
 
     .status-text {
       margin: 0 auto;
-      max-width: 540px;
-    }
-    a {
-      color: greenyellow;
+      max-width: 600px;
     }
     #about {
       font-size: 1.4em;
+    }
+  }
+
+  .donateButton {
+    padding: 5px 5px;
+    position: fixed;
+    bottom: -25px;
+    right: 25px;
+    font-size: 1.2em;
+    background: gold;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    text-align: center;
+    transition: transform 0.5s ease;
+
+    #link {
+      display: inline-block;
+      height: 100%;
+      width: 100%;
+      text-decoration: none;
+    }
+
+    &:hover {
+      transform: translate3d(0, -25px ,0);
     }
   }
 }

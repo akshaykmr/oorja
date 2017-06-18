@@ -1,4 +1,4 @@
-This place is really just a collection of random thoughts, ideas and improvements from which I select something to work upon. This only works for single person though, a better approach would be to use issues or a project tracker.
+This place is really just a collection of random thoughts, ideas and improvements from which I select something to work upon. This only works for single person though, I should move them to issues or use a project tracker.
 
 #### UX
 - The landing page is terrible. Does not show how to use the app or what to expect from it. Need to put some pictures, graphics, or maybe gifs in there.
