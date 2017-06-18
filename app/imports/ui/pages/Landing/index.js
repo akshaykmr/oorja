@@ -39,12 +39,12 @@ class Landing extends React.Component {
             Below are some examples of tabs.
             <ul>
               <li>
-                <div className="preview"><img src="http://imgur.com/oYNdefL.png" alt=""/></div>
+                <div className="preview"><img src="https://imgur.com/oYNdefL.png" alt=""/></div>
                 <div className="title">Video chat with screensharing</div>
               </li>
               <li>
                 <div className="preview">
-                  <img className="gif" src="http://imgur.com/Mh5Kyl1.gif" alt=""/>
+                  <img className="gif" src="https://imgur.com/Mh5Kyl1.gif" alt=""/>
                 </div>
                 <div className="title">Code editor with syntax highligting. synced realtime
                 between all participants
@@ -52,7 +52,7 @@ class Landing extends React.Component {
               </li>
               <li>
                 <div className="preview">
-                  <img className="gif" src="http://imgur.com/AVSXJ3s.gif" alt=""/>
+                  <img className="gif" src="https://imgur.com/AVSXJ3s.gif" alt=""/>
                 </div>
                 <div className="title">Chat, simple and private. supports some markdown
                   as well
@@ -60,7 +60,7 @@ class Landing extends React.Component {
               </li>
               <li>
                 <div className="preview">
-                  <img className="gif" src="http://imgur.com/ouc1Y37.gif" alt=""/>
+                  <img className="gif" src="https://imgur.com/ouc1Y37.gif" alt=""/>
                 </div>
                 <div className="title">Quillpad, a synced rich text editor</div>
               </li>
@@ -74,7 +74,7 @@ class Landing extends React.Component {
               donations for continued development and financing server costs of oorja.io
               <br/>
               <a target="_blank" href="https://patreon.com/oorja" className="patreonButton">
-                <img src="http://imgur.com/pGpBRtO.png" alt="patreon - oorja"/>
+                <img src="https://imgur.com/pGpBRtO.png" alt="patreon - oorja"/>
               </a> <br/>
               <span className="bitcoin">
                 <a href="bitcoin:1FzAAeMPxdBBhcuXH8XDfXKq5GTcBUncHT" className="bitcoinLink">
