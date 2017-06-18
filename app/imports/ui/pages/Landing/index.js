@@ -37,7 +37,7 @@ class Landing extends React.Component {
             mini-apps in the room (called tabs). Each tab adds a new capability to the
             room, you can add them to your room whenever needed. <br/>
             Below are some examples of tabs.
-            <ul>
+            <ul className="previewReel">
               <li>
                 <div className="preview"><img src="https://imgur.com/oYNdefL.png" alt=""/></div>
                 <div className="title">Video chat with screensharing</div>
