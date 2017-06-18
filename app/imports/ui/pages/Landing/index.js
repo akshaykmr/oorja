@@ -68,7 +68,7 @@ class Landing extends React.Component {
             <hr/>
             <br/>
             <div id="donate">
-              <a className="opensource" href="https://github.com/akshayKMR/oorja" target="_blank">oorja is open source and extendible</a> ❤️
+              <a className="opensource" href="https://github.com/akshayKMR/oorja" target="_blank">oorja is open source and extensible</a> <i className="ion ion-ios-heart"></i>
               <br/> It's a personal project which can be made even better with a few more
               contributors. There are no ads or tracking on this website. I would really appreciate
               donations for continued development and financing server costs of oorja.io
@@ -119,7 +119,7 @@ class Landing extends React.Component {
           </div>
         </section>
         <div className="donateButton">
-        <a href="#donate" id="link">Donate <br/> ❤️ </a>
+        <a href="#donate" id="link">Donate <br/> <i className="ion ion-ios-heart"></i> </a>
         </div>
       </div>
     );
