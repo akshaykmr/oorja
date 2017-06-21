@@ -11,6 +11,8 @@ import Arrow from '../../../../arrow';
 import tabPropTypes from '../tabPropTypes';
 import './info.scss';
 
+import roomActivities from '../../../constants/roomActivities';
+
 class Info extends Component {
 
   constructor(props) {
@@ -30,6 +32,16 @@ class Info extends Component {
         <div>Link Copied to Clipboard 👍 <br/> Share it to invite others to this room </div>
       ),
       intent: Intent.SUCCESS,
+    });
+  }
+
+  componentDidMount() {
+    this.props.roomAPI.addActivityListener(roomActivities.USER_JOINED, () => {
+      if (this.props.onTop && this.props.connectedUsers.length <= 2) {
+        // switch to video chat tab (UX, most people are going to invite one person)
+        // however, switching to any tab will not take place if the tab isn't loaded in the room
+        this.props.switchToTab(10);
+      }
     });
   }
 
