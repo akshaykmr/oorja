@@ -58,7 +58,6 @@ export default class GettingReady extends Component {
 
   getDefaultState() {
     const savedSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings'));
-    savedSettings.videoQuality = '1080p';
     return {
       videoQuality: savedSettings ? savedSettings.videoQuality : '1080p',
       lastGoodVideoQuality: '240p',
