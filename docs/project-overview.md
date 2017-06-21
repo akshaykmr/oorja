@@ -17,7 +17,7 @@ oorja also uses some of the latest technology in web browser namely
  - distributed
  - helps in separation of concerns.
  - Apart from videoconferencing it can be used for streaming and recording.
- - By default oorja uses p2p mode which gives good quality 1:1 video calls, but quality is likely to degrade with many more people. If needed the mcu of licode can be used to relay video stream to other clients. This results in less cpu usage (star vs full mesh) for each client albeit more server costs(due to the mcu, hence disabled for now).
+ - By default oorja uses p2p mode which gives good quality 1:1 video calls, but quality is likely to degrade with many more people. If needed the mcu of licode can be used to relay video stream to other clients. This results in less cpu usage (star vs full mesh) for each client albeit more server costs(due to the mcu, hence disabled for the public deployment at oorja.io, it can be enabled for internal IT deployments).
 
 <p align="center">
 
