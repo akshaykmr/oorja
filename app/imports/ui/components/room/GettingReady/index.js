@@ -23,7 +23,7 @@ export default class GettingReady extends Component {
     };
     this.state = this.getDefaultState();
     this.stateBuffer = this.state;
-    this.configureStream();
+    this.configureStream({ firstAttempt: true });
 
     this.reinitializeStream = this.reinitializeStream.bind(this);
     this.muteAudio = this.muteAudio.bind(this);
@@ -58,8 +58,9 @@ export default class GettingReady extends Component {
 
   getDefaultState() {
     const savedSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings'));
+    savedSettings.videoQuality = '1080p';
     return {
-      videoQuality: savedSettings ? savedSettings.videoQuality : '480p',
+      videoQuality: savedSettings ? savedSettings.videoQuality : '1080p',
       lastGoodVideoQuality: '240p',
       initialized: false,
       accessAccepted: false,
@@ -147,6 +148,24 @@ export default class GettingReady extends Component {
       this.speechEvents = speechEvents;
     });
     erizoStream.addEventListener('access-denied', (streamEvent) => {
+      const currentVideoQuality = this.stateBuffer.videoQuality;
+      if (options.firstAttempt && currentVideoQuality !== '240p') {
+        const dropQualitySwitch = { // next fallback quality setting. current -> next setting
+          '1080p': '720p',
+          '720p': '480p',
+          '480p': '360p',
+          '360p': '240p',
+        };
+        this.updateState({
+          accessAccepted: { $set: false },
+          videoQuality: {
+            $set: dropQualitySwitch[currentVideoQuality],
+          },
+        });
+        delete this.erizoStream;
+        this.reinitializeStream({ firstAttempt: true });
+        return;
+      }
       if (options.videoQualityChange) {
         SupremeToaster.show({
           message: 'Unable to change video quality',
@@ -156,8 +175,8 @@ export default class GettingReady extends Component {
           accessAccepted: { $set: false },
           videoQuality: { $set: this.stateBuffer.lastGoodVideoQuality },
         });
-        this.erizoStream = null;
-        this.reinitializeStream();
+        delete this.erizoStream;
+        this.reinitializeStream({ firstAttempt: true });
         return;
       }
       if (options.retryAttempt) {
@@ -171,7 +190,7 @@ export default class GettingReady extends Component {
         initialized: { $set: true },
         accessAccepted: { $set: false },
       });
-      this.erizoStream = null;
+      delete this.erizoStream;
     });
     erizoStream.addEventListener('stream-ended', (streamEvent) => {
       console.log(streamEvent);
@@ -212,6 +231,7 @@ export default class GettingReady extends Component {
     }
     setTimeout(() => {
       this.configureStream({
+        firstAttempt: options.firstAttempt,
         retryAttempt: options.default,
         videoQualityChange: options.videoQualityChange,
       });
