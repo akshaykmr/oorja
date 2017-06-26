@@ -203,7 +203,7 @@ export default class GettingReady extends Component {
     // delay initializing stream so that user can se the initial message
     // and that the page doesn't immediately ask for camera access, which may
     // surprise the user visiting a shared link.
-    setTimeout(() => this.erizoStream.init(), 2500);
+    setTimeout(() => this.erizoStream.init(), 1500);
   }
 
   componentWillUnmount() {
