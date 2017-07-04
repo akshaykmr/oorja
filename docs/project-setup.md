@@ -26,42 +26,59 @@ All the commands to run the project etc. are to be executed in this directory.
 
 #### Setting up the web app
 
-- `cd /app`
+- `$ cd /app`
 - [install the meteor tool](https://www.meteor.com/install)
-- install the node dependencies `meteor npm install`
+- install the node dependencies `$ meteor npm install`
 - Now in order to configure the environment settings for the application a file called `settings-development.json` is needed. A sample file called `settings-example.json` is provided. simply copy it's contents into a new file named `settings-development.json` in the same directory.  We will fill in it's contents later.
-- Try running the app. `meteor npm start` This should start the development server at `localhost:3000`. Do not try using the app though as we still need to setup licode and configure it's settings in `settings-development.json`
+- Try running the app. `meteor npm start` This should start the development server at `localhost:3000`. Do not try using the app though as we still need to setup licode and plug its settings in `settings-development.json`
 
 #### Setting up licode
+You must have [docker installed](https://www.docker.com/community-edition).
 
-You can install licode with [docker](http://licode.readthedocs.io/en/master/docker/) or [build it from source](http://licode.readthedocs.io/en/master/from_source/). It may take some time for you to set this up but remember you only need to do it once.
+1.  Pull the image 
+ `$ docker pull akshaykmr/licode-oorja:0.1` 
+ 
+**Note:** This image is not modified from the official licode images which can be [found here](https://hub.docker.com/r/lynckia/licode)
+The only difference is that this image is built with a licode version tested with oorja, so `licode-oorja:0.1` image works with oorja release `0.1.X` and so on.
 
-[More information on licode architecture](https://github.com/lynckia/licode/issues/335#issuecomment-127547113)
 
-Personally, I built it from source. I would recommend that you install licode on a cheap vps ubuntu 14.04 from aws/gce/digital-ocean etc. That way you can test the app on different devices amoung other advantages. Once you have setup licode, keep it running there using tmux or some other tool.
-Now you will need to put in the configuration settings in `settings-development.json`
+2. Start licode with the following command in the terminal
 
+ `MIN_PORT=30000; MAX_PORT=30050;  docker run --name licode -p  3010:3000 -p $MIN_PORT-$MAX_PORT:$MIN_PORT-$MAX_PORT/udp -p   3015:3001  -p 8080:8080 -e "MIN_PORT=$MIN_PORT" -e "MAX_PORT=$MAX_PORT" -e "PUBLIC_IP=127.0.0.1" licode-oorja:0.1`
+ 
+  This will start a licode instance and map necessary ports on your local machine. Once licode starts look out for two logs   in the console output:
+  
+ ```
+ [licode] SuperService ID 59577ce54c59534e64cb345c 
+ [licode] SuperService KEY 20067
+ ```
+ Your ID and Key will obviously be different.
+
+3. Now keep this running in a terminal tab and plug these values in `settings-development.json` in Nuve configuration. Like so
 ```
+    ...
     "Nuve": {
-      "serviceName": "any-name",  // just a name for your nuve service
-      "serviceId": "1",           // from from licode_config.js
-      "serviceKey": "2",          // from from licode_config.js 
-      "host": "https://10.20.23.14:3000/"  // host address of your nuve server
+      "serviceName": "local",
+      "serviceId": "59577ce54c59534e64cb345c",
+      "serviceKey": "20067",
+      "host": "http://127.0.0.1:3010/"
     },
+    ...
 ```
-do not put any comments in config file (it's not valid json)
-
-VPS Gotchas:
-- Remember to allow relevant ports through firewall. eg. 3000(nuve), 8080(erizoController) and some more if you use Erizo for forwarding streams.
-- you need to manually specify the public ip in `licode_config.js` when set to auto, it picks up the ip of the vps's private network instead of public ip.
-- Recommended: setup a reverse proxy (for nuve and erizoController) with ssl termination on the licode server. It's best to have the app served over https and all its outgoing connections over https since camera and media device permissions will likely be denied by the browser otherwise (does work on localhost though).
-
+If you have any comments in your `settings-development.json` remove them as it's not valid JSON.
 
 #### Run the app
-- With all settings in place the app should be able to run 🙏. `meteor npm start` Don't worry if some error comes up, reach out to me and I'll try my best to update the docs accordingly.
-- To simulate joining the with another user use a incognito window to open the same room link. Since the session is not shared you can test 2 users interacting locally.
+- With all settings in place the app should be able to run 🙏
+ `$ meteor npm start` 
+ Go to localhost:3000 and create a new Room!
+ 
+ Don't worry if some error comes in the above steps, reach out to me and I'll try my best to update the docs accordingly.
+- To simulate joining the with another user use a incognito window to open the same room link. Since the session is not shared you can test 2 users interacting locally 👍
+- Advanced users may want to setup licode on a VPS so that you can test the app on different devices and other use cases.
 
-[**more details on settings-development.json**](./settings-development.md)
+[**More details on settings-development.json**](./settings-development.md)
+
+[**More information on licode architecture**](https://github.com/lynckia/licode/issues/335#issuecomment-127547113)
 
 
 #### Dev setup
