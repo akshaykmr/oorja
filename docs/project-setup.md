@@ -26,7 +26,7 @@ All the commands to run the project etc. are to be executed in this directory.
 
 #### Setting up the web app
 
-- `$ cd /app`
+- `$ cd app`
 - [install the meteor tool](https://www.meteor.com/install)
 - install the node dependencies `$ meteor npm install`
 - Now in order to configure the environment settings for the application a file called `settings-development.json` is needed. A sample file called `settings-example.json` is provided. simply copy it's contents into a new file named `settings-development.json` in the same directory.  We will fill in it's contents later.
