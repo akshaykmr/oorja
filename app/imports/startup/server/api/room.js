@@ -137,7 +137,6 @@ Meteor.methods({
       };
       return response;
     } catch (exception) {
-      console.log(exception);
       const { details, reason } = exception;
       // add logging.
       throw new Meteor.Error(

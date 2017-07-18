@@ -2,12 +2,9 @@
 <span>Alpha version</span>
 
 
-[![CircleCI](https://circleci.com/gh/akshayKMR/oorja/tree/master.svg?style=svg&circle-token=4a0bb88da10bed1c0242fbd0a050f1dab2986e2b)](https://circleci.com/gh/akshayKMR/oorja/tree/master) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Join the chat at https://gitter.im/oorja-io/Lobby](https://badges.gitter.im/oorja-io/Lobby.svg)](https://gitter.im/oorja-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) <span class="badge-patreon"><a href="https://www.patreon.com/oorja" target="_blank" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
-<span class="badge-bitcoin"><a href="#donate" title="Donate once-off to this project using Bitcoin"><img src="https://img.shields.io/badge/bitcoin-donate-yellow.svg" alt="Bitcoin donate button" /></a></span>
+[![CircleCI](https://circleci.com/gh/akshayKMR/oorja/tree/master.svg?style=svg&circle-token=4a0bb88da10bed1c0242fbd0a050f1dab2986e2b)](https://circleci.com/gh/akshayKMR/oorja/tree/master) [![Join the chat at https://gitter.im/oorja-io/Lobby](https://badges.gitter.im/oorja-io/Lobby.svg)](https://gitter.im/oorja-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-
-
-#### oorja is a fully open source, quick to use video/voice chat application with realtime collaborative features.
+#### oorja is a quick to use video/voice chat application with realtime collaborative features.
 
 ##### To describe this project in a simple, straighforward way: 
 - The objective is to collaborate quickly, securely and privately.
@@ -41,7 +38,6 @@
 
 ##### Note
  -  oorja is built upon some of the latest technologies in modern web browsers namely WebRTC that enables p2p communication (It may not be supported in your browser eg. safari). Use Chrome or Firefox
- -  This is an alpha version with a long way to go. Feel free to give it a spin but I cannot guarantee an error free experience.
  -  If you are using chrome you will need to install the [screensharing extension](https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff?hl=en-US) to be able to share your screen.
 
 ---
@@ -49,24 +45,14 @@
 ### How to contribute ?
 You are welcome to contribute! In order to do so please go through the following docs in the given order.
 Also, It's quite easy to make tabs (you only need to know some react, which can itself be picked up in a weekend).
-
-The docs may seem too much at first but the info is there to give you the big picture and context to make you feel more confident.
-The docs start with a high level overview, followed by how to get the project running and finally how you can tinker and improve it.
- 1. [Project overview](docs/project-overview.md)
- 2. [Project Setup](docs/project-setup.md)
- 3. [Making a Tab](docs/make-a-tab.md)
-
-[Other notes](docs/other-notes.md)
-
-### License
-oorja is licensed under Apache 2.0 <br>
-It is a personal project, but I feel it can be made much better with help of a few contributors, and for that reason I've chosen this OSS license; not to forget, it is made possible only by leveraging other OSS projects.
+ 1. [Project Setup](docs/project-setup.md)
+ 2. [Making a Tab](docs/make-a-tab.md)
 
 ### Donate ❤️
 As mentioned earlier this is a personal project. There are no ads, tracking, premium paid features etc. To continue its development and finance the server costs of [oorja.io](https://oorja.io) I would really appreciate your financial backing
 
-<span class="badge-patreon"><a href="https://www.patreon.com/oorja" target="_blank" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
-<br>
+**[PayPal](https://paypal.me/akshayKMR)**
+<br><br>
 <span class="badge-bitcoin"><a id="donate" href="#donate" title="Donate once-off to this project using Bitcoin"><img src="https://img.shields.io/badge/bitcoin-donate-yellow.svg" alt="Bitcoin donate button" /></a></span> <code> 1FzAAeMPxdBBhcuXH8XDfXKq5GTcBUncHT </code>
 
 

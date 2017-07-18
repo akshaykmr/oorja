@@ -73,9 +73,7 @@ class Landing extends React.Component {
               contributors. There are no ads or tracking on this website. I would really appreciate
               donations for continued development and financing server costs of oorja.io
               <br/>
-              <a target="_blank" href="https://patreon.com/oorja" className="patreonButton">
-                <img src="https://imgur.com/pGpBRtO.png" alt="patreon - oorja"/>
-              </a> <br/>
+              <a className="paypalLink" target="_blank" href="https://paypal.me/akshaykmr" ><b>PayPal</b></a> <br/>
               <span className="bitcoin">
                 <a href="bitcoin:1FzAAeMPxdBBhcuXH8XDfXKq5GTcBUncHT" className="bitcoinLink">
                   <i style={{ color: '#FF9900' }} className="ion ion-social-bitcoin"></i>

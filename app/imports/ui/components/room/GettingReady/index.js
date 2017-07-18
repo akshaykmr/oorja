@@ -129,7 +129,6 @@ export default class GettingReady extends Component {
         streamSrc: { $set: streamSrc },
       });
       this.saveMediaDeviceSettings();
-      console.log(erizoStream);
       const speechEvents = hark(this.erizoStream.stream);
 
       speechEvents.on('speaking', () => {

@@ -9,14 +9,10 @@ const reconnectToServer = (timeOut, verbose = Meteor.isDevelopment) => {
     if (intervalId === null) {
       if (Meteor.status().status === 'waiting' || Meteor.status().status === 'failed') {
         intervalId = Meteor.setInterval(() => {
-          // Verbose Log Output
           if (verbose) {
             console.log(`Client Status: ${Meteor.status().status}`);
           }
-
-          // Attempt To Reconnect Over Specified TimeOut
           Meteor.reconnect();
-
           if (verbose) {
             console.log(`Client Status: ${Meteor.status().status}`);
           }
@@ -28,7 +24,6 @@ const reconnectToServer = (timeOut, verbose = Meteor.isDevelopment) => {
         if (verbose) {
           console.log(`Client Status: ${Meteor.status().status}`);
         }
-        // Clear Interval and Reset Interval Id
         Meteor.clearInterval(intervalId);
         intervalId = null;
       }

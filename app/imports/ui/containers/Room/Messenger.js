@@ -79,12 +79,10 @@ class Messenger {
     console.info('recieve message called', message);
 
     if (message.broadcast) {
-      console.log('isBroadcast', message.broadcast);
       callHandlers();
       return;
     }
     const isRecepient = !!(_.find(message.to, { userId: this.room.roomAPI.getUserId() }));
-    console.log('isRecepient');
     if (isRecepient) {
       callHandlers();
     }
@@ -99,29 +97,8 @@ class Messenger {
       );
       return;
     }
-
-    // if (message.broadcast) {
     this.room.dataBroadcastStream.sendData(message);
     return;
-    // }
-
-
-    // message.to.forEach((recepient) => {
-    //   if (!recepient.sessionId) {
-    //     // send to all sessions of this user.
-    //     Object.keys(this.room.outgoingDataStreams[recepient.userId])
-    //       .map(sessionId => this.room.outgoingDataStreams[recepient.userId][sessionId])
-    //       .forEach((p2pStream) => {
-    //         p2pStream.sendData(message);
-    //       });
-    //   } else {
-    //     const dataStreams = this.room.outgoingDataStreams[recepient.userId];
-    //     if (dataStreams) { // the user may have disconnected.
-    //       const p2pStream = dataStreams[recepient.sessionId];
-    //       if (p2pStream) p2pStream.sendData(message);
-    //     }
-    //   }
-    // });
   }
 }
 

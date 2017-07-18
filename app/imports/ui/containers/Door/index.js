@@ -164,7 +164,7 @@ class Door extends Component {
       case GETTING_READY:
         if (roomUserId) {
           const room = MongoRoom.findOne({ _id: this.roomId });
-          if (!room) console.error('room not foind');
+          if (!room) console.error('room not found');
           if (_.find(room.participants, { userId: roomUserId })) {
             if (this.isRoomReady()) {
               this.gotoStage(this.stages.LOADING);

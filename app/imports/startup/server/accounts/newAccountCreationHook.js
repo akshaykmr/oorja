@@ -52,7 +52,6 @@ Accounts.onCreateUser((options, user) => {
         timeout: 5000,
       }
     );
-    // console.log(data);
     user.profile = {
       firstName: linkedin.firstName,
       lastName: linkedin.lastName,
