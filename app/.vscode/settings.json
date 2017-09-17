@@ -5,7 +5,8 @@
         "**/bower_components": true,
         "**/.meteor/local": true,
         "**/client/compatibility": true,
-        "**/deployment": true
+        "**/deployment": true,
+        "**/playground": true
     },
     "vsicons.presets.angular": false
   }

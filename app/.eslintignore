@@ -1,4 +1,4 @@
-client/compatibility/*
+**/client/compatibility/*
 **/Reacteroids/src/*.js
 **/Spotlight/tabRegistry.js
 **/deployment/*

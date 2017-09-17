@@ -30,9 +30,9 @@ class AbstractConnector {
   */
   /*
     opts contains the following information:
-      role : String Role of this client ("master" or "slave")
-      userId : String Uniquely defines the user.
-      debug: Boolean Whether to print debug messages (optional)
+     role : String Role of this client ("master" or "slave")
+     userId : String Uniquely defines the user.
+     debug: Boolean Whether to print debug messages (optional)
   */
   constructor (y, opts) {
     this.y = y
@@ -43,7 +43,6 @@ class AbstractConnector {
     // this client receives operations from only one other client.
     // In particular, this does not work with y-webrtc.
     // It will work with y-websockets-client
-    this.preferUntransformed = opts.preferUntransformed || false
     if (opts.role == null || opts.role === 'master') {
       this.role = 'master'
     } else if (opts.role === 'slave') {
@@ -83,7 +82,7 @@ class AbstractConnector {
   }
   reconnect () {
     this.log('reconnecting..')
-    this.y.db.startGarbageCollector()
+    return this.y.db.startGarbageCollector()
   }
   disconnect () {
     this.log('discronnecting..')
@@ -92,7 +91,8 @@ class AbstractConnector {
     this.currentSyncTarget = null
     this.syncingClients = []
     this.whenSyncedListeners = []
-    return this.y.db.stopGarbageCollector()
+    this.y.db.stopGarbageCollector()
+    return this.y.db.whenTransactionsFinished()
   }
   repair () {
     this.log('Repairing the state of Yjs. This can happen if messages get lost, and Yjs detects that something is wrong. If this happens often, please report an issue here: https://github.com/y-js/yjs/issues')
@@ -194,9 +194,6 @@ class AbstractConnector {
           protocolVersion: conn.protocolVersion,
           auth: conn.authInfo
         }
-        if (conn.preferUntransformed && Object.keys(stateSet).length === 0) {
-          answer.preferUntransformed = true
-        }
         conn.send(syncUser, answer)
       })
     } else {
@@ -275,7 +272,7 @@ class AbstractConnector {
     }
     if (message.auth != null && this.connections[sender] != null) {
       // authenticate using auth in message
-      var auth = this.checkAuth(message.auth, this.y)
+      var auth = this.checkAuth(message.auth, this.y, sender)
       this.connections[sender].auth = auth
       auth.then(auth => {
         for (var f of this.userEventListeners) {
@@ -288,7 +285,7 @@ class AbstractConnector {
       })
     } else if (this.connections[sender] != null && this.connections[sender].auth == null) {
       // authenticate without otherwise
-      this.connections[sender].auth = this.checkAuth(null, this.y)
+      this.connections[sender].auth = this.checkAuth(null, this.y, sender)
     }
     if (this.connections[sender] != null && this.connections[sender].auth != null) {
       return this.connections[sender].auth.then((auth) => {
@@ -310,11 +307,7 @@ class AbstractConnector {
               protocolVersion: this.protocolVersion,
               auth: this.authInfo
             }
-            if (message.preferUntransformed === true && Object.keys(m.stateSet).length === 0) {
-              answer.osUntransformed = yield* this.getOperationsUntransformed()
-            } else {
-              answer.os = yield* this.getOperations(m.stateSet)
-            }
+            answer.os = yield* this.getOperations(m.stateSet)
             conn.send(sender, answer)
             if (this.forwardToSyncingClients) {
               conn.syncingClients.push(sender)
@@ -348,9 +341,9 @@ class AbstractConnector {
               this.store.apply(m.os)
             }
             /*
-              * This just sends the complete hb after some time
-              * Mostly for debugging..
-              *
+             * This just sends the complete hb after some time
+             * Mostly for debugging..
+             *
             db.requestTransaction(function * () {
               var ops = yield* this.getOperations(m.stateSet)
               if (ops.length > 0) {
