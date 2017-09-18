@@ -2,14 +2,14 @@ import Room from './Room';
 import { LicodeEvent, RoomEvent, StreamEvent } from './Events';
 import Stream from './Stream';
 import Logger from './utils/Logger';
-
+// Using script-loader to load global variables
 
 const Erizo = {
-  Room: Room.bind(null, undefined, undefined),
+  Room,
   LicodeEvent,
   RoomEvent,
   StreamEvent,
-  Stream: Stream.bind(null, undefined),
+  Stream,
   Logger,
 };
 

@@ -1,9 +1,11 @@
-/* global Erizo, URL */
+/* global URL */
 import React, { Component } from 'react';
 import update from 'immutability-helper';
 import classNames from 'classnames';
 import { Button, Intent, Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
 import hark from 'hark';
+
+import Erizo from '../../../../modules/Erizo';
 
 import SupremeToaster from '../../Toaster';
 

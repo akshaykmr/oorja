@@ -1,4 +1,4 @@
-/* global location document window Erizo URL*/
+/* global location document window URL*/
 import { Meteor } from 'meteor/meteor';
 
 import React, { Component } from 'react';
@@ -6,12 +6,12 @@ import { connect } from 'react-redux';
 import update from 'immutability-helper';
 import _ from 'lodash';
 
-// TODO: move stream handling related functions to streamManager.js
-
-// import Erizo from '../../modules/Erizo';
-
 import hark from 'hark';
 import { Intent } from '@blueprintjs/core';
+
+// TODO: move stream handling related functions to streamManager.js
+
+import Erizo from '../../../modules/Erizo';
 // constants
 import uiConfig from '../../components/room/constants/uiConfig';
 import status from '../../components/room/constants/status';
@@ -183,6 +183,7 @@ class Room extends Component {
         || this.unmountInProgress) {
       return;
     }
+
     const connectToErizo = (erizoToken, recievedNewToken = false) => {
       if (recievedNewToken) {
         console.info('got a new token');
@@ -232,10 +233,11 @@ class Room extends Component {
     if (attributes.activeTabs.indexOf(tabId) !== -1) {
       throw new Error('tab already set as ready');
     }
-    attributes.activeTabs.push(tabId);
-    this.dataBroadcastStream.setAttributes({
-      ...attributes,
+    console.log(this);
+    const updatedAttributes = update(attributes, {
+      activeTabs: { $push: [tabId] },
     });
+    this.dataBroadcastStream.setAttributes(updatedAttributes);
   }
 
   setRoomConnectionListeners(erizoRoom = this.erizoRoom) {
@@ -289,11 +291,11 @@ class Room extends Component {
     erizoRoom.addEventListener('stream-added', (streamEvent) => {
       const { stream } = streamEvent;
       this.handleStreamSubscription(stream);
-      console.info('stream added', streamEvent, streamEvent.stream.getAttributes());
+      console.info('stream added', streamEvent.stream.getAttributes());
     });
 
     erizoRoom.addEventListener('stream-subscribed', (streamEvent) => {
-      console.info('stream subscribed', streamEvent, streamEvent.stream.getAttributes());
+      console.info('stream subscribed', streamEvent.stream.getAttributes());
       this.handleStreamSubscriptionSucess(streamEvent.stream);
     });
 
@@ -306,7 +308,7 @@ class Room extends Component {
     });
 
     erizoRoom.addEventListener('stream-removed', (streamEvent) => {
-      console.info('stream removed', streamEvent, streamEvent.stream.getAttributes());
+      console.info('stream removed', streamEvent.stream.getAttributes());
       this.handleStreamRemoval(streamEvent.stream);
     });
   }
@@ -443,7 +445,7 @@ class Room extends Component {
 
   formMediaStreamState(user, stream, attributes, isLocal = false) {
     const streamId = stream.getID();
-    const localStream = isLocal ? this.erizoRoom.localStreams[streamId] : null;
+    const localStream = isLocal ? this.erizoRoom.localStreams.get(streamId) : null;
     const isScreenShare = attributes.purpose === mediaStreamPurpose.SCREEN_SHARE_STREAM;
     return {
       userId: user.userId,
@@ -710,7 +712,6 @@ class Room extends Component {
 
   handleStreamRemoval(stream) {
     if (this.unmountInProgress) return;
-
     const attributes = stream.getAttributes();
     const isLocal = this.streamManager.isLocalStream(stream);
     const user = this.roomAPI.getUserInfo(attributes.userId);
@@ -742,6 +743,7 @@ class Room extends Component {
       case MEDIA.BROADCAST:
       case MEDIA.P2P:
         if (this.props.mediaStreams[stream.getID()].video) this.decrementVideoStreamCount();
+        URL.revokeObjectURL(this.props.mediaStreams[stream.getID()].streamSrc);
         this.props.updateMediaStreams({
           $unset: [stream.getID()],
         });

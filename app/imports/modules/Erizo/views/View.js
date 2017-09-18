@@ -1,18 +1,18 @@
-/* eslint-disable */
 /*
  * View class represents a HTML component
  * Every view is an EventDispatcher.
  */
-import Erizo from '../index';
 
-export default View = function () {
-    var that = Erizo.EventDispatcher({});
+import { EventDispatcher } from '../Events';
 
-    // Variables
+const View = () => {
+  const that = EventDispatcher({});
 
-    // URL where it will look for icons and assets
-    that.url = '';
-    return that;
+  // Variables
+
+  // URL where it will look for icons and assets
+  that.url = '';
+  return that;
 };
 
-/* eslint-enable */
+export default View;

@@ -6,27 +6,30 @@ import { roomMessageTypes } from './index';
 
 
 // be careful of autocomplete do not make typos such as muteAudio/mutedAudio
+// TODO: refactor
 class StreamManager {
   constructor(room) {
     this.room = room;
   }
 
   isLocalStream(stream) {
-    return stream.getID() in this.room.erizoRoom.localStreams;
+    return this.room.erizoRoom.localStreams.has(stream.getID());
   }
 
   getLocalStreamList() {
-    return Object.keys(this.room.erizoRoom.localStreams)
-            .map(streamId => this.room.erizoRoom.localStreams[streamId]);
+    return this.room.erizoRoom.localStreams.keys()
+            .map(streamIdString => parseInt(streamIdString, 10))
+            .map(streamId => this.room.erizoRoom.localStreams.get(streamId));
   }
 
   getLocalStreamById(streamId) {
-    return this.room.erizoRoom.localStreams[streamId];
+    return this.room.erizoRoom.localStreams.get(streamId);
   }
 
   getRemoteStreamList() {
-    return Object.keys(this.room.erizoRoom.remoteStreams)
-            .map(streamId => this.room.erizoRoom.remoteStreams[streamId]);
+    return this.room.erizoRoom.remoteStreams.keys()
+            .map(streamIdString => parseInt(streamIdString, 10))
+            .map(streamId => this.room.erizoRoom.remoteStreams.get(streamId));
   }
 
 
