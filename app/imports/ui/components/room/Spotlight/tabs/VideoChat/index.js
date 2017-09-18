@@ -245,7 +245,7 @@ class VideoChat extends Component {
     const noVideo = !(focussedStream.video || focussedStream.screen) || focussedStream.mutedVideo;
     const userInfoCardClasses = classNames({
       userInfoCard: true,
-      hidden: this.state.idle,
+      hidden: this.state.idle && !noVideo,
       positionCenter: noVideo,
       positionSidelines: !noVideo,
     });
