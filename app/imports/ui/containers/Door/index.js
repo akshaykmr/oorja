@@ -119,8 +119,8 @@ class Door extends Component {
       } else if (!roomInfo.passwordEnabled && !self.roomSecret) {
         // fail? either user can create a new room or get a new shareLink.
         SupremeToaster.show({
-          message: `Please enter the complete link to enter the room.
-          Or ask someone to send you a new one.`,
+          message: `Could not access room. 
+          Try to obtain a new link OR make a new room and invite others`,
           intent: Intent.WARNING,
           timeout: 10000,
         });
