@@ -164,7 +164,6 @@ class Door extends Component {
       case GETTING_READY:
         if (roomUserId) {
           const room = MongoRoom.findOne({ _id: this.roomId });
-          if (!room) console.error('room not found');
           if (_.find(room.participants, { userId: roomUserId })) {
             if (this.isRoomReady()) {
               this.gotoStage(this.stages.LOADING);
@@ -183,7 +182,6 @@ class Door extends Component {
         localStorage.setItem(`roomReady:${roomName}`, moment().toISOString());
         this.roomUserId = localStorage.getItem(`roomUserId:${roomName}`);
         this.roomUserToken = localStorage.getItem(`roomUserToken:${roomName}`);
-        this.erizoToken = localStorage.getItem(`erizoToken:${roomName}`);
         break;
       default: break;
     }
@@ -282,7 +280,6 @@ class Door extends Component {
         return <GettingReady
         roomInfo={this.state.roomInfo}
         onReady={() => { this.gotoStage(SHOW_TIME); }}
-        isRoomReady={this.isRoomReady()}
         roomUserId={this.roomUserId}/>;
       case SHOW_TIME:
         return <Room
