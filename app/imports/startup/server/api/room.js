@@ -24,11 +24,6 @@ function validTokenPayload(payload, roomDocument) {
   return (payload.v === tokenVersion && payload.exp > now && roomDocument._id === payload.roomId);
 }
 
-// Common error handling
-const PASS_TO_CLIENT = 'PASS_TO_CLIENT';
-const GENERIC_ERROR_MESSAGE = 'Something went wrong... ☹️';
-
-
 Meteor.methods({
 
   createRoom(options) {
@@ -54,96 +49,87 @@ Meteor.methods({
       }
     };
 
-    try {
-      const validSpecification = Match.test(roomSpecification, {
-        roomName: Match.Where((candidateName) => {
-          check(candidateName, String);
-          return candidateName.length < 50;
-        }),
-        shareChoice: Match.Where((choice) => {
-          check(choice, String);
-          return choice === shareChoices.SECRET_LINK || choice === shareChoices.PASSWORD;
-        }),
-        password: String,
-      });
+    const validSpecification = Match.test(roomSpecification, {
+      roomName: Match.Where((candidateName) => {
+        check(candidateName, String);
+        return candidateName.length < 50;
+      }),
+      shareChoice: Match.Where((choice) => {
+        check(choice, String);
+        return choice === shareChoices.SECRET_LINK || choice === shareChoices.PASSWORD;
+      }),
+      password: String,
+    });
 
-      if (!validSpecification) {
-        throw new Meteor.Error(errorTopic, 'Invalid params for creating room', PASS_TO_CLIENT);
-      }
-
-      let { roomName } = roomSpecification;
-      if (!roomName) { // generate randomly
-        const template = '{{ adjective }}-{{ adjective }}-{{ nouns }}';
-        roomName = sentencer.make(template);
-      }
-      roomName = roomName.trim();
-      roomName = roomName.split('').map((char) => {
-        if (char === ' ') {
-          return '-';
-        }
-        return char;
-      }).join('');
-      checkIfValidRoomName(roomName);
-
-      const passwordEnabled = roomSpecification.shareChoice === shareChoices.PASSWORD;
-      const password = passwordEnabled ?
-                        hashPassword(roomSpecification.password, saltRounds) : null;
-
-      const roomSecret = !passwordEnabled ? Random.secret(20) : null;
-
-      const now = new Moment();
-      const nuveResponse = N.API.createRoom(roomName, { p2p: true });
-
-      const defaultTabs = [1, 10, 100];
-      const roomDocument = {
-        _id: nuveResponse.data._id,
-        NuveServiceName: Nuve.serviceName,
-        owner: Meteor.userId() || null,
-        roomName,
-        defaultTabId: 1,
-        tabs: defaultTabs.reduce((tabList, tabId) => {
-          tabList.push(tabRegistry[tabId]);
-          return tabList;
-        }, []),
-        passwordEnabled,
-        roomSecret,
-        password,
-        userTokens: [],
-        participants: [],
-        createdAt: now.toDate().getTime(),
-        validTill: now.add(4, 'days').toDate().getTime(),
-        archived: false,
-      };
-
-      if (Rooms.findOne({ roomName, archived: false })) {
-        throw new Meteor.Error(errorTopic, 'A room with same name exists (；一_一)', PASS_TO_CLIENT);
-      }
-      // Add schema validation later.
-      const roomId = Rooms.insert(roomDocument);
-      if (!roomId) {
-        throw new Meteor.Error(errorTopic, 'Failed to create Room');
-      }
-
-      const response = {
-        createdRoomName: roomName,
-        roomSecret,
-        passwordEnabled,
-        roomAccessToken: passwordEnabled ? jwt.encode({
-          v: tokenVersion,
-          iat: roomDocument.createdAt,
-          exp: roomDocument.validTill,
-          roomId,
-        }, JWTsecret, JWTalgo) : null,
-      };
-      return response;
-    } catch (exception) {
-      const { details, reason } = exception;
-      // add logging.
-      throw new Meteor.Error(
-        errorTopic,
-        details === PASS_TO_CLIENT ? reason : GENERIC_ERROR_MESSAGE
-      );
+    if (!validSpecification) {
+      throw new Meteor.Error(errorTopic, 'Invalid params for creating room');
     }
+
+    let { roomName } = roomSpecification;
+    if (!roomName) { // generate randomly
+      const template = '{{ adjective }}-{{ adjective }}-{{ nouns }}';
+      roomName = sentencer.make(template);
+    }
+    roomName = roomName.trim();
+    roomName = roomName.split('').map((char) => {
+      if (char === ' ') {
+        return '-';
+      }
+      return char;
+    }).join('');
+    checkIfValidRoomName(roomName);
+
+    const passwordEnabled = roomSpecification.shareChoice === shareChoices.PASSWORD;
+    const password = passwordEnabled ?
+                      hashPassword(roomSpecification.password, saltRounds) : null;
+
+    const roomSecret = !passwordEnabled ? Random.secret(20) : null;
+
+    const now = new Moment();
+    const nuveResponse = N.API.createRoom(roomName, { p2p: true });
+
+    const defaultTabs = [1, 10, 100];
+    const roomDocument = {
+      _id: nuveResponse.data._id,
+      NuveServiceName: Nuve.serviceName,
+      owner: Meteor.userId() || null,
+      roomName,
+      defaultTabId: 1,
+      tabs: defaultTabs.reduce((tabList, tabId) => {
+        tabList.push(tabRegistry[tabId]);
+        return tabList;
+      }, []),
+      passwordEnabled,
+      roomSecret,
+      password,
+      userTokens: [],
+      participants: [],
+      createdAt: now.toDate().getTime(),
+      validTill: now.add(4, 'days').toDate().getTime(),
+      archived: false,
+    };
+
+    if (Rooms.findOne({ roomName, archived: false })) {
+      throw new Meteor.Error(errorTopic, 'A room with same name exists (；一_一)');
+    }
+    // Add schema validation later.
+    const roomId = Rooms.insert(roomDocument);
+    if (!roomId) {
+      throw new Meteor.Error(errorTopic, 'Failed to create Room');
+    }
+
+    const response = {
+      createdRoomName: roomName,
+      roomSecret,
+      passwordEnabled,
+      roomAccessToken: passwordEnabled ? jwt.encode({
+        v: tokenVersion,
+        iat: roomDocument.createdAt,
+        exp: roomDocument.validTill,
+        roomId,
+      }, JWTsecret, JWTalgo) : null,
+    };
+    return response;
   },
 
   getRoomInfo(roomName, userToken) {

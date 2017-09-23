@@ -94,7 +94,7 @@ export const deleteRoomUserId = (roomName) => {
   };
 };
 
-const unexpectedError = ({ dispatch, message, error, roomName }) => {
+const unexpectedError = ({ dispatch, error, roomName }) => {
   console.error(error);
   browserHistory.push('/');
   dispatch({
@@ -108,7 +108,7 @@ const unexpectedError = ({ dispatch, message, error, roomName }) => {
     deleteRoomAccessToken(roomName);
   }
   SupremeToaster.show({
-    message: message || GENERIC_ERROR_MESSAGE,
+    message: GENERIC_ERROR_MESSAGE,
     intent: Intent.DANGER,
   });
 };
