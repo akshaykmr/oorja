@@ -1905,7 +1905,8 @@ a.pt-button {
   display: block; }
   .pt-editable-text.pt-multiline .pt-editable-content {
     overflow: auto;
-    white-space: pre-wrap; }
+    white-space: pre-wrap;
+    word-wrap: break-word; }
 
 .pt-select select {
   display: inline-block;
@@ -2773,6 +2774,9 @@ a.pt-button {
             background: rgba(57, 75, 89, 0.7); }
   .pt-file-upload.pt-fill {
     width: 100%; }
+  .pt-file-upload.pt-large,
+  .pt-large .pt-file-upload {
+    height: 40px; }
 
 .pt-file-upload-input {
   outline: none;
@@ -3032,7 +3036,7 @@ a.pt-button {
     margin: 0 7px;
     line-height: 30px;
     color: #5c7080; }
-  .pt-input-group .pt-spinner {
+  .pt-input-group .pt-input-action > .pt-spinner {
     margin: 3px; }
   .pt-input-group .pt-tag {
     margin: 5px; }
@@ -3078,7 +3082,7 @@ a.pt-button {
       padding-left: 40px; }
     .pt-input-group.pt-large .pt-input:not(:last-child) {
       padding-right: 40px; }
-  .pt-input-group.pt-large .pt-spinner {
+  .pt-input-group.pt-large .pt-input-action > .pt-spinner {
     margin: 8px; }
   .pt-input-group.pt-round .pt-button,
   .pt-input-group.pt-round .pt-input,
