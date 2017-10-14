@@ -8,7 +8,6 @@ import { Intent, RadioGroup, Radio, Collapse, Button } from '@blueprintjs/core';
 
 import { createRoom } from '../../actions/roomConfiguration';
 import SupremeToaster from '../../components/Toaster';
-import Oorja from '../../components/Oorja';
 
 import './roomSetup.scss';
 
@@ -206,10 +205,6 @@ class RoomSetup extends Component {
               </div>
           </fieldset>
           </form>
-        </div>
-        <div
-          className="logoJazz">
-          <Oorja onClick={this.handleSubmit} animate={waitingForServer}/>
         </div>
       </div>
     );

@@ -21,11 +21,11 @@ $landing-primary : white;
 
     .oorjaTitle {
       text-align: center;
+      font-size: 1.3em;
+      font-weight: 300;
     }
   }
   .kickstart {
-    min-height: 95vh; 
-    max-height: 700px;
     // background-image: url('/images/geo.png');
     padding-top: 100px;
     padding-bottom: 40px;
@@ -82,11 +82,12 @@ $landing-primary : white;
     h2 {
       text-align: center;
       color: #474747;
+      font-weight: 500;
+      line-height: 1.4em;
     }
-    line-height: 1.4em;
+    line-height: 1.5em;
     font-size: 1.2em;
     min-height: 50vh;
-    background-color: white;
     color: #333333;
     padding-top: 0px;
     padding-bottom: 60px;
@@ -146,7 +147,7 @@ $landing-primary : white;
       list-style: none;
       .title {
         text-align: center;
-        font-size: 14px;
+        font-size: 15px;
         color: #797979;
       }
 
@@ -190,6 +191,10 @@ $landing-primary : white;
       height: 100%;
       width: 100%;
       text-decoration: none;
+    }
+
+    b {
+      font-weight: 500;
     }
 
     &:hover {
