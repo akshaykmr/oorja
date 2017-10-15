@@ -15,6 +15,18 @@ html {
   -moz-box-sizing: inherit;
        box-sizing: inherit; }
 
+@font-face {
+  font-family: "Icons16";
+  font-style: normal;
+  font-weight: normal;
+  src: url("/resources/icons/icons-16.eot?#iefix") format("embedded-opentype"), url("../resources/icons/icons-16.woff") format("woff"), url("../resources/icons/icons-16.ttf") format("truetype"); }
+
+@font-face {
+  font-family: "Icons20";
+  font-style: normal;
+  font-weight: normal;
+  src: url("/resources/icons/icons-20.eot?#iefix") format("embedded-opentype"), url("../resources/icons/icons-20.woff") format("woff"), url("../resources/icons/icons-20.ttf") format("truetype"); }
+
 hr {
   margin: 20px 0;
   border: none;
@@ -4996,6 +5008,39 @@ span.pt-icon {
 .pt-icon-header-two::before {
   content: ""; }
 
+.pt-icon-form::before {
+  content: ""; }
+
+.pt-icon-series-add::before {
+  content: ""; }
+
+.pt-icon-series-search::before {
+  content: ""; }
+
+.pt-icon-series-filtered::before {
+  content: ""; }
+
+.pt-icon-series-derived::before {
+  content: ""; }
+
+.pt-icon-series-configuration::before {
+  content: ""; }
+
+.pt-icon-console::before {
+  content: ""; }
+
+.pt-icon-compass::before {
+  content: ""; }
+
+.pt-icon-walk::before {
+  content: ""; }
+
+.pt-icon-taxi::before {
+  content: ""; }
+
+.pt-icon-train::before {
+  content: ""; }
+
 .pt-submenu > .pt-popover-target {
   display: inherit; }
   .pt-submenu > .pt-popover-target > .pt-menu-item {
@@ -5015,7 +5060,7 @@ span.pt-icon {
         line-height: 20px; }
 
 .pt-submenu .pt-popover {
-  position: relative;
+  position: absolute;
   top: -5px;
   left: 5px; }
   .pt-submenu .pt-popover.pt-align-left {
