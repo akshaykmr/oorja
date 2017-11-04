@@ -2,8 +2,9 @@
 // https://github.com/ging/licode
 // I have made changes to the NuveClient as per requirements.
 import { HTTP } from 'meteor/http';
+import CryptoJS from 'crypto-js';
+
 import base64 from './base64';
-import CryptoJS from './hmac_sha1';
 
 const N = {};
 N.Base64 = base64(); // base64 encode decode
