@@ -10,7 +10,7 @@
       "request": "launch",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceRoot}",
-      "userDataDir": "${workspaceRoot}/app/.vscode/out/chrome",
+      "userDataDir": "${workspaceRoot}/.vscode/out/chrome",
       "runtimeExecutable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       "sourceMaps": true
     },
@@ -19,7 +19,7 @@
       "request": "launch",
       "name": "Meteor Server",
       "cwd": "${workspaceRoot}/",
-      "runtimeExecutable": "${workspaceRoot}/app/.meteor/local/dev_bundle/bin/npm",
+      "runtimeExecutable": "${workspaceRoot}/.meteor/local/dev_bundle/bin/npm",
       "restart": true,
       "timeout": 30000,
       "stopOnEntry": false,
