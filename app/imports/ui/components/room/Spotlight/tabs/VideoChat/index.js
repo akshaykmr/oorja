@@ -8,6 +8,8 @@ import classNames from 'classnames';
 import Avatar from '../../../Avatar';
 import roomActivities from '../../../constants/roomActivities';
 
+import VideoStream from '../../../../Media/Video';
+
 import tabPropTypes from '../tabPropTypes';
 import status from '../../../constants/status';
 import './videoChat.scss';
@@ -254,13 +256,7 @@ class VideoChat extends Component {
       <div className={`focussedStream ${noVideo ? 'empty' : ''}`}>
         {
           (focussedStream.video || focussedStream.screen) && !focussedStream.mutedVideo ?
-          (
-            <video
-              src={focussedStream.streamSrc}
-              muted='muted'
-              autoPlay>
-            </video>
-          ) : null
+          (<VideoStream streamSource={focussedStream.streamSource} muted='muted' autoPlay />) : null
         }
         <div className={userInfoCardClasses}>
           <Avatar user={user}></Avatar>

@@ -13,7 +13,7 @@ const defaultState = {};
               video: bool,
               status: status[TRYING_TO_CONNECT, ERROR, CONNECTED etc.]
               screen: bool,
-              streamSrc: '',
+              streamSource: '', // mediStream object
               errorReason: '',
               warningReason: ''
               speaking: bool,

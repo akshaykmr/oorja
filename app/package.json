@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "oorja is a quick to use video/voice chat application with realtime collaborative features",
   "scripts": {
-    "start": "meteor run --inspect-brk --settings settings-development.json",
+    "start": "meteor run --settings settings-development.json",
     "lint": "eslint ."
   },
   "devDependencies": {

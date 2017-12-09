@@ -100,12 +100,12 @@ $avatar-size: 50px;
       margin-right: 5px;
       cursor: pointer;
       transition: transform 0.3s ease-out;
-      
+
       &:hover {
-        transform: scale(1.03, 1.03);
+        transform: translateY(-2px);
       }
       &:active {
-        transform: scale(1.07, 1.07);;
+        transform: scale(0.98, 0.98);;
       }
 
       &.mutedVideo {
@@ -135,7 +135,7 @@ $avatar-size: 50px;
 
         &.warning {
           background-color: yellow !important;
-        }      
+        }
       }
     }
   }

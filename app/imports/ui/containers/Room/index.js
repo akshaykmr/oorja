@@ -460,7 +460,7 @@ class Room extends Component {
       mutedAudio: !!attributes.mutedAudio,
       mutedVideo: !!attributes.mutedVideo,
       screen: isScreenShare,
-      streamSrc: isLocal ? URL.createObjectURL(localStream.stream) : null,
+      streamSource: isLocal ? localStream.stream : null,
       errorReason: '',
       warningReason: '',
     };
@@ -647,11 +647,10 @@ class Room extends Component {
     };
 
     const handleMediaSubscriptionSuccess = () => {
-      const streamSrc = URL.createObjectURL(stream.stream);
       this.props.updateMediaStreams({
         [stream.getID()]: {
           status: { $set: status.CONNECTED },
-          streamSrc: { $set: streamSrc },
+          streamSource: { $set: stream.stream },
           audio: { $set: stream.stream.getAudioTracks().length > 0 },
           video: { $set: stream.stream.getVideoTracks().length > 0 },
         },
@@ -743,7 +742,6 @@ class Room extends Component {
       case MEDIA.BROADCAST:
       case MEDIA.P2P:
         if (this.props.mediaStreams[stream.getID()].video) this.decrementVideoStreamCount();
-        URL.revokeObjectURL(this.props.mediaStreams[stream.getID()].streamSrc);
         this.props.updateMediaStreams({
           $unset: [stream.getID()],
         });

@@ -7,6 +7,9 @@ import hark from 'hark';
 
 import Erizo from '../../../../modules/Erizo';
 
+import VideoStream from '../../Media/Video';
+import AudioStream from '../../Media/Audio';
+
 import SupremeToaster from '../../Toaster';
 
 import JoinRoomForm from '../../../containers/JoinRoomForm';
@@ -69,7 +72,7 @@ export default class GettingReady extends Component {
       video: false,
       mutedAudio: savedSettings ? savedSettings.mutedAudio : false,
       mutedVideo: savedSettings ? savedSettings.mutedVideo : false,
-      streamSrc: '',
+      streamSource: null,
       streamError: false,
       errorReason: '',
       speaking: false,
@@ -120,7 +123,6 @@ export default class GettingReady extends Component {
       videoSize: this.videoQualitySetting[this.stateBuffer.videoQuality],
     });
     erizoStream.addEventListener('access-accepted', () => {
-      const streamSrc = URL.createObjectURL(this.erizoStream.stream);
       this.updateState({
         initialized: { $set: true },
         audio: { $set: erizoStream.stream.getAudioTracks().length > 0 },
@@ -128,7 +130,7 @@ export default class GettingReady extends Component {
         lastGoodVideoQuality: { $set: this.stateBuffer.videoQuality },
         accessAccepted: { $set: true },
         streamError: { $set: false },
-        streamSrc: { $set: streamSrc },
+        streamSource: { $set: this.erizoStream.stream },
       });
       this.saveMediaDeviceSettings();
       const speechEvents = hark(this.erizoStream.stream);
@@ -355,7 +357,7 @@ export default class GettingReady extends Component {
     } else if (this.state.video) {
       return (
         <div className="videoStream">
-          <video src={this.state.streamSrc} autoPlay muted></video>
+          <VideoStream streamSource={this.state.streamSource} muted='muted' autoPlay />
           {
             this.state.mutedVideo ?
             (
@@ -380,7 +382,7 @@ export default class GettingReady extends Component {
       return (
         <div className="audioStream">
           {this.renderMicrophoneTest()}
-          <audio src={this.state.streamSrc} autoPlay muted></audio>
+          <AudioStream streamSource={this.state.streamSource} muted='muted' autoPlay />
         </div>
       );
     }
