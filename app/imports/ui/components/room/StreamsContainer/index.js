@@ -40,14 +40,12 @@ class StreamsContainer extends Component {
   renderVideoStream(stream) {
     const { TRYING_TO_CONNECT, WARNING } = status;
     if (stream.status === TRYING_TO_CONNECT) return null;
-    const indicatorClassNames = classNames({
-      indicator: true,
-      speaking: this.props.streamSpeaking[stream.streamId],
-      warning: stream.status === WARNING,
-    });
+
     const videoClassNames = classNames({
       videoStream: true,
       mutedVideo: stream.mutedVideo,
+      speaking: this.props.streamSpeaking[stream.streamId],
+      warning: stream.status === WARNING,
     });
     return (
       <VideoStream
@@ -60,9 +58,7 @@ class StreamsContainer extends Component {
         key={stream.streamId}
         streamSource={stream.streamSource}
         muted={stream.local ? 'muted' : ''}
-        videoClassNames={videoClassNames}
-        showSpeechIndicator={true}
-        indicatorClassNames={indicatorClassNames}>
+        videoClassNames={videoClassNames}>
       </VideoStream>
     );
   }
