@@ -1,5 +1,5 @@
 import './bugsnag';
-import './cdn'
+import './cdn';
 import './browser-policy';
 import './fixtures';
 import './api';

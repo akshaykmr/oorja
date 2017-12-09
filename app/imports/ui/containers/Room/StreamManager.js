@@ -18,8 +18,8 @@ class StreamManager {
 
   getLocalStreamList() {
     return this.room.erizoRoom.localStreams.keys()
-            .map(streamIdString => parseInt(streamIdString, 10))
-            .map(streamId => this.room.erizoRoom.localStreams.get(streamId));
+      .map(streamIdString => parseInt(streamIdString, 10))
+      .map(streamId => this.room.erizoRoom.localStreams.get(streamId));
   }
 
   getLocalStreamById(streamId) {
@@ -28,12 +28,12 @@ class StreamManager {
 
   getRemoteStreamList() {
     return this.room.erizoRoom.remoteStreams.keys()
-            .map(streamIdString => parseInt(streamIdString, 10))
-            .map(streamId => this.room.erizoRoom.remoteStreams.get(streamId));
+      .map(streamIdString => parseInt(streamIdString, 10))
+      .map(streamId => this.room.erizoRoom.remoteStreams.get(streamId));
   }
 
 
-  /* eslint-disable no-param-reassign*/
+  /* eslint-disable no-param-reassign */
   // NOTE mute unmute only for local streams as of now.
   muteBeforePublish(mediaStream, settings = {}) {
     const { mutedAudio, mutedVideo } = settings;
@@ -63,7 +63,9 @@ class StreamManager {
   saveMediaDeviceSettings(action) {
     const mediaDeviceSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings'));
     if (!mediaDeviceSettings) return;
-    const { MUTE_AUDIO, UNMUTE_AUDIO, MUTE_VIDEO, UNMUTE_VIDEO } = roomMessageTypes;
+    const {
+      MUTE_AUDIO, UNMUTE_AUDIO, MUTE_VIDEO, UNMUTE_VIDEO,
+    } = roomMessageTypes;
     switch (action) {
       case MUTE_AUDIO: mediaDeviceSettings.mutedAudio = true;
         break;
@@ -133,8 +135,7 @@ class StreamManager {
     });
     this.sendMuteUnmuteMessage(mediaStream, roomMessageTypes.UNMUTE_AUDIO);
   }
-  /* eslint-enable no-param-reassign*/
-
+  /* eslint-enable no-param-reassign */
 }
 
 export default StreamManager;

@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import './avatar.scss';
 
 class Avatar extends Component {
-
 // TODO: fix images for fb, twitter. google image works occasionally?
   constructor(props) {
     super(props);
@@ -55,9 +54,9 @@ class Avatar extends Component {
         complete = true;
       }
       seconds++;
-      /* eslint-disable no-param-reassign*/
+      /* eslint-disable no-param-reassign */
       callback.tryImage = setTimeout(tryImage, 1000);
-      /* eslint-enable no-param-reassign*/
+      /* eslint-enable no-param-reassign */
     };
 
     img.onload = tryImage();
@@ -116,8 +115,7 @@ class Avatar extends Component {
     if (words.length > 1) {
       initials = words[0][0] + words[words.length - 1][0];
     } else if (words.length === 1 && words[0] !== '') {
-      initials = words[0][0];
-      if (words[0][1]) initials += words[0][1];
+      initials = `${words[0][0]}${words[0][1] ? words[0][1] : ''}`;
     }
     return initials;
   }
@@ -127,7 +125,9 @@ class Avatar extends Component {
     // pararms to be picked from user object if in props, else explicitly specified.
     const paramContainer = this.props.user ? this.props.user : this.props;
     const { pictureError, loadComplete, pictureSrc } = this.state;
-    const { name, initials, textAvatarColor, avatarStyle } = paramContainer;
+    const {
+      name, initials, textAvatarColor, avatarStyle,
+    } = paramContainer;
     const text = initials || this.computeInitials(name);
     const defaultStyle = {
       backgroundImage: pictureSrc && loadComplete && !pictureError ? `url(${pictureSrc})` : null,

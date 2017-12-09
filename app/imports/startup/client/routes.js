@@ -2,7 +2,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Router, Route, IndexRoute, browserHistory } from 'react-router';
-import PropTypes from 'prop-types';
 
 // Redux related
 import { createStore, applyMiddleware } from 'redux';
@@ -27,7 +26,7 @@ import rootReducer from '../../ui/reducers';
 
 const createStoreWithMiddleware = applyMiddleware(ReduxThunk, ReduxPromise)(createStore);
 
-/* eslint-disable no-underscore-dangle */
+/* eslint-disable */
 const store = createStoreWithMiddleware(rootReducer,
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );
@@ -52,6 +51,6 @@ Meteor.startup(() => {
         </Route>
       </Router>
     </Provider>,
-    document.getElementById('react-root')
+    document.getElementById('react-root'),
   );
 });

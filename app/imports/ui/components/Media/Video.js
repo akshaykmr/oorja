@@ -4,7 +4,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 class VideoStream extends Component {
-
   constructor(props) {
     super(props);
 
@@ -44,7 +43,7 @@ class VideoStream extends Component {
       </div>
     );
   }
- }
+}
 
 VideoStream.propTypes = {
   streamSource: PropTypes.object.isRequired,

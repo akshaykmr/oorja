@@ -1,4 +1,4 @@
-/* global location*/
+/* global window */
 
 import React, { Component } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
@@ -14,11 +14,10 @@ import './info.scss';
 import roomActivities from '../../../constants/roomActivities';
 
 class Info extends Component {
-
   constructor(props) {
     super(props);
     this.onCopy = this.onCopy.bind(this);
-    const roomLink = location.href;
+    const roomLink = window.location.href;
     this.state = {
       roomLink,
       copied: false,

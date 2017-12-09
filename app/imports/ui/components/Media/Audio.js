@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 class AudioStream extends Component {
-
   componentDidMount() {
     this.audioElement.srcObject = this.props.streamSource;
   }
@@ -22,7 +21,7 @@ class AudioStream extends Component {
       </audio>
     );
   }
- }
+}
 
 AudioStream.propTypes = {
   streamSource: PropTypes.object.isRequired,

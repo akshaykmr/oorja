@@ -56,7 +56,7 @@ class Sidebar extends Component {
   }
 
   render() {
-    const activeTab = this.state.activeTab;
+    const { activeTab } = this.state;
 
     // change styling here for mobile later.
     const sidebarClassNames = {

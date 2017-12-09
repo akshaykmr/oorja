@@ -1,4 +1,4 @@
-/* global location document window URL*/
+/* global location document window URL */
 import { Meteor } from 'meteor/meteor';
 
 import React, { Component } from 'react';
@@ -50,7 +50,6 @@ const roomMessageTypes = {
 };
 
 class Room extends Component {
-
   constructor(props) {
     super(props);
     this.roomName = props.roomInfo.roomName;
@@ -139,8 +138,8 @@ class Room extends Component {
       videoStreamCount: 0,
 
       uiSize: this.calculateUISize(),
-      roomHeight: innerHeight,
-      roomWidth: innerWidth,
+      roomHeight: window.innerHeight,
+      roomWidth: window.innerWidth,
 
 
       settings: {
@@ -163,7 +162,7 @@ class Room extends Component {
     let breakRatio = uiConfig.defaultBreakRatio;
 
     if (this.state) { // component has initialized
-      const settings = this.state.settings;
+      const { settings } = this.state;
       breakRatio = settings.uiBreakRatio;
       breakWidth = settings.uiBreakWidth;
     }
@@ -203,7 +202,7 @@ class Room extends Component {
           sessionId: this.sessionId,
           type: streamTypes.DATA.BROADCAST,
 
-           // [tabId, ...]  list of tabs that are loaded / ready to listen for messages
+          // [tabId, ...]  list of tabs that are loaded / ready to listen for messages
           activeTabs: [],
         },
       });
@@ -224,7 +223,7 @@ class Room extends Component {
       .then(({ erizoToken }) => {
         connectToErizo(erizoToken, true);
       })
-      .catch(() => { location.reload(); });
+      .catch(() => { window.location.reload(); });
   }
 
   // to be only called once when tab is ready
@@ -260,7 +259,7 @@ class Room extends Component {
       this.activityListener.dispatch(roomActivities.ROOM_DISCONNECTED);
       this.updateState({ roomConnectionStatus: { $set: status.DISCONNECTED } });
       this.stateBuffer.connectedUsers.forEach((user) => {
-        let sessionCount = user.sessionCount;
+        let { sessionCount } = user;
         while (sessionCount--) {
           this.disconnectUser(user, this.sessionId);
         }
@@ -359,7 +358,7 @@ class Room extends Component {
     mediaStream.addEventListener('access-accepted', () => {
       this.erizoRoom.publish(
         mediaStream,
-        { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW }
+        { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW },
       );
       mediaStream.stream.getVideoTracks()[0].onended = this.stopScreenSharingStream;
     });
@@ -370,7 +369,7 @@ class Room extends Component {
             could not access your screen for sharing 😕
             <br/>
             Note: Currently works on
-            chrome, <a style={{ color: 'greenyellow' }} target="_blank" href="https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff?hl=en-US"> install this extension</a>
+            chrome, <a style={{ color: 'greenyellow' }} target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff?hl=en-US"> install this extension</a>
           </div>
         ),
         intent: Intent.WARNING,
@@ -423,7 +422,7 @@ class Room extends Component {
       this.streamManager.muteBeforePublish(mediaStream, mediaDeviceSettings);
       this.erizoRoom.publish(
         mediaStream,
-        { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW }
+        { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW },
       );
     });
     mediaStream.addEventListener('access-denied', () => {
@@ -593,7 +592,7 @@ class Room extends Component {
     };
 
     switch (attributes.type) {
-      case DATA.BROADCAST : subscribeDataBroadcastStream();
+      case DATA.BROADCAST: subscribeDataBroadcastStream();
         break;
       case DATA.P2P: // subscribeP2PDataStream();
         break;
@@ -677,7 +676,7 @@ class Room extends Component {
     const attributes = stream.getAttributes();
     const { DATA, MEDIA } = streamTypes;
     switch (attributes.type) {
-      case DATA.BROADCAST :
+      case DATA.BROADCAST:
         // set listners for data
         stream.addEventListener('stream-data', (streamEvent) => {
           this.messenger.recieve(attributes.userId, attributes.sessionId, streamEvent.msg);
@@ -754,7 +753,6 @@ class Room extends Component {
 
     if (this.streamManager.isLocalStream(stream)) {
       console.info('local stream removed');
-      return;
     }
   }
 
@@ -762,13 +760,13 @@ class Room extends Component {
     // adds user to connectedUsers list in state, increments sessionCount if already there.
     const connectedUser = _.find(
       this.stateBuffer.connectedUsers,
-      { userId: user.userId }
+      { userId: user.userId },
     );
 
     if (connectedUser) {
       const connectedUserIndex = _.findIndex(
         this.stateBuffer.connectedUsers,
-        { userId: connectedUser.userId }
+        { userId: connectedUser.userId },
       );
 
       const updatedUser = update(
@@ -776,7 +774,7 @@ class Room extends Component {
         {
           sessionCount: { $set: connectedUser.sessionCount + 1 },
           sessionList: { $push: [sessionId] },
-        }
+        },
       );
       this.updateState({
         connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
@@ -795,7 +793,7 @@ class Room extends Component {
   disconnectUser(user, sessionId) {
     const connectedUserIndex = _.findIndex(
       this.stateBuffer.connectedUsers,
-      { userId: user.userId }
+      { userId: user.userId },
     );
     if (connectedUserIndex === -1) {
       throw new Meteor.Error('User does not seem to be connected');
@@ -808,7 +806,7 @@ class Room extends Component {
         {
           sessionCount: { $set: connectedUser.sessionCount - 1 },
           sessionList: { $set: connectedUser.sessionList.filter(id => id !== sessionId) },
-        }
+        },
       );
 
       this.updateState({
@@ -827,12 +825,14 @@ class Room extends Component {
   }
 
   messageHandler(message) {
-    const { SPEECH, STREAM_SUBSCRIBE_SUCCESS, MUTE_AUDIO, UNMUTE_AUDIO,
-      MUTE_VIDEO, UNMUTE_VIDEO } = roomMessageTypes;
+    const {
+      SPEECH, STREAM_SUBSCRIBE_SUCCESS, MUTE_AUDIO, UNMUTE_AUDIO,
+      MUTE_VIDEO, UNMUTE_VIDEO,
+    } = roomMessageTypes;
     const roomMessage = message.content;
     const handleSpeechMessage = () => {
       const eventDetail = roomMessage.content;
-      const streamId = eventDetail.streamId;
+      const { streamId } = eventDetail;
       switch (eventDetail.action) {
         case SPEAKING:
           if (this.props.mediaStreams[streamId]) {
@@ -1053,9 +1053,9 @@ class Room extends Component {
     const { mediaStreams } = this.props;
     if (!mediaStreams) return uiConfig.COMPACT;
     const atleastOneVideoStream = Object.keys(mediaStreams)
-        .map(streamId => mediaStreams[streamId])
-        .some(stream =>
-          stream.video && !stream.mutedVideo && (stream.status !== status.TRYING_TO_CONNECT));
+      .map(streamId => mediaStreams[streamId])
+      .some(stream =>
+        stream.video && !stream.mutedVideo && (stream.status !== status.TRYING_TO_CONNECT));
     if (atleastOneVideoStream) return uiConfig.MEDIUM;
 
     return uiConfig.COMPACT;

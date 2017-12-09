@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import './settings.scss';
 
 class Settings extends Component {
-
   render() {
     return (
       <div className={this.props.classNames} style={this.props.style}>

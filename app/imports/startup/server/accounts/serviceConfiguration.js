@@ -1,8 +1,10 @@
 import { Meteor } from 'meteor/meteor';
 import { ServiceConfiguration } from 'meteor/service-configuration';
 
-const { github, google, facebook, twitter,
-  linkedin, weibo, reddit, twitch } = Meteor.settings.private;
+const {
+  github, google, facebook, twitter,
+  linkedin, weibo, reddit, twitch,
+} = Meteor.settings.private;
 
 ServiceConfiguration.configurations.upsert(
   { service: 'github' },
@@ -11,7 +13,7 @@ ServiceConfiguration.configurations.upsert(
       clientId: github.clientId,
       secret: github.secret,
     },
-  }
+  },
 );
 
 ServiceConfiguration.configurations.upsert(
@@ -21,7 +23,7 @@ ServiceConfiguration.configurations.upsert(
       appId: reddit.clientId,
       secret: reddit.secret,
     },
-  }
+  },
 );
 
 ServiceConfiguration.configurations.upsert(
@@ -31,7 +33,7 @@ ServiceConfiguration.configurations.upsert(
       clientId: google.clientId,
       secret: google.secret,
     },
-  }
+  },
 );
 
 ServiceConfiguration.configurations.upsert(
@@ -41,7 +43,7 @@ ServiceConfiguration.configurations.upsert(
       appId: facebook.clientId,
       secret: facebook.secret,
     },
-  }
+  },
 );
 
 ServiceConfiguration.configurations.upsert(
@@ -51,7 +53,7 @@ ServiceConfiguration.configurations.upsert(
       consumerKey: twitter.consumerKey,
       secret: twitter.secret,
     },
-  }
+  },
 );
 
 ServiceConfiguration.configurations.upsert(
@@ -61,7 +63,7 @@ ServiceConfiguration.configurations.upsert(
       clientId: linkedin.clientId,
       secret: linkedin.secret,
     },
-  }
+  },
 );
 
 ServiceConfiguration.configurations.upsert(
@@ -72,7 +74,7 @@ ServiceConfiguration.configurations.upsert(
       redirectUri: `${Meteor.absoluteUrl()}_oauth/twitch?close`,
       secret: twitch.secret,
     },
-  }
+  },
 );
 
 ServiceConfiguration.configurations.upsert(
@@ -82,7 +84,7 @@ ServiceConfiguration.configurations.upsert(
       clientId: weibo.clientId,
       secret: weibo.secret,
     },
-  }
+  },
 );
 
 // Deny all client-side updates to user documents

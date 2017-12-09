@@ -15,7 +15,6 @@ import roomActivities from '../constants/roomActivities';
 import './streamsContainer.scss';
 
 class StreamsContainer extends Component {
-
   constructor(props) {
     super(props);
     this.renderUserStreamBox = this.renderUserStreamBox.bind(this);
@@ -53,7 +52,7 @@ class StreamsContainer extends Component {
         onClick={() => {
           this.props.dispatchRoomActivity(
             roomActivities.STREAM_CLICKED,
-            stream.streamId
+            stream.streamId,
           );
         }}
         key={stream.streamId}
@@ -78,8 +77,8 @@ class StreamsContainer extends Component {
     });
 
     const atleastOneSpeakingMutedVideo = userMediaStreams.some(stream =>
-      (stream.video && stream.mutedVideo && streamSpeaking[stream.streamId])
-    );
+      (stream.video && stream.mutedVideo && streamSpeaking[stream.streamId]));
+
     const atleastOneSpeakingMediaStream = (userMediaStreams).some((stream) => {
       if (stream.status === status.TRYING_TO_CONNECT) return false;
       return streamSpeaking[stream.streamId];
@@ -120,7 +119,7 @@ class StreamsContainer extends Component {
           onClick={() => {
             this.props.dispatchRoomActivity(
               roomActivities.USER_CLICKED,
-              connectedUser.userId
+              connectedUser.userId,
             );
           }} />
       </div>
@@ -162,7 +161,7 @@ class StreamsContainer extends Component {
       </div>
     );
   }
- }
+}
 
 const mapStateToProps = state => ({
   mediaStreams: state.mediaStreams,

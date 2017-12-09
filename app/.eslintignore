@@ -1,4 +1,6 @@
-*/client/compatibility/*
-*/Reacteroids/src/*.js
-*/Spotlight/tabRegistry.js
-*/deployment/*
+client/compatibility/*
+packages/twitch-oauth/*
+deployment/*
+imports/ui/components/room/Spotlight/tabs/Reacteroids/src/*
+imports/ui/components/room/Spotlight/tabRegistry.js
+imports/modules/Erizo/*

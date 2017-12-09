@@ -10,9 +10,9 @@ import roomActivities from '../constants/roomActivities';
 
 import { addTab } from '../../../actions/roomConfiguration';
 
-/*eslint-disable*/
+/* eslint-disable*/
 import tabRegistry from './tabRegistry';
-/*eslint-enable*/
+/* eslint-enable */
 
 import './spotlight.scss';
 
@@ -24,7 +24,6 @@ import Info from './tabs/Info';
 import tabStatus from './tabStatus';
 
 class Spotlight extends Component {
-
   constructor(props) {
     super(props);
 
@@ -32,12 +31,12 @@ class Spotlight extends Component {
     this.updateState = this.updateState.bind(this);
     this.initialTabState = this.initialTabState.bind(this);
 
-    this.tabComponents = {  // id -> reactComponent(tab)
+    this.tabComponents = { // id -> reactComponent(tab)
       1: Info,
     };
 
     const defaultTabs = props.roomInfo.tabs;
-    /* eslint-disable no-param-reassign*/
+    /* eslint-disable no-param-reassign */
     const tabStatusRegistry = defaultTabs.reduce((registry, tab) => {
       const tabState = this.initialTabState(tab);
       if (tabState.status === tabStatus.INITIALIZING) {
@@ -48,7 +47,7 @@ class Spotlight extends Component {
 
       return registry;
     }, {});
-    /* eslint-enable no-param-reassign*/
+    /* eslint-enable no-param-reassign */
 
     this.defaultTabId = this.props.roomInfo.defaultTabId;
 
@@ -161,9 +160,8 @@ class Spotlight extends Component {
       this.fetchTabComponent(tabId, true);
       return;
     }
-    addTab(this.props.roomInfo._id, tabId).then(
-      () => { this.fetchTabComponent(tabId, true); }
-    );
+    addTab(this.props.roomInfo._id, tabId)
+      .then(() => { this.fetchTabComponent(tabId, true); });
   }
 
   render() {
@@ -193,7 +191,7 @@ class Spotlight extends Component {
 
       const renderBadge = () => {
         const { content } = tab.badge;
-        let backgroundColor = tab.badge.backgroundColor;
+        let { backgroundColor } = tab.badge;
         if (!backgroundColor) {
           backgroundColor = content ? '#1b1d1e' : 'orange';
         }
@@ -210,19 +208,18 @@ class Spotlight extends Component {
         return null;
       };
 
-      const renderBox = () => {
-        return (
-          <div className="box">
-            {renderBadge()}
-            <div
-              onClick={() => { this.switchToTab(tab.tabId); }}
-              className="tabIcon"
-              style={switchStyle}>
-              <i className={`icon ion-${tab.icon}`}></i>
-            </div>
+      const renderBox = () => (
+        <div className="box">
+          {renderBadge()}
+          <div
+            onClick={() => { this.switchToTab(tab.tabId); }}
+            className="tabIcon"
+            style={switchStyle}>
+            <i className={`icon ion-${tab.icon}`}></i>
           </div>
-        );
-      }
+        </div>
+      );
+
       return (
         <Tooltip
           key={tab.tabId}

@@ -50,14 +50,14 @@ class Messenger {
   }
 
   recieve(userId, sessionId, message) {
-    /* eslint-disable no-param-reassign*/
+    /* eslint-disable no-param-reassign */
     // get this data from stream attributes locally and append to the message
     // instead of having it being sent everytime.
     message.from = {
       userId,
       sessionId,
     };
-    /* eslint-enable no-param-reassign*/
+    /* eslint-enable no-param-reassign */
     const { messageHandlers } = this;
     const callHandlers = () => {
       const { ROOM_MESSAGE, TAB_MESSAGE } = messageType;
@@ -93,12 +93,11 @@ class Messenger {
       this.recieve(
         this.room.roomAPI.getUserId(),
         this.room.sessionId,
-        message
+        message,
       );
       return;
     }
     this.room.dataBroadcastStream.sendData(message);
-    return;
   }
 }
 

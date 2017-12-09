@@ -1,5 +1,5 @@
 import React from 'react';
-/* eslint-disable max-len*/
+/* eslint-disable max-len */
 const MinimalLogo = () => (
   <svg height="100%" viewBox="0 0 96 96" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
       <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
@@ -18,5 +18,5 @@ const MinimalLogo = () => (
       </g>
   </svg>
 );
-/* eslint-enable max-len*/
+/* eslint-enable max-len */
 export default MinimalLogo;

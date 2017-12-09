@@ -94,7 +94,9 @@ class LoginWithService extends Component {
       return null;
     }
 
-    return this.services.map(({ service, login, icon, color }, index) => {
+    return this.services.map(({
+      service, login, icon, color,
+    }, index) => {
       const loginButtonClasses = classNames({
         loginButton: true,
         active: loggedIn && loginService === service,
@@ -125,7 +127,7 @@ class LoginWithService extends Component {
         text = 'You have successfully signed out.';
       } else {
         text = ';
-      }*/
+      } */
       return (
         <span className='animate fade-in'>{text}</span>
       );

@@ -14,7 +14,7 @@ class App extends Component {
     return (
       <div>
         <div className="versionTag">
-          <a href="https://github.com/akshayKMR/oorja" target="_blank">
+          <a href="https://github.com/akshayKMR/oorja" target="_blank" rel="noopener noreferrer">
             <strong>ALPHA</strong>
           </a>
         </div>

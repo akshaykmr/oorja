@@ -9,7 +9,6 @@ import './Reacteroids.scss';
 
 
 class Reacteroids extends Component {
-
   render() {
     return (
       <div className={this.props.classNames} style={this.props.style}>

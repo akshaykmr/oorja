@@ -21,7 +21,6 @@ import './roomSetup.scss';
 // Should look good starting from 300x400px
 
 class RoomSetup extends Component {
-
   constructor(props) {
     super(props);
 
@@ -93,7 +92,7 @@ class RoomSetup extends Component {
           message: error.reason,
           timeout: 4000,
         });
-      }
+      },
     );
   }
 
@@ -151,8 +150,9 @@ class RoomSetup extends Component {
 
   render() {
     // sexy form goes here. learn some styling yo!
-
-    const { roomNameTouched, validName, customization, customRoom, waitingForServer } = this.state;
+    const {
+      roomNameTouched, validName, customization, customRoom, waitingForServer,
+    } = this.state;
     return (
       <div>
         <div className="roomSetup room-form">

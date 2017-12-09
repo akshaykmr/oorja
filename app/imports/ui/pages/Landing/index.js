@@ -68,12 +68,12 @@ class Landing extends React.Component {
             <hr/>
             <br/>
             <div id="donate">
-              <a className="opensource" href="https://github.com/akshayKMR/oorja" target="_blank">oorja is open source and extensible</a> <i className="ion ion-ios-heart"></i>
-              <br/> It's a personal project which can be made even better with a few more
+              <a className="opensource" href="https://github.com/akshayKMR/oorja" target="_blank" rel="noopener noreferrer">oorja is open source and extensible</a> <i className="ion ion-ios-heart"></i>
+              <br/>{`It's a personal project which can be made even better with a few more
               contributors. There are no ads or tracking on this website. I would really appreciate
-              donations for continued development and financing server costs of oorja.io
+              donations for continued development and financing server costs of oorja.io`}
               <br/>
-              <a className="paypalLink" target="_blank" href="https://paypal.me/akshaykmr" ><span className="donateLink">PayPal</span></a> <br/>
+              <a className="paypalLink" target="_blank" rel="noopener noreferrer" href="https://paypal.me/akshaykmr" ><span className="donateLink">PayPal</span></a> <br/>
               <span className="bitcoin">
                 <a href="bitcoin:1FzAAeMPxdBBhcuXH8XDfXKq5GTcBUncHT" className="bitcoinLink">
                   <i style={{ color: '#FF9900' }} className="ion ion-social-bitcoin"></i>
@@ -85,14 +85,14 @@ class Landing extends React.Component {
               </span>
               <span></span>
               <br/> <br/>
-              <a href="https://akshay.oorja.io" target="_blank" id='about'>About me</a>
+              <a href="https://akshay.oorja.io" target="_blank" rel="noopener noreferrer" id='about'>About me</a>
             </div>
             <br/>
             Got some feedback or something to say?
             <br/>send a
             mail: <a href="mailto:oorja.akshay@gmail.com?Subject=Hello%20Akshay">
             oorja.akshay@gmail.com </a>
-            or find me on twitter <a href="https://twitter.com/uberakshay" target="_blank">@uberakshay</a>
+            or find me on twitter <a href="https://twitter.com/uberakshay" target="_blank" rel="noopener noreferrer">@uberakshay</a>
 
             <br/><br/>
             <br/> <hr/>
@@ -105,7 +105,7 @@ class Landing extends React.Component {
               <br/>
               <b>Note:</b> If you are using chrome you will need to install the
               <a
-                target="_blank"
+                target="_blank" rel="noopener noreferrer"
                 href="https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff?hl=en-US"> screensharing
                 extension
               </a> to be able to share your screen.

@@ -116,27 +116,29 @@ const unexpectedError = ({ dispatch, error, roomName }) => {
 // this action relies redux-thunk middleware.
 // this short form is less readable but I'm going to keep it this way to remember it.
 export const createRoom = roomSpecification =>
-    dispatch =>
-      Meteor.callPromise('createRoom', roomSpecification).then(
-        (response) => {
-          const { createdRoomName, roomSecret, passwordEnabled, roomAccessToken } = response;
-          // its called createdRoomName because some minor changes may be done to
-          // the name send by the client above.
-          // store secret in localStorage
-          dispatch({
-            type: CREATE_ROOM,
-            payload: { createdRoomName },
-          });
+  dispatch =>
+    Meteor.callPromise('createRoom', roomSpecification).then(
+      (response) => {
+        const {
+          createdRoomName, roomSecret, passwordEnabled, roomAccessToken,
+        } = response;
+        // its called createdRoomName because some minor changes may be done to
+        // the name send by the client above.
+        // store secret in localStorage
+        dispatch({
+          type: CREATE_ROOM,
+          payload: { createdRoomName },
+        });
 
-          if (passwordEnabled) {
-            dispatch(storeRoomAccessToken(createdRoomName, roomAccessToken));
-          } else {
-            dispatch(storeRoomSecret(createdRoomName, roomSecret));
-          }
-          return Promise.resolve(response);
-        },
-        error => Promise.reject(error)
-      );
+        if (passwordEnabled) {
+          dispatch(storeRoomAccessToken(createdRoomName, roomAccessToken));
+        } else {
+          dispatch(storeRoomSecret(createdRoomName, roomSecret));
+        }
+        return Promise.resolve(response);
+      },
+      error => Promise.reject(error),
+    );
 
 
 export const getRoomInfo = (roomName, userToken = null) => ({
@@ -178,7 +180,7 @@ export const joinRoom = (roomId, name = '', textAvatarColor = '') =>
       unexpectedError(dispatch);
       return Promise.resolve();
     }
-    const roomName = room.roomName;
+    const { roomName } = room;
     const credentials = getRoomCredentials(roomName);
     return Meteor.callPromise('joinRoom', roomId, credentials, name, textAvatarColor).then(
       ({ erizoToken, userId, newUserToken }) => {
@@ -200,7 +202,7 @@ export const addTab = (roomId, tabId) => {
   const credentials = getRoomCredentials(room.roomName);
   return Meteor.callPromise('addTab', room._id, credentials, tabId).then(
     () => Promise.resolve(),
-    () => Promise.reject()
+    () => Promise.reject(),
   );
 };
 

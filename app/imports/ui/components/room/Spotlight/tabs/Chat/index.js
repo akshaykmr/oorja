@@ -17,7 +17,6 @@ import Spinner from '../../Spinner';
 import './chat.scss';
 
 class Chat extends Component {
-
   constructor(props) {
     super(props);
     this.y = null;
@@ -71,7 +70,9 @@ class Chat extends Component {
   }
 
   componentDidMount() {
-    const { roomAPI, connectedUsers, tabInfo, roomInfo, setTabReady } = this.props;
+    const {
+      roomAPI, connectedUsers, tabInfo, roomInfo, setTabReady,
+    } = this.props;
     new Y({
       db: {
         name: 'indexeddb',
@@ -147,7 +148,7 @@ class Chat extends Component {
       text: message.text,
     };
 
-    let newMessageCount = this.stateBuffer.newMessageCount;
+    let { newMessageCount } = this.stateBuffer;
     if (this.stateBuffer.freeNavigation || !this.props.onTop) {
       newMessageCount += 1;
     }
@@ -212,11 +213,10 @@ class Chat extends Component {
       text: chatInputValue.trim(),
     };
 
-    const y = this.y;
     this.updateState({
       chatInputValue: { $set: '' },
     });
-    y.share.chat.push([message]);
+    this.y.share.chat.push([message]);
   }
 
   renderChatBubble(chatMessage, index) {

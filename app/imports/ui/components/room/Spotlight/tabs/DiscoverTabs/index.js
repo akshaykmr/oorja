@@ -7,14 +7,13 @@ import tabPropTypes from '../tabPropTypes';
 import SupremeToaster from '../../../../Toaster';
 import './discoverTabs.scss';
 
-/* eslint-disable*/
+/* eslint-disable */
 import tabRegistry from '../../tabRegistry';
-/* eslint-enable*/
+/* eslint-enable */
 
 import tabStatus from '../../tabStatus';
 
 class DiscoverTabs extends Component {
-
   constructor(props) {
     super(props);
 
@@ -43,7 +42,7 @@ class DiscoverTabs extends Component {
     let loading = false;
     let iconColor = '#1a7ecb';
     if (localTab) {
-      const status = localTab.status;
+      const { status } = localTab;
       if (status === tabStatus.LOADED) {
         icon = 'ion-ios-checkmark';
         iconColor = 'darkseagreen';

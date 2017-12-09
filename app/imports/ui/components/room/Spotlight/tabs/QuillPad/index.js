@@ -21,7 +21,6 @@ import Spinner from '../../Spinner';
 // Quill.register('modules/imageDrop', ImageDrop);
 
 class QuillPad extends Component {
-
   constructor(props) {
     super(props);
     this.quill = null; // will be replace by quill instance later.
@@ -31,7 +30,9 @@ class QuillPad extends Component {
     };
   }
   componentDidMount() {
-    const { roomAPI, connectedUsers, tabInfo, roomInfo, setTabReady } = this.props;
+    const {
+      roomAPI, connectedUsers, tabInfo, roomInfo, setTabReady,
+    } = this.props;
     new Y({
       db: {
         name: 'indexeddb',
@@ -61,7 +62,7 @@ class QuillPad extends Component {
           toolbar: [
             [{ size: ['small', false, 'large', 'huge'] }],
             ['bold', 'italic', 'underline'],
-            [{ color: [] }, { background: [] }],    // Snow theme fills in values
+            [{ color: [] }, { background: [] }], // Snow theme fills in values
             [{ script: 'sub' }, { script: 'super' }],
             ['link', 'image'],
             ['link', 'code-block'],

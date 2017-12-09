@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import './oorja.scss';
-/* eslint-disable max-len*/
+/* eslint-disable max-len */
 const Oorja = props => (
   <svg
     height="100%"
@@ -97,6 +97,6 @@ Oorja.propTypes = {
   onClick: PropTypes.func,
   animate: PropTypes.bool,
 };
-/* eslint-enable max-len*/
+/* eslint-enable max-len */
 
 export default Oorja;

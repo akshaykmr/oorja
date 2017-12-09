@@ -20,7 +20,6 @@ import './JoinRoomForm.scss';
 
 // inputs user name and joins the room.
 class JoinRoomForm extends Component {
-
   constructor(props) {
     super(props);
 
@@ -122,15 +121,14 @@ class JoinRoomForm extends Component {
       ...this.state,
       waiting: true,
     });
-    this.props.joinRoom(this.props.roomInfo._id, name, textAvatarColor).then(
-      () => {
+    this.props.joinRoom(this.props.roomInfo._id, name, textAvatarColor)
+      .then(() => {
         this.setState({
           ...this.state,
           waiting: false,
         });
         this.props.processComplete();
-      },
-    );
+      });
   }
 
   enableAnon() {
@@ -142,8 +140,10 @@ class JoinRoomForm extends Component {
   }
 
   render() {
-    const { name, loggedIn, picture, waiting, textAvatarColor, existingUser, goAnon, validName }
-      = this.state;
+    const {
+      name, loggedIn, picture, waiting, textAvatarColor,
+      existingUser, goAnon, validName,
+    } = this.state;
 
     const inputAttr = {
       disabled: loggedIn || !!this.existingUser || waiting,

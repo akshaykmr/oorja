@@ -12,7 +12,11 @@ import { Rooms } from '../../../collections/common';
 import N from '../../../modules/NuveClient/';
 import tabRegistry from './tabRegistry';
 
-const { private: { saltRounds, Nuve, JWTsecret, JWTalgo, tokenVersion } } = Meteor.settings;
+const {
+  private: {
+    saltRounds, Nuve, JWTsecret, JWTalgo, tokenVersion,
+  },
+} = Meteor.settings;
 
 N.API.init(Nuve.serviceId, Nuve.serviceKey, Nuve.host);
 
@@ -80,8 +84,7 @@ Meteor.methods({
     checkIfValidRoomName(roomName);
 
     const passwordEnabled = roomSpecification.shareChoice === shareChoices.PASSWORD;
-    const password = passwordEnabled ?
-                      hashPassword(roomSpecification.password, saltRounds) : null;
+    const password = passwordEnabled ? hashPassword(roomSpecification.password, saltRounds) : null;
 
     const roomSecret = !passwordEnabled ? Random.secret(20) : null;
 
@@ -134,7 +137,7 @@ Meteor.methods({
 
   getRoomInfo(roomName, userToken) {
     check(roomName, String);
-    /* eslint-disable new-cap*/
+    /* eslint-disable new-cap */
     check(userToken, Match.Maybe(String));
     /* eslint-enable new-cap */
     const room = Rooms.findOne({ roomName, archived: false });
@@ -233,14 +236,15 @@ Meteor.methods({
         if (words.length > 1) {
           initials = words[0][0] + words[words.length - 1][0];
         } else if (words.length === 1 && words[0] !== '') {
-          initials = words[0][0];
-          if (words[0][1]) initials += words[0][1];
+          initials = `${words[0][0]}${words[0][1] ? words[0][1] : ''}`;
         }
         return initials;
       };
       let profile = {};
       if (user) {
+        /* eslint-disable */
         profile = user.profile;
+        /* eslint-enable */
         profile.initials = computeInitials(user.profile.firstName + user.profile.LastName);
       } else {
         profile.firstName = name.trim();
@@ -298,7 +302,7 @@ Meteor.methods({
       }
     }
 
-    const tabs = room.tabs;
+    const { tabs } = room;
     if (_.find(tabs, { tabId })) return;
     tabs.push(tabRegistry[tabId]);
     Rooms.update(roomId, {

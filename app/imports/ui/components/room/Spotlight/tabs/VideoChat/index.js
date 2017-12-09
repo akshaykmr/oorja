@@ -15,7 +15,6 @@ import status from '../../../constants/status';
 import './videoChat.scss';
 
 class VideoChat extends Component {
-
   constructor(props) {
     super(props);
 
@@ -280,8 +279,8 @@ class VideoChat extends Component {
         if (userCount <= 1) {
           return (
             <div className="header nobodyHere">
-              <div className="text">It doesn't look like there is anyone
-               {userCount === 0 ? '' : ' else'} in the room
+              <div className="text">
+              {`It doesn't look like there is anyone ${userCount === 0 ? '' : ' else'} in the room `}
               </div>
               <button onClick = {this.goToInfoTab}
                 type="button" className="pt-button pt-intent-success">
@@ -293,7 +292,9 @@ class VideoChat extends Component {
 
         return (
           <div className="header noMediaStreams">
-            <div className="text">There doesn't seem to be any incoming video or audio feed</div>
+            <div className="text">
+              {"There doesn't seem to be any incoming video or audio feed"}
+            </div>
           </div>
         );
       }

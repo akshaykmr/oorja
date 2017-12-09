@@ -1,4 +1,4 @@
-/* global document */
+/* global document window */
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -22,16 +22,15 @@ import Room from '../Room';
 import { Rooms as MongoRoom } from '../../../collections/common';
 
 import { getRoomInfo, deleteRoomSecret, storeRoomSecret, deleteRoomUserId, deleteErizoToken,
-        deleteRoomAccessToken, joinRoom } from '../../actions/roomConfiguration';
+  deleteRoomAccessToken, joinRoom } from '../../actions/roomConfiguration';
 
 import './door.scss';
 
 class Door extends Component {
-
   constructor(props) {
     super(props);
 
-    const roomName = this.props.params.roomName;
+    const { roomName } = this.props.params;
     this.roomName = roomName;
     this.roomSecret = localStorage.getItem(`roomSecret:${roomName}`);
     this.roomAccessToken = localStorage.getItem(`roomAccessToken:${roomName}`);
@@ -72,7 +71,7 @@ class Door extends Component {
       const currentTime = (new Date()).getTime();
       if (currentTime > (this.lastActiveTime + 7500)) {
         // resumed from sleep ?
-        if (Meteor.settings.public.refreshOnWake) location.reload();
+        if (Meteor.settings.public.refreshOnWake) window.location.reload();
       }
       this.lastActiveTime = currentTime;
     }, 3000); // check every 3 seconds
@@ -116,7 +115,6 @@ class Door extends Component {
           timeout: 6000,
         });
         browserHistory.push('/');
-        return;
       } else if (!roomInfo.passwordEnabled && !self.roomSecret) {
         // fail? either user can create a new room or get a new shareLink.
         SupremeToaster.show({
@@ -126,7 +124,6 @@ class Door extends Component {
           timeout: 10000,
         });
         browserHistory.push('/');
-        return;
       } else if (roomInfo.passwordEnabled && !self.roomAccessToken) {
         SupremeToaster.show({
           message: 'This room is password protected (°ロ°)☝',
@@ -158,7 +155,9 @@ class Door extends Component {
 
   gotoStage(stage) {
     const { INITIALIZING, GETTING_READY, SHOW_TIME } = this.stages;
-    const { roomName, roomSecret, roomUserId, roomAccessToken } = this;
+    const {
+      roomName, roomSecret, roomUserId, roomAccessToken,
+    } = this;
     // const previousStage = this.stateBuffer.stage;
     // custom action before switching to stage
     switch (stage) {
@@ -194,7 +193,7 @@ class Door extends Component {
     const self = this;
     // custom action after switching to stage.
     switch (stage) {
-      case INITIALIZING :
+      case INITIALIZING:
         (async function subscribeToRoomInfo() {
           self.gotoStage(self.stages.LOADING);
           self.roomInfoSubscriptionHandle = Meteor.subscribe(
@@ -203,7 +202,7 @@ class Door extends Component {
             {
               roomAccessToken: roomAccessToken || '',
               roomSecret: roomSecret || '',
-            }
+            },
           );
           await self.roomInfoSubscriptionHandle.readyPromise();
           const roomInfo = MongoRoom.findOne({ _id: self.roomId });
@@ -262,7 +261,9 @@ class Door extends Component {
   }
 
   render() {
-    const { LOADING, PASSWORD_PROMPT, GETTING_READY, SHOW_TIME } = this.stages;
+    const {
+      LOADING, PASSWORD_PROMPT, GETTING_READY, SHOW_TIME,
+    } = this.stages;
     switch (this.state.stage) {
       case LOADING:
         return (
@@ -314,5 +315,5 @@ export default connect(
     deleteErizoToken,
     deleteRoomAccessToken,
     joinRoom,
-  }
+  },
 )(Door);

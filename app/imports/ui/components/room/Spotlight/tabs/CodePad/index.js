@@ -37,7 +37,6 @@ import SettingsTab from './SettingsTab';
 import Spinner from '../../Spinner';
 
 class CodePad extends Component {
-
   constructor(props) {
     super(props);
 
@@ -88,7 +87,9 @@ class CodePad extends Component {
   }
 
   componentDidMount() {
-    const { roomAPI, connectedUsers, tabInfo, roomInfo, setTabReady } = this.props;
+    const {
+      roomAPI, connectedUsers, tabInfo, roomInfo, setTabReady,
+    } = this.props;
     new Y({
       db: {
         name: 'indexeddb',
