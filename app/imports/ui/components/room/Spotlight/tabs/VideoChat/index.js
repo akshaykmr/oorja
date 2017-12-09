@@ -37,22 +37,17 @@ class VideoChat extends Component {
     window.addEventListener('keypress', this.resetTimer);
 
     const checkIdleTime = () => {
-      this.idleSecondsCounter += 500;
+      this.idleSecondsCounter += 2000;
       if (this.idleSecondsCounter > this.idleTimeout * 1000) {
         this.setState({
           ...this.state,
           idle: true,
         });
-      } else if (this.state.idle) {
-        this.setState({
-          ...this.state,
-          idle: false,
-        });
       }
     };
 
 
-    this.windowIntervalId = setInterval(checkIdleTime, 500);
+    this.windowIntervalId = setInterval(checkIdleTime, 2000);
 
     this.services = {
       Google: {
@@ -111,6 +106,12 @@ class VideoChat extends Component {
   }
 
   resetTimer() {
+    if (this.state.idle) {
+      this.setState({
+        ...this.state,
+        idle: false,
+      });
+    }
     this.idleSecondsCounter = 0;
   }
 
