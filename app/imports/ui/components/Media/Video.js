@@ -2,39 +2,32 @@
 
 import React, { Component } from 'react';
 
-const useCreateObjectURL = true;
-
 class VideoStream extends Component {
 
+  constructor(props) {
+    super(props);
+
+    this.usingSrcObject = false;
+  }
   componentDidMount() {
-    if (useCreateObjectURL) {
+    try {
       this.videoElement.src = window.URL.createObjectURL(this.props.streamSource);
-    } else {
+    } catch (e) {
+      this.usingSrcObject = true;
       this.videoElement.srcObject = this.props.streamSource;
     }
   }
 
   componentDidUpdate() {
-    if (!useCreateObjectURL) {
+    if (this.usingSrcObject) {
       this.videoElement.srcObject = this.props.streamSource;
     }
   }
 
   componentWillUnmount() {
-    if (useCreateObjectURL) {
+    if (!this.usingSrcObject) {
       URL.revokeObjectURL(this.videoElement.src);
     }
-  }
-
-  renderSpeechIndicator() {
-    if (!this.props.showSpeechIndicator) {
-      return null;
-    }
-    return (
-      <div
-        className={this.props.indicatorClassNames}>
-      </div>
-    );
   }
 
   render() {
@@ -47,7 +40,6 @@ class VideoStream extends Component {
             this.videoElement = videoElement;
           }}>
         </video>
-        {this.renderSpeechIndicator()}
       </div>
     );
   }
@@ -57,9 +49,7 @@ VideoStream.propTypes = {
   streamSource: React.PropTypes.object.isRequired,
   muted: React.PropTypes.string,
   videoClassNames: React.PropTypes.string,
-  indicatorClassNames: React.PropTypes.string,
   onClick: React.PropTypes.func,
-  showSpeechIndicator: React.PropTypes.bool,
 };
 
 export default VideoStream;
