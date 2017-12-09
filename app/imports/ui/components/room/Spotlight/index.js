@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import update from 'immutability-helper';
 import classNames from 'classnames';
-import { Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
+import { Position, Tooltip } from '@blueprintjs/core';
 
 import uiConfig from '../constants/uiConfig';
 import roomActivities from '../constants/roomActivities';
@@ -209,15 +209,9 @@ class Spotlight extends Component {
         }
         return null;
       };
-      return (
-        <Popover
-          key={tab.tabId}
-          content={tab.description}
-          interactionKind={PopoverInteractionKind.HOVER}
-          popoverClassName="pt-popover-content-sizing"
-          position={uiSize === uiConfig.COMPACT ? Position.TOP : Position.RIGHT}
-          className={classNames(switchClassNames)}
-          hoverOpenDelay={800}>
+
+      const renderBox = () => {
+        return (
           <div className="box">
             {renderBadge()}
             <div
@@ -227,7 +221,18 @@ class Spotlight extends Component {
               <i className={`icon ion-${tab.icon}`}></i>
             </div>
           </div>
-        </Popover>
+        );
+      }
+      return (
+        <Tooltip
+          key={tab.tabId}
+          content={tab.description}
+          target={renderBox()}
+          popoverClassName="pt-popover-content-sizing"
+          position={uiSize === uiConfig.COMPACT ? Position.TOP : Position.RIGHT}
+          className={classNames(switchClassNames)}
+          hoverOpenDelay={500}>
+        </Tooltip>
       );
     };
 
