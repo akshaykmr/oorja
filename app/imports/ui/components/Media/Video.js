@@ -1,13 +1,29 @@
+/* global window */
+
 import React, { Component } from 'react';
+
+const useCreateObjectURL = true;
 
 class VideoStream extends Component {
 
   componentDidMount() {
-    this.videoElement.srcObject = this.props.streamSource;
+    if (useCreateObjectURL) {
+      this.videoElement.src = window.URL.createObjectURL(this.props.streamSource);
+    } else {
+      this.videoElement.srcObject = this.props.streamSource;
+    }
   }
 
   componentDidUpdate() {
-    this.videoElement.srcObject = this.props.streamSource;
+    if (!useCreateObjectURL) {
+      this.videoElement.srcObject = this.props.streamSource;
+    }
+  }
+
+  componentWillUnmount() {
+    if (useCreateObjectURL) {
+      URL.revokeObjectURL(this.videoElement.src);
+    }
   }
 
   renderSpeechIndicator() {
