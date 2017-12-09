@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import './oorja.scss';
 /* eslint-disable max-len*/
 const Oorja = props => (
@@ -92,8 +94,8 @@ const Oorja = props => (
 );
 
 Oorja.propTypes = {
-  onClick: React.PropTypes.func,
-  animate: React.PropTypes.bool,
+  onClick: PropTypes.func,
+  animate: PropTypes.bool,
 };
 /* eslint-enable max-len*/
 

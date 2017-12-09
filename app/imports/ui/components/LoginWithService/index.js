@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-// import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import PropTypes from 'prop-types';
 
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
@@ -164,7 +164,7 @@ class LoginWithService extends Component {
 }
 
 LoginWithService.propTypes = {
-  extraClasses: React.PropTypes.string,
+  extraClasses: PropTypes.string,
 };
 
 export default LoginWithService;

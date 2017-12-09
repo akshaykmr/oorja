@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import update from 'immutability-helper';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
@@ -212,7 +213,7 @@ class RoomSetup extends Component {
 }
 
 RoomSetup.propTypes = {
-  createRoom: React.PropTypes.func,
+  createRoom: PropTypes.func,
 };
 
 

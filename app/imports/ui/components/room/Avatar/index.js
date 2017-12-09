@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import './avatar.scss';
 
@@ -159,14 +160,14 @@ class Avatar extends Component {
 }
 
 Avatar.propTypes = {
-  size: React.PropTypes.string, // 30px, 50px, 80px
-  user: React.PropTypes.object, // if user is passed as prop, pull the properties below from it.
-  name: React.PropTypes.string,
-  initials: React.PropTypes.string,
-  textAvatarColor: React.PropTypes.string,
-  picture: React.PropTypes.string,
-  avatarStyle: React.PropTypes.object,
-  onClick: React.PropTypes.func,
+  size: PropTypes.string, // 30px, 50px, 80px
+  user: PropTypes.object, // if user is passed as prop, pull the properties below from it.
+  name: PropTypes.string,
+  initials: PropTypes.string,
+  textAvatarColor: PropTypes.string,
+  picture: PropTypes.string,
+  avatarStyle: PropTypes.object,
+  onClick: PropTypes.func,
 };
 
 

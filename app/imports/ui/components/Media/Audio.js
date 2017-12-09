@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 class AudioStream extends Component {
 
@@ -24,8 +25,8 @@ class AudioStream extends Component {
  }
 
 AudioStream.propTypes = {
-  streamSource: React.PropTypes.object.isRequired,
-  muted: React.PropTypes.string,
+  streamSource: PropTypes.object.isRequired,
+  muted: PropTypes.string,
 };
 
 export default AudioStream;

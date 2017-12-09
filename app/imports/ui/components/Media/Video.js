@@ -1,6 +1,7 @@
 /* global window */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 class VideoStream extends Component {
 
@@ -46,10 +47,10 @@ class VideoStream extends Component {
  }
 
 VideoStream.propTypes = {
-  streamSource: React.PropTypes.object.isRequired,
-  muted: React.PropTypes.string,
-  videoClassNames: React.PropTypes.string,
-  onClick: React.PropTypes.func,
+  streamSource: PropTypes.object.isRequired,
+  muted: PropTypes.string,
+  videoClassNames: PropTypes.string,
+  onClick: PropTypes.func,
 };
 
 export default VideoStream;

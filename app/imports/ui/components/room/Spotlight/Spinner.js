@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+
 import MinimalLogo from '../../MinimalLogo';
 
 class Spinner extends Component {
@@ -13,7 +15,7 @@ class Spinner extends Component {
 }
 
 Spinner.propTypes = {
-  show: React.PropTypes.bool,
+  show: PropTypes.bool,
 };
 
 export default Spinner;

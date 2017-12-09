@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
@@ -170,14 +171,14 @@ const mapStateToProps = state => ({
 
 
 StreamsContainer.propTypes = {
-  roomAPI: React.PropTypes.object.isRequired,
-  mediaStreams: React.PropTypes.object.isRequired,
-  dispatchRoomActivity: React.PropTypes.func.isRequired,
-  streamSpeaking: React.PropTypes.object.isRequired,
-  roomInfo: React.PropTypes.object.isRequired,
-  connectedUsers: React.PropTypes.array.isRequired,
-  uiSize: React.PropTypes.string.isRequired,
-  streamContainerSize: React.PropTypes.string.isRequired,
+  roomAPI: PropTypes.object.isRequired,
+  mediaStreams: PropTypes.object.isRequired,
+  dispatchRoomActivity: PropTypes.func.isRequired,
+  streamSpeaking: PropTypes.object.isRequired,
+  roomInfo: PropTypes.object.isRequired,
+  connectedUsers: PropTypes.array.isRequired,
+  uiSize: PropTypes.string.isRequired,
+  streamContainerSize: PropTypes.string.isRequired,
 };
 
 export default connect(mapStateToProps, {})(StreamsContainer);

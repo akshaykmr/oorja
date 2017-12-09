@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import './settings.scss';
 
@@ -16,9 +17,9 @@ class Settings extends Component {
 }
 
 Settings.propTypes = {
-  classNames: React.PropTypes.string,
-  style: React.PropTypes.object,
-  onTop: React.PropTypes.bool.isRequired,
+  classNames: PropTypes.string,
+  style: PropTypes.object,
+  onTop: PropTypes.bool.isRequired,
 };
 
 export default Settings;

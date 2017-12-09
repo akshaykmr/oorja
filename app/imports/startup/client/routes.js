@@ -24,7 +24,6 @@ import NotFound from '../../ui/pages/NotFound';
 // root reducer
 import rootReducer from '../../ui/reducers';
 
-React.PropTypes = PropTypes;
 
 const createStoreWithMiddleware = applyMiddleware(ReduxThunk, ReduxPromise)(createStore);
 

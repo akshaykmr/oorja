@@ -1,5 +1,6 @@
 /* global URL */
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import update from 'immutability-helper';
 import classNames from 'classnames';
 import { Button, Intent, Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
@@ -476,7 +477,7 @@ export default class GettingReady extends Component {
 }
 
 GettingReady.propTypes = {
-  roomInfo: React.PropTypes.object.isRequired,
-  onReady: React.PropTypes.func.isRequired,
-  roomUserId: React.PropTypes.string,
+  roomInfo: PropTypes.object.isRequired,
+  onReady: PropTypes.func.isRequired,
+  roomUserId: PropTypes.string,
 };

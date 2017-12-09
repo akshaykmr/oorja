@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { Intent, Button } from '@blueprintjs/core';
@@ -85,9 +86,9 @@ class PasswordPrompt extends Component {
 }
 
 PasswordPrompt.propTypes = {
-  checkPassword: React.PropTypes.func.isRequired,
-  onSuccess: React.PropTypes.func.isRequired,
-  roomName: React.PropTypes.string,
+  checkPassword: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func.isRequired,
+  roomName: PropTypes.string,
 };
 
 export default connect(null, { checkPassword })(PasswordPrompt);

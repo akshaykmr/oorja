@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import classNames from 'classnames';
@@ -228,10 +229,10 @@ class JoinRoomForm extends Component {
 }
 
 JoinRoomForm.propTypes = {
-  processComplete: React.PropTypes.func.isRequired,
-  joinRoom: React.PropTypes.func.isRequired,
-  roomInfo: React.PropTypes.object.isRequired,
-  roomUserId: React.PropTypes.string,
+  processComplete: PropTypes.func.isRequired,
+  joinRoom: PropTypes.func.isRequired,
+  roomInfo: PropTypes.object.isRequired,
+  roomUserId: PropTypes.string,
 };
 
 

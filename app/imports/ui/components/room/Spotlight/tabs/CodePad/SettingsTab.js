@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { Meteor } from 'meteor/meteor';
 import syntaxList from './syntaxList';
@@ -92,10 +93,10 @@ class SettingsTab extends Component {
 }
 
 SettingsTab.propTypes = {
-  classNames: React.PropTypes.string,
-  style: React.PropTypes.object,
-  editor: React.PropTypes.object,
-  initialSettings: React.PropTypes.object,
+  classNames: PropTypes.string,
+  style: PropTypes.object,
+  editor: PropTypes.object,
+  initialSettings: PropTypes.object,
 };
 
 export default SettingsTab;

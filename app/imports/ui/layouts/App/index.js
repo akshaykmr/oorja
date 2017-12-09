@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import { FocusStyleManager } from '@blueprintjs/core';
 
@@ -33,8 +34,8 @@ class App extends Component {
 }
 
 App.propTypes = {
-  children: React.PropTypes.object,
-  location: React.PropTypes.object,
+  children: PropTypes.object,
+  location: PropTypes.object,
 };
 
 export default App;

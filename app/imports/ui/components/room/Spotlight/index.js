@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import update from 'immutability-helper';
 import classNames from 'classnames';
@@ -304,17 +305,17 @@ class Spotlight extends Component {
 }
 
 Spotlight.propTypes = {
-  roomAPI: React.PropTypes.object.isRequired,
-  dispatchRoomActivity: React.PropTypes.func.isRequired,
-  connectedUsers: React.PropTypes.array.isRequired,
-  roomInfo: React.PropTypes.object.isRequired,
-  roomReady: React.PropTypes.bool.isRequired,
-  tabReady: React.PropTypes.func.isRequired,
-  uiSize: React.PropTypes.string.isRequired,
-  streamContainerSize: React.PropTypes.string.isRequired,
-  setCustomStreamContainerSize: React.PropTypes.func.isRequired,
-  primaryMediaStreamState: React.PropTypes.object.isRequired,
-  screenSharingStreamState: React.PropTypes.object.isRequired,
+  roomAPI: PropTypes.object.isRequired,
+  dispatchRoomActivity: PropTypes.func.isRequired,
+  connectedUsers: PropTypes.array.isRequired,
+  roomInfo: PropTypes.object.isRequired,
+  roomReady: PropTypes.bool.isRequired,
+  tabReady: PropTypes.func.isRequired,
+  uiSize: PropTypes.string.isRequired,
+  streamContainerSize: PropTypes.string.isRequired,
+  setCustomStreamContainerSize: PropTypes.func.isRequired,
+  primaryMediaStreamState: PropTypes.object.isRequired,
+  screenSharingStreamState: PropTypes.object.isRequired,
 };
 
 

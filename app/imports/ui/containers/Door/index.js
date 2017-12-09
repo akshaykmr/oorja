@@ -1,6 +1,7 @@
 /* global document */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { browserHistory } from 'react-router';
 import { connect } from 'react-redux';
 import update from 'immutability-helper';
@@ -119,7 +120,7 @@ class Door extends Component {
       } else if (!roomInfo.passwordEnabled && !self.roomSecret) {
         // fail? either user can create a new room or get a new shareLink.
         SupremeToaster.show({
-          message: `Could not access room. 
+          message: `Could not access room.
           Try to obtain a new link OR make a new room and invite others`,
           intent: Intent.WARNING,
           timeout: 10000,
@@ -292,15 +293,15 @@ class Door extends Component {
 }
 
 Door.propTypes = {
-  params: React.PropTypes.object,
-  location: React.PropTypes.object,
-  storeRoomSecret: React.PropTypes.func.isRequired,
-  deleteRoomSecret: React.PropTypes.func.isRequired,
-  getRoomInfo: React.PropTypes.func.isRequired,
-  deleteRoomUserId: React.PropTypes.func.isRequired,
-  deleteErizoToken: React.PropTypes.func.isRequired,
-  deleteRoomAccessToken: React.PropTypes.func.isRequired,
-  joinRoom: React.PropTypes.func.isRequired,
+  params: PropTypes.object,
+  location: PropTypes.object,
+  storeRoomSecret: PropTypes.func.isRequired,
+  deleteRoomSecret: PropTypes.func.isRequired,
+  getRoomInfo: PropTypes.func.isRequired,
+  deleteRoomUserId: PropTypes.func.isRequired,
+  deleteErizoToken: PropTypes.func.isRequired,
+  deleteRoomAccessToken: PropTypes.func.isRequired,
+  joinRoom: PropTypes.func.isRequired,
 };
 
 export default connect(

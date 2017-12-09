@@ -2,6 +2,7 @@
 import { Meteor } from 'meteor/meteor';
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import update from 'immutability-helper';
 import _ from 'lodash';
@@ -1128,14 +1129,14 @@ class Room extends Component {
 }
 
 Room.propTypes = {
-  roomUserId: React.PropTypes.string.isRequired,
-  roomInfo: React.PropTypes.object.isRequired,
-  joinRoom: React.PropTypes.func.isRequired,
-  mediaStreams: React.PropTypes.object.isRequired,
-  resetMediaStreams: React.PropTypes.func.isRequired,
-  updateMediaStreams: React.PropTypes.func.isRequired,
-  streamSpeaking: React.PropTypes.func.isRequired,
-  streamSpeakingStopped: React.PropTypes.func.isRequired,
+  roomUserId: PropTypes.string.isRequired,
+  roomInfo: PropTypes.object.isRequired,
+  joinRoom: PropTypes.func.isRequired,
+  mediaStreams: PropTypes.object.isRequired,
+  resetMediaStreams: PropTypes.func.isRequired,
+  updateMediaStreams: PropTypes.func.isRequired,
+  streamSpeaking: PropTypes.func.isRequired,
+  streamSpeakingStopped: PropTypes.func.isRequired,
 };
 
 

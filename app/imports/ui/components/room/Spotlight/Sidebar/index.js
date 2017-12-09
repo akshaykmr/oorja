@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import './sidebar.scss';
@@ -119,9 +120,9 @@ class Sidebar extends Component {
 }
 
 Sidebar.propTypes = {
-  closeButtonColor: React.PropTypes.string,
-  closeButtonBgColor: React.PropTypes.string,
-  tabList: React.PropTypes.array,
+  closeButtonColor: PropTypes.string,
+  closeButtonBgColor: PropTypes.string,
+  tabList: PropTypes.array,
 };
 
 export default Sidebar;
