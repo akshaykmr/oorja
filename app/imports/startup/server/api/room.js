@@ -6,11 +6,10 @@ import { moment as Moment } from 'meteor/momentjs:moment';
 import jwt from 'jwt-simple';
 import { Random } from 'meteor/random';
 
-import sentencer from 'sentencer';
-
 import { Rooms } from 'imports/collections/common';
 import N from 'imports/modules/NuveClient';
 import roomSetup from 'imports/modules/room/setup';
+import { extractInitialsFromName } from 'imports/modules/user/utilities';
 
 
 import tabRegistry from './tabRegistry';
@@ -45,34 +44,15 @@ Meteor.methods({
     // error format : throw new Meteor.Error(errorTopic,reason, passToClient)
     const errorTopic = 'Failed to create Room';
 
-    const validParameters = Match.test(roomSpecification, {
-      roomName: Match.Where((candidateName) => {
-        check(candidateName, String);
-        return candidateName.length < 50;
-      }),
-      shareChoice: Match.Where((choice) => {
-        check(choice, String);
-        return choice === shareChoices.SECRET_LINK || choice === shareChoices.PASSWORD;
-      }),
-      password: String,
-    });
+    const validParameters = roomSetup.validateRoomSpecification(roomSpecification);
 
     if (!validParameters) {
       throw new Meteor.Error(errorTopic, 'Invalid params for creating room');
     }
 
     let { roomName } = roomSpecification;
-    if (!roomName) { // generate randomly
-      const template = '{{ adjective }}-{{ adjective }}-{{ nouns }}';
-      roomName = sentencer.make(template);
-    }
-    roomName = roomName.trim();
-    roomName = roomName.split('').map((char) => {
-      if (char === ' ') {
-        return '-';
-      }
-      return char;
-    }).join('');
+    roomName = roomName || roomSetup.getRandomRoomName();
+    roomName = roomSetup.utilities.touchUpRoomName(roomName);
 
     const isValidRoomName = roomSetup.utilities.checkIfValidRoomName(roomName);
     if (!isValidRoomName) {
@@ -225,28 +205,17 @@ Meteor.methods({
 
 
     const generateProfile = () => {
-      const computeInitials = (fullName) => {
-        // first two letters of the name or first letters of first and last word.
-        const words = fullName.toUpperCase().trim().split(' ');
-        let initials = '';
-        if (words.length > 1) {
-          initials = words[0][0] + words[words.length - 1][0];
-        } else if (words.length === 1 && words[0] !== '') {
-          initials = `${words[0][0]}${words[0][1] ? words[0][1] : ''}`;
-        }
-        return initials;
-      };
       let profile = {};
       if (user) {
         /* eslint-disable */
         profile = user.profile;
         /* eslint-enable */
-        profile.initials = computeInitials(user.profile.firstName + user.profile.LastName);
+        profile.initials = extractInitialsFromName(user.profile.firstName + user.profile.LastName);
       } else {
         profile.firstName = name.trim();
         profile.loginService = '';
         profile.picture = '';
-        profile.initials = computeInitials(name);
+        profile.initials = extractInitialsFromName(name);
       }
       profile.userId = userId;
       profile.textAvatarColor = textAvatarColor;

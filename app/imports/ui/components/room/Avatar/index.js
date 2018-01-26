@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { extractInitialsFromName } from 'imports/modules/user/utilities';
 
 import './avatar.scss';
 
@@ -108,19 +109,6 @@ class Avatar extends Component {
     }
   }
 
-  computeInitials(fullName) {
-    // first two letters of the name or first letters of first and last word.
-    const words = fullName.toUpperCase().trim().split(' ');
-    let initials = '';
-    if (words.length > 1) {
-      initials = words[0][0] + words[words.length - 1][0];
-    } else if (words.length === 1 && words[0] !== '') {
-      initials = `${words[0][0]}${words[0][1] ? words[0][1] : ''}`;
-    }
-    return initials;
-  }
-
-
   render() {
     // pararms to be picked from user object if in props, else explicitly specified.
     const paramContainer = this.props.user ? this.props.user : this.props;
@@ -128,7 +116,7 @@ class Avatar extends Component {
     const {
       name, initials, textAvatarColor, avatarStyle,
     } = paramContainer;
-    const text = initials || this.computeInitials(name);
+    const text = initials || extractInitialsFromName(name);
     const defaultStyle = {
       backgroundImage: pictureSrc && loadComplete && !pictureError ? `url(${pictureSrc})` : null,
       backgroundColor: textAvatarColor,
