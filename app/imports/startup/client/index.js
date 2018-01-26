@@ -1,10 +1,9 @@
+// collections
+import 'imports/collections/common';
+import 'imports/collections/client';
+
 /* global window */
 import './routes.js';
-
-// collections
-import '../../collections/client';
-import '../../collections/common';
-
 import './attemptReconnection';
 
 // this should be done by the webserver, here for dev deployment temporarily

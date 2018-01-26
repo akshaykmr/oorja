@@ -14,14 +14,14 @@ import { syncHistoryWithStore } from 'react-router-redux';
 import { Meteor } from 'meteor/meteor';
 
 // components
-import App from '../../ui/layouts/App';
-import SupremeToaster from '../../ui/components/Toaster';
-import Landing from '../../ui/pages/Landing/';
-import Door from '../../ui/containers/Door';
-import NotFound from '../../ui/pages/NotFound';
+import App from 'imports/ui/layouts/App';
+import SupremeToaster from 'imports/ui/components/Toaster';
+import Landing from 'imports/ui/pages/Landing/';
+import Door from 'imports/ui/containers/Door';
+import NotFound from 'imports/ui/pages/NotFound';
 
 // root reducer
-import rootReducer from '../../ui/reducers';
+import rootReducer from 'imports/ui/reducers';
 
 
 const createStoreWithMiddleware = applyMiddleware(ReduxThunk, ReduxPromise)(createStore);

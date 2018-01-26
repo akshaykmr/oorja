@@ -1,7 +1,7 @@
 import { SyncedCron } from 'meteor/percolate:synced-cron';
 import { moment as Moment } from 'meteor/momentjs:moment';
 
-import { Rooms } from '../../../collections/common';
+import { Rooms } from 'imports/collections/common';
 
 SyncedCron.add({
   name: 'Archive rooms when their validity expires', // rooms are archived after 4 days
