@@ -4,6 +4,9 @@
     "react"
   ],
   "plugins": [
+    ["module-resolver", {
+      "root": ["./"]
+    }],
     "transform-class-properties"
   ]
 }

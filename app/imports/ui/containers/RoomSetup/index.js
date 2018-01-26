@@ -7,8 +7,11 @@ import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
 import { Intent, RadioGroup, Radio, Collapse, Button } from '@blueprintjs/core';
 
+import { shareChoices } from 'imports/modules/room/setup/constants';
+
 import { createRoom } from '../../actions/roomConfiguration';
 import SupremeToaster from '../../components/Toaster';
+
 
 import './roomSetup.scss';
 
@@ -24,10 +27,7 @@ class RoomSetup extends Component {
   constructor(props) {
     super(props);
 
-    this.shareChoices = {
-      SECRET_LINK: 'SECRET_LINK',
-      PASSWORD: 'PASSWORD',
-    };
+    this.shareChoices = shareChoices;
 
     this.defaultCustomizationState = {
       roomName: '',

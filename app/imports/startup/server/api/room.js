@@ -8,8 +8,11 @@ import { Random } from 'meteor/random';
 
 import sentencer from 'sentencer';
 
-import { Rooms } from '../../../collections/common';
-import N from '../../../modules/NuveClient/';
+import { Rooms } from 'imports/collections/common';
+import N from 'imports/modules/NuveClient';
+import roomSetup from 'imports/modules/room/setup';
+
+
 import tabRegistry from './tabRegistry';
 
 const {
@@ -32,28 +35,17 @@ Meteor.methods({
 
   createRoom(options) {
     check(options, Match.Maybe(Object));
-
-    const shareChoices = {
-      SECRET_LINK: 'SECRET_LINK',
-      PASSWORD: 'PASSWORD',
-    };
-    const defaultOptions = {
+    const { shareChoices } = roomSetup.constants;
+    const defaultParameters = {
       roomName: '',
       shareChoice: shareChoices.SECRET_LINK,
       password: '',
     };
-    const roomSpecification = options || defaultOptions;
+    const roomSpecification = options || defaultParameters;
     // error format : throw new Meteor.Error(errorTopic,reason, passToClient)
     const errorTopic = 'Failed to create Room';
 
-    const checkIfValidRoomName = (roomName) => {
-      const namePattern = /^[ @a-z0-9_-]+$/;
-      if (!namePattern.test(roomName)) {
-        throw new Meteor.Error(errorTopic, `Invalid Room Name: ${roomName}`);
-      }
-    };
-
-    const validSpecification = Match.test(roomSpecification, {
+    const validParameters = Match.test(roomSpecification, {
       roomName: Match.Where((candidateName) => {
         check(candidateName, String);
         return candidateName.length < 50;
@@ -65,7 +57,7 @@ Meteor.methods({
       password: String,
     });
 
-    if (!validSpecification) {
+    if (!validParameters) {
       throw new Meteor.Error(errorTopic, 'Invalid params for creating room');
     }
 
@@ -81,7 +73,11 @@ Meteor.methods({
       }
       return char;
     }).join('');
-    checkIfValidRoomName(roomName);
+
+    const isValidRoomName = roomSetup.utilities.checkIfValidRoomName(roomName);
+    if (!isValidRoomName) {
+      throw new Meteor.Error(errorTopic, `Invalid Room Name: ${roomName}`);
+    }
 
     const passwordEnabled = roomSpecification.shareChoice === shareChoices.PASSWORD;
     const password = passwordEnabled ? hashPassword(roomSpecification.password, saltRounds) : null;

@@ -3,4 +3,7 @@ export const checkIfValidRoomName = (candidateRoomName) => {
   return namePattern.test(candidateRoomName);
 };
 
-export const blah = false;
+export default {
+  checkIfValidRoomName,
+};
+

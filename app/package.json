@@ -14,6 +14,7 @@
     "@types/react-dom": "^16.0.3",
     "babel-core": "^6.26.0",
     "babel-jest": "^22.1.0",
+    "babel-plugin-module-resolver": "^3.0.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "eslint": "^4.13.0",
     "eslint-config-airbnb": "^16.1.0",
@@ -53,6 +54,7 @@
       "no-plusplus": 0,
       "import/no-unresolved": 0,
       "import/no-extraneous-dependencies": 0,
+      "import/no-absolute-path": 0,
       "import/extensions": 0,
       "no-underscore-dangle": [
         "error",

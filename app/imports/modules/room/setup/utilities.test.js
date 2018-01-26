@@ -1,6 +1,6 @@
 /* global test */
 
-import { checkIfValidRoomName } from './roomUtilities';
+import { checkIfValidRoomName } from './utilities';
 
 test('room name validation', () => {
   expect(checkIfValidRoomName('blah')).toBe(true);
