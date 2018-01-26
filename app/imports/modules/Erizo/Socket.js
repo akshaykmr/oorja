@@ -1,5 +1,4 @@
-/* global io*/
-
+import io from 'socket.io-client';
 import Logger from './utils/Logger';
 
 import { EventDispatcher, LicodeEvent } from './Events';
