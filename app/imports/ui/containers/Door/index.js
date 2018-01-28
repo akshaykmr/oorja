@@ -87,6 +87,12 @@ class Door extends Component {
     this.gotoStage(this.stages.INITIALIZING);
   }
 
+  checkIfExistingUser() {
+    if (!this.roomUserToken) return false;
+    return Meteor.callPromise('checkIfExistingUser', this.roomName, this.roomUserToken)
+      .then(response => response.data.existingUser);
+  }
+
   beginEntranceProcedure(getFreshAccessToken = false) {
     if (getFreshAccessToken) {
       this.props.deleteRoomAccessToken();
@@ -97,9 +103,11 @@ class Door extends Component {
 
     const self = this;
     (async function setRoomInfo() {
-      // get room info
-      const response = await self.props.getRoomInfo(self.roomName, self.roomUserToken);
-      const roomInfo = response.payload;
+      const response = await self.props.getRoomInfo(self.roomName);
+      const roomInfo = response.payload.data;
+
+      const isExistingUser = await self.checkIfExistingUser();
+
       self.roomId = roomInfo ? roomInfo._id : null;
       if (!roomInfo) {
         // room not found
@@ -132,9 +140,9 @@ class Door extends Component {
         });
         self.gotoStage(self.stages.PASSWORD_PROMPT);
       } else {
-        if (!roomInfo.existingUser) {
-          self.roomUserToken = null;
-          self.roomUserId = null;
+        if (!isExistingUser) {
+          delete self.roomUserToken;
+          delete self.roomUserId;
           self.props.deleteRoomUserId();
         }
         self.gotoStage(self.stages.INITIALIZING);

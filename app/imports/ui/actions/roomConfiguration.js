@@ -138,29 +138,23 @@ export const createRoom = roomSpecification =>
         } else {
           dispatch(storeRoomSecret(createdRoomName, roomSecret));
         }
-        return response;
+        return response.data;
       });
 
 
-export const getRoomInfo = (roomName, userToken = null) => ({
+export const getRoomInfo = roomName => ({ // userToken = null
   type: GOT_ROOM_INFO,
-  payload: Meteor.callPromise('getRoomInfo', roomName, userToken),
+  payload: Meteor.callPromise('getRoomInfo', roomName),
 });
-
 
 export const checkPassword = (roomName, password) =>
   dispatch =>
     Meteor.callPromise('authenticatePassword', roomName, password).then(
-      (roomAccessToken) => {
-        dispatch({
-          type: CHECK_PASSWORD,
-          payload: {
-            successful: !!roomAccessToken,
-          },
-        });
-        if (roomAccessToken != null) {
-          localStorage.setItem(`roomAccessToken:${roomName}`, roomAccessToken);
-        }
+      (response) => {
+        if (response.status !== HttpStatus.OK) return Promise.reject(response);
+
+        const { roomAccessToken } = response.data;
+        localStorage.setItem(`roomAccessToken:${roomName}`, roomAccessToken);
         return Promise.resolve(roomAccessToken);
       },
       (error) => { unexpectedError({ dispatch, error, roomName }); },
@@ -184,7 +178,10 @@ export const joinRoom = (roomId, name = '', textAvatarColor = '') =>
     const { roomName } = room;
     const credentials = getRoomCredentials(roomName);
     return Meteor.callPromise('joinRoom', roomId, credentials, name, textAvatarColor).then(
-      ({ erizoToken, userId, newUserToken }) => {
+      (response) => {
+        if (response.status !== HttpStatus.OK) return Promise.reject(response);
+
+        const { erizoToken, userId, userToken: newUserToken } = response.data;
         const action = storeErizoToken(roomName, erizoToken);
         Meteor.connection.setUserId(userId);
         dispatch(storeRoomUserId(roomName, userId, newUserToken));

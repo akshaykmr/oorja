@@ -3,12 +3,14 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import classNames from 'classnames';
-import { Button } from '@blueprintjs/core';
+import { Button, Intent } from '@blueprintjs/core';
 // import ImageLoader from 'react-imageloader';
 
 
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
+
+import SupremeToaster from '../../components/Toaster';
 
 import LoginWithService from '../../components/LoginWithService/';
 import { joinRoom } from '../../actions/roomConfiguration';
@@ -128,6 +130,13 @@ class JoinRoomForm extends Component {
           waiting: false,
         });
         this.props.processComplete();
+      })
+      .catch((response) => {
+        SupremeToaster.show({
+          message: response.message,
+          intent: Intent.WARNING,
+          timeout: 7000,
+        });
       });
   }
 

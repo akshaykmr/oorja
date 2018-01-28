@@ -36,23 +36,24 @@ class PasswordPrompt extends Component {
       waiting: true,
     });
     this.props.checkPassword(this.props.roomName, this.state.password)
-      .then((roomAccessToken) => {
-        if (!roomAccessToken) {
-          SupremeToaster.show({
-            message: 'Incorrect password 😕',
-            intent: Intent.WARNING,
-            timeout: 4000,
-          });
-        } else {
-          this.props.onSuccess();
-          this.setState({
-            ...this.state,
-            authSuccess: true,
-          });
-        }
+      .then(() => {
+        debugger;
         this.setState({
           ...this.state,
-          password: roomAccessToken ? this.state.password : '',
+          authSuccess: true,
+        });
+        this.props.onSuccess();
+      })
+      .catch((response) => {
+        debugger;
+        SupremeToaster.show({
+          message: response.message,
+          intent: Intent.WARNING,
+          timeout: 4000,
+        });
+        this.setState({
+          ...this.state,
+          password: '',
           waiting: false,
           tries: this.state.tries + 1, // setState is async, this should not be this way.
         });

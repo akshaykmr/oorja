@@ -49,7 +49,7 @@ class Spotlight extends Component {
     }, {});
     /* eslint-enable no-param-reassign */
 
-    this.defaultTabId = this.props.roomInfo.defaultTabId;
+    this.defaultTabId = this.props.roomInfo.defaultTab;
 
     let tabFound = false;
     let lastActiveTabId = localStorage.getItem(`lastActiveTab:${props.roomInfo.roomName}`);

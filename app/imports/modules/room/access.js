@@ -5,8 +5,8 @@ import { moment as Moment } from 'meteor/momentjs:moment';
 import jwt from 'jwt-simple';
 
 
-const hashPassword = Meteor.wrapAsync(bcrypt.hash);
-const comparePassword = Meteor.wrapAsync(bcrypt.compare);
+const bcryptHash = Meteor.wrapAsync(bcrypt.hash);
+const bcryptCompare = Meteor.wrapAsync(bcrypt.compare);
 
 const {
   private: {
@@ -16,16 +16,35 @@ const {
 
 export default {
   hashPassword(password) {
-    return hashPassword(password, saltRounds);
+    return bcryptHash(password, saltRounds);
   },
 
-  createRoomAccessToken(roomId, password) {
+  comparePassword(password, hashedPassword) {
+    return bcryptCompare(password, hashedPassword);
+  },
+
+  createRoomAccessToken(roomId, hashedPassword) {
     const now = new Moment();
     return jwt.encode({
       v: tokenVersion,
       iat: now.valueOf(),
       exp: now.add(2, 'days').valueOf(),
       roomId,
-    }, JWTsecret + password, JWTalgo);
+    }, JWTsecret + hashedPassword, JWTalgo);
+    // Add hashed password to the jwt secret so that if room password is changed
+    // it invalidates any existing tokens
+  },
+
+  decodeAccessToken(token, hashedPassword) {
+    try {
+      return jwt.decode(token, JWTsecret + hashedPassword);
+    } catch (e) {
+      return null;
+    }
+  },
+
+  isTokenPayloadValid(payload, roomDocument) {
+    const now = (new Moment()).valueOf();
+    return (payload.v === tokenVersion && payload.exp > now && roomDocument._id === payload.roomId);
   },
 };

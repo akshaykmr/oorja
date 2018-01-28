@@ -10,14 +10,18 @@ export class Licode {
     this.N.API.init(nuveConfig.serviceId, nuveConfig.serviceKey, nuveConfig.host);
   }
 
-  createRoom(roomName, options) {
-    const nuveResponse = this.N.API.createRoom(roomName, options);
-    const roomProviderMetadata = {
+  createRoom(roomId, options) {
+    const nuveResponse = this.N.API.createRoom(roomId, options);
+    const providerMetadata = {
       providerName: this.roomProvider,
       roomIdentifier: nuveResponse.data._id,
       NuveServiceName: Nuve.serviceName,
     };
-    return roomProviderMetadata;
+    return providerMetadata;
+  }
+
+  createToken(providerMetadata, userId, role = 'presenter') {
+    return this.N.API.createToken(providerMetadata.roomIdentifier, userId, role).content;
   }
 }
 
