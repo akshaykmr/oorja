@@ -4,7 +4,7 @@ export const checkIfValidRoomName = (candidateRoomName) => {
 };
 
 // Make minor adjustments to the roomName
-export const touchUpRoomName = roomName =>
+export const touchupRoomName = roomName =>
   roomName.trim()
     .split('')
     .map((char) => {
@@ -15,6 +15,6 @@ export const touchUpRoomName = roomName =>
 
 export default {
   checkIfValidRoomName,
-  touchUpRoomName,
+  touchupRoomName,
 };
 

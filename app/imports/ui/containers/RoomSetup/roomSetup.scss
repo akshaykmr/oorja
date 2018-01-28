@@ -4,9 +4,13 @@
     border-radius: 5px;
     left: 8px;
 
+    .field-container {
+      font-size: 1.15em;
+    }
+
     fieldset {
       border: none;
-      
+
       .buttonContainer {
         text-align: center;
         button {

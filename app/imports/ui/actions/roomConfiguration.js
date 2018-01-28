@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { browserHistory } from 'react-router';
+import * as HttpStatus from 'http-status-codes';
 
 import { Intent } from '@blueprintjs/core';
 import SupremeToaster from '../components/Toaster';
@@ -117,13 +118,15 @@ const unexpectedError = ({ dispatch, error, roomName }) => {
 // this short form is less readable but I'm going to keep it this way to remember it.
 export const createRoom = roomSpecification =>
   dispatch =>
-    Meteor.callPromise('createRoom', roomSpecification).then(
-      (response) => {
+    Meteor.callPromise('createRoom', roomSpecification)
+      .then((response) => {
+        if (response.status !== HttpStatus.CREATED) return Promise.reject(response);
+
         const {
-          createdRoomName, roomSecret, passwordEnabled, roomAccessToken,
-        } = response;
+          roomName: createdRoomName, roomSecret, passwordEnabled, roomAccessToken,
+        } = response.data;
         // its called createdRoomName because some minor changes may be done to
-        // the name send by the client above.
+        // the name sent by the client above.
         // store secret in localStorage
         dispatch({
           type: CREATE_ROOM,
@@ -135,10 +138,8 @@ export const createRoom = roomSpecification =>
         } else {
           dispatch(storeRoomSecret(createdRoomName, roomSecret));
         }
-        return Promise.resolve(response);
-      },
-      error => Promise.reject(error),
-    );
+        return response;
+      });
 
 
 export const getRoomInfo = (roomName, userToken = null) => ({

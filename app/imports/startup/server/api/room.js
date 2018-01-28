@@ -1,29 +1,23 @@
 import { Meteor } from 'meteor/meteor';
 import { check, Match } from 'meteor/check';
-import bcrypt from 'bcrypt';
 import _ from 'lodash';
 import { moment as Moment } from 'meteor/momentjs:moment';
 import jwt from 'jwt-simple';
 import { Random } from 'meteor/random';
 
+import * as HttpStatus from 'http-status-codes';
+
 import { Rooms } from 'imports/collections/common';
-import N from 'imports/modules/NuveClient';
 import roomSetup from 'imports/modules/room/setup';
+import roomAccess from 'imports/modules/room/access';
+import roomProvider from 'imports/modules/room/provider/';
+
 import { extractInitialsFromName } from 'imports/modules/user/utilities';
 
+import response from './response';
 
 import tabRegistry from './tabRegistry';
 
-const {
-  private: {
-    saltRounds, Nuve, JWTsecret, JWTalgo, tokenVersion,
-  },
-} = Meteor.settings;
-
-N.API.init(Nuve.serviceId, Nuve.serviceKey, Nuve.host);
-
-const hashPassword = Meteor.wrapAsync(bcrypt.hash);
-const comparePassword = Meteor.wrapAsync(bcrypt.compare);
 
 function validTokenPayload(payload, roomDocument) {
   const now = (new Moment()).toDate().getTime();
@@ -34,81 +28,61 @@ Meteor.methods({
 
   createRoom(options) {
     check(options, Match.Maybe(Object));
-    const { shareChoices } = roomSetup.constants;
-    const defaultParameters = {
-      roomName: '',
-      shareChoice: shareChoices.SECRET_LINK,
-      password: '',
-    };
-    const roomSpecification = options || defaultParameters;
-    // error format : throw new Meteor.Error(errorTopic,reason, passToClient)
-    const errorTopic = 'Failed to create Room';
+    const roomSpecification = Object.assign(roomSetup.getDefaultParameters(), options || {});
 
     const validParameters = roomSetup.validateRoomSpecification(roomSpecification);
-
     if (!validParameters) {
-      throw new Meteor.Error(errorTopic, 'Invalid params for creating room');
+      return response.error(HttpStatus.BAD_REQUEST, 'Invalid specifications for creating room');
     }
 
-    let { roomName } = roomSpecification;
-    roomName = roomName || roomSetup.getRandomRoomName();
-    roomName = roomSetup.utilities.touchUpRoomName(roomName);
-
-    const isValidRoomName = roomSetup.utilities.checkIfValidRoomName(roomName);
-    if (!isValidRoomName) {
-      throw new Meteor.Error(errorTopic, `Invalid Room Name: ${roomName}`);
+    if (roomSpecification.roomName) { // If User customized his room name
+      roomSpecification.roomName = roomSetup.utilities.touchupRoomName(roomSpecification.roomName);
+      const isValidRoomName = roomSetup.utilities.checkIfValidRoomName(roomSpecification.roomName);
+      if (!isValidRoomName) {
+        return response.error(HttpStatus.BAD_REQUEST, 'Room name not allowed');
+      }
+    } else {
+      roomSpecification.roomName = roomSetup.getRandomRoomName();
+    }
+    if (Rooms.findOne({ roomName: roomSpecification.roomName, archived: false })) {
+      return response.error(HttpStatus.CONFLICT, 'A room with same name exists (；一_一)');
     }
 
+
+    const { shareChoices } = roomSetup.constants;
     const passwordEnabled = roomSpecification.shareChoice === shareChoices.PASSWORD;
-    const password = passwordEnabled ? hashPassword(roomSpecification.password, saltRounds) : null;
+    const password = passwordEnabled ? roomAccess.hashPassword(roomSpecification.password) : null;
+    const roomSecret = !passwordEnabled ? Random.secret(10) : null;
+    const roomId = Random.id(20);
 
-    const roomSecret = !passwordEnabled ? Random.secret(20) : null;
-
-    const now = new Moment();
-    const nuveResponse = N.API.createRoom(roomName, { p2p: true });
-
-    const defaultTabs = [1, 10, 100];
     const roomDocument = {
-      _id: nuveResponse.data._id,
-      NuveServiceName: Nuve.serviceName,
-      owner: Meteor.userId() || null,
-      roomName,
-      defaultTabId: 1,
-      tabs: defaultTabs.reduce((tabList, tabId) => {
-        tabList.push(tabRegistry[tabId]);
-        return tabList;
-      }, []),
+      _id: roomId,
+      provider: 'LICODE',
+      creatorId: Meteor.userId() || null,
+      roomName: roomSpecification.roomName,
+      defaultTab: roomSpecification.defaultTab,
+      tabs: roomSpecification.tabs,
       passwordEnabled,
-      roomSecret,
       password,
+      roomSecret,
       userTokens: [],
       participants: [],
-      createdAt: now.toDate().getTime(),
-      validTill: now.add(4, 'days').toDate().getTime(),
+      createdAt: new Moment().valueOf(),
+      validTill: new Moment().add(4, 'days').valueOf(),
       archived: false,
     };
 
-    if (Rooms.findOne({ roomName, archived: false })) {
-      throw new Meteor.Error(errorTopic, 'A room with same name exists (；一_一)');
-    }
-    // Add schema validation later.
-    const roomId = Rooms.insert(roomDocument);
-    if (!roomId) {
-      throw new Meteor.Error(errorTopic, 'Failed to create Room');
-    }
+    if (!Rooms.insert(roomDocument)) return response.error(HttpStatus.INTERNAL_SERVER_ERROR);
 
-    const response = {
-      createdRoomName: roomName,
+    const providerMetadata = roomProvider.licode.createRoom(roomId, { p2p: true });
+    Rooms.update(roomId, { $set: { providerMetadata } });
+
+    return response.body(HttpStatus.CREATED, {
+      roomName: roomSpecification.roomName,
       roomSecret,
       passwordEnabled,
-      roomAccessToken: passwordEnabled ? jwt.encode({
-        v: tokenVersion,
-        iat: roomDocument.createdAt,
-        exp: roomDocument.validTill,
-        roomId,
-      }, JWTsecret, JWTalgo) : null,
-    };
-    return response;
+      roomAccessToken: passwordEnabled ? roomAccess.createRoomAccessToken(roomId, password) : null,
+    });
   },
 
   getRoomInfo(roomName, userToken) {
@@ -117,9 +91,8 @@ Meteor.methods({
     check(userToken, Match.Maybe(String));
     /* eslint-enable new-cap */
     const room = Rooms.findOne({ roomName, archived: false });
-    if (!room) {
-      return null;
-    }
+    if (!room) return response.error(HttpStatus.NOT_FOUND, 'Room not found');
+
     const existingUser = _.find(room.userTokens, { userToken });
     // be sure to filter for only relevent fields. dont send the whole doc lol.
     const info = _.pick(room, ['passwordEnabled', '_id', 'tabs']);
