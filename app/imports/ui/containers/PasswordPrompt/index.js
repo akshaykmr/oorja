@@ -37,7 +37,6 @@ class PasswordPrompt extends Component {
     });
     this.props.checkPassword(this.props.roomName, this.state.password)
       .then(() => {
-        debugger;
         this.setState({
           ...this.state,
           authSuccess: true,
@@ -45,7 +44,6 @@ class PasswordPrompt extends Component {
         this.props.onSuccess();
       })
       .catch((response) => {
-        debugger;
         SupremeToaster.show({
           message: response.message,
           intent: Intent.WARNING,

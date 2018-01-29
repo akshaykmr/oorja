@@ -43,6 +43,14 @@ export default {
     }
   },
 
+  areCredentialsValid(room, credentials) {
+    if (!room.passwordEnabled && (room.roomSecret === credentials.roomSecret)) {
+      return true;
+    }
+    const payload = this.decodeAccessToken(credentials.roomAccessToken, room.password);
+    return payload && this.isTokenPayloadValid(payload, room);
+  },
+
   isTokenPayloadValid(payload, roomDocument) {
     const now = (new Moment()).valueOf();
     return (payload.v === tokenVersion && payload.exp > now && roomDocument._id === payload.roomId);

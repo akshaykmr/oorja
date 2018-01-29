@@ -2,7 +2,6 @@ import { Meteor } from 'meteor/meteor';
 import { check, Match } from 'meteor/check';
 import _ from 'lodash';
 import { moment as Moment } from 'meteor/momentjs:moment';
-import jwt from 'jwt-simple';
 import { Random } from 'meteor/random';
 
 import * as HttpStatus from 'http-status-codes';
@@ -16,7 +15,6 @@ import { extractInitialsFromName } from 'imports/modules/user/utilities';
 
 import response from './response';
 
-import tabRegistry from './tabRegistry';
 
 Meteor.methods({
 
@@ -97,7 +95,6 @@ Meteor.methods({
     return response.body(HttpStatus.OK, { existingUser: _.find(room.userTokens, { userToken }) });
   },
 
-  // returns null or roomAccessToken(string)
   authenticatePassword(roomName, password) {
     check(roomName, String);
     check(password, String);
@@ -117,34 +114,27 @@ Meteor.methods({
   },
 
   // TODO: clean this mess
-  joinRoom(roomId, credentials, name, textAvatarColor) {
+  joinRoom(roomId, credentials, userToken, name, textAvatarColor) {
     check(roomId, String);
     check(credentials, Match.ObjectIncluding({
       roomSecret: String,
       roomAccessToken: String,
-      userToken: String,
     }));
     check(name, Match.Maybe(String));
-    check(textAvatarColor, Match.Maybe(String)); // add check for allowed colors
+    check(textAvatarColor, Match.Maybe(String));
+    check(userToken, Match.Maybe(String));
 
     const room = Rooms.findOne({ _id: roomId, archived: false });
     if (!room) response.error(HttpStatus.NOT_FOUND, 'Room not found');
 
-    if (!room.passwordEnabled) {
-      if (room.roomSecret !== credentials.roomSecret) {
-        return response.error(HttpStatus.UNAUTHORIZED, 'Room secret does not match');
-      }
-    } else {
-      const payload = roomAccess.decodeAccessToken(credentials.roomAccessToken, room.password);
-      if (!payload || !roomAccess.isTokenPayloadValid(payload, room)) {
-        return response.error(HttpStatus.UNAUTHORIZED, 'Unauthorized');
-      }
+    if (!roomAccess.areCredentialsValid(room, credentials)) {
+      return response.error(HttpStatus.UNAUTHORIZED, 'Unauthorized');
     }
 
     const user = Meteor.user();
     let userId = Meteor.userId();
 
-    const existingUser = _.find(room.userTokens, { userToken: credentials.userToken }) ||
+    const existingUser = _.find(room.userTokens, { userToken }) ||
       (user ? _.find(room.userTokens, { userId: user._id }) : null);
 
     if (!existingUser) {
@@ -208,23 +198,18 @@ Meteor.methods({
     }));
     check(tabId, Number);
     const room = Rooms.findOne(roomId);
-    if (!room.passwordEnabled) {
-      if (room.roomSecret !== credentials.roomSecret) {
-        throw new Meteor.Error('Unauthorized');
-      }
-    } else {
-      const payload = jwt.decode(credentials.roomAccessToken, JWTsecret);
-      if (!validTokenPayload(payload, room)) {
-        throw new Meteor.Error('Unauthorized');
-      }
+
+    if (!roomAccess.areCredentialsValid(room, credentials)) {
+      return response.error(HttpStatus.UNAUTHORIZED, 'Unauthorized');
     }
 
     const { tabs } = room;
-    if (_.find(tabs, { tabId })) return;
-    tabs.push(tabRegistry[tabId]);
-    Rooms.update(roomId, {
-      $set: { tabs },
-    });
+    if (_.find(tabs, { tabId })) return response.body(HttpStatus.OK);
+
+    tabs.push(tabId);
+    Rooms.update(roomId, { $set: { tabs } });
+
+    return response.body(HttpStatus.OK);
   },
 });
 
@@ -236,7 +221,13 @@ Meteor.publish('room.info', (roomName, credentials) => {
     roomAccessToken: String,
   }));
 
-  const roomCursor = Rooms.find({ roomName, archived: false }, {
+  const room = Rooms.findOne({ roomName, archived: false });
+
+  if (!roomAccess.areCredentialsValid(room, credentials)) {
+    return null;
+  }
+
+  const roomCursor = Rooms.find({ _id: room._id }, {
     fields: {
       roomName: 1,
       defaultTab: 1,
@@ -250,20 +241,7 @@ Meteor.publish('room.info', (roomName, credentials) => {
     limit: 1,
   });
 
-  const roomDocument = roomCursor.fetch()[0];
-  if (!roomDocument) throw new Meteor.Error('Room document not found');
-  if (roomDocument.passwordEnabled) {
-    if (!credentials.roomAccessToken) throw new Meteor.Error('Token Required');
-    const payload = roomAccess.decodeAccessToken(
-      credentials.roomAccessToken,
-      roomDocument.password,
-    );
-    if (payload && roomAccess.isTokenPayloadValid(payload, roomDocument)) {
-      return roomCursor;
-    }
-  } else if (roomDocument.roomSecret === credentials.roomSecret) return roomCursor;
-
-  return null;
+  return roomCursor;
 });
 
 
