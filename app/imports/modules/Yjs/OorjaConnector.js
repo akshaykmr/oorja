@@ -76,13 +76,6 @@ class OorjaConnector extends AbstractConnector {
     };
   }
 
-  disconnect() {
-    super.disconnect();
-  }
-  reconnect() {
-    super.reconnect();
-  }
-
   send(recieverId, content) {
     const { connectorOptions } = this;
     const { tabId, name } = connectorOptions.tabInfo; // our own tab

@@ -197,8 +197,8 @@ Meteor.methods({
       roomAccessToken: String,
     }));
     check(tabId, Number);
-    const room = Rooms.findOne(roomId);
 
+    const room = Rooms.findOne(roomId);
     if (!roomAccess.areCredentialsValid(room, credentials)) {
       return response.error(HttpStatus.UNAUTHORIZED, 'Unauthorized');
     }
