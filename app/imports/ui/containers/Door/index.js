@@ -107,7 +107,6 @@ class Door extends Component {
       const roomInfo = response.payload.data;
 
       const isExistingUser = await self.checkIfExistingUser();
-
       self.roomId = roomInfo ? roomInfo._id : null;
       if (!roomInfo) {
         // room not found

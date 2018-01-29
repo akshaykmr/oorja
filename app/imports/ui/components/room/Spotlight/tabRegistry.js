@@ -5,37 +5,31 @@
 export default {
   1: {
     tabId: 1,
-    // must be without spaces (used to contain css, check out css for any of the tabs)
+
+    // Name must be without spaces (used to contain css, check out css for any of the tabs)
     name: 'Info',
     displayName: 'Room Information',
 
-    // the badge icon on the left for this tab.
-    // icons are currently from ionic, maybe will allow images or svgs later
-    // choose from http://ionicons.com/
-    // iconColor is for the tabSwitch when I was experimenting with them,
-    // but later on I stuck with a set color scheme instead of a custom one for each tab.
     icon: 'android-share-alt',
-    // bgColor is the background color for the tab content
-    bgColor: '#ffffff',
     description: 'Invite others to this room',
 
+    // Baground color for the div containing your tab content
+    bgColor: '#ffffff',
 
     // by default if someone adds a tab in the room. it will be loaded for all
     // participants of the room. however if local is true then adding it won't load
     // it for others. e.g used in Reacteroids(game) tab.
     local: false,
 
-
     // specify custom streamContainer size for this tab
     // '' means auto (if there is any video stream [MEDIUM] else [COMPACT]),
     //  else specify one of [COMPACT, MEDIUM]. CSS for LARGE is not working well atm.
     streamContainerSize: '',
 
-    // Cannot make the import path dynamic (i.e use a variable for import path) as it
-    // needs to be statically analyzable. So it has to be this way for now.
-    load: (callback) => {
-      import('./tabs/Info').then(callback);
-    },
+    // Rather than specifying just the import path. It needs to be a function because
+    // Dynamic imports must be statically anlyzable. And thus I can't use strings determined
+    // on runtime to load these components elsewhere.
+    load: () => import('./tabs/Info'),
   },
   10: {
     tabId: 10,
@@ -45,9 +39,7 @@ export default {
     icon: 'videocamera',
     description: 'Video chat',
     streamContainerSize: '',
-    load: (callback) => {
-      import('./tabs/VideoChat').then(callback);
-    },
+    load: () => import('./tabs/VideoChat'),
   },
   // {
   //   tabId: 30,
@@ -68,9 +60,7 @@ export default {
     icon: 'document-text',
     description: 'Shared Richtext document',
     streamContainerSize: '',
-    load: (callback) => {
-      import('./tabs/QuillPad').then(callback);
-    },
+    load: () => import('./tabs/QuillPad')
   },
   41: {
     tabId: 41,
@@ -80,9 +70,7 @@ export default {
     icon: 'code-working',
     description: 'Shared Code editor',
     streamContainerSize: '',
-    load: (callback) => {
-      import('./tabs/CodePad').then(callback);
-    },
+    load: () => import('./tabs/CodePad')
   },
   31: {
     tabId: 31,
@@ -92,9 +80,7 @@ export default {
     icon: 'chatbubbles',
     description: 'Chat messaging',
     streamContainerSize: '',
-    load: (callback) => {
-      import('./tabs/Chat').then(callback);
-    },
+    load: () => import('./tabs/Chat')
   },
   100: {
     tabId: 100,
@@ -104,9 +90,7 @@ export default {
     icon: 'ios-plus',
     description: 'Discover more tabs',
     streamContainerSize: 'COMPACT',
-    load: (callback) => {
-      import('./tabs/DiscoverTabs').then(callback);
-    },
+    load: () => import('./tabs/DiscoverTabs')
   },
   35: {
     tabId: 35,
@@ -117,9 +101,7 @@ export default {
     description: 'Play a game while you wait',
     streamContainerSize: 'COMPACT',
     local: true,
-    load: (callback) => {
-      import('./tabs/Reacteroids').then(callback);
-    },
+    load: () => import('./tabs/Reacteroids')
   },
   999: {
     tabId: 999,
@@ -130,15 +112,8 @@ export default {
     description: 'For developers: A blank slate tab to be used as boilerplate for developing new tabs',
     streamContainerSize: 'COMPACT',
     local: false,
-    load: (callback) => {
-      import('./tabs/BlankSlate').then(callback);
-    },
+    load: () => import('./tabs/BlankSlate')
   },
-  // add your tab description in a similar fashion
-  // here as well as in app/imports/startup/server/api/tabRegistry.js since the server
-  // also needs a tabRegistry
 
-  // I could have made them refer to the same file however for dynamic imports to work
-  // it needs to be this way.
-  // Not using symlink as well since it is os dependent. 
+  // add your tab details here !
 };

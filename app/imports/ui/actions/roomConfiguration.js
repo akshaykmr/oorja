@@ -165,8 +165,9 @@ const getRoomCredentials = roomName =>
   ({
     roomSecret: localStorage.getItem(`roomSecret:${roomName}`) || '',
     roomAccessToken: localStorage.getItem(`roomAccessToken:${roomName}`) || '',
-    userToken: localStorage.getItem(`roomUserToken:${roomName}`) || '',
   });
+
+const getUserToken = roomName => localStorage.getItem(`roomUserToken:${roomName}`) || '';
 
 export const joinRoom = (roomId, name = '', textAvatarColor = '') =>
   (dispatch) => {
@@ -177,9 +178,11 @@ export const joinRoom = (roomId, name = '', textAvatarColor = '') =>
     }
     const { roomName } = room;
     const credentials = getRoomCredentials(roomName);
-    return Meteor.callPromise('joinRoom', roomId, credentials, name, textAvatarColor).then(
+    return Meteor.callPromise('joinRoom', roomId, credentials, getUserToken(roomName), name, textAvatarColor).then(
       (response) => {
-        if (response.status !== HttpStatus.OK) return Promise.reject(response);
+        if (response.status !== HttpStatus.OK) {
+          unexpectedError({ dispatch, error: 'Failed to join room', roomName });
+        }
 
         const { erizoToken, userId, userToken: newUserToken } = response.data;
         const action = storeErizoToken(roomName, erizoToken);
@@ -198,9 +201,6 @@ export const joinRoom = (roomId, name = '', textAvatarColor = '') =>
 export const addTab = (roomId, tabId) => {
   const room = Rooms.findOne({ _id: roomId });
   const credentials = getRoomCredentials(room.roomName);
-  return Meteor.callPromise('addTab', room._id, credentials, tabId).then(
-    () => Promise.resolve(),
-    () => Promise.reject(),
-  );
+  return Meteor.callPromise('addTab', room._id, credentials, tabId);
 };
 

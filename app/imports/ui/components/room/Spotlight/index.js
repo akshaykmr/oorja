@@ -35,9 +35,9 @@ class Spotlight extends Component {
       1: Info,
     };
 
-    const defaultTabs = props.roomInfo.tabs;
     /* eslint-disable no-param-reassign */
-    const tabStatusRegistry = defaultTabs.reduce((registry, tab) => {
+    const tabStatusRegistry = props.roomInfo.tabs.reduce((registry, tabId) => {
+      const tab = tabRegistry[tabId];
       const tabState = this.initialTabState(tab);
       if (tabState.status === tabStatus.INITIALIZING) {
         this.fetchTabComponent(tab.tabId);
@@ -114,11 +114,14 @@ class Spotlight extends Component {
     const newTabList = nextProps.roomInfo.tabs;
     if (currentTabList.length === newTabList.length) return;
 
-    newTabList.forEach((tab) => {
-      const { tabId } = tab;
+    newTabList.forEach((tabId) => {
+      const tab = tabRegistry[tabId];
       if (this.state.tabStatusRegistry[tabId]) return;
+
       const tabState = this.initialTabState(tab);
-      tabState.status = tabStatus.LOADING;
+      if (tabState.status === tabStatus.INITIALIZING) {
+        tabState.status = tabStatus.LOADING;
+      }
       this.updateState({
         tabStatusRegistry: {
           [tabId]: { $set: tabState },
@@ -134,17 +137,18 @@ class Spotlight extends Component {
     // when fetch component was callled
     const thenActiveTabId = switchAfterFetch ? this.stateBuffer.activeTabId : null;
 
-    tab.load((module) => {
-      const tabComponent = module.default;
-      this.tabComponents[tabId] = tabComponent;
-      this.updateState({
-        tabStatusRegistry: {
-          [tabId]: { status: { $set: tabStatus.LOADED } },
-        },
+    tab.load()
+      .then((module) => {
+        const tabComponent = module.default;
+        this.tabComponents[tabId] = tabComponent;
+        this.updateState({
+          tabStatusRegistry: {
+            [tabId]: { status: { $set: tabStatus.LOADED } },
+          },
+        });
+        const currentActiveTabId = this.stateBuffer.activeTabId;
+        if (switchAfterFetch && (thenActiveTabId === currentActiveTabId)) this.switchToTab(tabId);
       });
-      const currentActiveTabId = this.stateBuffer.activeTabId;
-      if (switchAfterFetch && (thenActiveTabId === currentActiveTabId)) this.switchToTab(tabId);
-    });
   }
 
   addTabToRoom(tabId) {
