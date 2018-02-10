@@ -1,2 +1,2 @@
-import './room';
-import './cron';
+import './private';
+

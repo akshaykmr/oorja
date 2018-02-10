@@ -45,3 +45,4 @@ percolate:synced-cron
 cultofcoders:redis-oplog
 disable-oplog@1.0.7
 akshay:twitch-oauth
+simple:json-routes

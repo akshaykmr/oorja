@@ -13,7 +13,7 @@ import roomProvider from 'imports/modules/room/provider/';
 
 import { extractInitialsFromName } from 'imports/modules/user/utilities';
 
-import response from './response';
+import response from 'imports/startup/server/response';
 
 
 Meteor.methods({
@@ -73,7 +73,7 @@ Meteor.methods({
       roomName: roomSpecification.roomName,
       roomSecret,
       passwordEnabled,
-      roomAccessToken: passwordEnabled ? roomAccess.createRoomAccessToken(roomId, password) : null,
+      roomAccessToken: passwordEnabled ? roomAccess.createRoomAccessToken(roomId) : null,
     });
   },
 
@@ -105,8 +105,8 @@ Meteor.methods({
     if (!roomAccess.comparePassword(password, roomDocument.password)) {
       return response.error(HttpStatus.UNAUTHORIZED, 'Incorrect room password 😕');
     }
-    const { _id, password: hashedPassword } = roomDocument;
-    const roomAccessToken = roomAccess.createRoomAccessToken(_id, hashedPassword);
+
+    const roomAccessToken = roomAccess.createRoomAccessToken(roomDocument._id);
     return response.body(
       HttpStatus.OK,
       { roomAccessToken },
