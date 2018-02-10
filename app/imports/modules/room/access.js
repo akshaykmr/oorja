@@ -25,21 +25,26 @@ export default {
     return bcryptCompare(password, hashedPassword);
   },
 
-  createRoomAccessToken(roomId, hashedPassword) {
-    const now = moment();
+  createRoomAccessToken(roomId) {
     return jwt.encode({
       v: tokenVersion,
-      iat: now.valueOf(),
-      exp: now.add(2, 'days').valueOf(),
+      iat: moment().valueOf(),
       roomId,
-    }, JWTsecret + hashedPassword, JWTalgo);
-    // Add hashed password to the jwt secret so that if room password is changed
-    // it invalidates any existing tokens
+    }, JWTsecret, JWTalgo);
   },
 
-  decodeAccessToken(token, hashedPassword) {
+  createBeamToken(roomId, userId) {
+    return jwt.encode({
+      v: tokenVersion,
+      iat: moment().valueOf(),
+      roomId,
+      userId,
+    }, JWTsecret, JWTalgo);
+  },
+
+  decodeAccessToken(token) {
     try {
-      return jwt.decode(token, JWTsecret + hashedPassword);
+      return jwt.decode(token, JWTsecret);
     } catch (e) {
       return null;
     }
@@ -49,12 +54,11 @@ export default {
     if (!room.passwordEnabled && (room.roomSecret === credentials.roomSecret)) {
       return true;
     }
-    const payload = this.decodeAccessToken(credentials.roomAccessToken, room.password);
+    const payload = this.decodeAccessToken(credentials.roomAccessToken);
     return payload && this.isTokenPayloadValid(payload, room);
   },
 
   isTokenPayloadValid(payload, roomDocument) {
-    const now = moment().valueOf();
-    return (payload.v === tokenVersion && payload.exp > now && roomDocument._id === payload.roomId);
+    return (payload.v === tokenVersion && roomDocument._id === payload.roomId);
   },
 };
