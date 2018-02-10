@@ -6,7 +6,7 @@ import { browserHistory } from 'react-router';
 import { connect } from 'react-redux';
 import update from 'immutability-helper';
 import _ from 'lodash';
-import { moment } from 'meteor/momentjs:moment';
+import moment from 'moment';
 
 import { Meteor } from 'meteor/meteor';
 

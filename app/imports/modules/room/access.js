@@ -1,7 +1,7 @@
 
 import { Meteor } from 'meteor/meteor';
 import bcrypt from 'bcrypt';
-import { moment as Moment } from 'meteor/momentjs:moment';
+import moment from 'moment';
 import jwt from 'jwt-simple';
 
 
@@ -10,9 +10,11 @@ const bcryptCompare = Meteor.wrapAsync(bcrypt.compare);
 
 const {
   private: {
-    saltRounds, JWTsecret, JWTalgo, tokenVersion,
+    saltRounds, JWTsecret, JWTalgo,
   },
 } = Meteor.settings;
+
+const tokenVersion = 1;
 
 export default {
   hashPassword(password) {
@@ -24,7 +26,7 @@ export default {
   },
 
   createRoomAccessToken(roomId, hashedPassword) {
-    const now = new Moment();
+    const now = moment();
     return jwt.encode({
       v: tokenVersion,
       iat: now.valueOf(),
@@ -52,7 +54,7 @@ export default {
   },
 
   isTokenPayloadValid(payload, roomDocument) {
-    const now = (new Moment()).valueOf();
+    const now = moment().valueOf();
     return (payload.v === tokenVersion && payload.exp > now && roomDocument._id === payload.roomId);
   },
 };

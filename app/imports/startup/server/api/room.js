@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { check, Match } from 'meteor/check';
 import _ from 'lodash';
-import { moment as Moment } from 'meteor/momentjs:moment';
+import moment from 'moment';
 import { Random } from 'meteor/random';
 
 import * as HttpStatus from 'http-status-codes';
@@ -59,8 +59,8 @@ Meteor.methods({
       roomSecret,
       userTokens: [],
       participants: [],
-      createdAt: new Moment().valueOf(),
-      validTill: new Moment().add(4, 'days').valueOf(),
+      createdAt: moment().valueOf(),
+      validTill: moment().add(4, 'days').valueOf(),
       archived: false,
     };
 
