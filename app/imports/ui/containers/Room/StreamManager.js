@@ -1,5 +1,7 @@
+import MediaPreferences from 'imports/modules/media/storage';
 import messageType from '../../components/room/constants/messageType';
 import { roomMessageTypes } from './index';
+
 
 // If Room class file gets too big. I should move stream handling over here.
 // be careful of 'this' context when doing so future-me. Did you finish witcher 3 btw?
@@ -61,23 +63,23 @@ class StreamManager {
   }
 
   saveMediaDeviceSettings(action) {
-    const mediaDeviceSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings'));
-    if (!mediaDeviceSettings) return;
+    const settings = MediaPreferences.get();
+    if (!settings) return;
     const {
       MUTE_AUDIO, UNMUTE_AUDIO, MUTE_VIDEO, UNMUTE_VIDEO,
     } = roomMessageTypes;
     switch (action) {
-      case MUTE_AUDIO: mediaDeviceSettings.mutedAudio = true;
+      case MUTE_AUDIO: settings.mutedAudio = true;
         break;
-      case UNMUTE_AUDIO: mediaDeviceSettings.mutedAudio = false;
+      case UNMUTE_AUDIO: settings.mutedAudio = false;
         break;
-      case MUTE_VIDEO: mediaDeviceSettings.mutedVideo = true;
+      case MUTE_VIDEO: settings.mutedVideo = true;
         break;
-      case UNMUTE_VIDEO: mediaDeviceSettings.mutedVideo = false;
+      case UNMUTE_VIDEO: settings.mutedVideo = false;
         break;
       default:
     }
-    localStorage.setItem('mediaDeviceSettings', JSON.stringify(mediaDeviceSettings));
+    MediaPreferences.save(settings);
   }
 
   muteVideo(mediaStream) {
