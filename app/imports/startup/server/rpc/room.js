@@ -36,6 +36,8 @@ Meteor.methods({
     } else {
       roomSpecification.roomName = roomSetup.getRandomRoomName();
     }
+
+    // TODO: in case of a random room name I should try a different name
     if (Rooms.findOne({ roomName: roomSpecification.roomName, archived: false })) {
       return response.error(HttpStatus.CONFLICT, 'A room with same name exists (；一_一)');
     }
@@ -64,12 +66,13 @@ Meteor.methods({
       archived: false,
     };
 
-    if (!Rooms.insert(roomDocument)) return response.error(HttpStatus.INTERNAL_SERVER_ERROR);
+    if (!Rooms.insert(roomDocument)) return response.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Internal server error 👹');
 
     const providerMetadata = roomProvider.licode.createRoom(roomId, { p2p: true });
     Rooms.update(roomId, { $set: { providerMetadata } });
 
     return response.body(HttpStatus.CREATED, {
+      roomId,
       roomName: roomSpecification.roomName,
       roomSecret,
       passwordEnabled,
@@ -77,7 +80,7 @@ Meteor.methods({
     });
   },
 
-  getRoomInfo(roomName) {
+  lookupRoom(roomName) {
     check(roomName, String);
     const room = Rooms.findOne({ roomName, archived: false });
     if (!room) return response.error(HttpStatus.NOT_FOUND, 'Room not found');
@@ -85,21 +88,25 @@ Meteor.methods({
     return response.body(HttpStatus.OK, _.pick(room, ['passwordEnabled', '_id', 'tabs', 'roomName']));
   },
 
-  checkIfExistingUser(roomName, userToken) {
-    check(roomName, String);
+  checkIfExistingUser(roomId, userId, userToken) {
+    check(roomId, String);
+    check(userId, String);
     check(userToken, String);
 
-    const room = Rooms.findOne({ roomName, archived: false });
+    const room = Rooms.findOne({ _id: roomId, archived: false });
     if (!room) return response.error(HttpStatus.NOT_FOUND, 'Room not found');
 
-    return response.body(HttpStatus.OK, { existingUser: _.find(room.userTokens, { userToken }) });
+    return response.body(
+      HttpStatus.OK,
+      { existingUser: !!_.find(room.userTokens, { userToken, userId }) },
+    );
   },
 
-  authenticatePassword(roomName, password) {
-    check(roomName, String);
+  unlockWithPassword(roomId, password) { // change to ID
+    check(roomId, String);
     check(password, String);
 
-    const roomDocument = Rooms.findOne({ roomName, archived: false });
+    const roomDocument = Rooms.findOne({ _id: roomId, archived: false });
     if (!roomDocument) return response.error(HttpStatus.NOT_FOUND, 'Room not found');
 
     if (!roomAccess.comparePassword(password, roomDocument.password)) {
@@ -167,6 +174,7 @@ Meteor.methods({
     };
 
     const erizoToken = roomProvider.licode.createToken(room.providerMetadata, userId);
+    const beamToken = roomAccess.createBeamToken(roomId, userId);
 
     if (!existingUser) {
       const profile = generateProfile();
@@ -178,6 +186,7 @@ Meteor.methods({
 
       return response.body(HttpStatus.OK, {
         erizoToken,
+        beamToken,
         userId,
         userToken: newUserToken.userToken,
       });
@@ -185,6 +194,7 @@ Meteor.methods({
 
     return response.body(HttpStatus.OK, {
       erizoToken,
+      beamToken,
       userId: existingUser.userId,
       userToken: existingUser.userToken, // existing token
     });
@@ -214,14 +224,13 @@ Meteor.methods({
 });
 
 
-Meteor.publish('room.info', (roomName, credentials) => {
-  check(roomName, String);
+Meteor.publish('room.info', (roomId, credentials) => {
+  check(roomId, String);
   check(credentials, Match.ObjectIncluding({
     roomSecret: String,
     roomAccessToken: String,
   }));
-
-  const room = Rooms.findOne({ roomName, archived: false });
+  const room = Rooms.findOne({ _id: roomId, archived: false });
 
   if (!roomAccess.areCredentialsValid(room, credentials)) {
     return null;
@@ -240,7 +249,6 @@ Meteor.publish('room.info', (roomName, credentials) => {
     },
     limit: 1,
   });
-
   return roomCursor;
 });
 
