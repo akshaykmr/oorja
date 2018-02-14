@@ -1,7 +1,7 @@
 import React from 'react';
 // import scrollToElement from 'scroll-to-element';
 
-import RoomSetup from 'imports/ui/containers/RoomSetup';
+import RoomSetup from 'imports/ui/components/RoomSetup';
 import MinimalLogo from 'imports/ui/components/MinimalLogo';
 import './landing.scss';
 

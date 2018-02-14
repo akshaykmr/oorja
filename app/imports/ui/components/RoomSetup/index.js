@@ -1,15 +1,16 @@
 import { Meteor } from 'meteor/meteor';
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import update from 'immutability-helper';
-import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
 import { Intent, RadioGroup, Radio, Collapse, Button } from '@blueprintjs/core';
 
+import * as HttpStatus from 'http-status-codes';
+
+import oorjaClient from 'imports/modules/oorjaClient';
+
 import { shareChoices } from 'imports/modules/room/setup/constants';
 
-import { createRoom } from '../../actions/roomConfiguration';
 import SupremeToaster from '../../components/Toaster';
 
 
@@ -20,6 +21,7 @@ import './roomSetup.scss';
   roomConfiguration in global state.
 */
 
+const GENERIC_ERROR_MESSAGE = 'Something went wrong 😕';
 
 // Should look good starting from 300x400px
 
@@ -51,6 +53,8 @@ class RoomSetup extends Component {
     this.resetCustomization = this.resetCustomization.bind(this);
     this.roomNameTouched = this.roomNameTouched.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleRoomCreationResponse = this.handleRoomCreationResponse.bind(this);
+    this.handleRoomCreationError = this.handleRoomCreationError.bind(this);
   }
 
   updateState(changes, buffer = this.stateBuffer) {
@@ -58,6 +62,33 @@ class RoomSetup extends Component {
     this.setState(this.stateBuffer);
   }
 
+  handleRoomCreationError(message) {
+    this.updateState({ waitingForServer: { $set: false } });
+    SupremeToaster.show({
+      intent: Intent.WARNING,
+      message,
+      timeout: 4000,
+    });
+  }
+
+  handleRoomCreationResponse(response) {
+    if (response.status !== HttpStatus.CREATED) {
+      this.handleRoomCreationError(response.message);
+      return;
+    }
+
+    const { roomName, roomSecret, passwordEnabled } = response.data;
+    this.updateState({ waitingForServer: { $set: false } });
+    Meteor.setTimeout(() => {
+      SupremeToaster.show({
+        intent: Intent.SUCCESS,
+        message: 'Room Created ヾ(⌐■_■)ノ♪',
+        timeout: 3000,
+      });
+    }, 100);
+    const queryString = passwordEnabled ? '' : `?secret=${roomSecret}`;
+    browserHistory.push(`/${roomName}${queryString}`);
+  }
 
   handleSubmit(event) {
     event.preventDefault();
@@ -71,30 +102,11 @@ class RoomSetup extends Component {
       });
       return;
     }
-
     const { customization, customRoom } = this.stateBuffer;
     this.updateState({ waitingForServer: { $set: true } });
-    this.props.createRoom(customRoom ? customization : null).then(
-      ({ roomName, roomSecret, passwordEnabled }) => {
-        this.updateState({ waitingForServer: { $set: false } });
-        Meteor.setTimeout(() => {
-          SupremeToaster.show({
-            intent: Intent.SUCCESS,
-            message: 'Room Created ヾ(⌐■_■)ノ♪',
-            timeout: 3000,
-          });
-        }, 100);
-        const queryString = passwordEnabled ? '' : `?secret=${roomSecret}`;
-        browserHistory.push(`/${roomName}${queryString}`);
-      },
-      (error) => {
-        this.updateState({ waitingForServer: { $set: false } });
-        SupremeToaster.show({
-          intent: Intent.WARNING,
-          message: error.message,
-          timeout: 4000,
-        });
-      },
+    oorjaClient.createRoom(customRoom ? customization : null).then(
+      this.handleRoomCreationResponse,
+      () => this.handleRoomCreationError(GENERIC_ERROR_MESSAGE),
     );
   }
 
@@ -213,9 +225,4 @@ class RoomSetup extends Component {
   }
 }
 
-RoomSetup.propTypes = {
-  createRoom: PropTypes.func,
-};
-
-
-export default connect(null, { createRoom })(RoomSetup);
+export default RoomSetup;
