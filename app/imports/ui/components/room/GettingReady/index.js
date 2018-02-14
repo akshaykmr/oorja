@@ -7,6 +7,7 @@ import { Button, Intent, Popover, PopoverInteractionKind, Position } from '@blue
 import hark from 'hark';
 
 import MediaPreferences from 'imports/modules/media/storage';
+import JoinRoomForm from 'imports/ui/components/JoinRoomForm';
 
 import Erizo from '../../../../modules/Erizo';
 
@@ -14,7 +15,6 @@ import VideoStream from '../../Media/Video';
 import AudioStream from '../../Media/Audio';
 
 
-import JoinRoomForm from '../../../containers/JoinRoomForm';
 import './gettingReady.scss';
 
 export default class GettingReady extends Component {

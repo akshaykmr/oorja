@@ -14,13 +14,13 @@ import oorjaClient from 'imports/modules/oorjaClient';
 import { RoomStorage } from 'imports/modules/room/storage';
 
 import { Intent } from '@blueprintjs/core';
+import Room from 'imports/ui/components/Room';
 
 import PasswordPrompt from 'imports/ui/components/PasswordPrompt';
 import toaster from '../../components/Toaster';
 
 import MinimalLogo from '../../components/MinimalLogo';
-import GettingReady from '../../components/room/GettingReady';
-import Room from '../Room';
+import GettingReady from '../../components/Room/GettingReady';
 
 import { Rooms as MongoRoom } from '../../../collections/common';
 

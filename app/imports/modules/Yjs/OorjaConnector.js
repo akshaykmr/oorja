@@ -1,7 +1,7 @@
 import AbstractConnector from './AbstractConnector';
 
-import messageType from '../../ui/components/room/constants/messageType';
-import roomActivities from '../../ui/components/room/constants/roomActivities';
+import messageType from '../../ui/components/Room/constants/messageType';
+import roomActivities from '../../ui/components/Room/constants/roomActivities';
 
 class OorjaConnector extends AbstractConnector {
   constructor(yConfig, connectorOptions) {

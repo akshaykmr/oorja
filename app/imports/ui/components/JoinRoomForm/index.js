@@ -12,7 +12,7 @@ import { Tracker } from 'meteor/tracker';
 
 import LoginWithService from '../../components/LoginWithService/';
 
-import Avatar from '../../components/room/Avatar';
+import Avatar from '../../components/Room/Avatar';
 
 
 import './JoinRoomForm.scss';

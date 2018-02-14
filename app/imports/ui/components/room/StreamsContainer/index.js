@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import status from '../../room/constants/status';
+import status from '../../Room/constants/status';
 
 import Avatar from '../Avatar';
 import VideoStream from '../../Media/Video';

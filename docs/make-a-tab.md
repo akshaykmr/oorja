@@ -15,7 +15,7 @@ Lets have a look at the Room below, and narrow down to the tab components.
     <p align="center">
       <img src="http://imgur.com/wadJCIB.png" alt="" height="500px">
     </p>
-  Now open your editor and navigate to `app/imports/ui/components/room/Spotlight`.
+  Now open your editor and navigate to `app/imports/ui/components/Room/Spotlight`.
 In this directory you can see all the tabs and their code. Each of them exports react component. The spotlight component loads the desired tabs (dynamically if need be) and renders their content on top of each other in the red box area marked as `tab content`. Depending on which tab is in focus (or active as in code), the z-index property is changed to bring it `onTop`.
 Writing only a tab component is not enough, it needs to be registered in the app. For this checkout `tabRegistry.js` which registers the tab and specifies its icon, description and other details described in that file.
 
@@ -42,7 +42,7 @@ Use the React developer tools extension to browse these props in detail.
   - **onTop**: bool, whether this tab is currently `onTop` or the current active tab. eg. If the tab is not currently on top you may want to stop unnecessary rendering or animation since its not visible to the user.
   - **primaryMediaStreamState**: The primary media stream is webcams audio/video stream. This object describes its state. eg. used by video chat tab to toggle mic/video when respective control buttons are clicked.
   - **screenSharingStreamState**: The stream state for the screen sharing stream.
-  - **uiSize**: You will find some constants used throughout the code base most of these are in `/room/constants/` they are their to avoid magic strings in the code. uiSize value is one of these constants found in `/room/constants/uiConfig.js` uiSize is used to determine whether the ui is compact or large. eg. used to position Arrow in in Room Info tab.
+  - **uiSize**: You will find some constants used throughout the code base most of these are in `/Room/constants/` they are their to avoid magic strings in the code. uiSize value is one of these constants found in `/Room/constants/uiConfig.js` uiSize is used to determine whether the ui is compact or large. eg. used to position Arrow in in Room Info tab.
   - **classNames** and **style**: each tab component applies these props to their main div for proper positioning and styling, yours must as well. If you see any of the tabs its main render block contains code like this: 
   ``` jsx
   <div className={this.props.classNames} style={this.props.style}>

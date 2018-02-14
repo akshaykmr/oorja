@@ -17,7 +17,7 @@ import { Meteor } from 'meteor/meteor';
 import App from 'imports/ui/layouts/App';
 import SupremeToaster from 'imports/ui/components/Toaster';
 import Landing from 'imports/ui/pages/Landing/';
-import Door from 'imports/ui/containers/Door';
+import Door from 'imports/ui/components/Door';
 import NotFound from 'imports/ui/pages/NotFound';
 
 // root reducer

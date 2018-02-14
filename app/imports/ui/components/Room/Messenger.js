@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import messageType from '../../components/room/constants/messageType';
+import messageType from '../../components/Room/constants/messageType';
 /* eg. message
   {
     type: // reqd. switching behavior for handling. from messageType.js

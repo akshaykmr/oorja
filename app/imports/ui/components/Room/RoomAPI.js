@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import _ from 'lodash';
-import roomActivities from '../../components/room/constants/roomActivities';
-import status from '../../components/room/constants/status';
+import roomActivities from '../../components/Room/constants/roomActivities';
+import status from '../../components/Room/constants/status';
 
 class RoomAPI {
   constructor(room) {

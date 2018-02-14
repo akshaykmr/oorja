@@ -16,22 +16,22 @@ import MediaPreferences from 'imports/modules/media/storage';
 
 import Erizo from '../../../modules/Erizo';
 // constants
-import uiConfig from '../../components/room/constants/uiConfig';
-import status from '../../components/room/constants/status';
-import streamTypes from '../../components/room/constants/streamType';
-import mediaStreamPurpose from '../../components/room/constants/mediaStreamPurpose';
-import roomActivities from '../../components/room/constants/roomActivities';
+import uiConfig from '../../components/Room/constants/uiConfig';
+import status from '../../components/Room/constants/status';
+import streamTypes from '../../components/Room/constants/streamType';
+import mediaStreamPurpose from '../../components/Room/constants/mediaStreamPurpose';
+import roomActivities from '../../components/Room/constants/roomActivities';
 
 // room components
-import StreamsContainer from '../../components/room/StreamsContainer/';
-import Spotlight from '../../components/room/Spotlight';
+import StreamsContainer from '../../components/Room/StreamsContainer/';
+import Spotlight from '../../components/Room/Spotlight';
 
 import ActivityListener from '../../../modules/ActivityListener';
 import RoomAPI from './RoomAPI';
 import Messenger from './Messenger';
 import StreamManager from './StreamManager';
 
-import messageType from '../../components/room/constants/messageType';
+import messageType from '../../components/Room/constants/messageType';
 
 import { MEDIASTREAMS_RESET, MEDIASTREAMS_UPDATE } from '../../actions/mediaStreams';
 import { SPEAKING, SPEAKING_STOPPED } from '../../actions/stream';

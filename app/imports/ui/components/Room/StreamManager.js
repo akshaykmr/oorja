@@ -1,5 +1,5 @@
 import MediaPreferences from 'imports/modules/media/storage';
-import messageType from '../../components/room/constants/messageType';
+import messageType from '../../components/Room/constants/messageType';
 import { roomMessageTypes } from './index';
 
 
