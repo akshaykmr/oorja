@@ -6,12 +6,13 @@ import classNames from 'classnames';
 import { Button, Intent, Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
 import hark from 'hark';
 
+import MediaPreferences from 'imports/modules/media/storage';
+
 import Erizo from '../../../../modules/Erizo';
 
 import VideoStream from '../../Media/Video';
 import AudioStream from '../../Media/Audio';
 
-import SupremeToaster from '../../Toaster';
 
 import JoinRoomForm from '../../../containers/JoinRoomForm';
 import './gettingReady.scss';
@@ -59,11 +60,11 @@ export default class GettingReady extends Component {
         return partialSettings;
       }, {});
     /* eslint-enable no-param-reassign */
-    localStorage.setItem('mediaDeviceSettings', JSON.stringify(settings));
+    MediaPreferences.save(settings);
   }
 
   getDefaultState() {
-    const savedSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings'));
+    const savedSettings = MediaPreferences.get();
     return {
       videoQuality: savedSettings ? savedSettings.videoQuality : '1080p',
       lastGoodVideoQuality: '240p',
@@ -170,7 +171,7 @@ export default class GettingReady extends Component {
         return;
       }
       if (options.videoQualityChange) {
-        SupremeToaster.show({
+        this.props.toaster.show({
           message: 'Unable to change video quality',
           intent: Intent.WARNING,
         });
@@ -183,7 +184,7 @@ export default class GettingReady extends Component {
         return;
       }
       if (options.retryAttempt) {
-        SupremeToaster.show({
+        this.props.toaster.show({
           message: 'Sorry. Could not access camera or microphone',
           intent: Intent.WARNING,
         });
@@ -256,7 +257,7 @@ export default class GettingReady extends Component {
         }),
         onClick: () => {
           if (!this.state.video) {
-            SupremeToaster.show({
+            this.props.toaster.show({
               message: 'no video found 😕',
               intent: Intent.WARNING,
             });
@@ -278,7 +279,7 @@ export default class GettingReady extends Component {
         }),
         onClick: () => {
           if (!this.state.audio) {
-            SupremeToaster.show({
+            this.props.toaster.show({
               message: 'no audio found 😕',
               intent: Intent.WARNING,
             });
@@ -470,6 +471,8 @@ export default class GettingReady extends Component {
         <JoinRoomForm
           roomInfo={this.props.roomInfo}
           processComplete={this.props.onReady}
+          oorjaClient={this.props.oorjaClient}
+          onUnexpectedServerError = {this.props.onUnexpectedServerError}
           roomUserId={this.props.roomUserId}/>
       </div>
     );
@@ -479,5 +482,8 @@ export default class GettingReady extends Component {
 GettingReady.propTypes = {
   roomInfo: PropTypes.object.isRequired,
   onReady: PropTypes.func.isRequired,
+  toaster: PropTypes.object.isRequired,
+  oorjaClient: PropTypes.object.isRequired,
+  onUnexpectedServerError: PropTypes.func.isRequired,
   roomUserId: PropTypes.string,
 };

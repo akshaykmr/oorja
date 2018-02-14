@@ -10,6 +10,8 @@ import _ from 'lodash';
 import hark from 'hark';
 import { Intent } from '@blueprintjs/core';
 
+import MediaPreferences from 'imports/modules/media/storage';
+
 // TODO: move stream handling related functions to streamManager.js
 
 import Erizo from '../../../modules/Erizo';
@@ -53,7 +55,7 @@ class Room extends Component {
   constructor(props) {
     super(props);
     this.roomName = props.roomInfo.roomName;
-    this.erizoToken = localStorage.getItem(`erizoToken:${this.roomName}`);
+    this.erizoToken = props.roomStorage.getErizoToken();
 
     // subscribed incoming data streams
     this.subscribedDataStreams = {}; // streamId -> erizoStream
@@ -116,7 +118,7 @@ class Room extends Component {
       '1080p': [1920, 1080, 2560, 1440],
     };
 
-    this.mediaDeviceSettings = JSON.parse(localStorage.getItem('mediaDeviceSettings')) || {};
+    this.mediaDeviceSettings = MediaPreferences.get() || {};
 
     this.state = {
       connectionTable: {},
@@ -219,9 +221,9 @@ class Room extends Component {
       return;
     }
 
-    this.props.joinRoom(this.props.roomInfo._id)
-      .then(({ erizoToken }) => {
-        connectToErizo(erizoToken, true);
+    this.props.oorjaClient.joinRoom(this.props.roomInfo._id)
+      .then((response) => {
+        connectToErizo(response.data.erizoToken, true);
       })
       .catch(() => { window.location.reload(); });
   }
@@ -1114,6 +1116,7 @@ class Room extends Component {
         <Spotlight
           roomReady={this.state.dataBroadcastStreamStatus === status.CONNECTED }
           roomInfo={this.props.roomInfo}
+          roomStorage={this.props.roomStorage}
           connectedUsers={this.state.connectedUsers}
           roomAPI={this.roomAPI}
           tabReady={this.tabReady}
@@ -1131,7 +1134,8 @@ class Room extends Component {
 Room.propTypes = {
   roomUserId: PropTypes.string.isRequired,
   roomInfo: PropTypes.object.isRequired,
-  joinRoom: PropTypes.func.isRequired,
+  roomStorage: PropTypes.object.isRequired,
+  oorjaClient: PropTypes.object.isRequired,
   mediaStreams: PropTypes.object.isRequired,
   resetMediaStreams: PropTypes.func.isRequired,
   updateMediaStreams: PropTypes.func.isRequired,

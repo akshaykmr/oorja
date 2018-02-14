@@ -3,53 +3,45 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { browserHistory } from 'react-router';
-import { connect } from 'react-redux';
 import update from 'immutability-helper';
-import _ from 'lodash';
 import moment from 'moment';
 
+import * as HttpStatus from 'http-status-codes';
+
 import { Meteor } from 'meteor/meteor';
+import oorjaClient from 'imports/modules/oorjaClient';
+
+import { RoomStorage } from 'imports/modules/room/storage';
 
 import { Intent } from '@blueprintjs/core';
-import SupremeToaster from '../../components/Toaster';
+
+import PasswordPrompt from 'imports/ui/components/PasswordPrompt';
+import toaster from '../../components/Toaster';
 
 import MinimalLogo from '../../components/MinimalLogo';
-import PasswordPrompt from '../PasswordPrompt';
 import GettingReady from '../../components/room/GettingReady';
 import Room from '../Room';
-// import TestErizo from '../components/room/TestErizo';
 
 import { Rooms as MongoRoom } from '../../../collections/common';
 
-import { getRoomInfo, deleteRoomSecret, storeRoomSecret, deleteRoomUserId, deleteErizoToken,
-  deleteRoomAccessToken, joinRoom } from '../../actions/roomConfiguration';
 
 import './door.scss';
+
+const GENERIC_ERROR_MESSAGE = 'Something went wrong 😕';
 
 class Door extends Component {
   constructor(props) {
     super(props);
+    this.roomStorage = null;
 
     const { roomName } = this.props.params;
     this.roomName = roomName;
-    this.roomSecret = localStorage.getItem(`roomSecret:${roomName}`);
-    this.roomAccessToken = localStorage.getItem(`roomAccessToken:${roomName}`);
-    this.roomUserToken = localStorage.getItem(`roomUserToken:${roomName}`);
-    this.roomUserId = localStorage.getItem(`roomUserId:${roomName}`);
-    this.props.deleteErizoToken();
-    this.urlRoomSecret = props.location.query.secret;
 
-    // if secret exists in url delete storedSecret
-    if (this.urlRoomSecret) {
-      this.props.deleteRoomSecret(roomName);
-      this.props.storeRoomSecret(roomName, this.urlRoomSecret);
-      this.roomSecret = this.urlRoomSecret;
-    }
+    this.roomSecret = props.location.query.secret;
 
     this.stages = {
-      LOADING: 'LOADING', // get some room info
+      LOADING: 'LOADING',
       PASSWORD_PROMPT: 'PASSWORD_PROMPT',
-      INITIALIZING: 'INITIALIZING',
       GETTING_READY: 'GETTING_READY',
       SHOW_TIME: 'SHOW_TIME',
     };
@@ -62,11 +54,28 @@ class Door extends Component {
       cleanRun: false,
     };
 
-    this.passwordSuccess = this.passwordSuccess.bind(this);
+    this.setupTrackerToRefreshIfWakingFromSleep();
     this.stateBuffer = this.state;
 
-    this.lastActiveTime = (new Date()).getTime();
+    this.kick = this.kick.bind(this);
+    this.setup = this.setup.bind(this);
+    this.initialize = this.initialize.bind(this);
+    this.handleRoomLookup = this.handleRoomLookup.bind(this);
+    this.passwordSuccess = this.passwordSuccess.bind(this);
+    this.onUnexpectedServerError = this.onUnexpectedServerError.bind(this);
+  }
 
+  kick(message = GENERIC_ERROR_MESSAGE, intent = Intent.WARNING) {
+    browserHistory.push('/');
+    toaster.show({
+      message,
+      intent,
+      timeout: 6000,
+    });
+  }
+
+  setupTrackerToRefreshIfWakingFromSleep() {
+    this.lastActiveTime = (new Date()).getTime();
     this.SleepTracker = setInterval(() => {
       const currentTime = (new Date()).getTime();
       if (currentTime > (this.lastActiveTime + 7500)) {
@@ -83,112 +92,168 @@ class Door extends Component {
   }
 
   passwordSuccess() {
-    this.roomAccessToken = localStorage.getItem(`roomAccessToken:${this.roomName}`);
-    this.gotoStage(this.stages.INITIALIZING);
+    this.roomAccessToken = this.roomStorage.getAccessToken();
+    this.initialize();
   }
 
-  checkIfExistingUser() {
-    if (!this.roomUserToken) return false;
-    return Meteor.callPromise('checkIfExistingUser', this.roomName, this.roomUserToken)
-      .then(response => response.data.existingUser);
+  handleRoomLookup(response) {
+    const { status } = response;
+    if (status !== HttpStatus.OK) {
+      const errorMessage = status === HttpStatus.NOT_FOUND ?
+        (
+          <div>
+            ( ⚆ _ ⚆ ) Room not found.
+            <br />
+            Please check the link or create a new room.
+          </div>
+        ) : GENERIC_ERROR_MESSAGE;
+      this.kick(errorMessage);
+      return Promise.reject();
+    }
+    return response.data;
   }
 
-  beginEntranceProcedure(getFreshAccessToken = false) {
-    if (getFreshAccessToken) {
-      this.props.deleteRoomAccessToken();
+  handleRoomSubscriptionFailure() {
+    // possible reasons
+    // - could be that room link is faulty (invalid secret)
+    // - tokens are faulty
+    // do a clean run once, if not fixed redirect to /.
+    if (!this.stateBuffer.cleanRun) {
+      this.roomStorage.deleteRoomAccessToken();
       this.updateState({
         cleanRun: { $set: true },
       });
+      this.setup();
+      return;
     }
 
-    const self = this;
-    (async function setRoomInfo() {
-      const response = await self.props.getRoomInfo(self.roomName);
-      const roomInfo = response.payload.data;
+    toaster.show({
+      message: 'Could not enter room. Please check your link or try later',
+      intent: Intent.WARNING,
+      timeout: 7000,
+    });
+    browserHistory.push('/');
+  }
 
-      const isExistingUser = await self.checkIfExistingUser();
-      self.roomId = roomInfo ? roomInfo._id : null;
-      if (!roomInfo) {
-        // room not found
-        SupremeToaster.show({
-          message: (
-            <div>
-              ( ⚆ _ ⚆ ) Room not found.
-              <br />
-              Please check the link or create a new room.
-            </div>
-          ),
-          intent: Intent.WARNING,
-          timeout: 6000,
+
+  setupRoomObserver() {
+    // set an observer to sync roomInfo changes to the state.
+    this.roomInfoObserver = MongoRoom.find({ _id: this.roomId }).observe({
+      changed: (latestRoomInfo) => {
+        this.updateState({
+          roomInfo: { $set: latestRoomInfo },
         });
+      },
+      removed: () => {
+        console.error('room removed');
         browserHistory.push('/');
-      } else if (!roomInfo.passwordEnabled && !self.roomSecret) {
-        // fail? either user can create a new room or get a new shareLink.
-        SupremeToaster.show({
-          message: `Could not access room.
-          Try to obtain a new link OR make a new room and invite others`,
-          intent: Intent.WARNING,
-          timeout: 10000,
-        });
-        browserHistory.push('/');
-      } else if (roomInfo.passwordEnabled && !self.roomAccessToken) {
-        SupremeToaster.show({
-          message: 'This room is password protected (°ロ°)☝',
-          intent: Intent.PRIMARY,
-          timeout: 3000,
-        });
-        self.gotoStage(self.stages.PASSWORD_PROMPT);
-      } else {
-        if (!isExistingUser) {
-          delete self.roomUserToken;
-          delete self.roomUserId;
-          self.props.deleteRoomUserId();
+      },
+    });
+  }
+
+  setup() {
+    oorjaClient.lookupRoom(this.roomName)
+      .then(this.handleRoomLookup, () => { this.kick(); return Promise.reject(); })
+      .then((minimalRoomInfo) => {
+        this.roomId = minimalRoomInfo._id;
+        this.roomStorage = new RoomStorage(this.roomId);
+        this.roomStorage.saveRoomSecret(this.roomSecret);
+        this.roomAccessToken = this.roomStorage.getAccessToken();
+
+        if (!minimalRoomInfo.passwordEnabled && !this.roomSecret) {
+          this.kick(`Could not access room.
+            Try to obtain a new link OR make a new room and invite others`);
+          return Promise.reject();
         }
-        self.gotoStage(self.stages.INITIALIZING);
-      }
-    }());
+
+        if (minimalRoomInfo.passwordEnabled && !this.roomAccessToken) {
+          toaster.show({
+            message: 'This room is password protected (°ロ°)☝',
+            intent: Intent.PRIMARY,
+            timeout: 3000,
+          });
+          this.gotoStage(this.stages.PASSWORD_PROMPT);
+          return Promise.resolve();
+        }
+        this.initialize();
+        return Promise.resolve();
+      });
+  }
+
+  initialize() {
+    this.gotoStage(this.stages.LOADING);
+    this.roomInfoSubscriptionHandle = oorjaClient.subscribeToRoom(this.roomId);
+    this.roomInfoSubscriptionHandle.readyPromise()
+      .then(() => {
+        // TODO handle case of broken subscription
+        const roomInfo = MongoRoom.findOne({ _id: this.roomId });
+        if (!roomInfo) {
+          this.onUnexpectedServerError();
+          return Promise.reject();
+        }
+        this.setupRoomObserver();
+        this.updateState({
+          roomInfo: { $set: roomInfo },
+          initialized: { $set: true },
+        });
+        return Promise.resolve();
+      }, this.handleRoomSubscriptionFailure) // BUG : promise on reject does not run..
+      .then(() => {
+        oorjaClient.checkIfExistingUser(this.roomId)
+          .then(
+            () => {
+              if (this.isRoomReady()) {
+                this.gotoStage(this.stages.LOADING);
+                this.enterRoom();
+                return;
+              }
+              this.gotoStage(this.stages.GETTING_READY);
+            },
+            () => {
+              this.roomStorage.deleteSavedUser();
+              this.gotoStage(this.stages.GETTING_READY);
+            },
+          );
+      });
   }
 
   componentWillMount() {
     document.body.classList.add('room-container');
-    this.beginEntranceProcedure();
+    this.setup();
+  }
+
+  enterRoom() {
+    oorjaClient.joinRoom(this.roomId)
+      .then(() => this.gotoStage(this.stages.SHOW_TIME), this.onUnexpectedServerError);
+  }
+
+  onUnexpectedServerError(message, intent = Intent.WARNING) {
+    setTimeout(() => {
+      toaster.show({
+        message: message || 'Internal Server Error 🤕',
+        intent: intent || Intent.DANGER,
+        timeout: 8000,
+      });
+    }, 300);
+    browserHistory.push('/');
   }
 
   isRoomReady() {
-    const lastReadyTime = localStorage.getItem(`roomReady:${this.roomName}`);
+    const lastReadyTime = this.roomStorage.getLastReadyTime();
     if (!lastReadyTime) return false;
     return moment().isBefore(moment(lastReadyTime).add(4, 'hours'));
   }
 
   gotoStage(stage) {
-    const { INITIALIZING, GETTING_READY, SHOW_TIME } = this.stages;
-    const {
-      roomName, roomSecret, roomUserId, roomAccessToken,
-    } = this;
+    const { SHOW_TIME } = this.stages;
+
     // const previousStage = this.stateBuffer.stage;
-    // custom action before switching to stage
+    // action before switching to stage
     switch (stage) {
-      case GETTING_READY:
-        if (roomUserId) {
-          const room = MongoRoom.findOne({ _id: this.roomId });
-          if (_.find(room.participants, { userId: roomUserId })) {
-            if (this.isRoomReady()) {
-              this.gotoStage(this.stages.LOADING);
-              this.props.joinRoom(this.roomId)
-                .then(() => {
-                  this.gotoStage(SHOW_TIME);
-                });
-              return;
-            }
-          } else {
-            this.props.deleteRoomUserId();
-          }
-        }
-        break;
       case SHOW_TIME:
-        localStorage.setItem(`roomReady:${roomName}`, moment().toISOString());
-        this.roomUserId = localStorage.getItem(`roomUserId:${roomName}`);
-        this.roomUserToken = localStorage.getItem(`roomUserToken:${roomName}`);
+        this.roomStorage.saveLastReadyTime(moment().toISOString());
+        this.roomUserId = this.roomStorage.getUserId();
+        this.roomUserToken = this.roomStorage.getUserToken();
         break;
       default: break;
     }
@@ -197,62 +262,8 @@ class Door extends Component {
       stage: { $set: stage },
     });
 
-    const self = this;
-    // custom action after switching to stage.
+    // Action after switching to stage.
     switch (stage) {
-      case INITIALIZING:
-        (async function subscribeToRoomInfo() {
-          self.gotoStage(self.stages.LOADING);
-          self.roomInfoSubscriptionHandle = Meteor.subscribe(
-            'room.info',
-            roomName,
-            {
-              roomAccessToken: roomAccessToken || '',
-              roomSecret: roomSecret || '',
-            },
-          );
-          await self.roomInfoSubscriptionHandle.readyPromise();
-          const roomInfo = MongoRoom.findOne({ _id: self.roomId });
-          self.updateState({
-            roomInfo: { $set: roomInfo },
-          });
-          if (!roomInfo) {
-            console.error('room info not found');
-            // possible reasons
-            // - could be that room link is faulty (invalid secret)
-            // - tokens are faulty
-            // do a clean run once, if not fixed redirect to /.
-            if (self.stateBuffer.cleanRun) {
-              SupremeToaster.show({
-                message: 'Could not enter room. Please check your link or try later',
-                intent: Intent.WARNING,
-                timeout: 7000,
-              });
-              browserHistory.push('/');
-              return;
-            }
-            self.beginEntranceProcedure(true);
-            return;
-          }
-
-          // set an observer to sync roomInfo changes to the state.
-          self.observeRoomInfo = MongoRoom.find({ roomName }).observe({
-            changed: (latestRoomInfo) => {
-              self.updateState({
-                roomInfo: { $set: latestRoomInfo },
-              });
-            },
-            removed: () => {
-              console.error('room removed');
-              browserHistory.push('/');
-            },
-          });
-          self.updateState({
-            initialized: { $set: true },
-          });
-          self.gotoStage(self.stages.GETTING_READY);
-        }());
-        break;
       default: break;
     }
   }
@@ -263,7 +274,7 @@ class Door extends Component {
     clearInterval(this.SleepTracker);
     if (this.stateBuffer.initialized) {
       this.roomInfoSubscriptionHandle.stop();
-      this.observeRoomInfo.stop();
+      this.roomInfoObserver.stop();
     }
   }
 
@@ -282,19 +293,26 @@ class Door extends Component {
         );
       case PASSWORD_PROMPT:
         return <PasswordPrompt
-                  roomName = {this.roomName}
-                  onSuccess = {this.passwordSuccess}
+                  roomId={this.roomId}
+                  oorjaClient={oorjaClient}
+                  roomName={this.roomName}
+                  onSuccess={this.passwordSuccess}
+                  toaster={toaster}
                 />;
       case GETTING_READY:
         return <GettingReady
-        roomInfo={this.state.roomInfo}
-        onReady={() => { this.gotoStage(SHOW_TIME); }}
-        roomUserId={this.roomUserId}/>;
+                  roomInfo={this.state.roomInfo}
+                  onReady={() => { this.gotoStage(SHOW_TIME); }}
+                  oorjaClient={oorjaClient}
+                  toaster={toaster}
+                  onUnexpectedServerError = {this.onUnexpectedServerError}
+                  roomUserId={this.roomUserId}/>;
       case SHOW_TIME:
         return <Room
-        roomInfo={this.state.roomInfo}
-        joinRoom={this.props.joinRoom}
-        roomUserId={this.roomUserId} />;
+                  roomInfo={this.state.roomInfo}
+                  roomStorage={this.roomStorage}
+                  oorjaClient={oorjaClient}
+                  roomUserId={this.roomUserId} />;
       default: return null;
     }
   }
@@ -303,24 +321,6 @@ class Door extends Component {
 Door.propTypes = {
   params: PropTypes.object,
   location: PropTypes.object,
-  storeRoomSecret: PropTypes.func.isRequired,
-  deleteRoomSecret: PropTypes.func.isRequired,
-  getRoomInfo: PropTypes.func.isRequired,
-  deleteRoomUserId: PropTypes.func.isRequired,
-  deleteErizoToken: PropTypes.func.isRequired,
-  deleteRoomAccessToken: PropTypes.func.isRequired,
-  joinRoom: PropTypes.func.isRequired,
 };
 
-export default connect(
-  null,
-  {
-    storeRoomSecret,
-    deleteRoomSecret,
-    getRoomInfo,
-    deleteRoomUserId,
-    deleteErizoToken,
-    deleteRoomAccessToken,
-    joinRoom,
-  },
-)(Door);
+export default Door;

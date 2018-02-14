@@ -1,19 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import _ from 'lodash';
 import classNames from 'classnames';
-import { Button, Intent } from '@blueprintjs/core';
-// import ImageLoader from 'react-imageloader';
+import { Button } from '@blueprintjs/core';
 
+import * as HttpStatus from 'http-status-codes';
 
 import { Meteor } from 'meteor/meteor';
 import { Tracker } from 'meteor/tracker';
 
-import SupremeToaster from '../../components/Toaster';
 
 import LoginWithService from '../../components/LoginWithService/';
-import { joinRoom } from '../../actions/roomConfiguration';
 
 import Avatar from '../../components/room/Avatar';
 
@@ -33,6 +30,8 @@ class JoinRoomForm extends Component {
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.enableAnon = this.enableAnon.bind(this);
+    this.handleJoinRoomResponse = this.handleJoinRoomResponse.bind(this);
+
     this.state = this.initialState();
     this.existingUser = _.find(this.props.roomInfo.participants, { userId: this.props.roomUserId });
   }
@@ -111,6 +110,18 @@ class JoinRoomForm extends Component {
     });
   }
 
+  handleJoinRoomResponse(response) {
+    this.setState({
+      ...this.state,
+      waiting: false,
+    });
+    if (response.status !== HttpStatus.OK) {
+      this.props.onUnexpectedServerError(response.message);
+      return;
+    }
+    this.props.processComplete();
+  }
+
   handleSubmit(event) {
     event.preventDefault();
     if (this.state.waiting || !(this.state.validName)) return;
@@ -123,21 +134,8 @@ class JoinRoomForm extends Component {
       ...this.state,
       waiting: true,
     });
-    this.props.joinRoom(this.props.roomInfo._id, name, textAvatarColor)
-      .then(() => {
-        this.setState({
-          ...this.state,
-          waiting: false,
-        });
-        this.props.processComplete();
-      })
-      .catch((response) => {
-        SupremeToaster.show({
-          message: response.message,
-          intent: Intent.WARNING,
-          timeout: 7000,
-        });
-      });
+    this.props.oorjaClient.joinRoom(this.props.roomInfo._id, name, textAvatarColor)
+      .then(this.handleJoinRoomResponse, this.props.onUnexpectedServerError);
   }
 
   enableAnon() {
@@ -239,10 +237,11 @@ class JoinRoomForm extends Component {
 
 JoinRoomForm.propTypes = {
   processComplete: PropTypes.func.isRequired,
-  joinRoom: PropTypes.func.isRequired,
+  oorjaClient: PropTypes.object.isRequired,
+  onUnexpectedServerError: PropTypes.func.isRequired,
   roomInfo: PropTypes.object.isRequired,
   roomUserId: PropTypes.string,
 };
 
 
-export default connect(null, { joinRoom })(JoinRoomForm);
+export default JoinRoomForm;

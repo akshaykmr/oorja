@@ -5,10 +5,10 @@ import update from 'immutability-helper';
 import classNames from 'classnames';
 import { Position, Tooltip } from '@blueprintjs/core';
 
+import oorjaClient from 'imports/modules/oorjaClient'; // TODO: this should be passed down from a parent component
+
 import uiConfig from '../constants/uiConfig';
 import roomActivities from '../constants/roomActivities';
-
-import { addTab } from '../../../actions/roomConfiguration';
 
 /* eslint-disable*/
 import tabRegistry from './tabRegistry';
@@ -52,7 +52,7 @@ class Spotlight extends Component {
     this.defaultTabId = this.props.roomInfo.defaultTab;
 
     let tabFound = false;
-    let lastActiveTabId = localStorage.getItem(`lastActiveTab:${props.roomInfo.roomName}`);
+    let lastActiveTabId = this.props.roomStorage.getLastActiveTab();
     lastActiveTabId = Number(lastActiveTabId);
     if (lastActiveTabId && tabStatusRegistry[lastActiveTabId]) {
       tabFound = true;
@@ -100,7 +100,7 @@ class Spotlight extends Component {
     this.updateState({
       activeTabId: { $set: tabId },
     });
-    localStorage.setItem(`lastActiveTab:${this.props.roomInfo.roomName}`, tabId);
+    this.props.roomStorage.saveLastActiveTab(tabId);
     this.props.dispatchRoomActivity(roomActivities.TAB_SWITCH, { from, to });
     const newActiveTab = tabStatusRegistry[tabId];
     this.props.setCustomStreamContainerSize(newActiveTab.streamContainerSize);
@@ -164,7 +164,7 @@ class Spotlight extends Component {
       this.fetchTabComponent(tabId, true);
       return;
     }
-    addTab(this.props.roomInfo._id, tabId)
+    oorjaClient.addTab(this.props.roomInfo._id, tabId)
       .then(() => { this.fetchTabComponent(tabId, true); });
   }
 
@@ -315,6 +315,7 @@ Spotlight.propTypes = {
   dispatchRoomActivity: PropTypes.func.isRequired,
   connectedUsers: PropTypes.array.isRequired,
   roomInfo: PropTypes.object.isRequired,
+  roomStorage: PropTypes.object.isRequired,
   roomReady: PropTypes.bool.isRequired,
   tabReady: PropTypes.func.isRequired,
   uiSize: PropTypes.string.isRequired,
