@@ -1,2 +1,2 @@
 import './serviceConfiguration';
-import './newAccountCreationHook';
+import './registerAccountCreationHook';

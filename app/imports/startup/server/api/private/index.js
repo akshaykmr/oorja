@@ -10,7 +10,7 @@ const { private: { privateAPISecret } } = Meteor.settings;
 Router.Middleware.use((req, res, next) => {
   if (req.url.includes('/api/v1/private')) {
     if (req.headers['oorja-secret'] === privateAPISecret) return next();
-    return Router.sendResult(res, { code: HttpStatus.BAD_REQUEST });
+    return Router.sendResult(res, { code: HttpStatus.UNAUTHORIZED });
   }
   return next();
 });
