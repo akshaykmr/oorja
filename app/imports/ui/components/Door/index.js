@@ -309,6 +309,7 @@ class Door extends Component {
                   roomUserId={this.roomUserId}/>;
       case SHOW_TIME:
         return <Room
+                  roomId={this.roomId}
                   roomInfo={this.state.roomInfo}
                   roomStorage={this.roomStorage}
                   oorjaClient={oorjaClient}

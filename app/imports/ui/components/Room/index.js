@@ -11,6 +11,12 @@ import hark from 'hark';
 import { Intent } from '@blueprintjs/core';
 
 import MediaPreferences from 'imports/modules/media/storage';
+import { SPEAKING, SPEAKING_STOPPED } from 'imports/ui/actions/stream';
+
+import roomMessageTypes from 'imports/modules/room/messageTypes';
+import browserUtils from 'imports/modules/browser/utils';
+
+import mapDispatchToProps from './dispatch';
 
 // TODO: move stream handling related functions to streamManager.js
 
@@ -33,23 +39,9 @@ import StreamManager from './StreamManager';
 
 import messageType from '../../components/Room/constants/messageType';
 
-import { MEDIASTREAMS_RESET, MEDIASTREAMS_UPDATE } from '../../actions/mediaStreams';
-import { SPEAKING, SPEAKING_STOPPED } from '../../actions/stream';
-
-import SupremeToaster from '../../components/Toaster';
-
 import './room.scss';
 
 const { defaultMaxVideoBW, defaultMaxAudioBW } = Meteor.settings;
-
-const roomMessageTypes = {
-  SPEECH: 'SPEECH',
-  STREAM_SUBSCRIBE_SUCCESS: 'STREAM_SUBSCRIBE_SUCCESS',
-  MUTE_VIDEO: 'MUTE_VIDEO',
-  UNMUTE_VIDEO: 'UNMUTE_VIDEO',
-  MUTE_AUDIO: 'MUTE_AUDIO',
-  UNMUTE_AUDIO: 'UNMUTE_AUDIO',
-};
 
 class Room extends Component {
   constructor(props) {
@@ -221,7 +213,7 @@ class Room extends Component {
       return;
     }
 
-    this.props.oorjaClient.joinRoom(this.props.roomInfo._id)
+    this.props.oorjaClient.joinRoom(this.props.roomId)
       .then((response) => {
         connectToErizo(response.data.erizoToken, true);
       })
@@ -365,7 +357,7 @@ class Room extends Component {
       mediaStream.stream.getVideoTracks()[0].onended = this.stopScreenSharingStream;
     });
     mediaStream.addEventListener('access-denied', () => {
-      SupremeToaster.show({
+      this.props.toaster.show({
         message: (
           <div>
             could not access your screen for sharing 😕
@@ -428,7 +420,7 @@ class Room extends Component {
       );
     });
     mediaStream.addEventListener('access-denied', () => {
-      SupremeToaster.show({
+      this.props.toaster.show({
         message: 'could not access your camera or microphone 😕',
         intent: Intent.WARNING,
       });
@@ -1026,8 +1018,8 @@ class Room extends Component {
   componentDidMount() {
     // store body bg color and then change it.
     this.tryToConnect();
-    this.originialBodyBackground = document.body.style.background;
-    document.body.style.backgroundColor = '#2e3136';
+    this.originalBodyBackground = browserUtils.getBodyColor();
+    browserUtils.setBodyColor('#2e3136');
   }
 
   componentWillUnmount() {
@@ -1040,7 +1032,7 @@ class Room extends Component {
     window.removeEventListener('resize', this.onWindowResize);
 
     // restore original body bg color
-    document.body.style.backgroundColor = this.originialBodyBackground;
+    browserUtils.setBodyColor(this.originalBodyBackground);
   }
 
   incrementVideoStreamCount() {
@@ -1073,29 +1065,7 @@ class Room extends Component {
 
   toggleFullscreen() {
     const element = this.roomDiv;
-    const requestFullscreen =
-      element.requestFullscreen ||
-      element.webkitRequestFullscreen ||
-      element.mozRequestFullScreen ||
-      element.msRequestFullscreen;
-
-    const exitFullscreen =
-      document.exitFullscreen ||
-      document.webkitExitFullscreen ||
-      document.mozCancelFullScreen ||
-      document.msExitFullscreen;
-
-    const fullscreenElement =
-      document.fullscreenElement ||
-      document.webkitFullscreenElement ||
-      document.mozFullScreenElement ||
-      document.msFullscreenElement;
-
-    if (!fullscreenElement) {
-      requestFullscreen.call(element);
-    } else if (exitFullscreen) {
-      exitFullscreen.call(document);
-    }
+    browserUtils.toggleFullScreenForElement(element);
   }
 
   render() {
@@ -1132,10 +1102,12 @@ class Room extends Component {
 }
 
 Room.propTypes = {
-  roomUserId: PropTypes.string.isRequired,
+  roomId: PropTypes.string.isRequired,
   roomInfo: PropTypes.object.isRequired,
+  roomUserId: PropTypes.string.isRequired,
   roomStorage: PropTypes.object.isRequired,
   oorjaClient: PropTypes.object.isRequired,
+  toaster: PropTypes.object.isRequired,
   mediaStreams: PropTypes.object.isRequired,
   resetMediaStreams: PropTypes.func.isRequired,
   updateMediaStreams: PropTypes.func.isRequired,
@@ -1148,41 +1120,6 @@ const mapStateToProps = state => ({
   mediaStreams: state.mediaStreams,
   focussedStreamId: state.focussedStreamId,
 });
-
-
-const mapDispatchToProps = dispatch => ({
-  updateMediaStreams: (changes) => {
-    dispatch({
-      type: MEDIASTREAMS_UPDATE,
-      payload: {
-        changes,
-      },
-    });
-  },
-  resetMediaStreams: () => {
-    dispatch({
-      type: MEDIASTREAMS_RESET,
-    });
-  },
-  streamSpeaking: (streamId) => {
-    dispatch({
-      type: SPEAKING,
-      payload: {
-        streamId,
-      },
-    });
-  },
-  streamSpeakingStopped: (streamId) => {
-    dispatch({
-      type: SPEAKING_STOPPED,
-      payload: {
-        streamId,
-      },
-    });
-  },
-});
-
-export { roomMessageTypes };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Room);
 

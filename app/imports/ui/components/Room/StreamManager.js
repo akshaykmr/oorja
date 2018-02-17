@@ -1,6 +1,6 @@
+import roomMessageTypes from 'imports/modules/room/messageTypes';
 import MediaPreferences from 'imports/modules/media/storage';
 import messageType from '../../components/Room/constants/messageType';
-import { roomMessageTypes } from './index';
 
 
 // If Room class file gets too big. I should move stream handling over here.
