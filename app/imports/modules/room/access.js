@@ -1,22 +1,15 @@
 
 import { Meteor } from 'meteor/meteor';
 import bcrypt from 'bcrypt';
-import moment from 'moment';
-import jwt from 'jwt-simple';
 
+import tokenHandler from 'imports/modules/tokenHandler';
 
 const bcryptHash = Meteor.wrapAsync(bcrypt.hash);
 const bcryptCompare = Meteor.wrapAsync(bcrypt.compare);
 
-const {
-  private: {
-    saltRounds, JWTsecret, JWTalgo,
-  },
-} = Meteor.settings;
+const { private: { saltRounds } } = Meteor.settings;
 
-const tokenVersion = 1;
-
-export default {
+const roomAccess = {
   hashPassword(password) {
     return bcryptHash(password, saltRounds);
   },
@@ -25,40 +18,17 @@ export default {
     return bcryptCompare(password, hashedPassword);
   },
 
-  createRoomAccessToken(roomId) {
-    return jwt.encode({
-      v: tokenVersion,
-      iat: moment().valueOf(),
-      roomId,
-    }, JWTsecret, JWTalgo);
-  },
-
-  createBeamToken(roomId, userId) {
-    return jwt.encode({
-      v: tokenVersion,
-      iat: moment().valueOf(),
-      roomId,
-      userId,
-    }, JWTsecret, JWTalgo);
-  },
-
-  decodeAccessToken(token) {
-    try {
-      return jwt.decode(token, JWTsecret);
-    } catch (e) {
-      return null;
-    }
+  createAccessToken(roomId) {
+    return tokenHandler.issue({ roomId });
   },
 
   areCredentialsValid(room, credentials) {
     if (!room.passwordEnabled && (room.roomSecret === credentials.roomSecret)) {
       return true;
     }
-    const payload = this.decodeAccessToken(credentials.roomAccessToken);
-    return payload && this.isTokenPayloadValid(payload, room);
-  },
-
-  isTokenPayloadValid(payload, roomDocument) {
-    return (payload.v === tokenVersion && roomDocument._id === payload.roomId);
+    const payload = tokenHandler.decode(credentials.roomAccessToken);
+    return payload && payload.roomId === room._id;
   },
 };
+
+export default roomAccess;

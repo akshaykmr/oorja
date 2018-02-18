@@ -47,11 +47,10 @@ const OorjaClient = {
   checkIfExistingUser(roomId) {
     const store = new RoomStorage(roomId);
     const userToken = store.getUserToken();
-    const userId = store.getUserId();
     return new Promise((resolve, reject) => {
-      if (!userId || !userToken) return reject();
+      if (!userToken) return reject();
 
-      return Meteor.callPromise('checkIfExistingUser', roomId, userId, userToken)
+      return Meteor.callPromise('checkIfExistingUser', roomId, userToken)
         .then(
           (response) => {
             if (response.status !== HttpStatus.OK || !response.data.existingUser) {
@@ -68,11 +67,11 @@ const OorjaClient = {
     const store = new RoomStorage(roomId);
     const userToken = store.getUserToken();
     const credentials = store.getRoomCredentials();
-    return Meteor.callPromise('joinRoom', roomId, credentials, userToken, name, textAvatarColor).then(
+    return Meteor.callPromise('joinRoom', roomId, credentials, { userToken, name, textAvatarColor }).then(
       (response) => {
         if (response.status === HttpStatus.OK) {
           const {
-            erizoToken, userId, userToken: newUserToken, beamToken,
+            erizoToken, userId, userToken: newUserToken,
           } = response.data;
 
           Meteor.connection.setUserId(userId);
@@ -81,7 +80,6 @@ const OorjaClient = {
             [storeKeys.ERIZO_TOKEN]: erizoToken,
             [storeKeys.USER_ID]: userId,
             [storeKeys.USER_TOKEN]: newUserToken,
-            [storeKeys.BEAM_TOKEN]: beamToken,
           });
         }
 

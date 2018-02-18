@@ -2,7 +2,9 @@ import { Meteor } from 'meteor/meteor';
 import nuveClient from 'imports/modules/NuveClient';
 
 const { private: { Nuve } } = Meteor.settings;
-
+// meh code...
+// TODO: think of how providers will be configured, how they will function.
+// when: When adding 1 more provider.
 export class Licode {
   constructor(N = nuveClient, nuveConfig = Nuve) {
     this.roomProvider = 'LICODE';

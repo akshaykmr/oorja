@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import * as HttpStatus from 'http-status-codes';
 import response from 'imports/startup/server/response';
-import roomAccess from 'imports/modules/room/access';
+import tokenHandler from 'imports/modules/tokenHandler';
 
 import Router from '../router';
 
@@ -18,7 +18,7 @@ Router.Middleware.use((req, res, next) => {
 
 Router.add('post', '/api/v1/private/jwt_decode', (req, res, _next) => {
   const { token } = req.body;
-  const payload = roomAccess.decodeAccessToken(token);
+  const payload = tokenHandler.decode(token);
 
   if (!payload) {
     return Router.sendResult(res, {

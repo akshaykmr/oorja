@@ -11,6 +11,8 @@ import roomSetup from 'imports/modules/room/setup';
 import roomAccess from 'imports/modules/room/access';
 import roomProvider from 'imports/modules/room/provider/';
 
+import userAccess from 'imports/modules/user/access';
+
 import { extractInitialsFromName } from 'imports/modules/user/utilities';
 
 import response from 'imports/startup/server/response';
@@ -76,7 +78,7 @@ Meteor.methods({
       roomName: roomSpecification.roomName,
       roomSecret,
       passwordEnabled,
-      roomAccessToken: passwordEnabled ? roomAccess.createRoomAccessToken(roomId) : null,
+      roomAccessToken: passwordEnabled ? roomAccess.createAccessToken(roomId) : null,
     });
   },
 
@@ -88,17 +90,17 @@ Meteor.methods({
     return response.body(HttpStatus.OK, _.pick(room, ['passwordEnabled', '_id', 'tabs', 'roomName']));
   },
 
-  checkIfExistingUser(roomId, userId, userToken) {
+  checkIfExistingUser(roomId, userToken) {
     check(roomId, String);
-    check(userId, String);
     check(userToken, String);
 
     const room = Rooms.findOne({ _id: roomId, archived: false });
-    if (!room) return response.error(HttpStatus.NOT_FOUND, 'Room not found');
+    if (!room) return response.error(HttpStatus.EXPECTATION_FAILED, 'Room not found');
+    const userId = userAccess.getUserId(userToken);
 
     return response.body(
       HttpStatus.OK,
-      { existingUser: !!_.find(room.userTokens, { userToken, userId }) },
+      { existingUser: !!_.find(room.participants, { userId }) },
     );
   },
 
@@ -113,20 +115,22 @@ Meteor.methods({
       return response.error(HttpStatus.UNAUTHORIZED, 'Incorrect room password 😕');
     }
 
-    const roomAccessToken = roomAccess.createRoomAccessToken(roomDocument._id);
+    const roomAccessToken = roomAccess.createAccessToken(roomDocument._id);
     return response.body(
       HttpStatus.OK,
       { roomAccessToken },
     );
   },
 
-  // TODO: clean this mess
-  joinRoom(roomId, credentials, userToken, name, textAvatarColor) {
+  joinRoom(roomId, credentials, options) {
     check(roomId, String);
     check(credentials, Match.ObjectIncluding({
       roomSecret: String,
       roomAccessToken: String,
     }));
+    check(options, Match.Maybe(Object));
+
+    const { userToken, name, textAvatarColor } = options;
     check(name, Match.Maybe(String));
     check(textAvatarColor, Match.Maybe(String));
     check(userToken, Match.Maybe(String));
@@ -138,65 +142,64 @@ Meteor.methods({
       return response.error(HttpStatus.UNAUTHORIZED, 'Unauthorized');
     }
 
-    const user = Meteor.user();
-    let userId = Meteor.userId();
+    // TODO
+    const createErizoToken = userId =>
+      roomProvider.licode.createToken(room.providerMetadata, userId);
 
-    const existingUser = _.find(room.userTokens, { userToken }) ||
-      (user ? _.find(room.userTokens, { userId: user._id }) : null);
-
-    if (!existingUser) {
-      if (!name || !textAvatarColor) {
-        return response.error(HttpStatus.BAD_REQUEST, 'Missing user name or avatar color');
+    if (userToken) {
+      const userId = userAccess.getUserId(userToken);
+      if (!_.find(room.participants, { userId })) {
+        return response.error(HttpStatus.UNAUTHORIZED, 'Unauthorized');
       }
-    }
-
-    if (!user) { // for anonynymous users
-      userId = Random.id(16);
-      this.setUserId(userId);
-    }
-
-    const generateProfile = () => {
-      let profile = {};
-      if (user) {
-        /* eslint-disable */
-        profile = user.profile;
-        /* eslint-enable */
-        profile.initials = extractInitialsFromName(user.profile.firstName + user.profile.LastName);
-      } else {
-        profile.firstName = name.trim();
-        profile.loginService = '';
-        profile.picture = '';
-        profile.initials = extractInitialsFromName(name);
-      }
-      profile.userId = userId;
-      profile.textAvatarColor = textAvatarColor;
-      return profile;
-    };
-
-    const erizoToken = roomProvider.licode.createToken(room.providerMetadata, userId);
-    const beamToken = roomAccess.createBeamToken(roomId, userId);
-
-    if (!existingUser) {
-      const profile = generateProfile();
-      const newUserToken = {
-        userId,
-        userToken: Random.secret(25),
-      };
-      Rooms.update(room._id, { $push: { participants: profile, userTokens: newUserToken } });
-
       return response.body(HttpStatus.OK, {
-        erizoToken,
-        beamToken,
+        erizoToken: createErizoToken(userId),
         userId,
-        userToken: newUserToken.userToken,
+        userToken,
       });
     }
 
+    const loggedInUser = Meteor.user();
+
+    if (loggedInUser && _.find(room.participants, { userId: loggedInUser._id })) {
+      const userId = loggedInUser._id;
+      return response.body(HttpStatus.OK, {
+        erizoToken: createErizoToken(userId),
+        userId,
+        userToken: userAccess.createToken(userId),
+      });
+    }
+
+    if (!name || !textAvatarColor) {
+      return response.error(HttpStatus.BAD_REQUEST, 'Missing user name or avatar color');
+    }
+
+    const userId = loggedInUser ? loggedInUser._id : `anon:${Random.id(12)}`;
+
+    const generateProfile = (user = loggedInUser) => {
+      let profile = {};
+      if (user) {
+        const initials = extractInitialsFromName(user.profile.firstName + user.profile.LastName);
+        profile = Object.assign(profile, loggedInUser.profile, { initials });
+      } else {
+        profile = Object.assign(profile, {
+          firstName: name.trim(),
+          loginService: '',
+          picture: '',
+          initials: extractInitialsFromName(name),
+        });
+      }
+      return Object.assign(profile, {
+        userId,
+        textAvatarColor,
+      });
+    };
+    const profile = generateProfile();
+    Rooms.update(room._id, { $push: { participants: profile } });
+
     return response.body(HttpStatus.OK, {
-      erizoToken,
-      beamToken,
-      userId: existingUser.userId,
-      userToken: existingUser.userToken, // existing token
+      erizoToken: createErizoToken(userId),
+      userId,
+      userToken: userAccess.createToken(userId),
     });
   },
 
