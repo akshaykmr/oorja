@@ -22,12 +22,15 @@ const roomAccess = {
     return tokenHandler.issue({ roomId });
   },
 
+  getRoomId(token) {
+    return tokenHandler.decode(token).roomId;
+  },
+
   areCredentialsValid(room, credentials) {
     if (!room.passwordEnabled && (room.roomSecret === credentials.roomSecret)) {
       return true;
     }
-    const payload = tokenHandler.decode(credentials.roomAccessToken);
-    return payload && payload.roomId === room._id;
+    return this.getRoomId(credentials.roomAccessToken) === room._id;
   },
 };
 

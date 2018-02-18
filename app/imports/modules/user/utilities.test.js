@@ -1,10 +1,7 @@
 /* global test */
-
-/* global test */
-
 import { extractInitialsFromName } from './utilities';
 
-test('room name validation', () => {
+test('name initials', () => {
   expect(extractInitialsFromName('blah')).toBe('BL');
   expect(extractInitialsFromName('p')).toBe('P');
   expect(extractInitialsFromName('akshay kumar')).toBe('AK');
