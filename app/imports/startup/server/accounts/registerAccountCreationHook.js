@@ -63,6 +63,7 @@ Accounts.onCreateUser((options, user) => {
         firstName,
         lastName,
         picture,
+        loginService: 'LinkedIn',
         publicProfile: publicProfileUrl,
         bio,
       },

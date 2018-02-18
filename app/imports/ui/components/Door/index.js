@@ -312,6 +312,7 @@ class Door extends Component {
                   roomId={this.roomId}
                   roomInfo={this.state.roomInfo}
                   roomStorage={this.roomStorage}
+                  toaster={toaster}
                   oorjaClient={oorjaClient}
                   roomUserId={this.roomUserId} />;
       default: return null;
