@@ -3,7 +3,5 @@ playground/
 
 npm-debug.log
 
-app/package-lock.json
-
 dump.rdb
 app/dependency_tree.txt
