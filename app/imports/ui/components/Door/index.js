@@ -22,8 +22,6 @@ import toaster from '../../components/Toaster';
 import MinimalLogo from '../../components/MinimalLogo';
 import GettingReady from '../../components/Room/GettingReady';
 
-import { Rooms as MongoRoom } from '../../../collections/common';
-
 
 import './door.scss';
 
@@ -113,7 +111,7 @@ class Door extends Component {
     return response.data;
   }
 
-  handleRoomSubscriptionFailure() {
+  handleRoomFetchFailure() {
     // possible reasons
     // - could be that room link is faulty (invalid secret)
     // - tokens are faulty
@@ -128,27 +126,11 @@ class Door extends Component {
     }
 
     toaster.show({
-      message: 'Could not enter room. Please check your link or try later',
+      message: 'Could not connect to room. Please check your link or try later',
       intent: Intent.WARNING,
       timeout: 7000,
     });
     browserHistory.push('/');
-  }
-
-
-  setupRoomObserver() {
-    // set an observer to sync roomInfo changes to the state.
-    this.roomInfoObserver = MongoRoom.find({ _id: this.roomId }).observe({
-      changed: (latestRoomInfo) => {
-        this.updateState({
-          roomInfo: { $set: latestRoomInfo },
-        });
-      },
-      removed: () => {
-        console.error('room removed');
-        browserHistory.push('/');
-      },
-    });
   }
 
   setup() {
@@ -180,25 +162,33 @@ class Door extends Component {
       });
   }
 
-  initialize() {
-    this.gotoStage(this.stages.LOADING);
-    this.roomInfoSubscriptionHandle = oorjaClient.subscribeToRoom(this.roomId);
-    this.roomInfoSubscriptionHandle.readyPromise()
-      .then(() => {
-        // TODO handle case of broken subscription
-        const roomInfo = MongoRoom.findOne({ _id: this.roomId });
+  fetchRoomInfo() {
+    return oorjaClient.fetchRoom(this.roomId)
+      .then((response) => {
+        const { status } = response;
+        if (status !== HttpStatus.OK) {
+          this.handleRoomSubscriptionFailure();
+          return Promise.reject();
+        }
+        const roomInfo = response.data;
         if (!roomInfo) {
           this.onUnexpectedServerError();
           return Promise.reject();
         }
-        this.setupRoomObserver();
         this.updateState({
           roomInfo: { $set: roomInfo },
-          initialized: { $set: true },
         });
         return Promise.resolve();
-      }, this.handleRoomSubscriptionFailure) // BUG : promise on reject does not run..
+      }, this.handleRoomFetchFailure);
+  }
+
+  initialize() {
+    this.gotoStage(this.stages.LOADING);
+    this.fetchRoomInfo()
       .then(() => {
+        this.updateState({
+          initialized: { $set: true },
+        });
         oorjaClient.checkIfExistingUser(this.roomId)
           .then(
             () => {
@@ -311,6 +301,7 @@ class Door extends Component {
         return <Room
                   roomId={this.roomId}
                   roomInfo={this.state.roomInfo}
+                  updateRoomInfo={this.updateRoomInfo}
                   roomStorage={this.roomStorage}
                   toaster={toaster}
                   oorjaClient={oorjaClient}

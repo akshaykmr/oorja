@@ -27,6 +27,11 @@ const OorjaClient = {
     return Meteor.callPromise('lookupRoom', roomName);
   },
 
+  fetchRoom(roomId) {
+    const credentials = new RoomStorage(roomId).getRoomCredentials();
+    return Meteor.callPromise('fetchRoom', roomId, credentials);
+  },
+
   unlockWithPassword(roomId, password) {
     return Meteor.callPromise('unlockWithPassword', roomId, password).then(
       (response) => {
@@ -71,15 +76,14 @@ const OorjaClient = {
       (response) => {
         if (response.status === HttpStatus.OK) {
           const {
-            erizoToken, userId, userToken: newUserToken,
+            erizoToken, userId, userToken: newUserToken, roomAccessToken,
           } = response.data;
-
-          Meteor.connection.setUserId(userId);
 
           store.setKeys({
             [storeKeys.ERIZO_TOKEN]: erizoToken,
             [storeKeys.USER_ID]: userId,
             [storeKeys.USER_TOKEN]: newUserToken,
+            [storeKeys.ACCESS_TOKEN]: roomAccessToken,
           });
         }
 
@@ -90,11 +94,6 @@ const OorjaClient = {
         return Promise.reject();
       },
     );
-  },
-
-  subscribeToRoom(roomId) {
-    const credentials = new RoomStorage(roomId).getRoomCredentials();
-    return Meteor.subscribe('room.info', roomId, credentials);
   },
 
   addTab(roomId, tabId) {

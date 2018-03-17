@@ -8,26 +8,5 @@ Meteor.users.deny({ update: () => true });
 
 
 export const Rooms = new Mongo.Collection('room');
-/*
-  {
-    roomName,
-    passwordEnabled,
-    password,
-    participants: [
-      {
-        userId,
-        ...profile
-      }
-    ],
-    userTokens: [
-      {
-        token:,
-        userId
-      }
-    ]
-    createdAt
-  }
-
-*/
 
 export default Rooms;
