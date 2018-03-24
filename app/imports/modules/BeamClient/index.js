@@ -1,9 +1,10 @@
 import { Socket } from 'phoenix';
 
 class BeamClient {
-  constructor(beamHost, userToken, { onOpen, onError, onClose } = {}) {
+  constructor(beamConfig, userToken, { onOpen, onError, onClose } = {}) {
     const socket = new Socket(
-      `${beamHost}/socket`,
+      // need ws instead of wss in dev
+      `${beamConfig.socketProtocolPrefix}${beamConfig.host}/socket`,
       {
         params: {
           user_token: userToken,
@@ -22,7 +23,7 @@ class BeamClient {
   joinRoomChannel({
     roomId,
     roomAccessToken,
-    session,
+    sessionId,
     onJoin,
     onError,
     onClose,
@@ -32,7 +33,7 @@ class BeamClient {
   }) {
     const roomChannel = this.socket.channel(`room:${roomId}`, {
       room_token: roomAccessToken,
-      session,
+      session_id: sessionId,
     });
 
     if (onError) roomChannel.onError(onError);
@@ -54,7 +55,7 @@ class BeamClient {
   }
 
   pushMessage(message) {
-    this.roomChannel.push('new_msg', message);
+    return this.roomChannel.push('new_msg', message);
   }
 }
 
