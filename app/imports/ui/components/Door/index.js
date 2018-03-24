@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { browserHistory } from 'react-router';
 import update from 'immutability-helper';
-import moment from 'moment';
+import { isBefore, addHours } from 'date-fns';
 
 import * as HttpStatus from 'http-status-codes';
 
@@ -234,7 +234,8 @@ class Door extends Component {
   isRoomReady() {
     const lastReadyTime = this.roomStorage.getLastReadyTime();
     if (!lastReadyTime) return false;
-    return moment().isBefore(moment(lastReadyTime).add(4, 'hours'));
+    // If the user setup his webcam and all a few hours ago, use those settings.
+    return isBefore(new Date(), addHours(new Date(lastReadyTime), 4));
   }
 
   gotoStage(stage) {
@@ -244,7 +245,7 @@ class Door extends Component {
     // action before switching to stage
     switch (stage) {
       case SHOW_TIME:
-        this.roomStorage.saveLastReadyTime(moment().toISOString());
+        this.roomStorage.saveLastReadyTime(new Date().toISOString());
         this.roomUserId = this.roomStorage.getUserId();
         this.roomUserToken = this.roomStorage.getUserToken();
         break;
