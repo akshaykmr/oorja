@@ -191,15 +191,11 @@ class Room extends Component {
         [messageType.ROOM_UPDATED]: () => this.props.updateRoomInfo(),
         [messageType.TAB_MESSAGE]: message => this.handleTabMessage(message),
         [messageType.TAB_READY]: ({ source, from: { session } }) => {
-          // dispatch activity that tab is ready
-          console.info('remote-tab-ready', session, source);
           this.activityListener.dispatch(roomActivities.REMOTE_TAB_READY, {
             session,
             source,
           });
         },
-        // [messageType.TAB_MESSAGE]: new MessageSwitch(),
-        // [messageType.MEDIA_STREAM]: () => {},
       });
   }
 

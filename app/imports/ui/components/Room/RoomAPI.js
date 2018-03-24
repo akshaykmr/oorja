@@ -43,17 +43,8 @@ class RoomAPI {
     return _.find(participants, { userId });
   }
 
-
-  // get list of active tabs (marked as ready by remote user)
-  // takes sessionId, a user may have multiple sessions open. sessionId gives a
-  // unique *user* identifier
-  getActiveRemoteTabs(session) {
-    return this.room.activeRemoteTabsRegistry[session] || [];
-  }
-
   sendMessage(message) {
     if (message.local) {
-      debugger;
       this.room.messageHandler.handleMessage(message);
       return;
     }

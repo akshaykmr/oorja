@@ -74,7 +74,6 @@ example of using uiSize and added css rules:
     + getUserId(): gives own userId
     + getSession(): gives own sessionId. **minor detour** - A user can have multiple sessions active thus sessionId identifies the unique user. This is purely for ux reasons and has some effects on activityListeners which will be described shortly.
     + getUserInfo(userId): gives user information for the given userId 
-    + getActiveRemoteTabs(sessionId): gives the list of remote tabs set as ready by sessionId(unique user session)
     + shareScreen(): start screen sharing
     + stopScreenShare(): stop screen sharing
     + mutePrimaryMediaStreamVideo()
