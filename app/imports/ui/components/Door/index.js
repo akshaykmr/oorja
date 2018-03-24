@@ -59,6 +59,8 @@ class Door extends Component {
     this.setup = this.setup.bind(this);
     this.initialize = this.initialize.bind(this);
     this.handleRoomLookup = this.handleRoomLookup.bind(this);
+    this.fetchRoomInfo = this.fetchRoomInfo.bind(this);
+    this.enterRoom = this.enterRoom.bind(this);
     this.passwordSuccess = this.passwordSuccess.bind(this);
     this.onUnexpectedServerError = this.onUnexpectedServerError.bind(this);
   }
@@ -178,7 +180,7 @@ class Door extends Component {
         this.updateState({
           roomInfo: { $set: roomInfo },
         });
-        return Promise.resolve();
+        return Promise.resolve(roomInfo);
       }, this.handleRoomFetchFailure);
   }
 
@@ -214,6 +216,7 @@ class Door extends Component {
 
   enterRoom() {
     oorjaClient.joinRoom(this.roomId)
+      .then(this.fetchRoomInfo)
       .then(() => this.gotoStage(this.stages.SHOW_TIME), this.onUnexpectedServerError);
   }
 
@@ -292,7 +295,7 @@ class Door extends Component {
       case GETTING_READY:
         return <GettingReady
                   roomInfo={this.state.roomInfo}
-                  onReady={() => { this.gotoStage(SHOW_TIME); }}
+                  onReady={this.enterRoom}
                   oorjaClient={oorjaClient}
                   toaster={toaster}
                   onUnexpectedServerError = {this.onUnexpectedServerError}
@@ -301,7 +304,7 @@ class Door extends Component {
         return <Room
                   roomId={this.roomId}
                   roomInfo={this.state.roomInfo}
-                  updateRoomInfo={this.updateRoomInfo}
+                  updateRoomInfo={this.fetchRoomInfo}
                   roomStorage={this.roomStorage}
                   toaster={toaster}
                   oorjaClient={oorjaClient}
