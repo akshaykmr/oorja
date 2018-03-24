@@ -265,10 +265,6 @@ class Door extends Component {
     document.body.classList.remove('room-container');
     // cleanup
     clearInterval(this.SleepTracker);
-    if (this.stateBuffer.initialized) {
-      this.roomInfoSubscriptionHandle.stop();
-      this.roomInfoObserver.stop();
-    }
   }
 
   render() {

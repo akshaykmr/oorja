@@ -525,11 +525,11 @@ class Room extends Component {
 
   componentWillUnmount() {
     this.unmountInProgress = true;
-    if (this.primaryMediaStream) {
-      this.removeSpeechTracker(this.primaryMediaStream);
-      this.primaryMediaStream.stop();
-    }
-    this.erizoRoom.disconnect();
+    // if (this.primaryMediaStream) {
+    //   this.removeSpeechTracker(this.primaryMediaStream);
+    //   this.primaryMediaStream.stop();
+    // }
+    // this.erizoRoom.disconnect();
     window.removeEventListener('resize', this.onWindowResize);
 
     // restore original body bg color
