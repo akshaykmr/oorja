@@ -17,7 +17,6 @@ import './streamsContainer.scss';
 class StreamsContainer extends Component {
   constructor(props) {
     super(props);
-    this.renderUserStreamBox = this.renderUserStreamBox.bind(this);
 
     this.streamContainerStyle = {
       COMPACT: {
@@ -33,6 +32,7 @@ class StreamsContainer extends Component {
       },
     };
 
+    this.renderUserStreamBox = this.renderUserStreamBox.bind(this);
     this.renderVideoStream = this.renderVideoStream.bind(this);
     this.renderUserStreamBox = this.renderUserStreamBox.bind(this);
   }
@@ -115,7 +115,7 @@ class StreamsContainer extends Component {
     return (
       <div className={streamBoxClassNames} key={connectedUser.userId}>
         {userMediaStreams.filter(stream => stream.video).map(this.renderVideoStream)}
-        <Avatar user={connectedUser} size={avatarSize}
+        <Avatar user={this.props.roomAPI.getUserInfo(connectedUser.userId)} size={avatarSize}
           onClick={() => {
             this.props.dispatchRoomActivity(
               roomActivities.USER_CLICKED,

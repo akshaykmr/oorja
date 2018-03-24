@@ -10,6 +10,7 @@ import { Rooms } from 'imports/collections/common';
 import roomSetup from 'imports/modules/room/setup';
 import roomAccess from 'imports/modules/room/access';
 import roomProvider from 'imports/modules/room/provider/';
+import beamClient from 'imports/startup/server/beamClient';
 
 import userAccess from 'imports/modules/user/access';
 
@@ -17,6 +18,11 @@ import { extractInitialsFromName } from 'imports/modules/user/utilities';
 
 import response from 'imports/startup/server/response';
 
+const updateRoom = (roomId, changeset) => {
+  const result = Rooms.update(roomId, changeset);
+  beamClient.pushRoomEvent(roomId, { payload: { type: 'ROOM_UPDATED' } });
+  return result;
+};
 
 Meteor.methods({
 
@@ -70,8 +76,8 @@ Meteor.methods({
 
     if (!Rooms.insert(roomDocument)) return response.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Internal server error 👹');
 
-    const providerMetadata = roomProvider.licode.createRoom(roomId, { p2p: true });
-    Rooms.update(roomId, { $set: { providerMetadata } });
+    //const providerMetadata = roomProvider.licode.createRoom(roomId, { p2p: true });
+    // updateRoom(roomId, { $set: { providerMetadata } });
 
     return response.body(HttpStatus.CREATED, {
       roomId,
@@ -143,8 +149,8 @@ Meteor.methods({
     }
 
     // TODO
-    const createErizoToken = userId =>
-      roomProvider.licode.createToken(room.providerMetadata, userId);
+    const createErizoToken = userId => '';
+    // roomProvider.licode.createToken(room.providerMetadata, userId);
 
     if (userToken) {
       const userId = userAccess.getUserId(userToken);
@@ -155,6 +161,7 @@ Meteor.methods({
         erizoToken: createErizoToken(userId),
         userId,
         userToken,
+        roomAccessToken: roomAccess.createAccessToken(roomId),
       });
     }
 
@@ -166,6 +173,7 @@ Meteor.methods({
         erizoToken: createErizoToken(userId),
         userId,
         userToken: userAccess.createToken(userId),
+        roomAccessToken: roomAccess.createAccessToken(roomId),
       });
     }
 
@@ -173,7 +181,7 @@ Meteor.methods({
       return response.error(HttpStatus.BAD_REQUEST, 'Missing user name or avatar color');
     }
 
-    const userId = loggedInUser ? loggedInUser._id : `anon:${Random.id(12)}`;
+    const userId = loggedInUser ? loggedInUser._id : `[anon]${Random.id(12)}`;
 
     const generateProfile = (user = loggedInUser) => {
       let profile = {};
@@ -194,12 +202,13 @@ Meteor.methods({
       });
     };
     const profile = generateProfile();
-    Rooms.update(room._id, { $push: { participants: profile } });
+    updateRoom(room._id, { $push: { participants: profile } });
 
     return response.body(HttpStatus.OK, {
       erizoToken: createErizoToken(userId),
       userId,
       userToken: userAccess.createToken(userId),
+      roomAccessToken: roomAccess.createAccessToken(roomId),
     });
   },
 
@@ -220,41 +229,35 @@ Meteor.methods({
     if (_.find(tabs, { tabId })) return response.body(HttpStatus.OK);
 
     tabs.push(tabId);
-    Rooms.update(roomId, { $set: { tabs } });
+    updateRoom(roomId, { $set: { tabs } });
 
     return response.body(HttpStatus.OK);
   },
+
+  fetchRoom(roomId, credentials) {
+    check(roomId, String);
+    check(credentials, Match.ObjectIncluding({
+      roomSecret: String,
+      roomAccessToken: String,
+    }));
+    const room = Rooms.findOne({ _id: roomId, archived: false });
+
+    if (!roomAccess.areCredentialsValid(room, credentials)) {
+      return response.error(HttpStatus.UNAUTHORIZED, 'Unauthorized');
+    }
+
+    return response.body(HttpStatus.OK, _.pick(room, [
+      '_id',
+      'roomName',
+      'defaultTab',
+      'tabs',
+      'participants',
+      'createdAt',
+      'roomSecret',
+      'passwordEnabled',
+    ]));
+  },
 });
-
-
-Meteor.publish('room.info', (roomId, credentials) => {
-  check(roomId, String);
-  check(credentials, Match.ObjectIncluding({
-    roomSecret: String,
-    roomAccessToken: String,
-  }));
-  const room = Rooms.findOne({ _id: roomId, archived: false });
-
-  if (!roomAccess.areCredentialsValid(room, credentials)) {
-    return null;
-  }
-
-  const roomCursor = Rooms.find({ _id: room._id }, {
-    fields: {
-      roomName: 1,
-      defaultTab: 1,
-      tabs: 1,
-      participants: 1,
-      passwordEnabled: 1,
-      roomSecret: 1,
-      comms: 1,
-      createdAt: 1,
-    },
-    limit: 1,
-  });
-  return roomCursor;
-});
-
 
 Meteor.startup(() => {
   Rooms._ensureIndex({
