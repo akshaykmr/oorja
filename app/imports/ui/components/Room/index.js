@@ -1,5 +1,6 @@
 /* global location document window URL */
 import { Meteor } from 'meteor/meteor';
+import { Presence } from 'phoenix';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -13,55 +14,51 @@ import { Intent } from '@blueprintjs/core';
 import MediaPreferences from 'imports/modules/media/storage';
 import { SPEAKING, SPEAKING_STOPPED } from 'imports/ui/actions/stream';
 
-import roomMessageTypes from 'imports/modules/room/messageTypes';
 import browserUtils from 'imports/modules/browser/utils';
+import ActivityListener from 'imports/modules/ActivityListener';
+import Erizo from 'imports/modules/Erizo';
+
+import roomMessageTypes from 'imports/modules/room/messageTypes';
+import BeamClient from 'imports/modules/BeamClient';
+import sessionUtils from 'imports/modules/room/sessionUtils';
+import MessageSwitch from 'imports/modules/MessageSwitch';
 
 import mapDispatchToProps from './dispatch';
-
 // TODO: move stream handling related functions to streamManager.js
 
-import Erizo from '../../../modules/Erizo';
 // constants
-import uiConfig from '../../components/Room/constants/uiConfig';
-import status from '../../components/Room/constants/status';
-import streamTypes from '../../components/Room/constants/streamType';
-import mediaStreamPurpose from '../../components/Room/constants/mediaStreamPurpose';
-import roomActivities from '../../components/Room/constants/roomActivities';
+import uiConfig from './constants/uiConfig';
+import status from './constants/status';
+import streamTypes from './constants/streamType';
+import mediaStreamPurpose from './constants/mediaStreamPurpose';
+import roomActivities from './constants/roomActivities';
+import messageType from './constants/messageType';
 
 // room components
-import StreamsContainer from '../../components/Room/StreamsContainer/';
-import Spotlight from '../../components/Room/Spotlight';
+import StreamsContainer from './StreamsContainer/';
+import Spotlight from './Spotlight';
 
-import ActivityListener from '../../../modules/ActivityListener';
 import RoomAPI from './RoomAPI';
-import Messenger from './Messenger';
 import StreamManager from './StreamManager';
 
-import messageType from '../../components/Room/constants/messageType';
 
 import './room.scss';
 
-const { defaultMaxVideoBW, defaultMaxAudioBW } = Meteor.settings;
+const { defaultMaxVideoBW, defaultMaxAudioBW, beamConfig } = Meteor.settings.public;
 
 class Room extends Component {
   constructor(props) {
     super(props);
-    this.roomName = props.roomInfo.roomName;
+    this.setupSession();
     this.erizoToken = props.roomStorage.getErizoToken();
 
-    // subscribed incoming data streams
-    this.subscribedDataStreams = {}; // streamId -> erizoStream
+    this.tabMessageHandlers = {}; // tabId -> messageHandler map
 
     this.subscribedMediaStreams = {}; // streamId -> erizoStream
     // note: erizoStream.stream would be of type MediaStream(the browser's MediaStream object)
 
-    this.outgoingDataStreams = {};
-
     this.speechTrackers = {}; // id -> hark instance
 
-    this.messageHandler = this.messageHandler.bind(this);
-    // for passing messages to and from tabs | local or remote(other users)
-    this.messenger = new Messenger(this, this.messageHandler);
 
     this.activeRemoteTabsRegistry = {}; // userSessionId -> [ tabId, ... ]  of tabs set as ready
 
@@ -73,30 +70,21 @@ class Room extends Component {
 
     this.roomAPI = new RoomAPI(this);
 
-    this.applyRoomPreferences = this.applyRoomPreferences.bind(this);
+    this.messageHandler = this.createMessageHandler();
+
     this.calculateUISize = this.calculateUISize.bind(this);
     this.onWindowResize = _.throttle(this.onWindowResize, 100);
     this.onWindowResize = this.onWindowResize.bind(this);
 
     this.updateState = this.updateState.bind(this);
-    this.tryToConnect = this.tryToConnect.bind(this);
-    this.setRoomConnectionListeners = this.setRoomConnectionListeners.bind(this);
-    this.setRoomStreamListners = this.setRoomStreamListners.bind(this);
+    this.connect = this.connect.bind(this);
     this.connectUser = this.connectUser.bind(this);
     this.disconnectUser = this.disconnectUser.bind(this);
     // not all of these need to be bound, doing so anyway as I
     // often end up moving them around and getting stuck with the same error for a while.
 
-    this.setDataBroadcastStreamListners = this.setDataBroadcastStreamListners.bind(this);
-    this.handleStreamSubscription = this.handleStreamSubscription.bind(this);
-    this.setIncomingStreamListners = this.setIncomingStreamListners.bind(this);
-    this.handleStreamRemoval = this.handleStreamRemoval.bind(this);
-    this.handleStreamSubscriptionSucess = this.handleStreamSubscriptionSucess.bind(this);
-    this.incrementVideoStreamCount = this.incrementVideoStreamCount.bind(this);
-    this.decrementVideoStreamCount = this.decrementVideoStreamCount.bind(this);
     this.determineStreamContainerSize = this.determineStreamContainerSize.bind(this);
     this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
-    this.tabReady = this.tabReady.bind(this);
     this.toggleFullscreen = this.toggleFullscreen.bind(this);
     this.stopScreenSharingStream = this.stopScreenSharingStream.bind(this);
 
@@ -113,11 +101,12 @@ class Room extends Component {
     this.mediaDeviceSettings = MediaPreferences.get() || {};
 
     this.state = {
+      roomConnectionStatus: status.INITIALIZING,
+      presence: {},
+
       connectionTable: {},
       connectedUsers: [],
 
-      roomConnectionStatus: status.INITIALIZING,
-      dataBroadcastStreamStatus: status.TRYING_TO_CONNECT,
       primaryMediaStreamState: {
         video: true,
         audio: true,
@@ -128,13 +117,12 @@ class Room extends Component {
       screenSharingStreamState: {
         status: status.DISCONNECTED,
       },
+
       customStreamContainerSize: false,
-      videoStreamCount: 0,
 
       uiSize: this.calculateUISize(),
       roomHeight: window.innerHeight,
       roomWidth: window.innerWidth,
-
 
       settings: {
         uiBreakRatio: uiConfig.defaultBreakRatio,
@@ -145,9 +133,38 @@ class Room extends Component {
     this.unmountInProgress = false;
   }
 
+  setupSession() {
+    this.session = sessionUtils.createSession(this.props.roomUserId);
+    const { sessionId } = sessionUtils.unpack(this.session);
+    this.sessionId = sessionId;
+  }
+
   updateState(changes, buffer = this.stateBuffer) {
     this.stateBuffer = update(buffer, changes);
     this.setState(this.stateBuffer);
+  }
+
+  handleTabMessage(message) {
+    const callHandlers = handlerList => handlerList.forEach(h => h(message));
+    message.destinationTabs.forEach(tabId => callHandlers(this.tabMessageHandlers[tabId]));
+  }
+
+  registerTabMessageHandler(tabId, handler) {
+    if (!this.tabMessageHandlers[tabId]) {
+      this.tabMessageHandlers[tabId] = [];
+    }
+    this.tabMessageHandlers[tabId].push(handler);
+  }
+
+  removeTabMessageHandler(tabId, handler) {
+    if (!this.tabMessageHandlers[tabId]) {
+      throw new Error('No message handlers exist');
+    }
+    this.tabMessageHandlers[tabId] = this.tabMessageHandlers[tabId].filter(h => h !== handler);
+  }
+
+  sendMessage(message) {
+    return this.beamClient.pushMessage(message);
   }
 
   calculateUISize() {
@@ -168,152 +185,63 @@ class Room extends Component {
     return ratio < breakRatio ? uiConfig.COMPACT : uiConfig.LARGE;
   }
 
-  applyRoomPreferences() {
-    // override room settings with user's preferences if any
+  createMessageHandler() {
+    return new MessageSwitch()
+      .registerHandlers({
+        [messageType.ROOM_UPDATED]: () => this.props.updateRoomInfo(),
+        [messageType.TAB_MESSAGE]: message => this.handleTabMessage(message),
+        [messageType.TAB_READY]: ({ source, from: { session } }) => {
+          // dispatch activity that tab is ready
+          console.info('remote-tab-ready', session, source);
+          this.activityListener.dispatch(roomActivities.REMOTE_TAB_READY, {
+            session,
+            source,
+          });
+        },
+        // [messageType.TAB_MESSAGE]: new MessageSwitch(),
+        // [messageType.MEDIA_STREAM]: () => {},
+      });
   }
 
-  tryToConnect() {
-    if (this.stateBuffer.roomConnectionStatus === status.TRYING_TO_CONNECT
-        || this.unmountInProgress) {
-      return;
-    }
-
-    const connectToErizo = (erizoToken, recievedNewToken = false) => {
-      if (recievedNewToken) {
-        console.info('got a new token');
-      }
-      console.info('trying to connect');
-      this.updateState({ roomConnectionStatus: { $set: status.TRYING_TO_CONNECT } });
-      this.erizoToken = erizoToken;
-      /* eslint-disable new-cap */
-      this.sessionId = `${this.props.roomUserId}:${_.random(5000)}`;
-      this.erizoRoom = Erizo.Room({ token: this.erizoToken });
-      // an erizo data stream to be used for sending 'data' by this user
-      this.dataBroadcastStream = Erizo.Stream({
-        data: true,
-        attributes: {
-          userId: this.props.roomUserId,
-          sessionId: this.sessionId,
-          type: streamTypes.DATA.BROADCAST,
-
-          // [tabId, ...]  list of tabs that are loaded / ready to listen for messages
-          activeTabs: [],
-        },
-      });
-      this.setDataBroadcastStreamListners();
-      this.dataBroadcastStream.init();
-      /* eslint-enable new-cap */
-      this.setRoomConnectionListeners();
-      this.setRoomStreamListners();
-      this.erizoRoom.connect();
+  connect() {
+    const handleJoin = (session) => {
+      const { userId } = sessionUtils.unpack(session);
+      this.connectUser(userId, session);
     };
 
-    if (this.stateBuffer.roomConnectionStatus === status.INITIALIZING) {
-      connectToErizo(this.erizoToken);
-      return;
-    }
+    const handleLeave = (session) => {
+      const { userId } = sessionUtils.unpack(session);
+      this.disconnectUser(userId, session);
+    };
 
-    this.props.oorjaClient.joinRoom(this.props.roomId)
-      .then((response) => {
-        connectToErizo(response.data.erizoToken, true);
-      })
-      .catch(() => { window.location.reload(); });
-  }
+    const handlePresenceState = (initialPresence) => {
+      const syncedPresence = Presence.syncState(this.stateBuffer.presence, initialPresence);
+      this.updateState({ presence: { $set: syncedPresence } });
+      Object.keys(initialPresence).forEach(handleJoin);
+    };
 
-  // to be only called once when tab is ready
-  // indicate that the tab is ready to be discovered by other connected users/their tabs etc.
-  tabReady(tabId) {
-    const attributes = this.dataBroadcastStream.getAttributes();
-    if (attributes.activeTabs.indexOf(tabId) !== -1) {
-      throw new Error('tab already set as ready');
-    }
-    console.log(this);
-    const updatedAttributes = update(attributes, {
-      activeTabs: { $push: [tabId] },
-    });
-    this.dataBroadcastStream.setAttributes(updatedAttributes);
-  }
+    const handlePresenceDiff = (diff) => {
+      console.log('presence_diff', diff);
+      const oldPresence = this.stateBuffer.presence;
+      const syncedPresence = Presence.syncDiff(oldPresence, diff);
+      this.updateState({ presence: { $set: syncedPresence } });
 
-  setRoomConnectionListeners(erizoRoom = this.erizoRoom) {
-    erizoRoom.addEventListener('room-connected', (roomEvent) => {
-      console.info('room connected', roomEvent, erizoRoom);
-      this.activityListener.dispatch(roomActivities.ROOM_CONNECTED);
-      erizoRoom.publish(this.dataBroadcastStream);
-      this.updateState({ roomConnectionStatus: { $set: status.CONNECTED } });
-    });
+      const handleJoins = joins => Object.keys(joins).forEach(handleJoin);
+      const handleLeaves = leaves => Object.keys(leaves).forEach(handleLeave);
+      handleJoins(diff.joins);
+      handleLeaves(diff.leaves);
+    };
 
-    erizoRoom.addEventListener('room-error', (roomEvent) => {
-      console.error('room connection error', roomEvent);
-      this.activityListener.dispatch(roomActivities.ROOM_ERROR);
-      this.updateState({ roomConnectionStatus: { $set: status.ERROR } });
-    });
-
-    erizoRoom.addEventListener('room-disconnected', (roomEvent) => {
-      console.info('room disconnected', roomEvent);
-      this.activityListener.dispatch(roomActivities.ROOM_DISCONNECTED);
-      this.updateState({ roomConnectionStatus: { $set: status.DISCONNECTED } });
-      this.stateBuffer.connectedUsers.forEach((user) => {
-        let { sessionCount } = user;
-        while (sessionCount--) {
-          this.disconnectUser(user, this.sessionId);
-        }
-        console.info('disconnected user', user);
-      });
-      this.updateState({
-        roomConnectionStatus: { $set: status.DISCONNECTED },
-        dataBroadcastStreamStatus: { $set: status.TRYING_TO_CONNECT },
-        connectedUsers: { $set: [] },
-      });
-      this.dataBroadcastStream.stop();
-      this.props.resetMediaStreams();
-      this.subscribedDataStreams = {};
-      this.activeRemoteTabsRegistry = {};
-      this.subscribedMediaStreams = {};
-      this.outgoingDataStreams = {};
-
-      // stop speechTrackers
-      Object.keys(this.speechTrackers).forEach(streamId => this.speechTrackers[streamId].stop());
-      this.speechTrackers = {};
-      setTimeout(() => {
-        this.tryToConnect();
-      }, 1000);
-    });
-  }
-
-  setRoomStreamListners(erizoRoom = this.erizoRoom) {
-    // when streams are added_to/removed_from the room
-    erizoRoom.addEventListener('stream-added', (streamEvent) => {
-      const { stream } = streamEvent;
-      this.handleStreamSubscription(stream);
-      console.info('stream added', streamEvent.stream.getAttributes());
-    });
-
-    erizoRoom.addEventListener('stream-subscribed', (streamEvent) => {
-      console.info('stream subscribed', streamEvent.stream.getAttributes());
-      this.handleStreamSubscriptionSucess(streamEvent.stream);
-    });
-
-    erizoRoom.addEventListener('stream-failed', (streamEvent) => {
-      // so far none of the streams have failed. however it will definitely
-      // be more likely in deployements
-      console.error('Oi! stream failed', streamEvent, streamEvent.stream.getAttributes());
-      // debugger
-      // this.handleStreamRemoval(streamEvent.stream);
-    });
-
-    erizoRoom.addEventListener('stream-removed', (streamEvent) => {
-      console.info('stream removed', streamEvent.stream.getAttributes());
-      this.handleStreamRemoval(streamEvent.stream);
-    });
-  }
-
-  setDataBroadcastStreamListners() {
-    const stream = this.dataBroadcastStream;
-    stream.addEventListener('access-accepted', (streamEvent) => {
-      console.info('dataBroadcastStream access-accepted', streamEvent);
-    });
-    stream.addEventListener('access-denied', (streamEvent) => {
-      console.error('dataBroadcastStream access-denied', streamEvent);
+    this.beamClient = new BeamClient(beamConfig, this.props.roomStorage.getUserToken());
+    this.beamClient.joinRoomChannel({
+      roomId: this.props.roomId,
+      roomAccessToken: this.props.roomStorage.getAccessToken(),
+      sessionId: this.sessionId,
+      onJoin: () => this.updateState({ roomConnectionStatus: { $set: status.CONNECTED } }),
+      onError: () => this.updateState({ roomConnectionStatus: { $set: status.TRYING_TO_CONNECT } }),
+      presenceStateHandler: handlePresenceState,
+      presenceDiffHandler: handlePresenceDiff,
+      onMessage: this.messageHandler.handleMessage,
     });
   }
 
@@ -437,358 +365,41 @@ class Room extends Component {
     mediaStream.init();
   }
 
-  formMediaStreamState(user, stream, attributes, isLocal = false) {
-    const streamId = stream.getID();
-    const localStream = isLocal ? this.erizoRoom.localStreams.get(streamId) : null;
-    const isScreenShare = attributes.purpose === mediaStreamPurpose.SCREEN_SHARE_STREAM;
-    return {
-      userId: user.userId,
-      streamId,
-      local: isLocal,
-      type: attributes.type,
-      purpose: attributes.purpose,
-      // connected when stream subscription is successfull
-      status: isLocal ? status.CONNECTED : status.TRYING_TO_CONNECT,
-      audio: isLocal ? localStream.stream.getAudioTracks().length > 0 : stream.hasAudio(),
-      video: isLocal ? localStream.stream.getVideoTracks().length > 0 : stream.hasVideo(),
-      mutedAudio: !!attributes.mutedAudio,
-      mutedVideo: !!attributes.mutedVideo,
-      screen: isScreenShare,
-      streamSource: isLocal ? localStream.stream : null,
-      errorReason: '',
-      warningReason: '',
-    };
-  }
+  connectUser(userId, session) {
+    // adds user to connectedUsers list in state, increments sessionCount if already there.
+    const connectedUser = _.find(this.stateBuffer.connectedUsers, { userId });
 
-  handleStreamSubscription(stream) {
-    const attributes = stream.getAttributes();
-    const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
-    if (!user) throw new Meteor.Error('stream publisher not found');
-
-    const { DATA, MEDIA } = streamTypes;
-
-    const subscribeDataBroadcastStream = () => {
-      // just a check If I run into this later
-      if (this.subscribedDataStreams[stream.getID()]) { // stream already subscribed
-        throw new Meteor.Error('over here!');
-      }
-      if (this.streamManager.isLocalStream(stream)) {
-        // do not subscribe our own data stream.
-        this.updateState({ dataBroadcastStreamStatus: { $set: status.CONNECTED } });
-        console.info('dataBroadcastStream successfully added to the room.');
-        this.connectUser(user, this.sessionId);
-        setTimeout(() => {
-          this.initializePrimaryMediaStream();
-        }, 1000);
-
-        // subscribe all remote data broadcast streams prexisting  in the room
-        console.info('subscribing all remote data broadcast streams prexisting in the room');
-        const currentStreamId = stream.getID();
-        this.streamManager.getRemoteStreamList()
-          .forEach((remoteStream) => {
-            if (remoteStream.getID() !== currentStreamId) {
-              const remoteStreamAttributes = remoteStream.getAttributes();
-              if ((remoteStreamAttributes.type === DATA.BROADCAST) ||
-              remoteStreamAttributes.type === MEDIA.BROADCAST) {
-                this.handleStreamSubscription(remoteStream);
-              }
-            }
-          });
-      } else {
-        if (this.stateBuffer.dataBroadcastStreamStatus !== status.CONNECTED) {
-          return; // subscribe remote streams when our dataBroadcastStream is connected.
-        }
-
-        const userConnectionState = this.stateBuffer.connectionTable[user.userId];
-        if (!userConnectionState) {
-          this.updateState({
-            connectionTable: {
-              [user.userId]: { $set: {} },
-            },
-          });
-        }
-
-        const sessionConnectionState =
-          this.stateBuffer.connectionTable[user.userId][attributes.sessionId];
-
-        if (sessionConnectionState) {
-          // need to know if this were to happen
-          // either stream got published again somehow or sessionId collision
-          console.error(
-            'another broadcast stream from existing session',
-            attributes,
-            this.stateBuffer,
-          );
-          return;
-        }
-
-        this.updateState({
-          connectionTable: {
-            [user.userId]: {
-              [attributes.sessionId]: {
-                $set: {
-                  broadcastSend: status.INITIALIZING,
-                  broadcastRecieve: status.INITIALIZING,
-                  p2pSend: status.DISCONNECTED,
-                  p2pRecieve: status.DISCONNECTED,
-                  connectionStatus: status.DISCONNECTED,
-                },
-              },
-            },
-          },
-        });
-        this.setIncomingStreamListners(stream);
-        this.erizoRoom.subscribe(stream);
-      }
-    };
-
-    const subscribeMediaStream = () => {
-      const streamId = stream.getID();
-      // just a check If I run into this later
-      if (this.subscribedMediaStreams[streamId]) { // stream already subscribed
-        throw new Meteor.Error('over here!');
-      }
-      const isLocal = this.streamManager.isLocalStream(stream);
-      if (isLocal) {
-        if (attributes.purpose === mediaStreamPurpose.PRIMARY_MEDIA_STREAM) {
-          this.updateState({
-            primaryMediaStreamState: {
-              status: { $set: status.CONNECTED },
-            },
-          });
-          this.addSpeechTracker(this.primaryMediaStream);
-        } else if (attributes.purpose === mediaStreamPurpose.SCREEN_SHARE_STREAM) {
-          this.updateState({
-            screenSharingStreamState: {
-              status: { $set: status.CONNECTED },
-            },
-          });
-        }
-        console.info('adding local media stream');
-      } else {
-        if (user.userId === this.props.roomUserId) {
-          // stream may be from a different session, do not subscribe.
-          // probably best to ask users
-          // return;
-        }
-        this.setIncomingStreamListners(stream);
-        this.erizoRoom.subscribe(stream);
-      }
-
-      this.props.updateMediaStreams({
-        [streamId]: {
-          $set: this.formMediaStreamState(user, stream, attributes, isLocal),
-        },
-      });
-      if (isLocal && stream.hasVideo()) {
-        this.incrementVideoStreamCount();
-      }
-    };
-
-    switch (attributes.type) {
-      case DATA.BROADCAST: subscribeDataBroadcastStream();
-        break;
-      case DATA.P2P: // subscribeP2PDataStream();
-        break;
-      case MEDIA.BROADCAST:
-      case MEDIA.P2P: subscribeMediaStream();
-        break;
-      default: console.error('unexpected stream type');
-    }
-  }
-
-
-  handleStreamSubscriptionSucess(stream) {
-    const attributes = stream.getAttributes();
-    const user = _.find(this.props.roomInfo.participants, { userId: attributes.userId });
-    const { DATA, MEDIA } = streamTypes;
-
-    const notifySuccessfullSubscription = (broadcast = false, to) => {
-      const message = {
-        type: messageType.ROOM_MESSAGE,
-        to,
-        broadcast,
-        content: {
-          type: roomMessageTypes.STREAM_SUBSCRIBE_SUCCESS,
-          content: {
-            streamId: stream.getID(),
-            publisherUserId: user.userId,
-            publisherSessionId: attributes.sessionId,
-          },
-        },
-      };
-      this.roomAPI.sendMessage(message);
-    };
-
-    const handleDataBroadcastStreamSubscriptionSuccess = () => {
-      this.subscribedDataStreams[stream.getID()] = stream;
-      this.activeRemoteTabsRegistry[attributes.sessionId] = attributes.activeTabs;
-      // recieving broadcast
-
+    if (!connectedUser) {
+      this.activityListener.dispatch(roomActivities.USER_JOINED, { userId, session });
       this.updateState({
-        connectionTable: {
-          [user.userId]: {
-            [attributes.sessionId]: {
-              broadcastRecieve: { $set: status.CONNECTED },
-            },
-          },
-        },
+        connectedUsers: { $push: [{ userId, sessionCount: 1, sessionList: [session] }] },
       });
-      setTimeout(() => {
-        notifySuccessfullSubscription(true); // use broadcast.
-      }, 3000); // not a good approach. TODO
-      this.updateUserConnection(user.userId, attributes.sessionId);
-    };
-
-    const handleMediaSubscriptionSuccess = () => {
-      this.props.updateMediaStreams({
-        [stream.getID()]: {
-          status: { $set: status.CONNECTED },
-          streamSource: { $set: stream.stream },
-          audio: { $set: stream.stream.getAudioTracks().length > 0 },
-          video: { $set: stream.stream.getVideoTracks().length > 0 },
-        },
-      });
-      this.subscribedMediaStreams[stream.getID()] = stream;
-      if (stream.hasVideo()) this.incrementVideoStreamCount();
-    };
-
-    switch (attributes.type) {
-      case DATA.BROADCAST: handleDataBroadcastStreamSubscriptionSuccess();
-        break;
-      case DATA.P2P: // handleP2PDataStreamSubscriptionSuccess();
-        break;
-      case MEDIA.BROADCAST:
-      case MEDIA.P2P:
-        handleMediaSubscriptionSuccess();
-        break;
-      default: console.error('unexpected stream type');
-    }
-  }
-
-  setIncomingStreamListners(stream) {
-    const attributes = stream.getAttributes();
-    const { DATA, MEDIA } = streamTypes;
-    switch (attributes.type) {
-      case DATA.BROADCAST:
-        // set listners for data
-        stream.addEventListener('stream-data', (streamEvent) => {
-          this.messenger.recieve(attributes.userId, attributes.sessionId, streamEvent.msg);
-        });
-        stream.addEventListener('stream-attributes-update', () => {
-          const updatedAttributes = stream.getAttributes();
-          const previousActiveTabs = this.activeRemoteTabsRegistry[attributes.sessionId];
-          const currentActiveTabs = updatedAttributes.activeTabs;
-          const readyTabs = _.difference(currentActiveTabs, previousActiveTabs);
-          this.activeRemoteTabsRegistry[attributes.sessionId] = currentActiveTabs;
-          if (readyTabs.length > 1) console.warn('more than one tab ready', readyTabs);// just a check
-          readyTabs.forEach((tabId) => {
-            console.info('remote-tab-ready', attributes.sessionId, tabId);
-            this.activityListener.dispatch(roomActivities.REMOTE_TAB_READY, {
-              sessionId: attributes.sessionId,
-              tabId,
-            });
-          });
-        });
-        break;
-      case DATA.P2P:
-        stream.addEventListener('stream-data', (streamEvent) => {
-          this.messenger.recieve(attributes.userId, attributes.sessionId, streamEvent.msg);
-        });
-        break;
-      case MEDIA.BROADCAST:
-      case MEDIA.P2P:
-        break;
-      default: console.error('unexpected stream type');
-    }
-  }
-
-  handleStreamRemoval(stream) {
-    if (this.unmountInProgress) return;
-    const attributes = stream.getAttributes();
-    const isLocal = this.streamManager.isLocalStream(stream);
-    const user = this.roomAPI.getUserInfo(attributes.userId);
-    const { DATA, MEDIA } = streamTypes;
-
-    if (isLocal) {
-      console.warn('need to handle this case when I give that option to the user.');
       return;
     }
 
-    const handleBroadcastStreamRemoval = () => {
-      if (!this.subscribedDataStreams[stream.getID()]) {
-        console.warn('stream was not subscribed earlier.');
-        return;
-      }
-      // remove stream from subscribed streams
-      delete this.subscribedDataStreams[stream.getID()];
-      delete this.activeRemoteTabsRegistry[attributes.sessionId];
-      this.updateUserConnection(user.userId, attributes.sessionId, true); // reset
-    };
-
-    switch (attributes.type) {
-      case DATA.BROADCAST:
-        handleBroadcastStreamRemoval();
-        break;
-      case DATA.P2P:
-        // handleP2PStreamRemoval();
-        break;
-      case MEDIA.BROADCAST:
-      case MEDIA.P2P:
-        if (this.props.mediaStreams[stream.getID()].video) this.decrementVideoStreamCount();
-        this.props.updateMediaStreams({
-          $unset: [stream.getID()],
-        });
-        this.removeSpeechTracker(stream);
-        this.subscribedMediaStreams[stream.getID()] = null;
-        break;
-      default: console.error('unexpected stream type');
-    }
-
-    if (this.streamManager.isLocalStream(stream)) {
-      console.info('local stream removed');
-    }
-  }
-
-  connectUser(user, sessionId) {
-    // adds user to connectedUsers list in state, increments sessionCount if already there.
-    const connectedUser = _.find(
+    const connectedUserIndex = _.findIndex(
       this.stateBuffer.connectedUsers,
-      { userId: user.userId },
+      { userId: connectedUser.userId },
     );
 
-    if (connectedUser) {
-      const connectedUserIndex = _.findIndex(
-        this.stateBuffer.connectedUsers,
-        { userId: connectedUser.userId },
-      );
-
-      const updatedUser = update(
-        connectedUser,
-        {
-          sessionCount: { $set: connectedUser.sessionCount + 1 },
-          sessionList: { $push: [sessionId] },
-        },
-      );
-      this.updateState({
-        connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
-      });
-      this.activityListener.dispatch(roomActivities.USER_SESSION_ADDED, { user, sessionId });
-      console.info('incremented session', updatedUser);
-    } else {
-      this.updateState({
-        connectedUsers: { $push: [{ ...user, sessionCount: 1, sessionList: [sessionId] }] },
-      });
-      this.activityListener.dispatch(roomActivities.USER_JOINED, { user, sessionId });
-    }
+    const updatedUser = update(
+      connectedUser,
+      {
+        sessionCount: { $set: connectedUser.sessionCount + 1 },
+        sessionList: { $push: [session] },
+      },
+    );
+    this.activityListener.dispatch(roomActivities.USER_SESSION_ADDED, { userId, session });
+    this.updateState({
+      connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
+    });
+    console.info('incremented session');
   }
 
   // decrements sessionCount for user. removing from connectUsers if reaches 0.
-  disconnectUser(user, sessionId) {
-    const connectedUserIndex = _.findIndex(
-      this.stateBuffer.connectedUsers,
-      { userId: user.userId },
-    );
+  disconnectUser(userId, session) {
+    const connectedUserIndex = _.findIndex(this.stateBuffer.connectedUsers, { userId });
+
     if (connectedUserIndex === -1) {
       throw new Meteor.Error('User does not seem to be connected');
     }
@@ -799,28 +410,29 @@ class Room extends Component {
         connectedUser,
         {
           sessionCount: { $set: connectedUser.sessionCount - 1 },
-          sessionList: { $set: connectedUser.sessionList.filter(id => id !== sessionId) },
+          sessionList: { $set: connectedUser.sessionList.filter(s => s !== session) },
         },
       );
 
+      this.activityListener.dispatch(roomActivities.USER_SESSION_REMOVED, { userId, session });
       this.updateState({
         connectedUsers: { $splice: [[connectedUserIndex, 1, updatedUser]] },
       });
-      this.activityListener.dispatch(roomActivities.USER_SESSION_REMOVED, { user, sessionId });
       console.info('decremented user session', updatedUser);
-    } else {
-      this.updateState({
-        connectedUsers: {
-          $splice: [[connectedUserIndex, 1]],
-        },
-      });
-      this.activityListener.dispatch(roomActivities.USER_LEFT, { user, sessionId });
+      return;
     }
+
+    this.activityListener.dispatch(roomActivities.USER_LEFT, { userId, session });
+    this.updateState({
+      connectedUsers: {
+        $splice: [[connectedUserIndex, 1]],
+      },
+    });
   }
 
-  messageHandler(message) {
+  messageHandleasdr(message) {
     const {
-      SPEECH, STREAM_SUBSCRIBE_SUCCESS, MUTE_AUDIO, UNMUTE_AUDIO,
+      SPEECH, MUTE_AUDIO, UNMUTE_AUDIO,
       MUTE_VIDEO, UNMUTE_VIDEO,
     } = roomMessageTypes;
     const roomMessage = message.content;
@@ -846,118 +458,11 @@ class Room extends Component {
       }
     };
 
-    const handleSuccessfulSubscriptionFromRemotePeer = () => {
-      const { userId, sessionId } = message.from;
-      const eventDetail = roomMessage.content;
-      const { publisherUserId, publisherSessionId, streamId } = eventDetail;
-      const acknowledgeBroadcastSubscription = () => {
-        this.updateState({
-          connectionTable: {
-            [userId]: {
-              [sessionId]: {
-                broadcastSend: { $set: status.CONNECTED },
-              },
-            },
-          },
-        });
-        this.updateUserConnection(userId, sessionId);
-      };
-
-      if (publisherUserId === this.props.roomUserId && publisherSessionId === this.sessionId) {
-        const stream = this.streamManager.getLocalStreamById(streamId);
-        if (!stream) {
-          console.error('cannot ack subscription because the local stream was not found', stream);
-        }
-        const { DATA } = streamTypes;
-        switch (stream.getAttributes().type) {
-          case DATA.BROADCAST: acknowledgeBroadcastSubscription();
-            break;
-          case DATA.P2P: // acknowledgeP2PDataStreamSubscriptionSuccess();
-            break;
-          default: console.error('unexpected stream type');
-        }
-      }
-    };
-
-
-    // meh this func doest look so good, refactor this later.
-    const handleMuteUnmuteChange = (AVKey, value) => { // AVKey = 'muteAudio' | 'muteVideo'
-      const { streamId } = message.content.eventDetail;
-      if (!this.subscribedMediaStreams[streamId]) {
-        return;
-      }
-      this.props.updateMediaStreams({
-        [streamId]: {
-          [AVKey]: { $set: value },
-        },
-      });
-    };
     switch (roomMessage.type) {
       case SPEECH: handleSpeechMessage();
         break;
-      case STREAM_SUBSCRIBE_SUCCESS: handleSuccessfulSubscriptionFromRemotePeer();
-        break;
-      case MUTE_AUDIO: handleMuteUnmuteChange('mutedAudio', true);
-        break;
-      case UNMUTE_AUDIO: handleMuteUnmuteChange('mutedAudio', false);
-        break;
-      case MUTE_VIDEO: handleMuteUnmuteChange('mutedVideo', true);
-        break;
-      case UNMUTE_VIDEO: handleMuteUnmuteChange('mutedVideo', false);
-        break;
       default: console.error('unrecognised room message');
     }
-  }
-
-  updateUserConnection(userId, sessionId, reset = false) {
-    const user = this.roomAPI.getUserInfo(userId);
-    const previousConnectionStatus =
-      this.stateBuffer.connectionTable[userId][sessionId].connectionStatus;
-
-    if (reset) {
-      this.updateState({
-        connectionTable: {
-          [userId]: {
-            $unset: [sessionId],
-          },
-        },
-      });
-      if (previousConnectionStatus === status.CONNECTED) {
-        this.disconnectUser(user, sessionId);
-      }
-      return;
-    }
-    const currentConnectionStatus = this.determineUserConnectionStatus(userId, sessionId);
-    this.updateState({
-      connectionTable: {
-        [userId]: {
-          [sessionId]: {
-            connectionStatus: { $set: currentConnectionStatus },
-          },
-        },
-      },
-    });
-    if (previousConnectionStatus === status.DISCONNECTED
-      && currentConnectionStatus === status.CONNECTED) {
-      this.connectUser(user, sessionId);
-    } else if (previousConnectionStatus === status.CONNECTED
-      && currentConnectionStatus === status.DISCONNECTED) {
-      this.disconnectUser(user, sessionId);
-    }
-  }
-
-  determineUserConnectionStatus(userId, sessionId) {
-    const userConnectionState = this.stateBuffer.connectionTable[userId];
-    if (!userConnectionState) return status.DISCONNECTED;
-    const sessionConnectionState = userConnectionState[sessionId];
-    if (!sessionConnectionState) return status.DISCONNECTED;
-    const { broadcastSend, broadcastRecieve } = sessionConnectionState;
-    return (
-      broadcastSend === status.CONNECTED &&
-      broadcastRecieve === status.CONNECTED
-      // p2pSend === status.CONNECTED &&
-      // p2pRecieve === status.CONNECTED
-    ) ? status.CONNECTED : status.DISCONNECTED;
   }
 
   // to be used with media streams
@@ -1017,7 +522,7 @@ class Room extends Component {
 
   componentDidMount() {
     // store body bg color and then change it.
-    this.tryToConnect();
+    this.connect();
     this.originalBodyBackground = browserUtils.getBodyColor();
     browserUtils.setBodyColor('#2e3136');
   }
@@ -1035,14 +540,6 @@ class Room extends Component {
     browserUtils.setBodyColor(this.originalBodyBackground);
   }
 
-  incrementVideoStreamCount() {
-    this.updateState({ videoStreamCount: { $set: this.stateBuffer.videoStreamCount + 1 } });
-  }
-
-  decrementVideoStreamCount() {
-    this.updateState({ videoStreamCount: { $set: this.stateBuffer.videoStreamCount - 1 } });
-  }
-
   determineStreamContainerSize() {
     const { mediaStreams } = this.props;
     if (!mediaStreams) return uiConfig.COMPACT;
@@ -1050,9 +547,7 @@ class Room extends Component {
       .map(streamId => mediaStreams[streamId])
       .some(stream =>
         stream.video && !stream.mutedVideo && (stream.status !== status.TRYING_TO_CONNECT));
-    if (atleastOneVideoStream) return uiConfig.MEDIUM;
-
-    return uiConfig.COMPACT;
+    return atleastOneVideoStream ? uiConfig.MEDIUM : uiConfig.COMPACT;
   }
 
   setCustomStreamContainerSize(size) {
@@ -1078,18 +573,17 @@ class Room extends Component {
         </div>
         <StreamsContainer
           uiSize={uiSize}
-          roomAPI={this.roomAPI}
           streamContainerSize={streamContainerSize}
-          dispatchRoomActivity={this.activityListener.dispatch}
           roomInfo={this.props.roomInfo}
+          roomAPI={this.roomAPI}
+          dispatchRoomActivity={this.activityListener.dispatch}
           connectedUsers={this.state.connectedUsers}/>
         <Spotlight
-          roomReady={this.state.dataBroadcastStreamStatus === status.CONNECTED }
+          roomReady={this.state.roomConnectionStatus === status.CONNECTED }
           roomInfo={this.props.roomInfo}
           roomStorage={this.props.roomStorage}
           connectedUsers={this.state.connectedUsers}
           roomAPI={this.roomAPI}
-          tabReady={this.tabReady}
           dispatchRoomActivity={this.activityListener.dispatch}
           primaryMediaStreamState={this.state.primaryMediaStreamState}
           screenSharingStreamState={this.state.screenSharingStreamState}
@@ -1104,6 +598,7 @@ class Room extends Component {
 Room.propTypes = {
   roomId: PropTypes.string.isRequired,
   roomInfo: PropTypes.object.isRequired,
+  updateRoomInfo: PropTypes.func.isRequired,
   roomUserId: PropTypes.string.isRequired,
   roomStorage: PropTypes.object.isRequired,
   oorjaClient: PropTypes.object.isRequired,
