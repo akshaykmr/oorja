@@ -1,5 +1,6 @@
+// TODO: Unit test
 class ActivityListener {
-  constructor(activities) {
+  constructor(activities) { // Activity Types must be registered initially
     this.listnerStore = {}; // ActivityType -> [handlerFunction, ...]
     Object.keys(activities).forEach((activity) => {
       this.listnerStore[activity] = [];
@@ -29,7 +30,7 @@ class ActivityListener {
 
   remove(activity, listner) {
     this.checkIfValidActivity(activity);
-    console.warn('TODO: I have not verified this function yet.');
+    console.warn('TODO');
     this.listnerStore[activity] = this.listnerStore[activity]
       .filter(activityListener => activityListener !== listner);
   }
