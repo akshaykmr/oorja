@@ -72,7 +72,7 @@ example of using uiSize and added css rules:
   - **tabStatusRegistry**: information of other tabs in the room and their state[initializing, loading, loaded ].
   - **roomAPI**: An object to interact with the room. properties are described below
     + getUserId(): gives own userId
-    + getSessionId(): gives own sessionId. **minor detour** - A user can have multiple sessions active thus sessionId identifies the unique user. This is purely for ux reasons and has some effects on activityListeners which will be described shortly.
+    + getSession(): gives own sessionId. **minor detour** - A user can have multiple sessions active thus sessionId identifies the unique user. This is purely for ux reasons and has some effects on activityListeners which will be described shortly.
     + getUserInfo(userId): gives user information for the given userId 
     + getActiveRemoteTabs(sessionId): gives the list of remote tabs set as ready by sessionId(unique user session)
     + shareScreen(): start screen sharing

@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { Position, Tooltip } from '@blueprintjs/core';
 
 import oorjaClient from 'imports/modules/oorjaClient'; // TODO: this should be passed down from a parent component
+import MessageSwitch from 'imports/modules/MessageSwitch';
 
 import uiConfig from '../constants/uiConfig';
 import roomActivities from '../constants/roomActivities';
@@ -17,7 +18,7 @@ import tabRegistry from './tabRegistry';
 import './spotlight.scss';
 
 // tabs. only import those which need to be displayed instantly.
-// rest are dynamically imported.z
+// rest are dynamically imported
 import Info from './tabs/Info';
 
 // constants
@@ -275,7 +276,7 @@ class Spotlight extends Component {
         roomReady={this.props.roomReady}
         connectedUsers={this.props.connectedUsers}
         roomAPI={this.props.roomAPI}
-        setTabReady={() => { this.props.tabReady(tab.tabId); }}
+        setTabReady={() => { }} // TODO
         uiSize={this.props.uiSize}
         onTop={onTop}
         touchDevice={this.touchDevice}
@@ -317,7 +318,6 @@ Spotlight.propTypes = {
   roomInfo: PropTypes.object.isRequired,
   roomStorage: PropTypes.object.isRequired,
   roomReady: PropTypes.bool.isRequired,
-  tabReady: PropTypes.func.isRequired,
   uiSize: PropTypes.string.isRequired,
   streamContainerSize: PropTypes.string.isRequired,
   setCustomStreamContainerSize: PropTypes.func.isRequired,

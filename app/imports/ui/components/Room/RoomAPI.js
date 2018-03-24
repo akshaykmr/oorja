@@ -5,18 +5,14 @@ import status from '../../components/Room/constants/status';
 
 class RoomAPI {
   constructor(room) {
-    // room will be directly accessible to whoever has a refernce to
-    // this object, since there are no private properties in javascript. hmm...
     this.room = room;
-    this.messenger = room.messenger;
     this.activityListener = room.activityListener;
-
 
     // is there a better way to do this?
     // bind all methods as they may be invoked with different context such as onClick handler
     // things like this make me doubt If I'm doing something wrong
     this.getUserId = this.getUserId.bind(this);
-    this.getSessionId = this.getSessionId.bind(this);
+    this.getSession = this.getSession.bind(this);
     this.getUserInfo = this.getUserInfo.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.shareScreen = this.shareScreen.bind(this);
@@ -38,8 +34,8 @@ class RoomAPI {
     return this.room.props.roomUserId;
   }
 
-  getSessionId() {
-    return this.room.sessionId;
+  getSession() {
+    return this.room.session;
   }
 
   getUserInfo(userId) {
@@ -51,12 +47,17 @@ class RoomAPI {
   // get list of active tabs (marked as ready by remote user)
   // takes sessionId, a user may have multiple sessions open. sessionId gives a
   // unique *user* identifier
-  getActiveRemoteTabs(sessionId) {
-    return this.room.activeRemoteTabsRegistry[sessionId];
+  getActiveRemoteTabs(session) {
+    return this.room.activeRemoteTabsRegistry[session] || [];
   }
 
   sendMessage(message) {
-    this.messenger.send(message);
+    if (message.local) {
+      debugger;
+      this.room.messageHandler.handleMessage(message);
+      return;
+    }
+    this.room.sendMessage(message);
   }
 
   shareScreen() {
@@ -70,17 +71,11 @@ class RoomAPI {
   }
 
   addMessageHandler(tabId, handler) {
-    /*
-        tabId, handler
-    */
-    this.messenger.addMessageHandler(tabId, handler);
+    this.room.registerTabMessageHandler(tabId, handler);
   }
 
   removeMessageHandler(tabId, handler) {
-    /*
-        tabId, handlerToBeRemoved
-    */
-    this.messenger.removeMessageHandler(tabId, handler);
+    this.room.removeTabMessageHandler(tabId, handler);
   }
 
   addActivityListener(activity, listner) {

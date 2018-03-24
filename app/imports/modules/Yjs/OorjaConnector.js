@@ -7,73 +7,51 @@ class OorjaConnector extends AbstractConnector {
   constructor(yConfig, connectorOptions) {
     super(yConfig, connectorOptions);
     this.connectorOptions = connectorOptions;
-    const { roomAPI, connectedUsers, tabInfo } = connectorOptions;
+    this.disconnectFromY = this.disconnectFromY.bind(this);
+
+    const { roomAPI, tabInfo } = connectorOptions;
     const tabName = tabInfo.name;
+    const ownSession = roomAPI.getSession();
 
-    const ownSessionId = roomAPI.getSessionId();
-    this.ownSessionId = ownSessionId;
-    this.setUserId(ownSessionId);
-    const self = this;
-    this.addressBook = {};
-
-    const connectToY = (sessionId) => {
-      if (this.addressBook[sessionId]) return;
-      this.addressBook[sessionId] = this.unpackIdentifier(sessionId);
-      self.userJoined(sessionId, 'slave');
-      console.info(tabName, 'user joined');
-    };
+    this.ownSession = ownSession;
+    this.setUserId(ownSession);
+    this.connectedSessions = new Set();
 
     roomAPI.addMessageHandler(tabInfo.tabId, (message) => {
       console.info(tabName, 'message recieved');
-      if (!this.addressBook[message.from.sessionId]) {
-        // the event listeners below should have sufficed for this case, but
-        // they don't. There is definitely something wrong with my logic for setting
-        // and checking `readyness` of remote tabs.
-        connectToY(message.from.sessionId);
-      }
-      self.receiveMessage(message.from.sessionId, message.content);
+      this.receiveMessage(message.from.session, message.content);
     });
 
-    const connectIfTabIsReady = ({ sessionId }) => {
-      // connect user(sessionId) to Y if the the remote users tab is ready
-      if (sessionId === ownSessionId) {
-        return;
-      }
-      const activeTabs = roomAPI.getActiveRemoteTabs(sessionId);
-      if (activeTabs.indexOf(tabInfo.tabId) !== -1) {
-        connectToY(sessionId);
-      }
-    };
-
-    connectedUsers.forEach((user) => {
-      user.sessionList.forEach((sessionId) => {
-        connectIfTabIsReady({ sessionId });
+    roomAPI.addActivityListener(roomActivities.REMOTE_TAB_READY, ({ source, session }) => {
+      if (source !== tabInfo.tabId || this.connectedSessions.has(session)) return;
+      // send message to indicate that we are ready too
+      this.connectorOptions.roomAPI.sendMessage({
+        type: messageType.TAB_READY,
+        source: connectorOptions.tabInfo.tabId,
+        to: [{ session }],
       });
+
+      if (this.connectedSessions.has(session)) return;
+      this.connectedSessions.add(session);
+      this.userJoined(session, 'slave');
+      console.info(tabName, 'user joined');
     });
 
-    roomAPI.addActivityListener(roomActivities.USER_JOINED, connectIfTabIsReady);
-    roomAPI.addActivityListener(roomActivities.USER_SESSION_ADDED, connectIfTabIsReady);
-    roomAPI.addActivityListener(roomActivities.REMOTE_TAB_READY, ({ tabId, sessionId }) => {
-      if (tabId === tabInfo.tabId) connectToY(sessionId);
-    });
+    roomAPI.addActivityListener(roomActivities.USER_LEFT, this.disconnectFromY);
+    roomAPI.addActivityListener(roomActivities.USER_SESSION_REMOVED, this.disconnectFromY);
 
-    const disconnectFromY = ({ sessionId }) => {
-      if (this.addressBook[sessionId]) {
-        console.info(tabName, 'user left');
-        self.userLeft(sessionId);
-      }
-      delete this.addressBook[sessionId];
-    };
-    roomAPI.addActivityListener(roomActivities.USER_LEFT, disconnectFromY);
-    roomAPI.addActivityListener(roomActivities.USER_SESSION_REMOVED, disconnectFromY);
+    this.connectorOptions.roomAPI.sendMessage({
+      type: messageType.TAB_READY,
+      source: connectorOptions.tabInfo.tabId,
+      broadcast: true,
+    });
   }
 
-  unpackIdentifier(sessionId) {
-    const split = sessionId.split(':');
-    return {
-      userId: split[0],
-      sessionId,
-    };
+  disconnectFromY({ session }) {
+    if (this.connectedSessions.has(session)) {
+      this.userLeft(session);
+    }
+    this.connectedSessions.delete(session);
   }
 
   send(recieverId, content) {
@@ -81,10 +59,10 @@ class OorjaConnector extends AbstractConnector {
     const { tabId, name } = connectorOptions.tabInfo; // our own tab
     const message = {
       type: messageType.TAB_MESSAGE,
-      sourceTab: tabId,
+      source: tabId,
       destinationTabs: [tabId],
-      local: recieverId === this.ownSessionId,
-      to: [this.addressBook[recieverId]],
+      local: recieverId === this.ownSession,
+      to: [{ session: recieverId }],
       content,
     };
     console.info(name, 'sending message', message);
@@ -96,17 +74,13 @@ class OorjaConnector extends AbstractConnector {
     const { tabId, name } = connectorOptions.tabInfo; // our own tab
     const message = {
       type: messageType.TAB_MESSAGE,
-      sourceTab: tabId,
+      source: tabId,
       destinationTabs: [tabId],
       broadcast: true,
       content,
     };
     console.info(name, 'broadcasting message');
     connectorOptions.roomAPI.sendMessage(message);
-  }
-
-  isDisconnected() {
-    return false;
   }
 }
 
