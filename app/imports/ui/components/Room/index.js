@@ -580,6 +580,7 @@ class Room extends Component {
           roomStorage={this.props.roomStorage}
           connectedUsers={this.state.connectedUsers}
           roomAPI={this.roomAPI}
+          oorjaClient={this.props.oorjaClient}
           dispatchRoomActivity={this.activityListener.dispatch}
           primaryMediaStreamState={this.state.primaryMediaStreamState}
           screenSharingStreamState={this.state.screenSharingStreamState}

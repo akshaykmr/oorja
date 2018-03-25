@@ -5,9 +5,6 @@ import update from 'immutability-helper';
 import classNames from 'classnames';
 import { Position, Tooltip } from '@blueprintjs/core';
 
-import oorjaClient from 'imports/modules/oorjaClient'; // TODO: this should be passed down from a parent component
-import MessageSwitch from 'imports/modules/MessageSwitch';
-
 import uiConfig from '../constants/uiConfig';
 import roomActivities from '../constants/roomActivities';
 
@@ -165,7 +162,7 @@ class Spotlight extends Component {
       this.fetchTabComponent(tabId, true);
       return;
     }
-    oorjaClient.addTab(this.props.roomInfo._id, tabId)
+    this.props.oorjaClient.addTab(this.props.roomInfo._id, tabId)
       .then(() => { this.fetchTabComponent(tabId, true); });
   }
 
@@ -316,6 +313,7 @@ Spotlight.propTypes = {
   dispatchRoomActivity: PropTypes.func.isRequired,
   connectedUsers: PropTypes.array.isRequired,
   roomInfo: PropTypes.object.isRequired,
+  oorjaClient: PropTypes.object.isRequired,
   roomStorage: PropTypes.object.isRequired,
   roomReady: PropTypes.bool.isRequired,
   uiSize: PropTypes.string.isRequired,

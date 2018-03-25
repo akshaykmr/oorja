@@ -24,7 +24,6 @@ class Chat extends Component {
     this.chatInput = null; // dom element for chatInput
     this.md = new Remarkable({
       linkify: true,
-      // todo: test highlight code using hljs
     });
 
     this.history = 50;
