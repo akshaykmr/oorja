@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 // import scrollToElement from 'scroll-to-element';
 
 import RoomSetup from 'imports/ui/components/RoomSetup';
@@ -25,7 +26,7 @@ class Landing extends React.Component {
           <div className="minimalDescription">
             with video, voice chat and <strong>much more! </strong>
           </div>
-          <RoomSetup />
+          <RoomSetup history={this.props.history} />
         </section>
         <section className="about">
           <div className="status-text">
@@ -123,5 +124,10 @@ class Landing extends React.Component {
     );
   }
 }
+
+Landing.propTypes = {
+  history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+};
 
 export default Landing;

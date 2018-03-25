@@ -1,8 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import update from 'immutability-helper';
-import { browserHistory } from 'react-router';
 import { Intent, RadioGroup, Radio, Collapse, Button } from '@blueprintjs/core';
 
 import * as HttpStatus from 'http-status-codes';
@@ -87,7 +87,7 @@ class RoomSetup extends Component {
       });
     }, 100);
     const queryString = passwordEnabled ? '' : `?secret=${roomSecret}`;
-    browserHistory.push(`/${roomName}${queryString}`);
+    this.props.history.push(`/${roomName}${queryString}`);
   }
 
   handleSubmit(event) {
@@ -224,5 +224,9 @@ class RoomSetup extends Component {
     );
   }
 }
+
+RoomSetup.propTypes = {
+  history: PropTypes.object.isRequired,
+};
 
 export default RoomSetup;

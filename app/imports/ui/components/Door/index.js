@@ -2,9 +2,9 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { browserHistory } from 'react-router';
 import update from 'immutability-helper';
 import { isBefore, addHours } from 'date-fns';
+import queryString from 'query-string';
 
 import * as HttpStatus from 'http-status-codes';
 
@@ -31,11 +31,9 @@ class Door extends Component {
   constructor(props) {
     super(props);
     this.roomStorage = null;
-
-    const { roomName } = this.props.params;
+    const { params: { roomName } } = this.props.match;
     this.roomName = roomName;
-
-    this.roomSecret = props.location.query.secret;
+    this.roomSecret = queryString.parse(props.location.search).secret;
 
     this.stages = {
       LOADING: 'LOADING',
@@ -66,7 +64,7 @@ class Door extends Component {
   }
 
   kick(message = GENERIC_ERROR_MESSAGE, intent = Intent.WARNING) {
-    browserHistory.push('/');
+    this.props.history.push('/');
     toaster.show({
       message,
       intent,
@@ -132,7 +130,7 @@ class Door extends Component {
       intent: Intent.WARNING,
       timeout: 7000,
     });
-    browserHistory.push('/');
+    this.props.history.push('/');
   }
 
   setup() {
@@ -228,7 +226,7 @@ class Door extends Component {
         timeout: 8000,
       });
     }, 300);
-    browserHistory.push('/');
+    this.props.history.push('/');
   }
 
   isRoomReady() {
@@ -312,8 +310,9 @@ class Door extends Component {
 }
 
 Door.propTypes = {
-  params: PropTypes.object,
-  location: PropTypes.object,
+  match: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
 };
 
 export default Door;

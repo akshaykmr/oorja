@@ -2,10 +2,23 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FocusStyleManager } from '@blueprintjs/core';
 
+import { Route } from 'react-router-dom';
+
+import Landing from 'imports/ui/pages/Landing/';
+import Door from 'imports/ui/components/Door';
+import NotFound from 'imports/ui/pages/NotFound';
+import SupremeToaster from 'imports/ui/components/Toaster';
+
 import './app.scss';
 
 
 FocusStyleManager.onlyShowFocusOnTabs();
+
+
+const onEnterDoor = (nextState, replace, callback) => {
+  SupremeToaster.clear();
+  callback();
+};
 
 class App extends Component {
   render() {
@@ -16,15 +29,17 @@ class App extends Component {
             <strong>ALPHA</strong>
           </a>
         </div>
-        {this.props.children}
+
+        <Route exact path="/" name="Landing" component={ Landing } />
+        <Route path="/not-found" component={ NotFound }/>
+        <Route path="/:roomName" component={ Door } onEnter={onEnterDoor} />
       </div>
     );
   }
 }
 
 App.propTypes = {
-  children: PropTypes.object,
-  location: PropTypes.object,
+  history: PropTypes.object.isRequired,
 };
 
 export default App;
