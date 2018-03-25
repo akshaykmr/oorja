@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import status from '../../Room/constants/status';
@@ -113,16 +113,21 @@ class StreamsContainer extends Component {
     }
 
     return (
-      <div className={streamBoxClassNames} key={connectedUser.userId}>
-        {userMediaStreams.filter(stream => stream.video).map(this.renderVideoStream)}
-        <Avatar user={this.props.roomAPI.getUserInfo(connectedUser.userId)} size={avatarSize}
-          onClick={() => {
-            this.props.dispatchRoomActivity(
-              roomActivities.USER_CLICKED,
-              connectedUser.userId,
-            );
-          }} />
-      </div>
+      <CSSTransition
+        key={connectedUser.userId}
+        classNames='streamBox'
+        timeout={{ enter: 800, leave: 400 }}>
+          <div className={streamBoxClassNames}>
+            {userMediaStreams.filter(stream => stream.video).map(this.renderVideoStream)}
+            <Avatar user={this.props.roomAPI.getUserInfo(connectedUser.userId)} size={avatarSize}
+              onClick={() => {
+                this.props.dispatchRoomActivity(
+                  roomActivities.USER_CLICKED,
+                  connectedUser.userId,
+                );
+              }} />
+          </div>
+      </CSSTransition>
     );
   }
 
@@ -143,14 +148,9 @@ class StreamsContainer extends Component {
       <div
         className={classNames(streamContainerClassNames)}
         style={streamContainerStyle}>
-        <CSSTransitionGroup
-          transitionName='streamBox'
-          transitionAppear={true}
-          transitionAppearTimeout={200}
-          transitionEnterTimeout={1000}
-          transitionLeaveTimeout={400}>
+        <TransitionGroup appear={true}>
           {this.props.connectedUsers.map(this.renderUserStreamBox)}
-        </CSSTransitionGroup>
+        </TransitionGroup>
         { tryingToConnect ?
           (
             <span className="displayText">

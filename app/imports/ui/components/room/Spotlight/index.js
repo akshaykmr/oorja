@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import update from 'immutability-helper';
 import classNames from 'classnames';
 import { Position, Tooltip } from '@blueprintjs/core';
@@ -222,16 +222,23 @@ class Spotlight extends Component {
         </div>
       );
 
+      const switchTransition = uiSize === uiConfig.LARGE ? 'switch' : 'switch-alt';
+
       return (
-        <Tooltip
+        <CSSTransition
           key={tab.tabId}
-          content={tab.description}
-          target={renderBox()}
-          popoverClassName="pt-popover-content-sizing"
-          position={uiSize === uiConfig.COMPACT ? Position.TOP : Position.RIGHT}
-          className={classNames(switchClassNames)}
-          hoverOpenDelay={500}>
-        </Tooltip>
+          classNames={switchTransition}
+          appear={true}
+          timeout={{ enter: 1200, exit: 800 }}>
+            <Tooltip
+              content={tab.description}
+              target={renderBox()}
+              popoverClassName="pt-popover-content-sizing"
+              position={uiSize === uiConfig.COMPACT ? Position.TOP : Position.RIGHT}
+              className={classNames(switchClassNames)}
+              hoverOpenDelay={500}>
+            </Tooltip>
+        </CSSTransition>
       );
     };
 
@@ -283,8 +290,6 @@ class Spotlight extends Component {
         style={tabContentStyle}/>;
     };
 
-    const switchTransition = uiSize === uiConfig.LARGE ? 'switch' : 'switch-alt';
-
     return (
       <div className="spotlightContainer">
         <div
@@ -293,14 +298,9 @@ class Spotlight extends Component {
             {Object.keys(this.state.tabStatusRegistry).map(renderTabContent)}
           </div>
           <div className="content-switcher">
-            <CSSTransitionGroup
-                transitionName={switchTransition}
-                transitionAppear={true}
-                transitionAppearTimeout={1500}
-                transitionEnterTimeout={1500}
-                transitionLeaveTimeout={1000}>
-                {Object.keys(this.state.tabStatusRegistry).map(renderSwitch)}
-            </CSSTransitionGroup>
+            <TransitionGroup>
+              {Object.keys(this.state.tabStatusRegistry).map(renderSwitch)}
+            </TransitionGroup>
           </div>
         </div>
       </div>

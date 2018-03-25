@@ -41,7 +41,7 @@ $switcher-width: 62px;
       transition: transform 1s ease-in;
     }
 
-    .switch-leave {
+    .switch-exit {
       transform: translate3d(0, 0, 0);
     }
 
@@ -54,7 +54,7 @@ $switcher-width: 62px;
       transition: transform 1s ease-in;
     }
 
-    .switch-leave.switch-leave-active {
+    .switch-exit.switch-exit-active {
       transform: translate3d(-70px, 0, 0);
       transition: transform 300ms ease-out;
     }
@@ -70,7 +70,7 @@ $switcher-width: 62px;
       transition: transform 1s ease-in;
     }
 
-    .switch-alt-leave {
+    .switch-alt-exit {
       transform: translate3d(0, 0, 0);
     }
 
@@ -83,7 +83,7 @@ $switcher-width: 62px;
       transition: transform 1s ease-in;
     }
 
-    .switch-alt-leave.switch-alt-leave-active {
+    .switch-alt-exit.switch-alt-exit-active {
       transform: translate3d(0, 70px, 0);
       transition: transform 300ms ease-out;
     }
@@ -165,10 +165,10 @@ $switcher-width: 62px;
 
       &:hover {
         .tabIcon {
-          border: 3px solid #3e606f;    
+          border: 3px solid #3e606f;
           line-height: 39px;
           opacity: 0.8;
-        }        
+        }
       }
 
       &.active {
@@ -200,14 +200,14 @@ $switcher-width: 62px;
       flex-direction: row;
       overflow-x: auto;
       overflow-y: hidden;
-      
+
       > .switch {
         margin-top: initial;
         margin-bottom: initial;
         margin-left: 5px;
         margin-right: 5px;
       }
-    }  
+    }
   }
 
 

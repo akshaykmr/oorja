@@ -179,7 +179,7 @@ class JoinRoomForm extends Component {
     const buttonAttr = {
       type: 'submit',
       text: 'Ready to join',
-      rightIconName: 'arrow-right',
+      rightIcon: 'arrow-right',
       disabled: buttonIsDisabled,
       loading: waiting,
       className: classNames({

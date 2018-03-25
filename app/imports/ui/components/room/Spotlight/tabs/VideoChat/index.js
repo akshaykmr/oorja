@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import _ from 'lodash';
 import classNames from 'classnames';
 // import uiConfig from '../../../constants/uiConfig';
@@ -304,14 +303,7 @@ class VideoChat extends Component {
 
     return (
       <div className={this.props.classNames} style={this.props.style}>
-      <CSSTransitionGroup
-        transitionName="fade"
-        transitionAppear={true}
-        transitionAppearTimeout={500}
-        transitionEnterTimeout={500}
-        transitionLeaveTimeout={300}>
-        {determineContent()}
-      </CSSTransitionGroup>
+      {determineContent()}
       {this.renderControls()}
       </div>
     );

@@ -143,10 +143,10 @@ $avatar-size: 50px;
     transform: translate3d(0, 0, 0);
     transition: transform 500ms ease-in;
   }
-  .streamBox-leave {
+  .streamBox-exit {
     transform: translate3d(0, 0, 0);
   }
-  .streamBox-leave.streamBox-leave-active {
+  .streamBox-exit.streamBox-exit-active {
     transform: translate3d(0, -100%, 0);
     transition: transform 300ms ease-out;
   }
