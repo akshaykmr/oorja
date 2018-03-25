@@ -1,8 +1,8 @@
+/* global window */
 // collections
 import 'imports/collections/common';
 import 'imports/collections/client';
 
-/* global window */
 import './routes.js';
 import './attemptReconnection';
 

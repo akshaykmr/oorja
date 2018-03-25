@@ -6,7 +6,7 @@ import { Random } from 'meteor/random';
 
 import * as HttpStatus from 'http-status-codes';
 
-import { Rooms } from 'imports/collections/common';
+import { Rooms } from 'imports/collections/server';
 import roomSetup from 'imports/modules/room/setup';
 import roomAccess from 'imports/modules/room/access';
 import roomProvider from 'imports/modules/room/provider/';
