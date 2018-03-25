@@ -22,12 +22,13 @@ import 'brace/mode/ruby';
 import 'brace/mode/swift';
 import 'brace/mode/typescript';
 
+import Y from 'imports/modules/Yjs';
+
 import syntaxList from './syntaxList';
 import colorSchemes from './colorSchemes';
 
 import roomActivities from '../../../constants/roomActivities';
 
-import Y from '../../../../../../modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
 
 import './codepad.scss';

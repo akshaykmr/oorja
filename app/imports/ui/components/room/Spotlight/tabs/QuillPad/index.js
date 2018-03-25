@@ -8,7 +8,7 @@ import Quill from 'quill';
 // "quill-image-drop-module": "^1.0.3",
 // "quill-image-resize-module": "^3.0.0",
 
-import Y from '../../../../../../modules/Yjs';
+import Y from 'imports/modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
 
 import roomActivities from '../../../constants/roomActivities';

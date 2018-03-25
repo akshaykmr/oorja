@@ -4,12 +4,11 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import update from 'immutability-helper';
 import Remarkable from 'remarkable';
-// import hljs from 'highlight.js';
 
+import Y from 'imports/modules/Yjs';
 import Avatar from '../../../Avatar';
 import roomActivities from '../../../constants/roomActivities';
 
-import Y from '../../../../../../modules/Yjs';
 import tabPropTypes from '../tabPropTypes';
 
 import Spinner from '../../Spinner';
