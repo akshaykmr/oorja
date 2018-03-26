@@ -6,4 +6,5 @@ import './accounts';
 import './crons';
 import './rpc';
 import './api';
+import './ssr';
 

@@ -1,6 +1,5 @@
-// React
 import React from 'react';
-import { render } from 'react-dom';
+import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 // Redux related
@@ -9,13 +8,10 @@ import { Provider } from 'react-redux';
 import ReduxPromise from 'redux-promise';
 import ReduxThunk from 'redux-thunk';
 
-// Meteor
-import { Meteor } from 'meteor/meteor';
+import { onPageLoad } from 'meteor/server-render';
 
-// components
 import App from 'imports/ui/layouts/App';
 
-// root reducer
 import rootReducer from 'imports/ui/reducers';
 
 
@@ -27,8 +23,8 @@ const store = createStoreWithMiddleware(rootReducer,
 );
  /* eslint-enable */
 
-Meteor.startup(() => {
-  render(
+onPageLoad((_sink) => {
+  ReactDOM.hydrate(
     <Provider store={store}>
       <Router>
         <Route path="/" component={ App } />

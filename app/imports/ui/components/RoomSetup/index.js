@@ -14,8 +14,6 @@ import { shareChoices } from 'imports/modules/room/setup/constants';
 import SupremeToaster from '../../components/Toaster';
 
 
-import './roomSetup.scss';
-
 /*
   Form to input roomName, password. dispatches actions to set
   roomConfiguration in global state.
@@ -39,6 +37,7 @@ class RoomSetup extends Component {
     };
 
     this.state = {
+      isServer: Meteor.isServer,
       customRoom: false,
       waitingForServer: false,
       validName: false,
@@ -161,65 +160,66 @@ class RoomSetup extends Component {
   }
 
   render() {
-    // sexy form goes here. learn some styling yo!
     const {
-      roomNameTouched, validName, customization, customRoom, waitingForServer,
+      roomNameTouched, validName, customization, customRoom, waitingForServer, isServer,
     } = this.state;
+
+    if (isServer) { // render empty space
+      return <div className="roomSetup room-form" />;
+    }
     return (
-      <div>
-        <div className="roomSetup room-form">
-          <form onSubmit = {this.handleSubmit.bind(this)}>
-            <fieldset disabled={this.state.waitingForServer}>
-              <div className="field-container">
-                <Collapse isOpen={this.state.customRoom} >
-                  <div style={{ padding: '5px' }}>
-                    <label className="pt-label" htmlFor="roomName">
-                      Room Name
-                    <input className="pt-input" type="text" id="roomName"
-                      placeholder="something meaningful"
-                      style={{ color: roomNameTouched && !validName ? '#d90000' : 'inherit' }}
-                      value={customization.roomName}
-                      onChange={this.handleNameChange.bind(this)} />
-                    </label>
-                    <RadioGroup
-                            label="How will others join this room?"
-                            onChange={this.handleShareChoice}
-                            selectedValue={customization.shareChoice}>
-                            <Radio label="With a secret link that I share with them"
-                              value={this.shareChoices.SECRET_LINK} />
-                            <Radio label="Those who know the password may enter"
-                              value={this.shareChoices.PASSWORD} />
-                    </RadioGroup>
+      <div className="roomSetup room-form">
+        <form onSubmit = {this.handleSubmit.bind(this)}>
+          <fieldset disabled={this.state.waitingForServer}>
+            <div className="field-container">
+              <Collapse isOpen={this.state.customRoom} >
+                <div style={{ padding: '5px' }}>
+                  <label className="pt-label" htmlFor="roomName">
+                    Room Name
+                  <input className="pt-input" type="text" id="roomName"
+                    placeholder="something meaningful"
+                    style={{ color: roomNameTouched && !validName ? '#d90000' : 'inherit' }}
+                    value={customization.roomName}
+                    onChange={this.handleNameChange.bind(this)} />
+                  </label>
+                  <RadioGroup
+                          label="How will others join this room?"
+                          onChange={this.handleShareChoice}
+                          selectedValue={customization.shareChoice}>
+                          <Radio label="With a secret link that I share with them"
+                            value={this.shareChoices.SECRET_LINK} />
+                          <Radio label="Those who know the password may enter"
+                            value={this.shareChoices.PASSWORD} />
+                  </RadioGroup>
+                </div>
+                <Collapse
+                  isOpen={customization.shareChoice === this.shareChoices.PASSWORD} >
+                  <div style={{ padding: '5px', paddingTop: '0px' }}>
+                  <label className="pt-label" htmlFor="roomPassword">Password</label>
+                    <input className="pt-input" type="password" id="roomPassword"
+                      value={customization.password}
+                      onChange={this.handlePasswordChange.bind(this)}/>
                   </div>
-                  <Collapse
-                    isOpen={customization.shareChoice === this.shareChoices.PASSWORD} >
-                    <div style={{ padding: '5px', paddingTop: '0px' }}>
-                    <label className="pt-label" htmlFor="roomPassword">Password</label>
-                      <input className="pt-input" type="password" id="roomPassword"
-                        value={customization.password}
-                        onChange={this.handlePasswordChange.bind(this)}/>
-                    </div>
-                  </Collapse>
                 </Collapse>
-              </div>
-              <div className="buttonContainer">
-                <button
-                  type="button"
-                  className={`pt-button pt-minimal ${customRoom ? 'pt-active' : ''}`}
-                  onClick={this.toggleCustomRoomForm}>
-                  Customize
-                </button>
-                <Button
-                  type="submit"
-                  loading={waitingForServer}
-                  onClick={this.handleSubmit}
-                  className="pt-large"
-                  text="Create Room !">
-                </Button>
-              </div>
-          </fieldset>
-          </form>
-        </div>
+              </Collapse>
+            </div>
+            <div className="buttonContainer">
+              <button
+                type="button"
+                className={`pt-button pt-minimal ${customRoom ? 'pt-active' : ''}`}
+                onClick={this.toggleCustomRoomForm}>
+                Customize
+              </button>
+              <Button
+                type="submit"
+                loading={waitingForServer}
+                onClick={this.handleSubmit}
+                className="pt-large"
+                text="Create Room !">
+              </Button>
+            </div>
+        </fieldset>
+        </form>
       </div>
     );
   }

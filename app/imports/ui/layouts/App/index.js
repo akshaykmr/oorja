@@ -9,8 +9,6 @@ import Door from 'imports/ui/components/Door';
 import NotFound from 'imports/ui/pages/NotFound';
 import SupremeToaster from 'imports/ui/components/Toaster';
 
-import './app.scss';
-
 
 FocusStyleManager.onlyShowFocusOnTabs();
 
