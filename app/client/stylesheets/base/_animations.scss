@@ -5,7 +5,7 @@
 
  .animate.fade-in {
     animation-name: fade-in;
-    animation-duration: 0.2s;
+    animation-duration: 0.4s;
     animation-timing-function: ease-in;
   }
 
@@ -27,7 +27,7 @@
     0%{
         opacity: 0;
     }
-    
+
     100%{
         opacity: 1;
     }

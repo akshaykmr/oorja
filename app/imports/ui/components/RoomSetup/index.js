@@ -164,12 +164,14 @@ class RoomSetup extends Component {
       roomNameTouched, validName, customization, customRoom, waitingForServer, isServer,
     } = this.state;
 
+    const classNames = 'roomSetup room-form';
+
     if (isServer) { // render empty space
-      return <div className="roomSetup room-form" />;
+      return <div className={classNames} />;
     }
     return (
-      <div className="roomSetup room-form">
-        <form onSubmit = {this.handleSubmit.bind(this)}>
+      <div className={classNames}>
+        <form onSubmit = {this.handleSubmit.bind(this)} className="animate fade-in">
           <fieldset disabled={this.state.waitingForServer}>
             <div className="field-container">
               <Collapse isOpen={this.state.customRoom} >
