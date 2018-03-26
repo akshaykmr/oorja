@@ -3,8 +3,9 @@ import renderLandingPage from './landing';
 
 onPageLoad((sink) => {
   const path = sink.request.url.pathname;
-  console.log(path)
-  if (path === '/') { // landing page
-    renderLandingPage(sink);
+  switch (path) {
+    case '/': renderLandingPage(sink);
+      break;
+    default:
   }
 });
