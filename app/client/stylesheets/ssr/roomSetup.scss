@@ -1,0 +1,25 @@
+.roomSetup {
+  form {
+    position: relative;
+    border-radius: 5px;
+    left: 8px;
+
+    .field-container {
+      font-size: 1.15em;
+    }
+
+    fieldset {
+      border: none;
+
+      .buttonContainer {
+        text-align: center;
+        button {
+          margin: 5px;
+        }
+      }
+    }
+    #roomName, #roomPassword {
+      width: 300px
+    }
+  }
+}
