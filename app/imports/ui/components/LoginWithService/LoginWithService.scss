@@ -3,8 +3,6 @@ $icon-spacing: 10px;
 
 .login-container {
   max-width: 400px;
-  width: 95%;
-  margin: 0 auto;
   transition: opacity 500ms ease;
 
   &.blur {
@@ -19,68 +17,68 @@ $icon-spacing: 10px;
     display: none;
   }
 
-  .login-info {
+  .button-container {
+    position: relative;
+    height: 50px;
+    width: 6 * ($icon-size + $icon-spacing) ;
+    margin: 0 auto;
+
+    &.hidden {
+      display: none;
+    }
+
+    .buttonTransition-enter {
+      opacity: 0.01;
+    }
+
+    .buttonTransition-enter.buttonTransition-enter-active {
+      opacity: 1;
+      transition: opacity 500ms ease-in;
+    }
+
+    .buttonTransition-leave {
+      opacity: 1;
+    }
+
+    .buttonTransition-leave.buttonTransition-leave-active {
+      opacity: 0.01;
+      transition: opacity 100ms ease-out;
+    }
+  }
+
+  .loginButton {
+    cursor: pointer;
+    display: inline-block;
+    height: $icon-size;
+    width: $icon-size;
+    margin-left: 6px;
+    line-height: $icon-size;
+    font-size: 2.6em;
     text-align: center;
-  }
-}
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    //transition: all 0.2s ease-out;
+    border-radius: 15%;
 
-.button-container {
-  position: relative;
-  height: 50px;
-  width: 6 * ($icon-size + $icon-spacing) ;
-  margin: 0 auto;
+    &:hover {
+      transform: scale(1.05, 1.05);
+      box-shadow: 0px 5px 15px -6px rgba(0, 0, 0, 0.81);
+    }
 
-  &.hidden {
-    display: none;
-  }
+    // -webkit-background-clip: padding-box;
+    // -moz-background-clip:    padding;
+    // background-clip:         padding-box;
 
-  .buttonTransition-enter {
-    opacity: 0.01;
-  }
+    &.active {
+      transform: translate3d(0,0,0) scale(1.05, 1.05) !important;
+    }
 
-  .buttonTransition-enter.buttonTransition-enter-active {
-    opacity: 1;
-    transition: opacity 500ms ease-in;
-  }
-
-  .buttonTransition-leave {
-    opacity: 1;
-  }
-
-  .buttonTransition-leave.buttonTransition-leave-active {
-    opacity: 0.01;
-    transition: opacity 100ms ease-out;
+    &.waiting {
+      opacity: 0.6;
+    }
   }
 }
 
 
-.loginButton {
-  cursor: pointer;
-  display: inline-block;
-  height: $icon-size;
-  width: $icon-size;
-  margin-left: 6px;
-  line-height: $icon-size;
-  font-size: 2.6em;
-  text-align: center;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-  //transition: all 0.2s ease-out;
-  border-radius: 15%;
 
-  &:hover {
-    transform: scale(1.05, 1.05);
-    box-shadow: 0px 5px 15px -6px rgba(0, 0, 0, 0.81);
-  }
 
-  // -webkit-background-clip: padding-box; 
-  // -moz-background-clip:    padding; 
-  // background-clip:         padding-box;
 
-  &.active {
-    transform: translate3d(0,0,0) scale(1.05, 1.05) !important; 
-  }
-
-  &.waiting {
-    opacity: 0.6;
-  }
-}

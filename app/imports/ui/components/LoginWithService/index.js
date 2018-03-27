@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { Meteor } from 'meteor/meteor';
-import { Tracker } from 'meteor/tracker';
 import classNames from 'classnames';
 
 import './LoginWithService.scss';
@@ -10,10 +9,7 @@ import './LoginWithService.scss';
 class LoginWithService extends Component {
   constructor(props) {
     super(props);
-    const user = Meteor.user();
     this.state = {
-      loggedIn: !!user,
-      loginService: user ? user.profile.loginService : null,
       waitingFor: '', // waiting for the service with 'name',
       hasLoggedOutOnce: false,
     };
@@ -68,28 +64,9 @@ class LoginWithService extends Component {
     });
   }
 
-  updateState(user) {
-    this.setState({
-      ...this.state,
-      loggedIn: !!user,
-      loginService: user ? user.profile.loginService : '',
-    });
-  }
-
-  componentWillMount() {
-    this.loginStatusTracker = Tracker.autorun(() => {
-      const user = Meteor.user();
-      this.updateState(user);
-    });
-  }
-
-  componentWillUnmount() {
-    // cleanup
-    this.loginStatusTracker.stop();
-  }
-
   renderLoginButtons() {
-    const { loggedIn, waitingFor, loginService } = this.state;
+    const { waitingFor } = this.state;
+    const { loggedIn, loginService } = this.props;
     if (loggedIn) {
       return null;
     }
@@ -120,44 +97,10 @@ class LoginWithService extends Component {
     });
   }
 
-  loginInfo() {
-    if (!this.state.loggedIn) {
-      const text = 'Sign in';
-      /* if (this.state.hasLoggedOutOnce) {
-        text = 'You have successfully signed out.';
-      } else {
-        text = ';
-      } */
-      return (
-        <span className='animate fade-in'>{text}</span>
-      );
-    }
-    const service = this.state.loginService;
-    const greet = `Welcome, you are signed in with ${service} `;
-    const logoutHandler = () => {
-      Meteor.logout();
-      this.setState({
-        ...this.state,
-        hasLoggedOutOnce: true,
-      });
-    };
-    return (
-      <div className="animate fade-in">
-        <span>{greet}</span>
-        <span>
-          <button type="button" className="pt-button" onClick={logoutHandler}>Sign out</button>
-        </span>
-      </div>
-    );
-  }
-
   render() {
     return (
       <div className={`login-container ${this.props.extraClasses}`}>
-        <div className="login-info" style={{ fontSize: this.state.loggedIn ? '1.0em' : '1.3em' }}>
-          {this.loginInfo()}
-        </div>
-        <div className={`button-container ${this.state.loggedIn ? 'hidden' : ''}`}>
+        <div className={`button-container ${this.props.loggedIn ? 'hidden' : ''}`}>
           {this.renderLoginButtons()}
         </div>
       </div>
@@ -166,6 +109,8 @@ class LoginWithService extends Component {
 }
 
 LoginWithService.propTypes = {
+  loggedIn: PropTypes.bool.isRequired,
+  loginService: PropTypes.string,
   extraClasses: PropTypes.string,
 };
 

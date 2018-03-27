@@ -10,6 +10,8 @@ export const extractInitialsFromName = (fullName) => {
   return initials;
 };
 
-export default {
-  extractInitialsFromName,
-};
+const avatarColors = ['#c78ae1', '#f4d448', '#e6cb71', '#66aee3', '#7bcd52',
+  '#e5176f', '#d784a6', '#a693e9', '#f078ae', '#457fd1', '#8a4ebf'];
+
+export const getRandomAvatarColor = () =>
+  avatarColors[Math.floor(Math.random() * avatarColors.length)];

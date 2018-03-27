@@ -1,18 +1,19 @@
 /* global URL */
+import { Meteor } from 'meteor/meteor';
+import { Tracker } from 'meteor/tracker';
+import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import update from 'immutability-helper';
+import * as HttpStatus from 'http-status-codes';
 import classNames from 'classnames';
-import { Button, Intent, Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
-import hark from 'hark';
+import { Radio, Button } from '@blueprintjs/core';
+import { getRandomAvatarColor } from 'imports/modules/user/utilities';
 
-import MediaPreferences from 'imports/modules/media/storage';
-import JoinRoomForm from 'imports/ui/components/JoinRoomForm';
+import { mediaPreferences, storeKeys as mediaStoreKeys } from 'imports/modules/media/storage';
+import LoginWithService from 'imports/ui/components/LoginWithService';
 
-import Erizo from '../../../../modules/Erizo';
-
-import VideoStream from '../../Media/Video';
-import AudioStream from '../../Media/Audio';
+import Avatar from 'imports/ui/components/Room/Avatar';
 
 
 import './gettingReady.scss';
@@ -20,24 +21,46 @@ import './gettingReady.scss';
 export default class GettingReady extends Component {
   constructor(props) {
     super(props);
-
-    this.videoQualitySetting = {
-      '240p': [320, 240, 480, 360],
-      '360p': [480, 360, 640, 480],
-      '480p': [640, 480, 1280, 720],
-      '720p': [1280, 720, 1440, 900],
-      '1080p': [1920, 1080, 2560, 1440],
-    };
+    this.existingUser = _.find(this.props.roomInfo.participants, { userId: this.props.roomUserId });
     this.state = this.getDefaultState();
     this.stateBuffer = this.state;
-    this.configureStream({ firstAttempt: true });
 
-    this.reinitializeStream = this.reinitializeStream.bind(this);
-    this.muteAudio = this.muteAudio.bind(this);
-    this.muteVideo = this.muteVideo.bind(this);
-    this.unmuteAudio = this.unmuteAudio.bind(this);
-    this.unmuteVideo = this.unmuteVideo.bind(this);
-    this.handleVideoQualityChange = this.handleVideoQualityChange.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.enableAnon = this.enableAnon.bind(this);
+    this.disableAnon = this.disableAnon.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleJoinRoomResponse = this.handleJoinRoomResponse.bind(this);
+  }
+
+  getDefaultState() {
+    const user = Meteor.user();
+    const getName = () => {
+      if (this.existingUser) return this.existingUser.firstName;
+      return user ? `${user.profile.firstName} ${user.profile.lastName}` : '';
+    };
+    const getAvatarColor = () => {
+      return this.existingUser ? this.existingUser.textAvatarColor : getRandomAvatarColor();
+    };
+    const getPicture = () => {
+      if (this.existingUser) return this.existingUser.picture;
+      return user ? user.profile.picture : null;
+    };
+
+    return {
+      waiting: false,
+      // login related
+      loggedIn: !!user,
+      loginService: user ? user.profile.loginService : null,
+
+      name: getName(),
+      textAvatarColor: getAvatarColor(),
+      picture: getPicture(),
+      validName: true,
+      goAnon: false,
+
+      muteAudio: mediaPreferences.getKey(mediaStoreKeys.MUTE_AUDIO, false),
+      muteVideo: mediaPreferences.getKey(mediaStoreKeys.MUTE_VIDEO, false),
+    };
   }
 
   updateState(changes, buffer = this.stateBuffer) {
@@ -45,435 +68,215 @@ export default class GettingReady extends Component {
     this.setState(this.stateBuffer);
   }
 
-  saveMediaDeviceSettings() {
-    const toBeSaved = [ // store these keys from state into local storage upon changes.
-      'videoQuality',
-      'lastGoodVideoQuality',
-      'mutedAudio',
-      'mutedVideo',
-    ];
-
-    /* eslint-disable no-param-reassign */
-    const settings = toBeSaved
-      .reduce((partialSettings, currentKey) => {
-        partialSettings[currentKey] = this.stateBuffer[currentKey];
-        return partialSettings;
-      }, {});
-    /* eslint-enable no-param-reassign */
-    MediaPreferences.save(settings);
-  }
-
-  getDefaultState() {
-    const savedSettings = MediaPreferences.get();
-    return {
-      videoQuality: savedSettings ? savedSettings.videoQuality : '1080p',
-      lastGoodVideoQuality: '240p',
-      initialized: false,
-      accessAccepted: false,
-      audio: false,
-      video: false,
-      mutedAudio: savedSettings ? savedSettings.mutedAudio : false,
-      mutedVideo: savedSettings ? savedSettings.mutedVideo : false,
-      streamSource: null,
-      streamError: false,
-      errorReason: '',
-      speaking: false,
-      spokenOnce: false,
-    };
-  }
-
-  muteAudio() {
-    this.erizoStream.stream.getAudioTracks()[0].enabled = false;
-    this.updateState({
-      mutedAudio: { $set: true },
-    });
-    this.saveMediaDeviceSettings();
-  }
-
-  unmuteAudio() {
-    this.erizoStream.stream.getAudioTracks()[0].enabled = true;
-    this.updateState({
-      mutedAudio: { $set: false },
-    });
-    this.saveMediaDeviceSettings();
-  }
-
-  muteVideo() {
-    this.erizoStream.stream.getVideoTracks()[0].enabled = false;
-    this.updateState({
-      mutedVideo: { $set: true },
-    });
-    this.saveMediaDeviceSettings();
-  }
-
-  unmuteVideo() {
-    this.erizoStream.stream.getVideoTracks()[0].enabled = true;
-    this.updateState({
-      mutedVideo: { $set: false },
-    });
-    this.saveMediaDeviceSettings();
-  }
-
-  configureStream(options = {}) {
-    if (this.erizoStream) {
-      this.erizoStream.close();
-      this.speechEvents.stop();
-    }
-    const erizoStream = Erizo.Stream({
-      video: true,
-      audio: true,
-      videoSize: this.videoQualitySetting[this.stateBuffer.videoQuality],
-    });
-    erizoStream.addEventListener('access-accepted', () => {
+  componentWillMount() {
+    this.loginStatusTracker = Tracker.autorun(() => {
+      const user = Meteor.user();
+      const getName = () => {
+        if (!user) return '';
+        const { firstName, lastName } = user.profile;
+        let name = firstName;
+        if (lastName) {
+          name += ` ${lastName}`;
+        }
+        return name;
+      };
       this.updateState({
-        initialized: { $set: true },
-        audio: { $set: erizoStream.stream.getAudioTracks().length > 0 },
-        video: { $set: erizoStream.stream.getVideoTracks().length > 0 },
-        lastGoodVideoQuality: { $set: this.stateBuffer.videoQuality },
-        accessAccepted: { $set: true },
-        streamError: { $set: false },
-        streamSource: { $set: this.erizoStream.stream },
+        loggedIn: { $set: !!user },
+        loginService: { $set: user ? user.profile.loginService : '' },
+        name: { $set: getName() },
+        picture: { $set: user ? user.profile.picture : null },
+        validName: { $set: true },
+        goAnon: { $set: user ? false : this.stateBuffer.goAnon },
       });
-      this.saveMediaDeviceSettings();
-      const speechEvents = hark(this.erizoStream.stream);
-
-      speechEvents.on('speaking', () => {
-        this.updateState({
-          speaking: { $set: true },
-          spokenOnce: { $set: true },
-        });
-      });
-
-      speechEvents.on('stopped_speaking', () => {
-        this.updateState({
-          speaking: { $set: false },
-        });
-      });
-      this.speechEvents = speechEvents;
     });
-    erizoStream.addEventListener('access-denied', (streamEvent) => {
-      const currentVideoQuality = this.stateBuffer.videoQuality;
-      if (options.firstAttempt && currentVideoQuality !== '240p') {
-        const dropQualitySwitch = { // next fallback quality setting. current -> next setting
-          '1080p': '720p',
-          '720p': '480p',
-          '480p': '360p',
-          '360p': '240p',
-        };
-        this.updateState({
-          accessAccepted: { $set: false },
-          videoQuality: {
-            $set: dropQualitySwitch[currentVideoQuality],
-          },
-        });
-        delete this.erizoStream;
-        this.reinitializeStream({ firstAttempt: true });
-        return;
-      }
-      if (options.videoQualityChange) {
-        this.props.toaster.show({
-          message: 'Unable to change video quality',
-          intent: Intent.WARNING,
-        });
-        this.updateState({
-          accessAccepted: { $set: false },
-          videoQuality: { $set: this.stateBuffer.lastGoodVideoQuality },
-        });
-        delete this.erizoStream;
-        this.reinitializeStream({ firstAttempt: true });
-        return;
-      }
-      if (options.retryAttempt) {
-        this.props.toaster.show({
-          message: 'Sorry. Could not access camera or microphone',
-          intent: Intent.WARNING,
-        });
-      }
-      console.log(streamEvent);
-      this.updateState({
-        initialized: { $set: true },
-        accessAccepted: { $set: false },
-      });
-      delete this.erizoStream;
-    });
-    erizoStream.addEventListener('stream-ended', (streamEvent) => {
-      console.log(streamEvent);
-      this.speechEvents.stop();
-    });
-
-    this.erizoStream = erizoStream;
-  }
-
-  componentDidMount() {
-    // delay initializing stream so that user can se the initial message
-    // and that the page doesn't immediately ask for camera access, which may
-    // surprise the user visiting a shared link.
-    setTimeout(() => this.erizoStream.init(), 1500);
   }
 
   componentWillUnmount() {
-    if (this.erizoStream) {
-      this.speechEvents.stop();
-      this.erizoStream.close();
-    }
+    this.loginStatusTracker.stop();
   }
 
-  handleVideoQualityChange(event) {
-    this.updateState({
-      videoQuality: { $set: event.target.value },
+  setAudioMutePreference(isMuted) {
+    this.updateState({ mutedAudio: { $set: isMuted } });
+  }
+
+  setVideoMutePreference(isMuted) {
+    this.updateState({ mutedVideo: { $set: isMuted } });
+  }
+
+  enableAnon() {
+    this.updateState({ goAnon: { $set: true } });
+  }
+
+  disableAnon() {
+    this.updateState({ goAnon: { $set: false } });
+  }
+
+  handleNameChange(event) {
+    const candidateName = event.target.value;
+    const namePattern = /^[ @a-zA-Z0-9_-]+$/;
+    this.setState({
+      ...this.state,
+      validName: namePattern.test(candidateName),
+      name: candidateName,
+      textAvatarColor: getRandomAvatarColor(),
     });
-    this.reinitializeStream({ videoQualityChange: true });
   }
 
-
-  reinitializeStream(options = {}) {
-    let delay = 0;
-    if (options.retryAttempt) {
-      this.stateBuffer = this.getDefaultState();
-      this.setState(this.stateBuffer);
-      delay = 2000;
+  handleJoinRoomResponse(response) {
+    this.updateState({ waiting: { $set: false } });
+    if (response.status !== HttpStatus.OK) {
+      this.props.onUnexpectedServerError(response.message);
+      return;
     }
-    setTimeout(() => {
-      this.configureStream({
-        firstAttempt: options.firstAttempt,
-        retryAttempt: options.default,
-        videoQualityChange: options.videoQualityChange,
-      });
-      this.erizoStream.init();
-    }, delay);
+    this.props.onReady();
   }
 
-  renderVideoControlButtons() {
-    const controlButtons = [
-      {
-        name: 'video',
-        icon: 'ion-ios-videocam',
-        classNames: classNames({
-          control: true,
-          video: true,
-          error: !this.state.video,
-          active: this.state.video,
-          muted: this.state.mutedVideo,
-        }),
-        onClick: () => {
-          if (!this.state.video) {
-            this.props.toaster.show({
-              message: 'no video found 😕',
-              intent: Intent.WARNING,
-            });
-            return;
-          }
-          if (this.state.mutedVideo) this.unmuteVideo();
-          else this.muteVideo();
-        },
-      },
-      {
-        name: 'mic',
-        icon: this.state.mutedAudio ? 'ion-ios-mic-off' : 'ion-ios-mic',
-        classNames: classNames({
-          control: true,
-          mic: true,
-          error: !this.state.audio,
-          active: this.state.audio,
-          muted: this.state.mutedAudio,
-        }),
-        onClick: () => {
-          if (!this.state.audio) {
-            this.props.toaster.show({
-              message: 'no audio found 😕',
-              intent: Intent.WARNING,
-            });
-            return;
-          }
-          if (this.state.mutedAudio) this.unmuteAudio();
-          else this.muteAudio();
-        },
-      },
-    ];
-    return (
-      <div className="controls">
-        {controlButtons.map(control => (
-          <div
-            className={control.classNames}
-            onClick={control.onClick}
-            key={control.name}>
-              <i className={`icon ${control.icon}`}></i>
-          </div>
-        ))}
-      </div>
-    );
+  handleSubmit(event) {
+    event.preventDefault();
+    if (this.state.waiting || !(this.state.validName)) return;
+    if (!Meteor.user() && !this.state.name) {
+      return;
+    }
+
+    const { name, textAvatarColor } = this.state;
+    this.updateState({ waiting: { $set: true } });
+    this.props.oorjaClient.joinRoom(this.props.roomInfo._id, name, textAvatarColor)
+      .then(this.handleJoinRoomResponse, this.props.onUnexpectedServerError);
   }
 
-  renderMicrophoneTest() {
+  loginInfo() {
+    if (!this.state.loggedIn) {
+      if (this.state.goAnon) {
+        return <span className='animate fade-in'>
+          Choose a nickname so others know who you are.
+        </span>;
+      }
+      return <span className='animate fade-in'>Sign in so that others knows who you are.</span>;
+    }
+    const service = this.state.loginService;
+    const greet = `Welcome, you are signed in with ${service} `;
     return (
-      <div className={`pt-callout pt-intent-${this.state.spokenOnce ? 'success' : 'primary'}`}>
-        <h5>
-          <span className="status">Test your microphone</span>
-          <i className="icon ion-ios-mic"></i>
-        </h5>
-        <span className={`status ${!this.state.speaking ? 'animate blink' : ''}`}>
-          {
-            this.state.speaking ? 'All good. You are audible 👍' : 'Say something...'
-          }
+      <div className="animate fade-in">
+        <span className="greeting">{greet}</span>
+        <span>
+          <button type="button" className="pt-button" onClick={ () => Meteor.logout()}>
+            Sign out
+          </button>
         </span>
       </div>
     );
   }
-  renderMediaPreview() {
-    const retryButtonAttr = {
-      type: 'button',
-      text: 'Try Again ?',
-      intent: Intent.WARNING,
-      onClick: () => { this.reinitializeStream({ retryAttempt: true }); },
-    };
-    if (!this.state.initialized) {
-      return (
-        <div className="pt-callout">
-          <h5>Get ready to join the room</h5>
-          <div className="detail">
-            <i className="icon ion-ios-videocam"></i>
-            <span className="status animate blink">initializing camera and microphone</span>
-            <i className="icon ion-ios-mic"></i>
-          </div>
-        </div>
-      );
-    } else if (!this.state.accessAccepted) {
-      return (
-        <div className="pt-callout pt-intent-warning">
-          <h5>Could not access camera or microphone
-            <Button {...retryButtonAttr} />
-          </h5>
-          <div className="detail" style={{ textAlign: 'left' }}>
-            <ul style={{ paddingLeft: '20px' }}>
-            <li>It is possible that access to the devices has been blocked. If so
-              please check your browser settings. You can always mute the devices if you
-              do not need them</li>
-            <li> oorja uses some of the newest features in web browsers,
-             which may not be supported by yours yet. Proceeding may result in an erroneous
-             experience. Vist the room link using Chrome or Firefox
-            </li>
-            </ul>
-          </div>
-        </div>
-      );
-    } else if (this.state.video) {
-      return (
-        <div className="videoStream">
-          <VideoStream streamSource={this.state.streamSource} muted='muted' autoPlay />
-          {
-            this.state.mutedVideo ?
-            (
-              <div className="videoMuteCover">
-                { this.state.mutedAudio ?
-                  (
-                    <div className="pt-callout">
-                      <div className="detail">
-                        Camera and microphone muted
-                      </div>
-                    </div>
-                  ) : this.renderMicrophoneTest()
-                }
-              </div>
-            ) : null
-          }
-          <div className={`speakingIndicator ${this.state.speaking ? 'speaking' : ''}`} />
-          {this.renderVideoControlButtons()}
-        </div>
-      );
-    } else if (this.state.audio) {
-      return (
-        <div className="audioStream">
-          {this.renderMicrophoneTest()}
-          <AudioStream streamSource={this.state.streamSource} muted='muted' autoPlay />
-        </div>
-      );
-    }
-    // access accepted but no video or audio
-    return (
-      <div>
-        <div className="pt-callout" style={{ textAlign: 'center' }}>
-          <div className="detail">
-            Camera and microphone not found <br/>
-          </div>
-          <div><Button {...retryButtonAttr} /></div>
-        </div>
-      </div>
-    );
-  }
 
-  renderInfoContent() {
-    return (
-      <div className="mediaPreviewPopoverContent">
-        Test your camera and microphone before joining the room
-        <div className="pt-callout pt-intent-primary" style={{ marginTop: '10px' }}>
-          <h6>Tips</h6>
-          <ul style={{ paddingLeft: '20px' }}>
-            <li> Choose a high resolution video quality, else select
-            low quality for more performance </li>
-            <li> You may mute devices before joining the room and enable them
-            later when needed</li>
-          </ul>
-        </div>
-      </div>
-    );
-  }
-
-  renderSettingContent() {
-    return (
-      <div className="mediaPreviewPopoverContent">
-        <h6>Settings</h6> <br/>
-        <label className="pt-label">
-          Video quality
-          <div className="pt-select">
-            <select value={this.state.videoQuality} onChange={this.handleVideoQualityChange}>
-              {Object.keys(this.videoQualitySetting).map((quality, index) => (
-                <option key={index} value={quality}>{quality}</option>
-              ))}
-            </select>
-          </div>
-        </label>
-      </div>
-    );
-  }
-
-  renderPopovers() {
-    return (
-      <div className="popOverButtons">
-        <Popover
-            content={this.renderInfoContent()}
-            interactionKind={PopoverInteractionKind.CLICK}
-            popoverClassName="pt-popover-content-sizing"
-            position={Position.LEFT_TOP}>
-            <div className="information">
-              <i className="icon ion-ios-help"></i>
-            </div>
-        </Popover>
-        <Popover
-            content={this.renderSettingContent()}
-            interactionKind={PopoverInteractionKind.CLICK}
-            popoverClassName="pt-popover-content-sizing"
-            position={Position.LEFT_TOP}>
-            <div className="settings">
-              <i className="icon ion-ios-gear"></i>
-            </div>
-        </Popover>
-      </div>
-    );
+  socialLogin() {
+    const {
+      name, loggedIn, loginService, goAnon,
+    } = this.state;
+    if (goAnon) return null;
+    const loginContainerClasses = classNames({
+      blur: !loggedIn && name,
+      hidden: this.existingUser,
+    });
+    return <LoginWithService
+      loggedIn={loggedIn}
+      loginService={loginService}
+      extraClasses={loginContainerClasses}/>;
   }
 
   render() {
-    return (
-      <div className="page">
-        <div className={`mediaPreview ${this.state.video ? 'hasVideo' : ''}`}>
-          {this.renderMediaPreview()}
-          {this.renderPopovers()}
+    const {
+      name, loggedIn, picture, waiting, textAvatarColor,
+      existingUser, goAnon, validName,
+    } = this.state;
+
+    const inputAttr = {
+      disabled: loggedIn || !!this.existingUser || waiting,
+      value: name,
+      onChange: this.handleNameChange,
+      className: classNames({ nameInput: true, active: !!name, errorState: !validName }),
+      placeholder: 'Your Name...',
+    };
+
+    const renderAvatar = () => {
+      const avatarStyle = {
+        opacity: (!picture && !name) ? 0 : 100,
+      };
+      return (
+        <Avatar
+          name={name}
+          picture={picture}
+          textAvatarColor={textAvatarColor}
+          avatarStyle={avatarStyle}
+        />
+      );
+    };
+
+    const buttonIsDisabled = !name || waiting || !validName;
+    const buttonAttr = {
+      type: 'submit',
+      text: 'Ready to join',
+      rightIcon: 'arrow-right',
+      disabled: buttonIsDisabled,
+      loading: waiting,
+      className: classNames({
+        joinButton: true,
+        'pt-large': true,
+        'pt-intent-success': true,
+        glow: !buttonIsDisabled,
+      }),
+      onSubmit: this.handleSubmit,
+      onClick: this.handleSubmit,
+    };
+
+    const renderPreview = () => {
+      if (loggedIn || existingUser || goAnon) {
+        return (
+          <div>
+            <div className="interactiveInput">
+              {renderAvatar()}
+              <input type="text" {...inputAttr}
+              ref={
+                (input) => {
+                  if (input) {
+                    this.interactiveInput = input;
+                    this.interactiveInput.focus();
+                  }
+                }
+              }/>
+            </div>
+            <div className="goAnonText">
+              <span className="animate fade-in" onClick={this.disableAnon}>
+                Login using an existing account ?
+              </span>
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="goAnonText">
+          <span className="animate fade-in" onClick={this.enableAnon}>Join anonymously ?</span>
         </div>
-        <JoinRoomForm
-          roomInfo={this.props.roomInfo}
-          processComplete={this.props.onReady}
-          oorjaClient={this.props.oorjaClient}
-          onUnexpectedServerError = {this.props.onUnexpectedServerError}
-          roomUserId={this.props.roomUserId}/>
+      );
+    };
+    return (
+      <div className="page get-ready">
+        <div className="login-info" style={{ fontSize: this.state.loggedIn ? '1.1em' : '1.3em' }}>
+          {this.loginInfo()}
+        </div>
+
+        {this.socialLogin()}
+
+        <div className='JoinRoomForm'>
+          <form onSubmit={this.handleSubmit}>
+            {renderPreview()}
+            <br />
+            <Radio label="Enable video and voice" value="one" />
+            <Radio label="Mute video" value="two" />
+            <Radio label="Mute both video and voice" value="three" />
+            <div className="joinButtonWrapper">
+              <Button {...buttonAttr} />
+            </div>
+          </form>
+        </div>
       </div>
     );
   }
