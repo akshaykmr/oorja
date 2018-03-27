@@ -23,12 +23,10 @@ class MessageSwitch {
   }
 
   registerHandlers(handlerSpecsMap) {
-    Object.keys(handlerSpecsMap).forEach((messageType) => {
-      this.registerHandler({
-        messageType,
-        handler: handlerSpecsMap[messageType],
-      });
-    });
+    Object.entries(handlerSpecsMap).forEach(([messageType, handler]) => this.registerHandler({
+      messageType,
+      handler,
+    }));
     return this;
   }
 
