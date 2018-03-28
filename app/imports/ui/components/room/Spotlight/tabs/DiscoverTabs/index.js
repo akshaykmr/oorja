@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import update from 'immutability-helper';
 import { Intent } from '@blueprintjs/core';
-import { Loading, PlusCircle, Check, AlertCircle } from 'imports/ui/components/Icons';
+import { Loading, PlusCircle, Check, AlertCircle } from 'imports/ui/components/icons';
 
 import tabPropTypes from '../tabPropTypes';
 import SupremeToaster from '../../../../Toaster';

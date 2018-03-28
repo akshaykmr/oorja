@@ -3,6 +3,9 @@
 import React, { Component } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { Intent } from '@blueprintjs/core';
+
+import { Copy } from 'imports/ui/components/icons';
+
 import uiConfig from '../../../constants/uiConfig';
 
 import SupremeToaster from '../../../../../components/Toaster';
@@ -52,7 +55,7 @@ class Info extends Component {
           onCopy={this.onCopy}>
           <div className="shareRoom" onClick={this.copyRoomLinkToClipboard}>
             <div className="copyButton">
-              <i className="icon ion-ios-copy-outline"></i>
+              <Copy />
             </div>
             <div className="copyText">
               Click to copy room link <span className='hand'>👋</span>
