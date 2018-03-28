@@ -10,11 +10,8 @@ import classNames from 'classnames';
 import { Button } from '@blueprintjs/core';
 import { getRandomAvatarColor } from 'imports/modules/user/utilities';
 
-import { mediaPreferences, storeKeys as mediaStoreKeys } from 'imports/modules/media/storage';
 import LoginWithService from 'imports/ui/components/LoginWithService';
-
 import Avatar from 'imports/ui/components/Room/Avatar';
-
 
 import './gettingReady.scss';
 
@@ -141,9 +138,9 @@ export default class GettingReady extends Component {
   loginInfo() {
     if (!this.state.loggedIn) {
       if (this.state.goAnon) {
-        return <span className='animate fade-in'>
+        return <div className='animate fade-in'>
           Choose a nickname so others know who you are.
-        </span>;
+        </div>;
       }
       return <span className='animate fade-in'>Sign in so that others knows who you are.</span>;
     }
@@ -232,24 +229,30 @@ export default class GettingReady extends Component {
     const renderPreview = () => {
       if (loggedIn || existingUser || goAnon) {
         return (
-          <div>
-            <div className="interactiveInput">
-              {renderAvatar()}
-              <input type="text" {...inputAttr}
-              ref={
-                (input) => {
-                  if (input) {
-                    this.interactiveInput = input;
-                    this.interactiveInput.focus();
-                  }
+          <div className="interactiveInput">
+            {renderAvatar()}
+            <input type="text" {...inputAttr}
+            ref={
+              (input) => {
+                if (input) {
+                  this.interactiveInput = input;
+                  this.interactiveInput.focus();
                 }
-              }/>
-            </div>
-            <div className="textLink">
-              <span className="animate fade-in" onClick={this.disableAnon}>
-                Login using an existing account ?
-              </span>
-            </div>
+              }
+            }/>
+          </div>
+        );
+      }
+    };
+
+    const renderAnonSwitchLink = () => {
+      if (loggedIn || existingUser) return null;
+      if (goAnon) {
+        return (
+          <div className="textLink">
+            <span className="animate fade-in" onClick={this.disableAnon}>
+              Login using on of your online accounts ?
+            </span>
           </div>
         );
       }
@@ -259,6 +262,7 @@ export default class GettingReady extends Component {
         </div>
       );
     };
+
     return (
       <div className="page get-ready">
         <div className="login-info" style={{ fontSize: this.state.loggedIn ? '1.1em' : '1.3em' }}>
@@ -270,6 +274,7 @@ export default class GettingReady extends Component {
         <div className='JoinRoomForm'>
           <form onSubmit={this.handleSubmit}>
             {renderPreview()}
+            {renderAnonSwitchLink()}
             <br />
             <div className="webcamSettings">
               {/* <div className="label"> Setup your webcam. </div> */}
@@ -280,9 +285,15 @@ export default class GettingReady extends Component {
                 <option value="muteAll">Mute both video and voice</option>
               </select>
             </div>
-            <div className="textLink">
-              <span onClick={this.testWebcam}> Test your webcam </span>
-            </div>
+            {
+              this.state.testWebcam ? (
+                <span />
+              ) : (
+                <div className="textLink">
+                  <span onClick={this.testWebcam}> Test your webcam </span>
+                </div>
+              )
+            }
             <div className="joinButtonWrapper">
               <Button {...buttonAttr} />
             </div>
