@@ -5,11 +5,13 @@ $input-width: 180px;
 $preview-spacing: 30px;
 
 .JoinRoomForm {
-  .goAnonText {
+  .textLink {
     margin-top: 10px;
     text-align: center;
     span {
-      color: #3f5765;
+      font-weight: 400;
+      font-size: 1.03em;
+      color: steelblue;
       cursor: pointer;
       &:hover {
         text-decoration: underline;
@@ -62,6 +64,18 @@ $preview-spacing: 30px;
       animation-duration: 2s;
       animation-iteration-count: infinite;
     }
+  }
+
+  .webcamSettings {
+      text-align: center;
+      .label {
+        font-size: 1.22em;
+        line-height: 1.6em;
+      }
+      padding: 10px 0px 8px 0px;
+      select {
+        font-size: 1.02em;
+      }
   }
 }
 

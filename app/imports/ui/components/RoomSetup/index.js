@@ -216,7 +216,7 @@ class RoomSetup extends Component {
                 type="submit"
                 loading={waitingForServer}
                 onClick={this.handleSubmit}
-                className="pt-large"
+                className="pt-large pt-intent-primary"
                 text="Create Room !">
               </Button>
             </div>

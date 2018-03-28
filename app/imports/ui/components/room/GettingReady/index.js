@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import update from 'immutability-helper';
 import * as HttpStatus from 'http-status-codes';
 import classNames from 'classnames';
-import { Radio, Button } from '@blueprintjs/core';
+import { Button } from '@blueprintjs/core';
 import { getRandomAvatarColor } from 'imports/modules/user/utilities';
 
 import { mediaPreferences, storeKeys as mediaStoreKeys } from 'imports/modules/media/storage';
@@ -30,6 +30,8 @@ export default class GettingReady extends Component {
     this.disableAnon = this.disableAnon.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleJoinRoomResponse = this.handleJoinRoomResponse.bind(this);
+    this.handleWebcamSetting = this.handleWebcamSetting.bind(this);
+    this.testWebcam = this.testWebcam.bind(this);
   }
 
   getDefaultState() {
@@ -58,8 +60,8 @@ export default class GettingReady extends Component {
       validName: true,
       goAnon: false,
 
-      muteAudio: mediaPreferences.getKey(mediaStoreKeys.MUTE_AUDIO, false),
-      muteVideo: mediaPreferences.getKey(mediaStoreKeys.MUTE_VIDEO, false),
+      webcamSetting: 'voiceAndVideo',
+      testWebcam: false,
     };
   }
 
@@ -93,14 +95,6 @@ export default class GettingReady extends Component {
 
   componentWillUnmount() {
     this.loginStatusTracker.stop();
-  }
-
-  setAudioMutePreference(isMuted) {
-    this.updateState({ mutedAudio: { $set: isMuted } });
-  }
-
-  setVideoMutePreference(isMuted) {
-    this.updateState({ mutedVideo: { $set: isMuted } });
   }
 
   enableAnon() {
@@ -182,6 +176,14 @@ export default class GettingReady extends Component {
       extraClasses={loginContainerClasses}/>;
   }
 
+  handleWebcamSetting(event) {
+    this.updateState({ webcamSetting: { $set: event.target.value } });
+  }
+
+  testWebcam() {
+    this.updateState({ testWebcam: { $set: true } });
+  }
+
   render() {
     const {
       name, loggedIn, picture, waiting, textAvatarColor,
@@ -243,7 +245,7 @@ export default class GettingReady extends Component {
                 }
               }/>
             </div>
-            <div className="goAnonText">
+            <div className="textLink">
               <span className="animate fade-in" onClick={this.disableAnon}>
                 Login using an existing account ?
               </span>
@@ -252,7 +254,7 @@ export default class GettingReady extends Component {
         );
       }
       return (
-        <div className="goAnonText">
+        <div className="textLink">
           <span className="animate fade-in" onClick={this.enableAnon}>Join anonymously ?</span>
         </div>
       );
@@ -269,9 +271,18 @@ export default class GettingReady extends Component {
           <form onSubmit={this.handleSubmit}>
             {renderPreview()}
             <br />
-            <Radio label="Enable video and voice" value="one" />
-            <Radio label="Mute video" value="two" />
-            <Radio label="Mute both video and voice" value="three" />
+            <div className="webcamSettings">
+              {/* <div className="label"> Setup your webcam. </div> */}
+              <select value={this.state.webcamSetting} onChange={this.handleWebcamSetting}>
+                <option value="voiceAndVideo"> Turn on my video and voice </option>
+                <option value="voice">Voice only</option>
+                <option value="video">Video only</option>
+                <option value="muteAll">Mute both video and voice</option>
+              </select>
+            </div>
+            <div className="textLink">
+              <span onClick={this.testWebcam}> Test your webcam </span>
+            </div>
             <div className="joinButtonWrapper">
               <Button {...buttonAttr} />
             </div>
