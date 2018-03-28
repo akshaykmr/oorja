@@ -530,6 +530,7 @@ class Room extends Component {
     //   this.primaryMediaStream.stop();
     // }
     // this.erizoRoom.disconnect();
+    this.beamClient.leaveRoomChannel();
     window.removeEventListener('resize', this.onWindowResize);
 
     // restore original body bg color

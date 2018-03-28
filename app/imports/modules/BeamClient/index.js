@@ -57,6 +57,10 @@ class BeamClient {
   pushMessage(message) {
     return this.roomChannel.push('new_msg', message);
   }
+
+  leaveRoomChannel() {
+    this.roomChannel.leave();
+  }
 }
 
 export default BeamClient;
