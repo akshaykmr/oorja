@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import update from 'immutability-helper';
 import { Intent } from '@blueprintjs/core';
-
+import { Loading, PlusCircle, Check, AlertCircle } from 'imports/ui/components/Icons';
 
 import tabPropTypes from '../tabPropTypes';
 import SupremeToaster from '../../../../Toaster';
@@ -38,19 +38,20 @@ class DiscoverTabs extends Component {
   renderTabPreview(tab) {
     if (tab.name === 'DiscoverTabs') return null;
     const localTab = this.props.tabStatusRegistry[tab.tabId];
-    let icon = 'ion-plus-circled';
+
+    let icon = <PlusCircle />;
     let loading = false;
     let iconColor = '#1a7ecb';
     if (localTab) {
       const { status } = localTab;
       if (status === tabStatus.LOADED) {
-        icon = 'ion-ios-checkmark';
+        icon = <Check />;
         iconColor = 'darkseagreen';
       } else if (status === tabStatus.LOADING) {
         loading = true;
-        icon = 'ion-load-d';
+        icon = <Loading />;
       } else if (status === tabStatus.ERROR) {
-        icon = 'ion-alert-circled';
+        icon = <AlertCircle />;
         iconColor = 'palevioletred';
       }
     }
@@ -69,9 +70,7 @@ class DiscoverTabs extends Component {
       this.props.addTabToRoom(tab.tabId);
     };
     return (
-      <div
-        key={tab.tabId}
-        className="tabPreview">
+      <div key={tab.tabId} className="tabPreview">
         <div className="name">
           {tab.displayName}
         </div>
@@ -79,9 +78,9 @@ class DiscoverTabs extends Component {
           {tab.description}
         </div>
         <div
-          className={`status ${loading ? 'spin-infinite custom-delay' : ''}`}
+          className={`status ${loading ? 'loading' : ''}`}
           style={{ color: iconColor }} onClick={handleClick}>
-          <i className={`icon ${icon}`}></i>
+          {icon}
         </div>
       </div>
     );

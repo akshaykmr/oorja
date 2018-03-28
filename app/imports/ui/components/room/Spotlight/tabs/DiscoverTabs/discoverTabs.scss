@@ -4,7 +4,7 @@
   &.compact {
     border-top-left-radius: initial;
   }
-  
+
   > .container {
     padding-top: 20px;
     max-width: 600px;
@@ -61,6 +61,15 @@
       line-height: 50px;
       text-align: center;
       cursor: pointer;
+
+      &.loading {
+        svg {
+          animation-name: rotate;
+          animation-duration: 1s;
+          animation-iteration-count: infinite;
+          animation-timing-function: ease;
+        }
+      }
     }
   }
 }

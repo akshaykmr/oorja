@@ -8,7 +8,7 @@ import { Position, Tooltip } from '@blueprintjs/core';
 import uiConfig from '../constants/uiConfig';
 import roomActivities from '../constants/roomActivities';
 
-/* eslint-disable*/
+/* eslint-disable*/ // Dynamic imports in this file...
 import tabRegistry from './tabRegistry';
 /* eslint-enable */
 
@@ -217,13 +217,13 @@ class Spotlight extends Component {
             onClick={() => { this.switchToTab(tab.tabId); }}
             className="tabIcon"
             style={switchStyle}>
-            <i className={`icon ion-${tab.icon}`}></i>
+            <tab.icon />
           </div>
         </div>
       );
 
       const switchTransition = uiSize === uiConfig.LARGE ? 'switch' : 'switch-alt';
-
+      // FIXME: tooltip is broken
       return (
         <CSSTransition
           key={tab.tabId}
@@ -235,8 +235,8 @@ class Spotlight extends Component {
               target={renderBox()}
               popoverClassName="pt-popover-content-sizing"
               position={uiSize === uiConfig.COMPACT ? Position.TOP : Position.RIGHT}
-              className={classNames(switchClassNames)}
-              hoverOpenDelay={500}>
+              hoverOpenDelay={500}
+              className={classNames(switchClassNames)}>
             </Tooltip>
         </CSSTransition>
       );
