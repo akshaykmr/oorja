@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import update from 'immutability-helper';
 import _ from 'lodash';
+import Peer from 'simple-peer/simplepeer.min.js';
 
 import hark from 'hark';
 import { Intent } from '@blueprintjs/core';
@@ -53,17 +54,14 @@ class Room extends Component {
     this.erizoToken = props.roomStorage.getErizoToken();
 
     this.tabMessageHandlers = {}; // tabId -> messageHandler map
+    this.peers = {}; // sessionId -> Peer
 
     this.subscribedMediaStreams = {}; // streamId -> erizoStream
     // note: erizoStream.stream would be of type MediaStream(the browser's MediaStream object)
 
     this.speechTrackers = {}; // id -> hark instance
 
-
-    this.activeRemoteTabsRegistry = {}; // userSessionId -> [ tabId, ... ]  of tabs set as ready
-
-    // Listens for activities in the room, such as user entering, leaving etc.
-    // not naming it roomEvent because that naming is used in the Erizo room.
+    // Event emitter for activities in the room, such as user entering, leaving etc.
     this.activityListener = new ActivityListener(roomActivities);
 
     this.streamManager = new StreamManager(this);
@@ -87,6 +85,7 @@ class Room extends Component {
     this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
     this.toggleFullscreen = this.toggleFullscreen.bind(this);
     this.stopScreenSharingStream = this.stopScreenSharingStream.bind(this);
+    this.createPeer = this.createPeer.bind(this);
 
     this.videoQualitySetting = {
       // this is how erizo expects it
@@ -103,10 +102,7 @@ class Room extends Component {
     this.state = {
       roomConnectionStatus: status.INITIALIZING,
       presence: {},
-
-      connectionTable: {},
       connectedUsers: [],
-
       primaryMediaStreamState: {
         video: true,
         audio: true,
@@ -125,7 +121,7 @@ class Room extends Component {
       roomWidth: window.innerWidth,
 
       settings: {
-        uiBreakRatio: uiConfig.defaultBreakRatio,
+        uiBreakRatio: uiConfig.defaultBreakRatio, // For switching between LARGE and COMPACT
         uiBreakWidth: uiConfig.defaultBreakWidth,
       }, // user preferences such as room component sizes, position etc.
     };
@@ -196,16 +192,60 @@ class Room extends Component {
             source,
           });
         },
+        [messageType.SIGNAL]: message => this.handleSignalingMessage(message),
       });
+  }
+
+  handleSignalingMessage({ from, content }) {
+    const { session } = from;
+    if (this.peers[session]) {
+      this.peers[session].signal(content);
+      return;
+    }
+    const peer = this.createPeer({ session, initiator: false });
+    peer.signal(content);
+    this.peers[session] = peer;
+  }
+
+  createPeer({ session, initiator }) {
+    const peer = new Peer({ initiator });
+    peer.on('signal', (data) => {
+      this.sendMessage({
+        type: messageType.SIGNAL,
+        to: [{ session }],
+        content: data,
+      });
+    });
+    peer.on('connect', () => {
+      const { userId } = sessionUtils.unpack(session);
+      this.connectUser(userId, session);
+    });
+    return peer;
   }
 
   connect() {
     const handleJoin = (session) => {
-      const { userId } = sessionUtils.unpack(session);
-      this.connectUser(userId, session);
+      if (session === this.session) {
+        const { userId } = sessionUtils.unpack(session);
+        this.connectUser(userId, session);
+        return;
+      }
+      if (this.peers[session]) {
+        console.error('peer exists');
+        // WIP
+        // this.peers[session].destroy();
+        // delete this.peers[session];
+      }
+      const peer = this.createPeer({ session, initiator: true });
+      this.peers[session] = peer;
     };
 
+
     const handleLeave = (session) => {
+      if (this.peers[session]) {
+        this.peers[session].destroy();
+        delete this.peers[session];
+      }
       const { userId } = sessionUtils.unpack(session);
       this.disconnectUser(userId, session);
     };
@@ -213,7 +253,7 @@ class Room extends Component {
     const handlePresenceState = (initialPresence) => {
       const syncedPresence = Presence.syncState(this.stateBuffer.presence, initialPresence);
       this.updateState({ presence: { $set: syncedPresence } });
-      Object.keys(initialPresence).forEach(handleJoin);
+      // Object.keys(initialPresence).forEach(handleJoin);
     };
 
     const handlePresenceDiff = (diff) => {
@@ -396,11 +436,10 @@ class Room extends Component {
   disconnectUser(userId, session) {
     const connectedUserIndex = _.findIndex(this.stateBuffer.connectedUsers, { userId });
 
-    if (connectedUserIndex === -1) {
-      throw new Meteor.Error('User does not seem to be connected');
-    }
+    if (connectedUserIndex === -1) return;
 
     const connectedUser = this.stateBuffer.connectedUsers[connectedUserIndex];
+    if (!connectedUser.sessionList.find(s => s === session)) return;
     if (connectedUser.sessionCount > 1) {
       const updatedUser = update(
         connectedUser,

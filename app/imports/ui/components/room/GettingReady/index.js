@@ -114,7 +114,6 @@ export default class GettingReady extends Component {
   }
 
   handleJoinRoomResponse(response) {
-    this.updateState({ waiting: { $set: false } });
     if (response.status !== HttpStatus.OK) {
       this.props.onUnexpectedServerError(response.message);
       return;
