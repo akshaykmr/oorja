@@ -37,9 +37,6 @@ export default class GettingReady extends Component {
       if (this.existingUser) return this.existingUser.firstName;
       return user ? `${user.profile.firstName} ${user.profile.lastName}` : '';
     };
-    const getAvatarColor = () => {
-      return this.existingUser ? this.existingUser.textAvatarColor : getRandomAvatarColor();
-    };
     const getPicture = () => {
       if (this.existingUser) return this.existingUser.picture;
       return user ? user.profile.picture : null;
@@ -52,7 +49,8 @@ export default class GettingReady extends Component {
       loginService: user ? user.profile.loginService : null,
 
       name: getName(),
-      textAvatarColor: getAvatarColor(),
+      textAvatarColor: this.existingUser ?
+        this.existingUser.textAvatarColor : getRandomAvatarColor(),
       picture: getPicture(),
       validName: true,
       goAnon: false,
@@ -226,22 +224,21 @@ export default class GettingReady extends Component {
     };
 
     const renderPreview = () => {
-      if (loggedIn || existingUser || goAnon) {
-        return (
-          <div className="interactiveInput">
-            {renderAvatar()}
-            <input type="text" {...inputAttr}
-            ref={
-              (input) => {
-                if (input) {
-                  this.interactiveInput = input;
-                  this.interactiveInput.focus();
-                }
+      if (!(loggedIn || existingUser || goAnon)) return null;
+      return (
+        <div className="interactiveInput">
+          {renderAvatar()}
+          <input type="text" {...inputAttr}
+          ref={
+            (input) => {
+              if (input) {
+                this.interactiveInput = input;
+                this.interactiveInput.focus();
               }
-            }/>
-          </div>
-        );
-      }
+            }
+          }/>
+        </div>
+      );
     };
 
     const renderAnonSwitchLink = () => {
