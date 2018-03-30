@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 class VideoStream extends Component {
   constructor(props) {
     super(props);
-
     this.usingSrcObject = false;
   }
   componentDidMount() {
