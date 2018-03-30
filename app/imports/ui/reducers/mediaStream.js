@@ -11,8 +11,9 @@ const defaultState = {};
         local: bool,
         audio: bool,
         video: bool,
+        mutedAudio: bool,
+        mutedVideo: bool,
         status: status[TRYING_TO_CONNECT, ERROR, CONNECTED etc.]
-        screen: bool,
         streamSource: '', // mediStream object
         errorReason: '',
         warningReason: ''

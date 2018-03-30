@@ -1,3 +1,6 @@
+import { mediaPreferences } from './storage';
+import videoResolution from './videoResolution';
+
 export const hasVideo = mediaStream => mediaStream.getVideoTracks().length > 0;
 export const hasAudio = mediaStream => mediaStream.getAudioTracks().length > 0;
 
@@ -14,10 +17,27 @@ export const destroyMediaStream = (mediaStream) => {
   mediaStream.getVideoTracks().forEach(track => track.stop());
 };
 
+export const getSavedConstraints = () => {
+  const resolution = mediaPreferences.getVideoResolution() || videoResolution.setting.VGA;
+  const audioDeviceId = mediaPreferences.getVoiceSource();
+  const videoDeviceId = mediaPreferences.getVideoSource();
+  const audioConstraints = {
+    audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : undefined,
+  };
+  const videoConstraints = {
+    video: Object.assign(
+      { deviceId: videoDeviceId ? { exact: videoDeviceId } : undefined },
+      videoResolution.constraints[resolution],
+    ),
+  };
+  return Object.assign(audioConstraints, videoConstraints);
+};
+
 export default {
   hasVideo,
   hasAudio,
   isVideoMuted,
   isAudioMuted,
   destroyMediaStream,
+  getSavedConstraints,
 };

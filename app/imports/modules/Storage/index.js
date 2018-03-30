@@ -20,7 +20,7 @@ class Storage {
     return this;
   }
 
-  getKey(key, fallback) {
+  getKey(key, fallback = undefined) {
     const item = this.get() || {};
     return item[key] || fallback;
   }

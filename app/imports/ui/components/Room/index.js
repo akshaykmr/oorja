@@ -10,19 +10,19 @@ import _ from 'lodash';
 import Peer from 'simple-peer/simplepeer.min.js';
 
 import hark from 'hark';
-import { Intent } from '@blueprintjs/core';
-
-import MediaPreferences from 'imports/modules/media/storage';
 import { SPEAKING, SPEAKING_STOPPED } from 'imports/ui/actions/stream';
 
+
+import mediaPreferences from 'imports/modules/media/storage';
+import mediaUtils from 'imports/modules/media/utils';
 import browserUtils from 'imports/modules/browser/utils';
 import ActivityListener from 'imports/modules/ActivityListener';
-import Erizo from 'imports/modules/Erizo';
-
 import roomMessageTypes from 'imports/modules/room/messageTypes';
 import BeamClient from 'imports/modules/BeamClient';
 import sessionUtils from 'imports/modules/room/sessionUtils';
 import MessageSwitch from 'imports/modules/MessageSwitch';
+
+import { Intent } from '@blueprintjs/core';
 
 import mapDispatchToProps from './dispatch';
 // TODO: move stream handling related functions to streamManager.js
@@ -30,8 +30,6 @@ import mapDispatchToProps from './dispatch';
 // constants
 import uiConfig from './constants/uiConfig';
 import status from './constants/status';
-import streamTypes from './constants/streamType';
-import mediaStreamPurpose from './constants/mediaStreamPurpose';
 import roomActivities from './constants/roomActivities';
 import messageType from './constants/messageType';
 
@@ -56,48 +54,35 @@ class Room extends Component {
     this.tabMessageHandlers = {}; // tabId -> messageHandler map
     this.peers = {}; // sessionId -> Peer
 
-    this.subscribedMediaStreams = {}; // streamId -> erizoStream
+    this.streams = {}; // streamId -> mediaStream
     // note: erizoStream.stream would be of type MediaStream(the browser's MediaStream object)
 
-    this.speechTrackers = {}; // id -> hark instance
+    this.speechTrackers = {}; // streamId -> hark instance
 
     // Event emitter for activities in the room, such as user entering, leaving etc.
     this.activityListener = new ActivityListener(roomActivities);
 
     this.streamManager = new StreamManager(this);
 
+    // Forms the interface to interact with the room. To be passed down to tabs.
     this.roomAPI = new RoomAPI(this);
 
     this.messageHandler = this.createMessageHandler();
-
-    this.calculateUISize = this.calculateUISize.bind(this);
     this.onWindowResize = _.throttle(this.onWindowResize, 100);
-    this.onWindowResize = this.onWindowResize.bind(this);
 
+    // not all of these need to be bound, doing so anyway as I
+    // often end up moving them around and getting stuck with the same error for a while.
+    this.calculateUISize = this.calculateUISize.bind(this);
+    this.onWindowResize = this.onWindowResize.bind(this);
     this.updateState = this.updateState.bind(this);
     this.connect = this.connect.bind(this);
     this.connectUser = this.connectUser.bind(this);
     this.disconnectUser = this.disconnectUser.bind(this);
-    // not all of these need to be bound, doing so anyway as I
-    // often end up moving them around and getting stuck with the same error for a while.
-
     this.determineStreamContainerSize = this.determineStreamContainerSize.bind(this);
     this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
     this.toggleFullscreen = this.toggleFullscreen.bind(this);
     this.stopScreenSharingStream = this.stopScreenSharingStream.bind(this);
     this.createPeer = this.createPeer.bind(this);
-
-    this.videoQualitySetting = {
-      // this is how erizo expects it
-      // [minWidth, minHeight, maxWidth, maxHeight]
-      '240p': [320, 240, 480, 360],
-      '360p': [480, 360, 640, 480],
-      '480p': [640, 480, 1280, 720],
-      '720p': [1280, 720, 1440, 900],
-      '1080p': [1920, 1080, 2560, 1440],
-    };
-
-    this.mediaDeviceSettings = MediaPreferences.get() || {};
 
     this.state = {
       roomConnectionStatus: status.INITIALIZING,
@@ -342,63 +327,102 @@ class Room extends Component {
     mediaStream.init();
   }
 
+  formMediaStreamState({ userId, mediaStream, isLocal = false }) {
+    const streamId = mediaStream.id;
+    return {
+      userId,
+      streamId,
+      local: isLocal,
+      status: status.CONNECTED,
+      audio: mediaUtils.hasAudio(mediaStream),
+      video: mediaUtils.hasVideo(mediaStream),
+      mutedAudio: mediaUtils.isAudioMuted(mediaStream),
+      mutedVideo: mediaUtils.isVideoMuted(mediaStream),
+      streamSource: mediaStream,
+      errorReason: '',
+      warningReason: '',
+    };
+  }
+
   initializePrimaryMediaStream() {
-    if (this.primaryMediaStream) {
-      // unpublish and destroy
-      const speechTracker = this.speechTrackers[this.primaryMediaStream.getID()];
-      if (speechTracker) speechTracker.stop();
-      this.primaryMediaStream.close();
-    }
+    // create a stream with saved preferences
+    // if failure. delete media preferences
+    navigator.mediaDevices.getUserMedia(mediaUtils.getSavedConstraints())
+      .then((mediaStream) => {
+        this.props.updateMediaStreams({
+          [mediaStream.id]: {
+            $set: this.formMediaStreamState({
+              userId: this.props.roomUserId,
+              mediaStream,
+              isLocal: true,
+            }),
+          },
+        });
+        this.updateState({
+          primaryMediaStreamState: {
+            status: { $set: status.CONNECTED },
+            audio: { $set: mediaUtils.hasAudio(mediaStream) },
+            video: { $set: mediaUtils.hasVideo(mediaStream) },
+          },
+        });
+      })
+      .catch(() => {
+        mediaPreferences.clear();
+        this.props.toaster.show({
+          message: 'could not access your camera or microphone 😕',
+          intent: Intent.WARNING,
+        });
+        this.updateState({
+          primaryMediaStreamState: {
+            status: { $set: status.ERROR },
+          },
+        });
+        this.primaryMediaStream = null;
+      });
 
-    const { mediaDeviceSettings } = this;
-    // get config and initialize new stream
-    // assume this config for now.
+    // if (this.primaryMediaStream) {
+    //   // unpublish and destroy
+    //   const speechTracker = this.speechTrackers[this.primaryMediaStream.getID()];
+    //   if (speechTracker) speechTracker.stop();
+    //   this.primaryMediaStream.close();
+    // }
 
-    this.primaryMediaStream = Erizo.Stream({
-      audio: this.state.primaryMediaStreamState.audio,
-      video: this.state.primaryMediaStreamState.video,
-      videoSize: this.videoQualitySetting[mediaDeviceSettings.videoQuality],
-      data: false,
-      attributes: {
-        userId: this.props.roomUserId,
-        sessionId: this.sessionId,
-        type: streamTypes.MEDIA.BROADCAST,
-        purpose: mediaStreamPurpose.PRIMARY_MEDIA_STREAM,
-        mutedAudio: mediaDeviceSettings.mutedAudio,
-        mutedVideo: mediaDeviceSettings.mutedVideo,
-      },
-    });
-    const mediaStream = this.primaryMediaStream;
-    mediaStream.addEventListener('access-accepted', () => {
-      this.updateState({
-        primaryMediaStreamState: {
-          status: { $set: status.TRYING_TO_CONNECT },
-          audio: { $set: this.primaryMediaStream.stream.getAudioTracks().length > 0 },
-          video: { $set: this.primaryMediaStream.stream.getVideoTracks().length > 0 },
-        },
-      });
-      this.streamManager.muteBeforePublish(mediaStream, mediaDeviceSettings);
-      this.erizoRoom.publish(
-        mediaStream,
-        { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW },
-      );
-    });
-    mediaStream.addEventListener('access-denied', () => {
-      this.props.toaster.show({
-        message: 'could not access your camera or microphone 😕',
-        intent: Intent.WARNING,
-      });
-      this.updateState({
-        primaryMediaStreamState: {
-          status: { $set: status.ERROR },
-        },
-      });
-      this.primaryMediaStream = null;
-    });
-    mediaStream.addEventListener('stream-ended', (streamEvent) => {
-      console.info(streamEvent);
-    });
-    mediaStream.init();
+    // this.primaryMediaStream = Erizo.Stream({
+    //   audio: this.state.primaryMediaStreamState.audio,
+    //   video: this.state.primaryMediaStreamState.video,
+    //   videoSize: this.videoQualitySetting[mediaDeviceSettings.videoQuality],
+    //   data: false,
+    //   attributes: {
+    //     userId: this.props.roomUserId,
+    //     sessionId: this.sessionId,
+    //     type: streamTypes.MEDIA.BROADCAST,
+    //     purpose: mediaStreamPurpose.PRIMARY_MEDIA_STREAM,
+    //     mutedAudio: mediaDeviceSettings.mutedAudio,
+    //     mutedVideo: mediaDeviceSettings.mutedVideo,
+    //   },
+    // });
+    // const mediaStream = this.primaryMediaStream;
+    // mediaStream.addEventListener('access-accepted', () => {
+    //   this.updateState({
+    //     primaryMediaStreamState: {
+    //       status: { $set: status.TRYING_TO_CONNECT },
+    //       audio: { $set: this.primaryMediaStream.stream.getAudioTracks().length > 0 },
+    //       video: { $set: this.primaryMediaStream.stream.getVideoTracks().length > 0 },
+    //     },
+    //   });
+    //   this.streamManager.muteBeforePublish(mediaStream, mediaDeviceSettings);
+    //   this.erizoRoom.publish(
+    //     mediaStream,
+    //     { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW },
+    //   );
+    // });
+    // mediaStream.addEventListener('access-denied', () => {
+
+    // });
+    // mediaStream.addEventListener('stream-ended', (streamEvent) => {
+    //   console.info(streamEvent);
+    // });
+    // mediaStream.init();
   }
 
   connectUser(userId, session) {
@@ -558,6 +582,7 @@ class Room extends Component {
   componentDidMount() {
     // store body bg color and then change it.
     this.connect();
+    this.initializePrimaryMediaStream();
     this.originalBodyBackground = browserUtils.getBodyColor();
     browserUtils.setBodyColor('#2e3136');
   }
