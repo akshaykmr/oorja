@@ -107,11 +107,10 @@ export default class GettingReady extends Component {
   handleNameChange(event) {
     const candidateName = event.target.value;
     const namePattern = /^[ @a-zA-Z0-9_-]+$/;
-    this.setState({
-      ...this.state,
-      validName: namePattern.test(candidateName),
-      name: candidateName,
-      textAvatarColor: getRandomAvatarColor(),
+    this.updateState({
+      validName: { $set: namePattern.test(candidateName) },
+      name: { $set: candidateName },
+      textAvatarColor: { $set: getRandomAvatarColor() },
     });
   }
 
