@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import videoResolution from 'imports/modules/UserMedia/videoResolution';
+import videoResolution from 'imports/modules/media/videoResolution';
 import { mediaPreferences } from 'imports/modules/media/storage';
 import update from 'immutability-helper';
 import { Button, Intent } from '@blueprintjs/core';
@@ -142,10 +142,18 @@ class WebcamPreview extends Component {
     }
     const { videoResolution: res } = this.stateBuffer;
     this.resetErrors();
-    const constraints = Object.assign(
-      { audio: true },
-      videoResolution.constraints[res],
-    );
+
+    const { selectedVideoInput, selectedAudioInput } = this.stateBuffer;
+
+    const audioConstraints = { audio: { deviceId: { exact: selectedAudioInput } } };
+    const videoConstraints = {
+      video: Object.assign(
+        { deviceId: { exact: selectedVideoInput } },
+        videoResolution.constraints[res],
+      ),
+    };
+
+    const constraints = Object.assign(audioConstraints, videoConstraints);
     navigator.mediaDevices.getUserMedia(constraints)
       .then((mediaStream) => {
         this.stream = mediaStream;

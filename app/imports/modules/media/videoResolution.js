@@ -20,19 +20,19 @@ const name = {
 
 const constraints = {
   QVGA: {
-    video: { width: { exact: 320 }, height: { exact: 240 } },
+    width: { exact: 320 }, height: { exact: 240 },
   },
   VGA: {
-    video: { width: { exact: 640 }, height: { exact: 480 } },
+    width: { exact: 640 }, height: { exact: 480 },
   },
   HD: {
-    video: { width: { exact: 1280 }, height: { exact: 720 } },
+    width: { exact: 1280 }, height: { exact: 720 },
   },
   FULL_HD: {
-    video: { width: { exact: 1920 }, height: { exact: 1080 } },
+    width: { exact: 1920 }, height: { exact: 1080 },
   },
   UHD: {
-    video: { width: { exact: 4096 }, height: { exact: 2160 } },
+    width: { exact: 4096 }, height: { exact: 2160 },
   },
 };
 
