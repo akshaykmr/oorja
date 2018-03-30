@@ -6,6 +6,7 @@ $preview-spacing: 30px;
 
 .JoinRoomForm {
   .textLink {
+    font-size: 1.1em;
     margin-top: 10px;
     text-align: center;
     span {
@@ -16,6 +17,11 @@ $preview-spacing: 30px;
       &:hover {
         text-decoration: underline;
       }
+    }
+
+    button {
+      color: steelblue;
+      font-size: 1.02em;
     }
   }
 
@@ -69,12 +75,13 @@ $preview-spacing: 30px;
   .webcamSettings {
       text-align: center;
       .label {
-        font-size: 1.22em;
+        font-size: 1.3em;
+        padding-bottom: 3px;
         line-height: 1.6em;
       }
       padding: 10px 0px 8px 0px;
       select {
-        font-size: 1.02em;
+        font-size: 1.1em;
       }
   }
 }
@@ -96,5 +103,9 @@ $preview-spacing: 30px;
 
   .login-container {
     margin-top: 6px;
+  }
+
+  .webcamPreview {
+    margin-top: 10px;
   }
 }

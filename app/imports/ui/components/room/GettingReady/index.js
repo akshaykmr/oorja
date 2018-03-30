@@ -13,6 +13,10 @@ import { getRandomAvatarColor } from 'imports/modules/user/utilities';
 import LoginWithService from 'imports/ui/components/LoginWithService';
 import Avatar from 'imports/ui/components/Room/Avatar';
 
+import { mediaPreferences } from 'imports/modules/media/storage';
+
+import WebcamPreview from './WebcamPreview';
+
 import './gettingReady.scss';
 
 export default class GettingReady extends Component {
@@ -171,7 +175,19 @@ export default class GettingReady extends Component {
   }
 
   handleWebcamSetting(event) {
-    this.updateState({ webcamSetting: { $set: event.target.value } });
+    const setting = event.target.value;
+    switch (setting) {
+      case 'voiceAndVideo': mediaPreferences.enableVoice(true); mediaPreferences.enableVideo(true);
+        break;
+      case 'video': mediaPreferences.enableVoice(false); mediaPreferences.enableVideo(true);
+        break;
+      case 'voice': mediaPreferences.enableVoice(true); mediaPreferences.enableVideo(false);
+        break;
+      case 'muteAll': mediaPreferences.enableVoice(false); mediaPreferences.enableVideo(false);
+        break;
+      default: // noop
+    }
+    this.updateState({ webcamSetting: { $set: setting } });
   }
 
   testWebcam() {
@@ -247,7 +263,7 @@ export default class GettingReady extends Component {
         return (
           <div className="textLink">
             <span className="animate fade-in" onClick={this.disableAnon}>
-              Login using on of your online accounts ?
+              Sign in using on of your online accounts ?
             </span>
           </div>
         );
@@ -261,7 +277,7 @@ export default class GettingReady extends Component {
 
     return (
       <div className="page get-ready">
-        <div className="login-info" style={{ fontSize: this.state.loggedIn ? '1.1em' : '1.3em' }}>
+        <div className="login-info" style={{ fontSize: this.state.loggedIn ? '1.1em' : '1.5em' }}>
           {this.loginInfo()}
         </div>
 
@@ -273,9 +289,9 @@ export default class GettingReady extends Component {
             {renderAnonSwitchLink()}
             <br />
             <div className="webcamSettings">
-              {/* <div className="label"> Setup your webcam. </div> */}
+              <div className="label"> Webcam setting </div>
               <select value={this.state.webcamSetting} onChange={this.handleWebcamSetting}>
-                <option value="voiceAndVideo"> Turn on my video and voice </option>
+                <option value="voiceAndVideo"> Join with video and voice </option>
                 <option value="voice">Voice only</option>
                 <option value="video">Video only</option>
                 <option value="muteAll">Mute both video and voice</option>
@@ -283,10 +299,12 @@ export default class GettingReady extends Component {
             </div>
             {
               this.state.testWebcam ? (
-                <span />
+                <WebcamPreview />
               ) : (
                 <div className="textLink">
-                  <span onClick={this.testWebcam}> Test your webcam </span>
+                  <button type="button" className="pt-button pt-minimal" onClick={this.testWebcam}>
+                    Test webcam ?
+                  </button>
                 </div>
               )
             }
