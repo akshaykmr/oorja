@@ -56,37 +56,47 @@ class WebcamPreview extends Component {
   }
 
   setMediaDevices() {
-    return new Promise((resolve, _reject) => {
-      navigator.mediaDevices.enumerateDevices()
-        .then((mediaDevices) => {
-          const audioInputDevices = mediaDevices
-            .filter(device => device.kind === 'audioinput')
-            .map(device => _.pick(device, ['deviceId', 'label']));
+    return new Promise((resolve, _reject) => navigator.mediaDevices.enumerateDevices()
+      .then((mediaDevices) => {
+        const audioInputDevices = mediaDevices
+          .filter(device => device.kind === 'audioinput')
+          .map(device => _.pick(device, ['deviceId', 'label']));
 
-          const videoInputDevices = mediaDevices
-            .filter(device => device.kind === 'videoinput')
-            .map(device => _.pick(device, ['deviceId', 'label']));
+        const videoInputDevices = mediaDevices
+          .filter(device => device.kind === 'videoinput')
+          .map(device => _.pick(device, ['deviceId', 'label']));
 
-          this.updateState({
-            audioInputDevices: { $set: audioInputDevices },
-            videoInputDevices: { $set: videoInputDevices },
-          });
-          resolve();
-        })
-        .catch(resolve()); // Don't know what to do here
-    });
+        this.updateState({
+          audioInputDevices: { $set: audioInputDevices },
+          videoInputDevices: { $set: videoInputDevices },
+        });
+        resolve();
+      }));
+  }
+
+  setInitialMediaDevices() {
+    const { audioInputDevices, videoInputDevices } = this.stateBuffer;
+
+    if (audioInputDevices.length) {
+      const savedAudioInputDeviceId = mediaPreferences.getVoiceSource();
+      const audioDeviceId = _.find(audioInputDevices, { deviceId: savedAudioInputDeviceId }) ?
+        savedAudioInputDeviceId : audioInputDevices[0].deviceId;
+
+      this.updateState({ selectedAudioInput: { $set: audioDeviceId } });
+    }
+    if (videoInputDevices.length) {
+      const savedVideoInputDeviceId = mediaPreferences.getVideoSource();
+      const videoDeviceId = _.find(videoInputDevices, { deviceId: savedVideoInputDeviceId }) ?
+        savedVideoInputDeviceId : videoInputDevices[0].deviceId;
+
+      this.updateState({ selectedVideoInput: { $set: videoDeviceId } });
+    }
   }
 
   componentDidMount() {
     this.setMediaDevices()
       .then(() => {
-        const { audioInputDevices, videoInputDevices } = this.stateBuffer;
-        if (audioInputDevices.length) {
-          this.updateState({ selectedAudioInput: { $set: audioInputDevices[0].deviceId } });
-        }
-        if (videoInputDevices.length) {
-          this.updateState({ selectedVideoInput: { $set: videoInputDevices[0].deviceId } });
-        }
+        this.setInitialMediaDevices();
         this.initializeWebcam();
         this.trackMediaDevices();
       });
@@ -163,18 +173,21 @@ class WebcamPreview extends Component {
   handleVideoResolutionChange(event) {
     const qualitySetting = event.target.value;
     this.updateState({ videoResolution: { $set: qualitySetting } });
+    mediaPreferences.saveVideoResolution(qualitySetting);
     this.initializeWebcam();
   }
 
   handleVideoInputChange(event) {
     const deviceId = event.target.value;
     this.updateState({ selectedVideoInput: { $set: deviceId } });
+    mediaPreferences.setVideoSource(deviceId);
     this.initializeWebcam();
   }
 
   handleAudioInputChange(event) {
     const deviceId = event.target.value;
     this.updateState({ selectedAudioInput: { $set: deviceId } });
+    mediaPreferences.setVoiceSource(deviceId);
     this.initializeWebcam();
   }
 
