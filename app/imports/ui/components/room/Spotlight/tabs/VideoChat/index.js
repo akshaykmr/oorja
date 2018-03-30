@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import Avatar from '../../../Avatar';
 import roomActivities from '../../../constants/roomActivities';
 
-import VideoStream from '../../../../Media/Video';
+import VideoStream from '../../../../media/Video';
 
 import tabPropTypes from '../tabPropTypes';
 import status from '../../../constants/status';

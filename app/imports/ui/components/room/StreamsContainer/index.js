@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import status from '../../Room/constants/status';
 
 import Avatar from '../Avatar';
-import VideoStream from '../../Media/Video';
+import VideoStream from '../../media/Video';
 
 import uiConfig from '../constants/uiConfig';
 

@@ -66,7 +66,7 @@ class Info extends Component {
                 </a>
             </div>
             <div className="copyReason">
-              Share it to invite others to this room
+              Share it to invite others to this room.
             </div>
           </div>
         </CopyToClipboard>
