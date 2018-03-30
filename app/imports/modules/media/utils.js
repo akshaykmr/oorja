@@ -13,3 +13,11 @@ export const destroyMediaStream = (mediaStream) => {
   mediaStream.getAudioTracks().forEach(track => track.stop());
   mediaStream.getVideoTracks().forEach(track => track.stop());
 };
+
+export default {
+  hasVideo,
+  hasAudio,
+  isVideoMuted,
+  isAudioMuted,
+  destroyMediaStream,
+};
