@@ -9,7 +9,7 @@ import * as HttpStatus from 'http-status-codes';
 import { Rooms } from 'imports/collections/server';
 import roomSetup from 'imports/modules/room/setup';
 import roomAccess from 'imports/modules/room/access';
-import roomProvider from 'imports/modules/room/provider/';
+// import roomProvider from 'imports/modules/room/provider/';
 import beamClient from 'imports/startup/server/beamClient';
 
 import userAccess from 'imports/modules/user/access';
@@ -76,7 +76,8 @@ Meteor.methods({
 
     if (!Rooms.insert(roomDocument)) return response.error(HttpStatus.INTERNAL_SERVER_ERROR, 'Internal server error 👹');
 
-    //const providerMetadata = roomProvider.licode.createRoom(roomId, { p2p: true });
+    // TODO
+    // const providerMetadata = roomProvider.licode.createRoom(roomId, { p2p: true });
     // updateRoom(roomId, { $set: { providerMetadata } });
 
     return response.body(HttpStatus.CREATED, {
@@ -149,7 +150,7 @@ Meteor.methods({
     }
 
     // TODO
-    const createErizoToken = userId => '';
+    const createErizoToken = _userId => '';
     // roomProvider.licode.createToken(room.providerMetadata, userId);
 
     if (userToken) {
