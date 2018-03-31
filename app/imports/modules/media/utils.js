@@ -12,6 +12,28 @@ export const isAudioMuted = mediaStream =>
   mediaStream.getAudioTracks()
     .every(track => track.muted);
 
+/* eslint-disable no-param-reassign */
+export const muteAudioTracks = mediaStream =>
+  mediaStream
+    .getAudioTracks()
+    .forEach((track) => { track.enabled = false; });
+
+export const unmuteAudioTracks = mediaStream =>
+  mediaStream
+    .getAudioTracks()
+    .forEach((track) => { track.enabled = true; });
+
+export const muteVideoTracks = mediaStream =>
+  mediaStream
+    .getVideoTracks()
+    .forEach((track) => { track.enabled = false; });
+
+export const unmuteVideoTracks = mediaStream =>
+  mediaStream
+    .getVideoTracks()
+    .forEach((track) => { track.enabled = true; });
+/* eslint-enable no-param-reassign */
+
 export const destroyMediaStream = (mediaStream) => {
   mediaStream.getAudioTracks().forEach(track => track.stop());
   mediaStream.getVideoTracks().forEach(track => track.stop());
@@ -40,4 +62,8 @@ export default {
   isAudioMuted,
   destroyMediaStream,
   getSavedConstraints,
+  muteAudioTracks,
+  unmuteAudioTracks,
+  muteVideoTracks,
+  unmuteVideoTracks,
 };

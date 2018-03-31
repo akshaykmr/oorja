@@ -57,7 +57,7 @@ class StreamsContainer extends Component {
         }}
         key={stream.streamId}
         streamSource={stream.streamSource}
-        muted={stream.local ? 'muted' : ''}
+        muted={stream.local || stream.mutedAudio ? 'muted' : ''}
         videoClassNames={videoClassNames}>
       </VideoStream>
     );

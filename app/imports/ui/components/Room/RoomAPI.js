@@ -1,16 +1,12 @@
-import { Meteor } from 'meteor/meteor';
 import _ from 'lodash';
-import roomActivities from '../../components/Room/constants/roomActivities';
 import status from '../../components/Room/constants/status';
+import mediaPreferences from 'imports/modules/media/storage';
 
 class RoomAPI {
   constructor(room) {
     this.room = room;
-    this.activityListener = room.activityListener;
 
-    // is there a better way to do this?
     // bind all methods as they may be invoked with different context such as onClick handler
-    // things like this make me doubt If I'm doing something wrong
     this.getUserId = this.getUserId.bind(this);
     this.getSession = this.getSession.bind(this);
     this.getUserInfo = this.getUserInfo.bind(this);
@@ -22,6 +18,7 @@ class RoomAPI {
     this.addActivityListener = this.addActivityListener.bind(this);
     this.removeActivityListener = this.removeActivityListener.bind(this);
     this.initializePrimaryMediaStream = this.initializePrimaryMediaStream.bind(this);
+
     this.togglePrimaryMediaStreamVideo = this.togglePrimaryMediaStreamVideo.bind(this);
     this.togglePrimaryMediaStreamAudio = this.togglePrimaryMediaStreamAudio.bind(this);
     this.mutePrimaryMediaStreamAudio = this.mutePrimaryMediaStreamAudio.bind(this);
@@ -45,6 +42,7 @@ class RoomAPI {
 
   sendMessage(message) {
     if (message.local) {
+      debugger; // TODO
       this.room.messageHandler.handleMessage(message);
       return;
     }
@@ -69,20 +67,18 @@ class RoomAPI {
     this.room.removeTabMessageHandler(tabId, handler);
   }
 
-  addActivityListener(activity, listner) {
-    if (!roomActivities[activity]) throw new Meteor.Error('Room activity not found.');
-    this.room.activityListener.listen(activity, listner);
+  addActivityListener(activity, listener) {
+    this.room.activityListener.listen(activity, listener);
   }
 
-  removeActivityListener(activity, listner) {
-    this.room.activityListener.remove(activity, listner);
+  removeActivityListener(activity, listener) {
+    this.room.activityListener.remove(activity, listener);
   }
 
 
   // stream related
-
   initializePrimaryMediaStream() {
-    const streamStatus = this.room.state.primaryMediaStreamState.status;
+    const streamStatus = this.room.stateBuffer.primaryMediaStreamState.status;
     if (streamStatus === status.CONNECTED || streamStatus === status.TRYING_TO_CONNECT) {
       return;
     }
@@ -90,7 +86,7 @@ class RoomAPI {
   }
 
   togglePrimaryMediaStreamVideo() {
-    if (this.room.state.primaryMediaStreamState.mutedVideo) {
+    if (this.room.stateBuffer.primaryMediaStreamState.mutedVideo) {
       this.unmutePrimaryMediaStreamVideo();
       return;
     }
@@ -98,7 +94,7 @@ class RoomAPI {
   }
 
   togglePrimaryMediaStreamAudio() {
-    if (this.room.state.primaryMediaStreamState.mutedAudio) {
+    if (this.room.stateBuffer.primaryMediaStreamState.mutedAudio) {
       this.unmutePrimaryMediaStreamAudio();
       return;
     }

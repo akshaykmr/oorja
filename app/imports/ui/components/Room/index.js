@@ -164,7 +164,7 @@ class Room extends Component {
     return ratio < breakRatio ? uiConfig.COMPACT : uiConfig.LARGE;
   }
 
-  createMessageHandler() {
+  createMessageHandler() { // TODO: refactor. use messageSwitch to organize and break it down.
     return new MessageSwitch()
       .registerHandlers({
         [messageType.ROOM_UPDATED]: () => this.props.updateRoomInfo(),
@@ -177,7 +177,6 @@ class Room extends Component {
         },
         [messageType.SIGNAL]: message => this.handleSignalingMessage(message),
         [messageType.SPEAKING]: ({ content: { streamId } }) => {
-          debugger;
           if (this.props.mediaStreams[streamId]) {
             this.activityListener
               .dispatch(roomActivities.STREAM_SPEAKING_START, { streamId, remote: true });
@@ -185,11 +184,20 @@ class Room extends Component {
           }
         },
         [messageType.SPEAKING_STOPPED]: ({ content: { streamId } }) => {
-          debugger;
           if (this.props.mediaStreams[streamId]) {
             this.activityListener
               .dispatch(roomActivities.STREAM_SPEAKING_END, { streamId, remote: true });
             this.props.streamSpeaking(streamId);
+          }
+        },
+        [messageType.STREAM_UPDATE]: ({ content: { streamId, mutedAudio, mutedVideo } }) => {
+          if (this.props.mediaStreams[streamId]) {
+            this.props.updateMediaStreams({
+              [streamId]: {
+                mutedAudio: { $set: mutedAudio },
+                mutedVideo: { $set: mutedVideo },
+              },
+            });
           }
         },
       });
