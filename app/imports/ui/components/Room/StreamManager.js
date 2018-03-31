@@ -1,4 +1,4 @@
-import roomMessageTypes from 'imports/modules/room/messageTypes';
+// import roomMessageTypes from 'imports/modules/room/messageTypes';
 import MediaPreferences from 'imports/modules/media/storage';
 import messageType from '../../components/Room/constants/messageType';
 

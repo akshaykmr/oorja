@@ -56,6 +56,11 @@ export class RoomStorage extends Storage {
     return this;
   }
 
+  clearLastReadyTime() {
+    this.deleteKey(storeKeys.READY);
+    return this;
+  }
+
   getAccessToken() {
     return this.getKey(storeKeys.ACCESS_TOKEN);
   }

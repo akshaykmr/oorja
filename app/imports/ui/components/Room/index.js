@@ -7,17 +7,15 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import update from 'immutability-helper';
 import _ from 'lodash';
+
 import Peer from 'simple-peer/simplepeer.min.js';
 
 import hark from 'hark';
-import { SPEAKING, SPEAKING_STOPPED } from 'imports/ui/actions/stream';
-
 
 import mediaPreferences from 'imports/modules/media/storage';
 import mediaUtils from 'imports/modules/media/utils';
 import browserUtils from 'imports/modules/browser/utils';
 import ActivityListener from 'imports/modules/ActivityListener';
-import roomMessageTypes from 'imports/modules/room/messageTypes';
 import BeamClient from 'imports/modules/BeamClient';
 import sessionUtils from 'imports/modules/room/sessionUtils';
 import MessageSwitch from 'imports/modules/MessageSwitch';
@@ -43,7 +41,7 @@ import StreamManager from './StreamManager';
 
 import './room.scss';
 
-const { defaultMaxVideoBW, defaultMaxAudioBW, beamConfig } = Meteor.settings.public;
+const { beamConfig } = Meteor.settings.public;
 
 class Room extends Component {
   constructor(props) {
@@ -56,6 +54,7 @@ class Room extends Component {
 
     this.streams = {}; // streamId -> mediaStream
     // note: erizoStream.stream would be of type MediaStream(the browser's MediaStream object)
+    this.sessionStreams = {}; // session -> [ streamId, ... ];
 
     this.speechTrackers = {}; // streamId -> hark instance
 
@@ -81,7 +80,6 @@ class Room extends Component {
     this.determineStreamContainerSize = this.determineStreamContainerSize.bind(this);
     this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
     this.toggleFullscreen = this.toggleFullscreen.bind(this);
-    this.stopScreenSharingStream = this.stopScreenSharingStream.bind(this);
     this.createPeer = this.createPeer.bind(this);
 
     this.state = {
@@ -178,6 +176,22 @@ class Room extends Component {
           });
         },
         [messageType.SIGNAL]: message => this.handleSignalingMessage(message),
+        [messageType.SPEAKING]: ({ content: { streamId } }) => {
+          debugger;
+          if (this.props.mediaStreams[streamId]) {
+            this.activityListener
+              .dispatch(roomActivities.STREAM_SPEAKING_START, { streamId, remote: true });
+            this.props.streamSpeaking(streamId);
+          }
+        },
+        [messageType.SPEAKING_STOPPED]: ({ content: { streamId } }) => {
+          debugger;
+          if (this.props.mediaStreams[streamId]) {
+            this.activityListener
+              .dispatch(roomActivities.STREAM_SPEAKING_END, { streamId, remote: true });
+            this.props.streamSpeaking(streamId);
+          }
+        },
       });
   }
 
@@ -192,7 +206,15 @@ class Room extends Component {
     this.peers[session] = peer;
   }
 
+  publishPrimaryMediaStream(peer) {
+    // TODO: handle case for multiple local media streams.
+    if (this.primaryMediaStream) {
+      peer.addStream(this.primaryMediaStream);
+    }
+  }
+
   createPeer({ session, initiator }) {
+    const { userId } = sessionUtils.unpack(session);
     const peer = new Peer({ initiator });
     peer.on('signal', (data) => {
       this.sendMessage({
@@ -201,9 +223,27 @@ class Room extends Component {
         content: data,
       });
     });
+    peer.on('stream', (mediaStream) => {
+      if (!this.props.mediaStreams[mediaStream.id]) {
+        this.props.updateMediaStreams({
+          [mediaStream.id]: {
+            $set: this.formMediaStreamState({
+              userId,
+              mediaStream,
+              isLocal: false,
+            }),
+          },
+        });
+        this.sessionStreams[session].push(mediaStream.id);
+      }
+    });
+    peer.on('removestream', (_mediaStream) => {
+      // TODO
+    });
     peer.on('connect', () => {
-      const { userId } = sessionUtils.unpack(session);
       this.connectUser(userId, session);
+      this.sessionStreams[session] = [];
+      this.publishPrimaryMediaStream(peer);
     });
     return peer;
   }
@@ -230,6 +270,11 @@ class Room extends Component {
       if (this.peers[session]) {
         this.peers[session].destroy();
         delete this.peers[session];
+        this.sessionStreams[session].forEach((streamId) => {
+          this.props.updateMediaStreams({
+            $unset: [streamId],
+          });
+        });
       }
       const { userId } = sessionUtils.unpack(session);
       this.disconnectUser(userId, session);
@@ -238,7 +283,6 @@ class Room extends Component {
     const handlePresenceState = (initialPresence) => {
       const syncedPresence = Presence.syncState(this.stateBuffer.presence, initialPresence);
       this.updateState({ presence: { $set: syncedPresence } });
-      // Object.keys(initialPresence).forEach(handleJoin);
     };
 
     const handlePresenceDiff = (diff) => {
@@ -266,67 +310,6 @@ class Room extends Component {
     });
   }
 
-  stopScreenSharingStream() {
-    this.updateState({
-      screenSharingStreamState: {
-        status: { $set: status.DISCONNECTED },
-      },
-    });
-    this.screenSharingStream.close();
-    this.screenSharingStream = null;
-  }
-
-  initializeScreenSharingStream() {
-    if (this.screenSharingStream) {
-      // unpublish and destroy
-      this.screenSharingStream.close();
-    }
-    this.updateState({
-      screenSharingStreamState: {
-        status: { $set: status.TRYING_TO_CONNECT },
-      },
-    });
-
-    this.screenSharingStream = Erizo.Stream({
-      screen: true,
-      extensionId: Meteor.settings.public.screenShareExtensionId,
-      attributes: {
-        userId: this.props.roomUserId,
-        sessionId: this.sessionId,
-        type: streamTypes.MEDIA.BROADCAST,
-        purpose: mediaStreamPurpose.SCREEN_SHARE_STREAM,
-      },
-    });
-    const mediaStream = this.screenSharingStream;
-    mediaStream.addEventListener('access-accepted', () => {
-      this.erizoRoom.publish(
-        mediaStream,
-        { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW },
-      );
-      mediaStream.stream.getVideoTracks()[0].onended = this.stopScreenSharingStream;
-    });
-    mediaStream.addEventListener('access-denied', () => {
-      this.props.toaster.show({
-        message: (
-          <div>
-            could not access your screen for sharing 😕
-            <br/>
-            Note: Currently works on
-            chrome, <a style={{ color: 'greenyellow' }} target="_blank" rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff?hl=en-US"> install this extension</a>
-          </div>
-        ),
-        intent: Intent.WARNING,
-      });
-      this.updateState({
-        screenSharingStreamState: {
-          status: { $set: status.ERROR },
-        },
-      });
-    });
-    mediaStream.addEventListener('stream-ended', this.stopScreenSharingStream);
-    mediaStream.init();
-  }
-
   formMediaStreamState({ userId, mediaStream, isLocal = false }) {
     const streamId = mediaStream.id;
     return {
@@ -344,85 +327,57 @@ class Room extends Component {
     };
   }
 
+  cleanupPrimaryMediaStream() {
+    if (this.primaryMediaStream) {
+      mediaUtils.destroyMediaStream(this.primaryMediaStream);
+      this.removeSpeechTracker(this.primaryMediaStream.id);
+      this.primaryMediaStream = null;
+    }
+  }
+
   initializePrimaryMediaStream() {
+    this.cleanupPrimaryMediaStream();
     // create a stream with saved preferences
     // if failure. delete media preferences
-    navigator.mediaDevices.getUserMedia(mediaUtils.getSavedConstraints())
-      .then((mediaStream) => {
-        this.props.updateMediaStreams({
-          [mediaStream.id]: {
-            $set: this.formMediaStreamState({
-              userId: this.props.roomUserId,
-              mediaStream,
-              isLocal: true,
-            }),
-          },
-        });
-        this.updateState({
-          primaryMediaStreamState: {
-            status: { $set: status.CONNECTED },
-            audio: { $set: mediaUtils.hasAudio(mediaStream) },
-            video: { $set: mediaUtils.hasVideo(mediaStream) },
-          },
-        });
-      })
-      .catch(() => {
-        mediaPreferences.clear();
-        this.props.toaster.show({
-          message: 'could not access your camera or microphone 😕',
-          intent: Intent.WARNING,
-        });
-        this.updateState({
-          primaryMediaStreamState: {
-            status: { $set: status.ERROR },
-          },
-        });
-        this.primaryMediaStream = null;
+
+    const onSuccess = (mediaStream) => {
+      this.primaryMediaStream = mediaStream;
+      this.props.updateMediaStreams({
+        [mediaStream.id]: {
+          $set: this.formMediaStreamState({
+            userId: this.props.roomUserId,
+            mediaStream,
+            isLocal: true,
+          }),
+        },
       });
+      this.updateState({
+        primaryMediaStreamState: {
+          status: { $set: status.CONNECTED },
+          audio: { $set: mediaUtils.hasAudio(mediaStream) },
+          video: { $set: mediaUtils.hasVideo(mediaStream) },
+        },
+      });
+      this.addSpeechTracker(mediaStream);
+      Object.entries(this.peers)
+        .forEach(([_sessionId, peer]) => this.publishPrimaryMediaStream(peer));
+    };
 
-    // if (this.primaryMediaStream) {
-    //   // unpublish and destroy
-    //   const speechTracker = this.speechTrackers[this.primaryMediaStream.getID()];
-    //   if (speechTracker) speechTracker.stop();
-    //   this.primaryMediaStream.close();
-    // }
+    const onFailure = () => {
+      this.props.toaster.show({
+        message: 'could not access your camera or microphone 😕',
+        intent: Intent.WARNING,
+      });
+      this.updateState({
+        primaryMediaStreamState: {
+          status: { $set: status.ERROR },
+        },
+      });
+      this.primaryMediaStream = null;
+    };
 
-    // this.primaryMediaStream = Erizo.Stream({
-    //   audio: this.state.primaryMediaStreamState.audio,
-    //   video: this.state.primaryMediaStreamState.video,
-    //   videoSize: this.videoQualitySetting[mediaDeviceSettings.videoQuality],
-    //   data: false,
-    //   attributes: {
-    //     userId: this.props.roomUserId,
-    //     sessionId: this.sessionId,
-    //     type: streamTypes.MEDIA.BROADCAST,
-    //     purpose: mediaStreamPurpose.PRIMARY_MEDIA_STREAM,
-    //     mutedAudio: mediaDeviceSettings.mutedAudio,
-    //     mutedVideo: mediaDeviceSettings.mutedVideo,
-    //   },
-    // });
-    // const mediaStream = this.primaryMediaStream;
-    // mediaStream.addEventListener('access-accepted', () => {
-    //   this.updateState({
-    //     primaryMediaStreamState: {
-    //       status: { $set: status.TRYING_TO_CONNECT },
-    //       audio: { $set: this.primaryMediaStream.stream.getAudioTracks().length > 0 },
-    //       video: { $set: this.primaryMediaStream.stream.getVideoTracks().length > 0 },
-    //     },
-    //   });
-    //   this.streamManager.muteBeforePublish(mediaStream, mediaDeviceSettings);
-    //   this.erizoRoom.publish(
-    //     mediaStream,
-    //     { maxVideoBW: defaultMaxVideoBW, maxAudioBW: defaultMaxAudioBW },
-    //   );
-    // });
-    // mediaStream.addEventListener('access-denied', () => {
-
-    // });
-    // mediaStream.addEventListener('stream-ended', (streamEvent) => {
-    //   console.info(streamEvent);
-    // });
-    // mediaStream.init();
+    navigator.mediaDevices.getUserMedia(mediaUtils.getSavedConstraints())
+      .then(onSuccess, onFailure);
   }
 
   connectUser(userId, session) {
@@ -489,57 +444,19 @@ class Room extends Component {
     });
   }
 
-  messageHandleasdr(message) {
-    const {
-      SPEECH, MUTE_AUDIO, UNMUTE_AUDIO,
-      MUTE_VIDEO, UNMUTE_VIDEO,
-    } = roomMessageTypes;
-    const roomMessage = message.content;
-    const handleSpeechMessage = () => {
-      const eventDetail = roomMessage.content;
-      const { streamId } = eventDetail;
-      switch (eventDetail.action) {
-        case SPEAKING:
-          if (this.props.mediaStreams[streamId]) {
-            this.activityListener
-              .dispatch(roomActivities.STREAM_SPEAKING_START, { streamId, remote: true });
-            this.props.streamSpeaking(streamId);
-          }
-          break;
-        case SPEAKING_STOPPED:
-          if (this.props.mediaStreams[streamId]) {
-            this.activityListener
-              .dispatch(roomActivities.STREAM_SPEAKING_END, { streamId, remote: true });
-            this.props.streamSpeakingStopped(streamId);
-          }
-          break;
-        default: console.error('unrecognised speech status');
-      }
-    };
-
-    switch (roomMessage.type) {
-      case SPEECH: handleSpeechMessage();
-        break;
-      default: console.error('unrecognised room message');
-    }
-  }
-
   // to be used with media streams
   // only use for local streams and broadcast the speech events over data stream.
-  addSpeechTracker(stream) {
-    if (!stream.hasAudio()) console.error('stream has no audio');
-    const tracker = hark(stream.stream); // the browser mediaStream object
-    const streamId = stream.getID();
-    const broadcastSpeechEvent = (action) => {
+  addSpeechTracker(mediaStream) {
+    if (!mediaUtils.hasAudio(mediaStream)) return;
+
+    const tracker = hark(mediaStream);
+    const streamId = mediaStream.id;
+    const broadcastSpeechEvent = (type) => {
       this.roomAPI.sendMessage({
         broadcast: true,
-        type: messageType.ROOM_MESSAGE,
+        type,
         content: {
-          type: roomMessageTypes.SPEECH,
-          content: {
-            action,
-            streamId,
-          },
+          streamId,
         },
       });
     };
@@ -547,23 +464,24 @@ class Room extends Component {
       this.props.streamSpeaking(streamId);
       this.activityListener
         .dispatch(roomActivities.STREAM_SPEAKING_START, { streamId, remote: false });
-      if (this.state.roomConnectionStatus !== status.CONNECTED) return;
-      broadcastSpeechEvent(SPEAKING);
+      broadcastSpeechEvent(messageType.SPEAKING);
     });
 
     tracker.on('stopped_speaking', () => {
       this.props.streamSpeakingStopped(streamId);
       this.activityListener
         .dispatch(roomActivities.STREAM_SPEAKING_END, { streamId, remote: false });
-      if (this.state.roomConnectionStatus !== status.CONNECTED) return;
-      broadcastSpeechEvent(SPEAKING_STOPPED);
+      broadcastSpeechEvent(messageType.SPEAKING_STOPPED);
     });
-    this.speechTrackers[stream.getID()] = tracker;
+    this.speechTrackers[streamId] = tracker;
   }
 
-  removeSpeechTracker(stream) {
-    const speechTracker = this.speechTrackers[stream.getID()];
-    if (speechTracker) speechTracker.stop();
+  removeSpeechTracker(streamId) {
+    const speechTracker = this.speechTrackers[streamId];
+    if (speechTracker) {
+      speechTracker.stop();
+      delete this.speechTrackers[streamId];
+    }
   }
 
   onWindowResize(event) {
@@ -588,12 +506,12 @@ class Room extends Component {
   }
 
   componentWillUnmount() {
+    this.props.resetMediaStreams();
     this.unmountInProgress = true;
-    // if (this.primaryMediaStream) {
-    //   this.removeSpeechTracker(this.primaryMediaStream);
-    //   this.primaryMediaStream.stop();
-    // }
-    // this.erizoRoom.disconnect();
+    Object.entries(this.peers)
+      .forEach(([_sessionId, peer]) => peer.destroy());
+    this.cleanupPrimaryMediaStream();
+
     this.beamClient.leaveRoomChannel();
     window.removeEventListener('resize', this.onWindowResize);
 
