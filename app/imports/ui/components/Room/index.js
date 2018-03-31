@@ -187,7 +187,7 @@ class Room extends Component {
           if (this.props.mediaStreams[streamId]) {
             this.activityListener
               .dispatch(roomActivities.STREAM_SPEAKING_END, { streamId, remote: true });
-            this.props.streamSpeaking(streamId);
+            this.props.streamSpeakingStopped(streamId);
           }
         },
         [messageType.STREAM_UPDATE]: ({ content: { streamId, mutedAudio, mutedVideo } }) => {
@@ -217,7 +217,11 @@ class Room extends Component {
   publishPrimaryMediaStream(peer) {
     // TODO: handle case for multiple local media streams.
     if (this.primaryMediaStream) {
-      peer.addStream(this.primaryMediaStream);
+      try {
+        peer.addStream(this.primaryMediaStream);
+      } catch (e) {
+        console.warn(e);
+      }
     }
   }
 
