@@ -268,7 +268,7 @@ export default class GettingReady extends Component {
         );
       }
       return (
-        <div className="textLink">
+        <div className="textLink" style={{ marginTop: '4px' }}>
           <span className="animate fade-in" onClick={this.enableAnon}>Join anonymously ?</span>
         </div>
       );
@@ -288,25 +288,28 @@ export default class GettingReady extends Component {
             {renderAnonSwitchLink()}
             <br />
             <div className="webcamSettings">
-              <div className="label"> Webcam setting </div>
-              <select value={this.state.webcamSetting} onChange={this.handleWebcamSetting}>
-                <option value="voiceAndVideo"> Join with video and voice </option>
-                <option value="voice">Voice only</option>
-                <option value="video">Video only</option>
-                <option value="muteAll">Mute both video and voice</option>
-              </select>
-            </div>
-            {
-              this.state.testWebcam ? (
-                <WebcamPreview />
-              ) : (
-                <div className="textLink">
-                  <button type="button" className="pt-button pt-minimal" onClick={this.testWebcam}>
-                    Test webcam ?
-                  </button>
+              <div className="label"> Webcam options </div>
+                {
+                  this.state.testWebcam ? (
+                    <WebcamPreview />
+                  ) : (
+                    <div className="textLink">
+                      <button type="button" className="pt-button pt-minimal" onClick={this.testWebcam}>
+                        Test webcam ?
+                      </button>
+                    </div>
+                  )
+                }
+                <div className="options">
+                  <select value={this.state.webcamSetting} onChange={this.handleWebcamSetting}>
+                    <option value="voiceAndVideo"> Join with video and voice </option>
+                    <option value="voice">Voice only</option>
+                    <option value="video">Video only</option>
+                    <option value="muteAll">Mute both video and voice</option>
+                  </select>
                 </div>
-              )
-            }
+            </div>
+
             <div className="joinButtonWrapper">
               <Button {...buttonAttr} />
             </div>

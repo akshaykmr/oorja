@@ -239,7 +239,7 @@ class Room extends Component {
       if (!this.props.mediaStreams[mediaStream.id]) {
         this.props.updateMediaStreams({
           [mediaStream.id]: {
-            $set: this.formMediaStreamState({
+            $set: this.streamManager.formMediaStreamState({
               userId,
               mediaStream,
               isLocal: false,
@@ -322,23 +322,6 @@ class Room extends Component {
     });
   }
 
-  formMediaStreamState({ userId, mediaStream, isLocal = false }) {
-    const streamId = mediaStream.id;
-    return {
-      userId,
-      streamId,
-      local: isLocal,
-      status: status.CONNECTED,
-      audio: mediaUtils.hasAudio(mediaStream),
-      video: mediaUtils.hasVideo(mediaStream),
-      mutedAudio: mediaUtils.isAudioMuted(mediaStream),
-      mutedVideo: mediaUtils.isVideoMuted(mediaStream),
-      streamSource: mediaStream,
-      errorReason: '',
-      warningReason: '',
-    };
-  }
-
   cleanupPrimaryMediaStream() {
     if (this.primaryMediaStream) {
       mediaUtils.destroyMediaStream(this.primaryMediaStream);
@@ -356,7 +339,7 @@ class Room extends Component {
       this.primaryMediaStream = mediaStream;
       this.props.updateMediaStreams({
         [mediaStream.id]: {
-          $set: this.formMediaStreamState({
+          $set: this.streamManager.formMediaStreamState({
             userId: this.props.roomUserId,
             mediaStream,
             isLocal: true,

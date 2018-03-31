@@ -1,3 +1,4 @@
+/* eslint-disable */
 // //  OLD CODE FOR reference.
 
 // setRoomStreamListners(erizoRoom = this.erizoRoom) {
@@ -280,3 +281,5 @@
   //   mediaStream.addEventListener('stream-ended', this.stopScreenSharingStream);
   //   mediaStream.init();
   // }
+
+  /* eslint-enable */

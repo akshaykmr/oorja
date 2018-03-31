@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import status from '../../components/Room/constants/status';
 import mediaPreferences from 'imports/modules/media/storage';
+import status from '../../components/Room/constants/status';
 
 class RoomAPI {
   constructor(room) {
@@ -42,7 +42,7 @@ class RoomAPI {
 
   sendMessage(message) {
     if (message.local) {
-      debugger; // TODO
+      console.warn('todo'); // TODO
       this.room.messageHandler.handleMessage(message);
       return;
     }

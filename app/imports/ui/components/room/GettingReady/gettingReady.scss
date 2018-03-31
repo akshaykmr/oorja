@@ -7,7 +7,6 @@ $preview-spacing: 30px;
 .JoinRoomForm {
   .textLink {
     font-size: 1.1em;
-    margin-top: 10px;
     text-align: center;
     span {
       font-weight: 400;
@@ -73,15 +72,19 @@ $preview-spacing: 30px;
   }
 
   .webcamSettings {
-      text-align: center;
-      .label {
+    > .label {
+        text-align: center;
         font-size: 1.3em;
         padding-bottom: 3px;
         line-height: 1.6em;
       }
       padding: 10px 0px 8px 0px;
-      select {
-        font-size: 1.1em;
+    > .options {
+        text-align: center;
+        margin: 4px;
+        select {
+          font-size: 1.1em;
+        }
       }
   }
 }

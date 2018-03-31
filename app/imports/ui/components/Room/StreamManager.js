@@ -2,7 +2,7 @@ import _ from 'lodash';
 import update from 'immutability-helper';
 import mediaUtils from 'imports/modules/media/utils';
 import messageType from '../../components/Room/constants/messageType';
-
+import status from './constants/status';
 
 class StreamManager {
   constructor(room) {
@@ -18,6 +18,22 @@ class StreamManager {
         ...state,
       },
     });
+  }
+
+  formMediaStreamState({ userId, mediaStream, isLocal = false }) {
+    return {
+      userId,
+      streamId: mediaStream.id,
+      local: isLocal,
+      status: status.CONNECTED,
+      audio: mediaUtils.hasAudio(mediaStream),
+      video: mediaUtils.hasVideo(mediaStream),
+      mutedAudio: mediaUtils.isAudioMuted(mediaStream),
+      mutedVideo: mediaUtils.isVideoMuted(mediaStream),
+      streamSource: mediaStream,
+      errorReason: '',
+      warningReason: '',
+    };
   }
 
   updateStream(streamId, changeSet) {
