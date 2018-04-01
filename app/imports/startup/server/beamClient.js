@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { HTTP } from 'meteor/http';
 
-const { private: { beamSecret }, public: { beamConfig } } = Meteor.settings;
+const { private: { privateAPISecret }, public: { beamConfig } } = Meteor.settings;
 const BEAM_ORIGIN = `${beamConfig.httpProtocolPrefix}${beamConfig.host}`;
 
 const beamClient = {
@@ -10,7 +10,7 @@ const beamClient = {
       `${BEAM_ORIGIN}/api/v1/push_room_event`,
       {
         headers: {
-          secret: beamSecret,
+          secret: privateAPISecret,
         },
         timeout: 3000,
         data: {
