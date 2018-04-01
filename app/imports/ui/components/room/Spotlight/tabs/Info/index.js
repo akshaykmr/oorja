@@ -78,8 +78,8 @@ class Info extends Component {
           <div className="text">
             {
               this.props.uiSize === uiConfig.COMPACT ?
-                (<div> Explore <i className="icon ion-arrow-down-c"></i></div>)
-                : 'Explore, hover over a tab to know more'
+                (<div> Check out tabs <i className="icon ion-arrow-down-c"></i></div>)
+                : 'Check out tabs !'
             }
           </div>
         </div>

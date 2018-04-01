@@ -153,9 +153,9 @@ class StreamsContainer extends Component {
         </TransitionGroup>
         { tryingToConnect ?
           (
-            <span className="displayText">
+            <div className="displayText">
               <div className="tryingToConnect animate blink">Connecting</div>
-            </span>
+            </div>
           ) : null
         }
       </div>

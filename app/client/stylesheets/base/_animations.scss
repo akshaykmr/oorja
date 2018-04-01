@@ -18,9 +18,10 @@
 }
 
  .animate.zoom-in {
-    animation-name: zoom-in;
-    animation-duration: 2s;
-    animation-timing-function: cubic-bezier(1.000, 0.020, 0.810, 1.015);
+    animation-name: flipInY;
+    animation-duration: 1.5s;
+    backface-visibility: visible !important;
+    animation-fill-mode: both;
   }
 
 @keyframes fade-in {
@@ -35,7 +36,7 @@
 
 @keyframes zoom-in {
   0%{
-    transform: scale(0)
+    transform: scale(0.6)
   }
   100%{
     transform: scale(1);
@@ -56,4 +57,38 @@
   from { background-color: #1d9f69;  }
   50% { background-color: #91bd09; }
   to { background-color: #1d9f69;  }
+}
+
+
+@keyframes flipInY {
+  from {
+    -webkit-transform: perspective(400px) rotate3d(0, 1, 0, 90deg);
+    transform: perspective(400px) rotate3d(0, 1, 0, 90deg);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+
+  40% {
+    -webkit-transform: perspective(400px) rotate3d(0, 1, 0, -20deg);
+    transform: perspective(400px) rotate3d(0, 1, 0, -20deg);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+
+  60% {
+    -webkit-transform: perspective(400px) rotate3d(0, 1, 0, 10deg);
+    transform: perspective(400px) rotate3d(0, 1, 0, 10deg);
+    opacity: 1;
+  }
+
+  80% {
+    -webkit-transform: perspective(400px) rotate3d(0, 1, 0, -5deg);
+    transform: perspective(400px) rotate3d(0, 1, 0, -5deg);
+  }
+
+  to {
+    -webkit-transform: perspective(400px);
+    transform: perspective(400px);
+  }
 }

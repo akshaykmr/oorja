@@ -185,6 +185,8 @@ class Spotlight extends Component {
       const switchClassNames = {
         switch: true,
         active: onTop,
+        animate: true,
+        'zoom-in': true,
       };
       const switchStyle = {
         backgroundColor: '#1b1d1e',
@@ -221,24 +223,11 @@ class Spotlight extends Component {
           </div>
         </div>
       );
-
-      const switchTransition = uiSize === uiConfig.LARGE ? 'switch' : 'switch-alt';
       // FIXME: tooltip is broken
       return (
-        <CSSTransition
-          key={tab.tabId}
-          classNames={switchTransition}
-          appear={true}
-          timeout={{ enter: 1200, exit: 800 }}>
-            <Tooltip
-              content={tab.description}
-              target={renderBox()}
-              popoverClassName="pt-popover-content-sizing"
-              position={uiSize === uiConfig.COMPACT ? Position.TOP : Position.RIGHT}
-              hoverOpenDelay={500}
-              className={classNames(switchClassNames)}>
-            </Tooltip>
-        </CSSTransition>
+        <div key={tab.tabId} className={classNames(switchClassNames)}>
+          {renderBox()}
+        </div>
       );
     };
 
@@ -298,9 +287,7 @@ class Spotlight extends Component {
             {Object.keys(this.state.tabStatusRegistry).map(renderTabContent)}
           </div>
           <div className="content-switcher">
-            <TransitionGroup>
-              {Object.keys(this.state.tabStatusRegistry).map(renderSwitch)}
-            </TransitionGroup>
+            {Object.keys(this.state.tabStatusRegistry).map(renderSwitch)}
           </div>
         </div>
       </div>

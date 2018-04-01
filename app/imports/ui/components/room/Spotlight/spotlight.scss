@@ -27,69 +27,6 @@ $switcher-width: 62px;
   }
 
   > .content-switcher {
-    height: 100%;
-    width: $switcher-width;
-    background-color: #2e3136;
-
-    // css transition group classes for switch
-    .switch-enter {
-      transform: translate3d(-70px, 0, 0);
-    }
-
-    .switch-enter.switch-enter-active {
-      transform: translate3d(0, 0, 0);
-      transition: transform 1s ease-in;
-    }
-
-    .switch-exit {
-      transform: translate3d(0, 0, 0);
-    }
-
-    .switch-appear {
-      transform: translate3d(-70px, 0, 0);
-    }
-
-    .switch-appear.switch-appear-active {
-      transform: translate3d(0, 0, 0);
-      transition: transform 1s ease-in;
-    }
-
-    .switch-exit.switch-exit-active {
-      transform: translate3d(-70px, 0, 0);
-      transition: transform 300ms ease-out;
-    }
-
-
-    // alt transition for compact UI
-    .switch-alt-enter {
-      transform: translate3d(0, 70px, 0);
-    }
-
-    .switch-alt-enter.switch-alt-enter-active {
-      transform: translate3d(0, 0, 0);
-      transition: transform 1s ease-in;
-    }
-
-    .switch-alt-exit {
-      transform: translate3d(0, 0, 0);
-    }
-
-    .switch-alt-appear {
-      transform: translate3d(0, 70px, 0);
-    }
-
-    .switch-alt-appear.switch-alt-appear-active {
-      transform: translate3d(0, 0, 0);
-      transition: transform 1s ease-in;
-    }
-
-    .switch-alt-exit.switch-alt-exit-active {
-      transform: translate3d(0, 70px, 0);
-      transition: transform 300ms ease-out;
-    }
-  }
-
-  > .content-switcher > div {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -99,7 +36,8 @@ $switcher-width: 62px;
     overflow-x: hidden;
 
     height: 100%;
-    width: 100%;
+    width: $switcher-width;
+    background-color: #2e3136;
 
     > .switch {
       width: 45px;
@@ -148,10 +86,6 @@ $switcher-width: 62px;
         align-items: center;
         border-radius: 30%;
         text-align: center;
-        // display: flex;
-        // align-content: center;
-        // align-items: center;
-        // justify-content: center;
         opacity: 0.7;
       }
 
@@ -183,20 +117,18 @@ $switcher-width: 62px;
     width: 100%;
     height: 62px;
 
-    > div {
-      padding-left: 25px;
-      padding-right: 25px;
-      justify-content: center;
-      flex-direction: row;
-      overflow-x: auto;
-      overflow-y: hidden;
+    padding-left: 25px;
+    padding-right: 25px;
+    justify-content: center;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
 
-      > .switch {
-        margin-top: initial;
-        margin-bottom: initial;
-        margin-left: 5px;
-        margin-right: 5px;
-      }
+    > .switch {
+      margin-top: initial;
+      margin-bottom: initial;
+      margin-left: 5px;
+      margin-right: 5px;
     }
   }
 
