@@ -78,7 +78,6 @@ class RoomAPI {
 
   // stream related
   initializePrimaryMediaStream() {
-    debugger;
     const streamStatus = this.room.stateBuffer.primaryMediaStreamState.status;
     if (streamStatus === status.INITIALIZING) return;
     this.room.initializePrimaryMediaStream();

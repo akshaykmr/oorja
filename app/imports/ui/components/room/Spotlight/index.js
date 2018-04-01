@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import update from 'immutability-helper';
 import classNames from 'classnames';
-import { Position, Tooltip } from '@blueprintjs/core';
 
 import uiConfig from '../constants/uiConfig';
 import roomActivities from '../constants/roomActivities';
