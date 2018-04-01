@@ -1,6 +1,8 @@
 # <span><img src="http://svgshare.com/i/1pX.svg" alt="" height="40px" width="40px"/> oorja </span> 
 <span>Alpha version</span>
 
+> I made the alpha version of oorja in my final year of college. Its been almost an year since then I'm picking this up again and refactoring my older terrible code! There are some architectural changes as well such as a new microservice for signalling and presence powered by elixir. The documentation below is old, so please wait if you wish to give this a spin. Cheers!
+
 
 [![CircleCI](https://circleci.com/gh/akshayKMR/oorja/tree/master.svg?style=svg&circle-token=4a0bb88da10bed1c0242fbd0a050f1dab2986e2b)](https://circleci.com/gh/akshayKMR/oorja/tree/master) [![Join the chat at https://gitter.im/oorja-io/Lobby](https://badges.gitter.im/oorja-io/Lobby.svg)](https://gitter.im/oorja-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -47,14 +49,6 @@ You are welcome to contribute! In order to do so please go through the following
 Also, It's quite easy to make tabs (you only need to know some react, which can itself be picked up in a weekend).
  1. [Project Setup](docs/project-setup.md)
  2. [Making a Tab](docs/make-a-tab.md)
-
-### Donate ❤️
-As mentioned earlier this is a personal project. There are no ads, tracking, premium paid features etc. To continue its development and finance the server costs of [oorja.io](https://oorja.io) I would really appreciate your financial backing
-
-**[PayPal](https://paypal.me/akshayKMR)**
-<br><br>
-<span class="badge-bitcoin"><a id="donate" href="#donate" title="Donate once-off to this project using Bitcoin"><img src="https://img.shields.io/badge/bitcoin-donate-yellow.svg" alt="Bitcoin donate button" /></a></span> <code> 1FzAAeMPxdBBhcuXH8XDfXKq5GTcBUncHT </code>
-
 
 ### Contact
 [![Join the chat at https://gitter.im/oorja-io/Lobby](https://badges.gitter.im/oorja-io/Lobby.svg)](https://gitter.im/oorja-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
