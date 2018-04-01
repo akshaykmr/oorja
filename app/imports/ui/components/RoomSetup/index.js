@@ -10,7 +10,7 @@ import * as HttpStatus from 'http-status-codes';
 import oorjaClient from 'imports/modules/oorjaClient';
 
 import { shareChoices } from 'imports/modules/room/setup/constants';
-
+import HorizontalLoading from 'imports/ui/components/HorizontalLoading';
 import SupremeToaster from '../../components/Toaster';
 
 
@@ -167,7 +167,7 @@ class RoomSetup extends Component {
     const classNames = 'roomSetup room-form';
 
     if (isServer) { // render empty space
-      return <div className={classNames} />;
+      return <div className={classNames}> <HorizontalLoading /> </div>;
     }
     return (
       <div className={classNames}>
