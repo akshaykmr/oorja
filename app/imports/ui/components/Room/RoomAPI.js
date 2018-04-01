@@ -50,7 +50,7 @@ class RoomAPI {
   }
 
   shareScreen() {
-    this.room.initializeScreenSharingStream();
+    // this.room.initializeScreenSharingStream();
   }
 
   stopScreenShare() {
