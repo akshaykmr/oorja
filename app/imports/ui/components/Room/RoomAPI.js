@@ -78,10 +78,9 @@ class RoomAPI {
 
   // stream related
   initializePrimaryMediaStream() {
+    debugger;
     const streamStatus = this.room.stateBuffer.primaryMediaStreamState.status;
-    if (streamStatus === status.CONNECTED || streamStatus === status.TRYING_TO_CONNECT) {
-      return;
-    }
+    if (streamStatus === status.INITIALIZING) return;
     this.room.initializePrimaryMediaStream();
   }
 
@@ -102,6 +101,7 @@ class RoomAPI {
   }
 
   mutePrimaryMediaStreamAudio() {
+    mediaPreferences.enableVoice(false);
     this.room.updateState({
       primaryMediaStreamState: {
         mutedAudio: { $set: true },
@@ -111,15 +111,21 @@ class RoomAPI {
   }
 
   unmutePrimaryMediaStreamAudio() {
-    this.room.updateState({
-      primaryMediaStreamState: {
-        mutedAudio: { $set: false },
-      },
-    });
-    this.room.streamManager.unmuteAudio(this.room.primaryMediaStream);
+    mediaPreferences.enableVoice(true);
+    if (this.room.stateBuffer.primaryMediaStreamState.audio) {
+      this.room.updateState({
+        primaryMediaStreamState: {
+          mutedAudio: { $set: false },
+        },
+      });
+      this.room.streamManager.unmuteAudio(this.room.primaryMediaStream);
+      return;
+    }
+    this.initializePrimaryMediaStream();
   }
 
   mutePrimaryMediaStreamVideo() {
+    mediaPreferences.enableVideo(false);
     this.room.updateState({
       primaryMediaStreamState: {
         mutedVideo: { $set: true },
@@ -129,12 +135,17 @@ class RoomAPI {
   }
 
   unmutePrimaryMediaStreamVideo() {
-    this.room.updateState({
-      primaryMediaStreamState: {
-        mutedVideo: { $set: false },
-      },
-    });
-    this.room.streamManager.unmuteVideo(this.room.primaryMediaStream);
+    mediaPreferences.enableVideo(true);
+    if (this.room.stateBuffer.primaryMediaStreamState.video) {
+      this.room.updateState({
+        primaryMediaStreamState: {
+          mutedVideo: { $set: false },
+        },
+      });
+      this.room.streamManager.unmuteVideo(this.room.primaryMediaStream);
+      return;
+    }
+    this.initializePrimaryMediaStream();
   }
 }
 

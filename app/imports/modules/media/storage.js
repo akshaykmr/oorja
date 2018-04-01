@@ -27,11 +27,11 @@ class MediaPreferences extends Storage {
   }
 
   isVoiceMute() {
-    return this.getKey(storeKeys.VOICE_MUTE);
+    return this.getKey(storeKeys.VOICE_MUTE) || false;
   }
 
   isVideoMute() {
-    return this.getKey(storeKeys.VOICE_MUTE);
+    return this.getKey(storeKeys.VIDEO_MUTE) || false;
   }
 
   enableVoice(bool) {

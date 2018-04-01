@@ -155,11 +155,6 @@ class VideoChat extends Component {
     const screenSharingStreamError = screenSharingStreamState.status === status.ERROR;
 
     const handleAudioVideoClick = (options = {}) => {
-      const streamStatus = this.props.primaryMediaStreamState.status;
-      if (streamStatus === status.DISCONNECTED || streamStatus === status.ERROR) {
-        this.props.roomAPI.initializePrimaryMediaStream();
-        return;
-      }
       if (options.video) this.props.roomAPI.togglePrimaryMediaStreamVideo();
       if (options.audio) this.props.roomAPI.togglePrimaryMediaStreamAudio();
     };

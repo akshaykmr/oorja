@@ -87,8 +87,8 @@ class Room extends Component {
       presence: {},
       connectedUsers: [],
       primaryMediaStreamState: {
-        video: true,
-        audio: true,
+        video: false,
+        audio: false,
         mutedAudio: false,
         mutedVideo: false,
         status: status.DISCONNECTED,
@@ -214,11 +214,25 @@ class Room extends Component {
     this.peers[session] = peer;
   }
 
-  publishPrimaryMediaStream(peer) {
-    // TODO: handle case for multiple local media streams.
-    if (this.primaryMediaStream) {
+  publishMediaStream(peer, mediaStream) {
+    if (mediaStream) {
       try {
-        peer.addStream(this.primaryMediaStream);
+        peer.addStream(mediaStream);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+  }
+
+  getPeerList() {
+    return Object.entries(this.peers)
+      .map(([_sessionId, peer]) => peer);
+  }
+
+  unpublishMediaStream(peer, mediaStream) {
+    if (mediaStream) {
+      try {
+        peer.removeStream(mediaStream);
       } catch (e) {
         console.warn(e);
       }
@@ -249,13 +263,16 @@ class Room extends Component {
         this.sessionStreams[session].push(mediaStream.id);
       }
     });
-    peer.on('removestream', (_mediaStream) => {
-      // TODO
+    peer.on('removestream', (mediaStream) => {
+      mediaUtils.destroyMediaStream(mediaStream);
+      this.props.updateMediaStreams({
+        $unset: [mediaStream.id],
+      });
     });
     peer.on('connect', () => {
       this.connectUser(userId, session);
       this.sessionStreams[session] = [];
-      this.publishPrimaryMediaStream(peer);
+      this.publishMediaStream(peer, this.primaryMediaStream);
     });
     return peer;
   }
@@ -324,6 +341,8 @@ class Room extends Component {
 
   cleanupPrimaryMediaStream() {
     if (this.primaryMediaStream) {
+      this.getPeerList()
+        .forEach(peer => this.unpublishMediaStream(peer, this.primaryMediaStream));
       mediaUtils.destroyMediaStream(this.primaryMediaStream);
       this.removeSpeechTracker(this.primaryMediaStream.id);
       this.primaryMediaStream = null;
@@ -333,9 +352,28 @@ class Room extends Component {
   initializePrimaryMediaStream() {
     this.cleanupPrimaryMediaStream();
     // create a stream with saved preferences
-    // if failure. delete media preferences
+    const mutedVideo = mediaPreferences.isVideoMute();
+    const mutedAudio = mediaPreferences.isVoiceMute();
+
+    this.updateState({
+      primaryMediaStreamState: {
+        mutedAudio: { $set: mutedAudio },
+        mutedVideo: { $set: mutedVideo },
+      },
+    });
+
+    const savedConstraints = mediaUtils.getSavedConstraints();
+    const constraints = {};
+    constraints.audio = savedConstraints.audio || true;
+
+    if (mutedVideo && mutedAudio) return;
+
+    if (!mutedVideo) constraints.video = savedConstraints.video;
 
     const onSuccess = (mediaStream) => {
+      if (mutedAudio) mediaUtils.muteAudioTracks(mediaStream);
+      if (mutedVideo) mediaUtils.muteVideoTracks(mediaStream);
+
       this.primaryMediaStream = mediaStream;
       this.props.updateMediaStreams({
         [mediaStream.id]: {
@@ -354,8 +392,8 @@ class Room extends Component {
         },
       });
       this.addSpeechTracker(mediaStream);
-      Object.entries(this.peers)
-        .forEach(([_sessionId, peer]) => this.publishPrimaryMediaStream(peer));
+      this.getPeerList()
+        .forEach(peer => this.publishMediaStream(peer, this.primaryMediaStream));
     };
 
     const onFailure = () => {
@@ -371,7 +409,13 @@ class Room extends Component {
       this.primaryMediaStream = null;
     };
 
-    navigator.mediaDevices.getUserMedia(mediaUtils.getSavedConstraints())
+    this.updateState({
+      primaryMediaStreamState: {
+        status: { $set: status.INITIALIZING },
+      },
+    });
+
+    navigator.mediaDevices.getUserMedia(constraints)
       .then(onSuccess, onFailure);
   }
 
@@ -503,8 +547,9 @@ class Room extends Component {
   componentWillUnmount() {
     this.props.resetMediaStreams();
     this.unmountInProgress = true;
-    Object.entries(this.peers)
-      .forEach(([_sessionId, peer]) => peer.destroy());
+    this.getPeerList()
+      .forEach(peer => peer.destroy());
+
     this.cleanupPrimaryMediaStream();
 
     this.beamClient.leaveRoomChannel();

@@ -82,7 +82,6 @@ example of using uiSize and added css rules:
     + unmutePrimaryMediaStreamAudio()
     + togglePrimaryMediaStreamAudio()
     + togglePrimaryMediaStreamVideo()
-    + initializePrimaryMediaStream(): initialize webcam/audio stream.
     + **sendMessage(message)**: each tab can send and receive json serializable messages. To see the message format see `Messenger.js`. With this you can send messages to any tabs local or remote(loaded by another room participant). In the message you need to specify the recipient users, and the recipient tabs. When a message is received the handler registered by the recipient tab will be called with the message contents.
     + **addMessageHandler(tabId, handler)**: The tab must register a message handler to process messages. Use the message handler to change state, trigger actions in your tab etc. just search the project for `roomAPI.addMessageHandler` for use cases. 
     + removeMessageHandler(tabId, handler): removes previously registered handler.
