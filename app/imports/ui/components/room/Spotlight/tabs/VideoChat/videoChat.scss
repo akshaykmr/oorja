@@ -126,10 +126,10 @@
       display: inline-block;
       height: 50px;
       width: 50px;
-      text-align: center;
-      line-height: 50px;
-      font-size: 1.5em;
       opacity: 0.95;
+
+      padding-top: 13px;
+      padding-left: 13px;
 
       &:active {
         opacity: 1.0;

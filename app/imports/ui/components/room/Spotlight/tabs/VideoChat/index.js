@@ -2,7 +2,15 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import classNames from 'classnames';
-// import uiConfig from '../../../constants/uiConfig';
+
+import {
+  UserPlus,
+  Video as VideoIcon,
+  VideoOff as VideoOffIcon,
+  Mic,
+  MicOff,
+  Monitor,
+} from 'imports/ui/components/icons';
 
 import Avatar from '../../../Avatar';
 import roomActivities from '../../../constants/roomActivities';
@@ -161,13 +169,13 @@ class VideoChat extends Component {
     const controlButtons = [
       {
         name: 'add',
-        icon: 'ion-ios-personadd',
+        icon: UserPlus,
         classNames: 'control',
         onClick: this.goToInfoTab,
       },
       {
         name: 'video',
-        icon: 'ion-ios-videocam',
+        icon: primaryMediaStreamState.mutedVideo ? VideoOffIcon : VideoIcon,
         classNames: classNames({
           control: true,
           video: true,
@@ -180,7 +188,7 @@ class VideoChat extends Component {
       },
       {
         name: 'mic',
-        icon: primaryMediaStreamState.mutedAudio ? 'ion-ios-mic-off' : 'ion-ios-mic',
+        icon: primaryMediaStreamState.mutedAudio ? MicOff : Mic,
         classNames: classNames({
           control: true,
           mic: true,
@@ -193,7 +201,7 @@ class VideoChat extends Component {
       },
       {
         name: 'screenshare',
-        icon: 'ion-ios-monitor',
+        icon: Monitor,
         classNames: classNames({
           control: true,
           screen: true,
@@ -211,7 +219,7 @@ class VideoChat extends Component {
             className={control.classNames}
             onClick={control.onClick}
             key={control.name}>
-              <i className={`icon ${control.icon}`}></i>
+              <control.icon />
           </div>
         ))}
       </div>
@@ -274,7 +282,7 @@ class VideoChat extends Component {
           return (
             <div className="header nobodyHere">
               <div className="text">
-              {`It doesn't look like there is anyone ${userCount === 0 ? '' : ' else'} in the room `}
+                When users join their video will appear here.
               </div>
               <button onClick = {this.goToInfoTab}
                 type="button" className="pt-button pt-intent-success">

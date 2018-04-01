@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import update from 'immutability-helper';
 import _ from 'lodash';
 
+
 import Peer from 'simple-peer/simplepeer.min.js';
 
 import hark from 'hark';
@@ -21,6 +22,7 @@ import sessionUtils from 'imports/modules/room/sessionUtils';
 import MessageSwitch from 'imports/modules/MessageSwitch';
 
 import { Intent } from '@blueprintjs/core';
+import { Maximize as MaximizeIcon} from 'imports/ui/components/icons';
 
 import mapDispatchToProps from './dispatch';
 // TODO: move stream handling related functions to streamManager.js
@@ -589,7 +591,7 @@ class Room extends Component {
     return (
       <div className='room page' ref={ (div) => { this.roomDiv = div; } }>
         <div className="fullscreenButton" onClick={this.toggleFullscreen}>
-          <i className="icon ion-android-expand"></i>
+          <MaximizeIcon />
         </div>
         <StreamsContainer
           uiSize={uiSize}
