@@ -81,6 +81,8 @@ class Room extends Component {
     this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
     this.toggleFullscreen = this.toggleFullscreen.bind(this);
     this.createPeer = this.createPeer.bind(this);
+    this.handleJoin = this.handleJoin.bind(this);
+    this.handleLeave = this.handleLeave.bind(this);
 
     this.state = {
       roomConnectionStatus: status.INITIALIZING,
@@ -241,7 +243,7 @@ class Room extends Component {
 
   createPeer({ session, initiator }) {
     const { userId } = sessionUtils.unpack(session);
-    const peer = new Peer({ initiator });
+    const peer = new Peer({ initiator, reconnectTimer: 200 });
     peer.on('signal', (data) => {
       this.sendMessage({
         type: messageType.SIGNAL,
@@ -277,38 +279,37 @@ class Room extends Component {
     return peer;
   }
 
-  connect() {
-    const handleJoin = (session) => {
-      if (session === this.session) {
-        const { userId } = sessionUtils.unpack(session);
-        this.connectUser(userId, session);
-        return;
-      }
-      if (this.peers[session]) {
-        console.error('peer exists');
-        // WIP
-        // this.peers[session].destroy();
-        // delete this.peers[session];
-      }
-      const peer = this.createPeer({ session, initiator: true });
-      this.peers[session] = peer;
-    };
-
-
-    const handleLeave = (session) => {
-      if (this.peers[session]) {
-        this.peers[session].destroy();
-        delete this.peers[session];
-        this.sessionStreams[session].forEach((streamId) => {
-          this.props.updateMediaStreams({
-            $unset: [streamId],
-          });
-        });
-      }
+  handleJoin(session) {
+    if (session === this.session) {
       const { userId } = sessionUtils.unpack(session);
-      this.disconnectUser(userId, session);
-    };
+      this.connectUser(userId, session);
+      return;
+    }
+    if (this.peers[session]) {
+      console.error('peer exists');
+      // WIP
+      // this.peers[session].destroy();
+      // delete this.peers[session];
+    }
+    const peer = this.createPeer({ session, initiator: true });
+    this.peers[session] = peer;
+  }
 
+  handleLeave(session) {
+    if (this.peers[session]) {
+      this.peers[session].destroy();
+      delete this.peers[session];
+      this.sessionStreams[session].forEach((streamId) => {
+        this.props.updateMediaStreams({
+          $unset: [streamId],
+        });
+      });
+    }
+    const { userId } = sessionUtils.unpack(session);
+    this.disconnectUser(userId, session);
+  }
+
+  connect() {
     const handlePresenceState = (initialPresence) => {
       const syncedPresence = Presence.syncState(this.stateBuffer.presence, initialPresence);
       this.updateState({ presence: { $set: syncedPresence } });
@@ -320,8 +321,8 @@ class Room extends Component {
       const syncedPresence = Presence.syncDiff(oldPresence, diff);
       this.updateState({ presence: { $set: syncedPresence } });
 
-      const handleJoins = joins => Object.keys(joins).forEach(handleJoin);
-      const handleLeaves = leaves => Object.keys(leaves).forEach(handleLeave);
+      const handleJoins = joins => Object.keys(joins).forEach(this.handleJoin);
+      const handleLeaves = leaves => Object.keys(leaves).forEach(this.handleLeave);
       handleJoins(diff.joins);
       handleLeaves(diff.leaves);
     };
