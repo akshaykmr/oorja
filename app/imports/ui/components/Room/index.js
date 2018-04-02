@@ -535,7 +535,7 @@ class Room extends Component {
                 ),
                 intent: Intent.WARNING,
               });
-              return
+              return;
             }
 
             window.chrome.runtime.sendMessage(
