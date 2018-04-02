@@ -24,12 +24,12 @@ class LoginWithService extends Component {
         icon: 'ion-googly',
         color: '#dd4b39',
       },
-      {
-        service: 'Facebook',
-        login: () => Meteor.loginWithFacebook({}, loginCallback),
-        icon: 'ion-book-of-faces',
-        color: '#3b5998',
-      },
+      // {
+      //   service: 'Facebook',
+      //   login: () => Meteor.loginWithFacebook({}, loginCallback),
+      //   icon: 'ion-book-of-faces',
+      //   color: '#3b5998',
+      // },
       {
         service: 'Twitter',
         login: () => Meteor.loginWithTwitter({}, loginCallback),
@@ -38,7 +38,7 @@ class LoginWithService extends Component {
       },
       {
         service: 'LinkedIn',
-        login: () => Meteor.loginWithLinkedIn({}, loginCallback),
+        login: () => Meteor.loginWithLinkedin({}, loginCallback),
         icon: 'ion-spam-central',
         color: '#0077b5',
       },

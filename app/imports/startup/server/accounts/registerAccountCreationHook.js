@@ -37,7 +37,7 @@ Accounts.onCreateUser((options, user) => {
       profile: {
         firstName: screenName,
         lastName: '',
-        picture: `https://twitter.com/${options.profile.name}/profile_image?size=original`,
+        picture: `https://twitter.com/${screenName}/profile_image?size=original`,
         loginService: 'Twitter',
       },
     });

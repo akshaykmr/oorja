@@ -1,5 +1,6 @@
 client/compatibility/*
 packages/twitch-oauth/*
+packages/linkedin-oauth/*
 deployment/*
 imports/ui/components/Room/Spotlight/tabs/Reacteroids/src/*
 imports/ui/components/Room/Spotlight/tabRegistry.js

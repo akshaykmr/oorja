@@ -8,7 +8,7 @@ export const extractFirstAndLastName = fullName => ({
 export const getPictureForLinkedInUser = (token) => {
   const { data } = HTTP.call(
     'GET',
-    'https://api.linkedin.com/v1/people/~/picture-urls::(original)?format=json',
+    'https://api.linkedin.com/v1/people/~:(id,location,picture-url,specialties,public-profile-url,email-address,formatted-name)?format=json',
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -16,5 +16,5 @@ export const getPictureForLinkedInUser = (token) => {
       timeout: 3000,
     },
   );
-  return data.values[0] || '';
+  return data.pictureUrl || '';
 };

@@ -39,9 +39,10 @@ aldeed:simple-schema
 random@1.1.0
 http@1.4.0
 fourseven:scss
-pauli:accounts-linkedin
+
 dynamic-import@0.3.0
 percolate:synced-cron
 akshay:twitch-oauth
 simple:json-routes
 server-render
+pauli:accounts-linkedin:custom
