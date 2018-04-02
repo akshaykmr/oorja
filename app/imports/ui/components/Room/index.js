@@ -348,7 +348,7 @@ class Room extends Component {
 
   // to be only used with local mediaStreams
   cleanupMediaStream(mediaStream) {
-    if (this.mediaStream) {
+    if (mediaStream) {
       this.getPeerList()
         .forEach(peer => this.unpublishMediaStream(peer, mediaStream));
       mediaUtils.destroyMediaStream(mediaStream);
