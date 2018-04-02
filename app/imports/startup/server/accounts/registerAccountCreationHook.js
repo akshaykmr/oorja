@@ -49,7 +49,7 @@ Accounts.onCreateUser((options, user) => {
         firstName: username,
         lastName: '',
         picture: `https://github.com/${username}.png?size=150`,
-        loginService: 'GitHub',
+        loginService: 'Github',
       },
     });
   } else if (user.services.linkedin) {

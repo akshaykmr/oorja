@@ -61,6 +61,7 @@ class Door extends Component {
     this.enterRoom = this.enterRoom.bind(this);
     this.passwordSuccess = this.passwordSuccess.bind(this);
     this.onUnexpectedServerError = this.onUnexpectedServerError.bind(this);
+    this.handleRoomFetchFailure = this.handleRoomFetchFailure.bind(this);
   }
 
   kick(message = GENERIC_ERROR_MESSAGE, intent = Intent.WARNING) {
@@ -179,7 +180,7 @@ class Door extends Component {
           roomInfo: { $set: roomInfo },
         });
         return Promise.resolve(roomInfo);
-      }, this.handleRoomFetchFailure);
+      }, () => { this.handleRoomFetchFailure(); return Promise.reject(); });
   }
 
   initialize() {

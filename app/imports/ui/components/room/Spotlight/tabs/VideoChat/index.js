@@ -12,13 +12,13 @@ import {
   Monitor,
 } from 'imports/ui/components/icons';
 
-import Avatar from '../../../Avatar';
-import roomActivities from '../../../constants/roomActivities';
+import Avatar from 'imports/ui/components/Room/Avatar';
+import roomActivities from 'imports/ui/components/Room/constants/roomActivities';
 
-import VideoStream from '../../../../media/Video';
+import VideoStream from 'imports/ui/components/media/Video';
+import status from 'imports/ui/components/Room/constants/status';
 
 import tabPropTypes from '../tabPropTypes';
-import status from '../../../constants/status';
 import './videoChat.scss';
 
 class VideoChat extends Component {
@@ -34,7 +34,7 @@ class VideoChat extends Component {
 
     this.resetTimer = this.resetTimer.bind(this);
 
-    this.idleTimeout = 5.0; // seconds
+    this.idleTimeout = 5; // seconds
     this.idleSecondsCounter = 0;
     window.addEventListener('click', this.resetTimer);
 
@@ -43,8 +43,9 @@ class VideoChat extends Component {
     window.addEventListener('keypress', this.resetTimer);
 
     const checkIdleTime = () => {
-      this.idleSecondsCounter += 2000;
-      if (this.idleSecondsCounter > this.idleTimeout * 1000) {
+      if (this.state.idle) return;
+      this.idleSecondsCounter += 1;
+      if (this.idleSecondsCounter > this.idleTimeout) {
         this.setState({
           ...this.state,
           idle: true,
@@ -53,7 +54,7 @@ class VideoChat extends Component {
     };
 
 
-    this.windowIntervalId = setInterval(checkIdleTime, 2000);
+    this.windowIntervalId = setInterval(checkIdleTime, 1000); // tick every second
 
     this.services = {
       Google: {
@@ -84,8 +85,8 @@ class VideoChat extends Component {
 
     this.goToInfoTab = this.goToInfoTab.bind(this);
     this.handleScreenShareClick = this.handleScreenShareClick.bind(this);
-    this.updateFocussedMediaStream = _.throttle(this.updateFocussedMediaStream, 2000);
-    this.temporaryPin = false;
+    this.updateFocussedMediaStream = _.throttle(this.updateFocussedMediaStream, 2000).bind(this);
+
     this.pinTimeoutId = null;
     this.props.roomAPI.addActivityListener(roomActivities.STREAM_CLICKED, (streamId) => {
       if (this.pinTimeoutId) clearTimeout(this.pinTimeoutId);
@@ -94,7 +95,7 @@ class VideoChat extends Component {
         pin: true,
         pinnedStreamId: streamId,
       });
-      setTimeout(() => this.setState({ ...this.state, pin: false }), 30000);
+      this.pinTimeoutId = setTimeout(() => this.setState({ ...this.state, pin: false }), 30000);
     });
     this.props.roomAPI
       .addActivityListener(roomActivities.STREAM_SPEAKING_START, ({ streamId, remote }) => {
@@ -127,9 +128,10 @@ class VideoChat extends Component {
     window.removeEventListener('onmousemove', this.resetTimer);
     window.removeEventListener('onkeypress', this.resetTimer);
   }
+
   getMediaStreamList() {
-    return Object.keys(this.props.mediaStreams)
-      .map(streamId => this.props.mediaStreams[streamId]);
+    return Object.entries(this.props.mediaStreams)
+      .map(([_streamId, mediaStream]) => mediaStream);
   }
 
   allLocalStreams(streamList = this.getMediaStreamList()) {
@@ -229,6 +231,10 @@ class VideoChat extends Component {
   renderLogo(loginService) {
     if (!loginService) return null;
     const service = this.services[loginService];
+    if (!service) {
+      console.warn(`service not found: ${service}`);
+      return null;
+    }
     const { color, icon } = service;
     return (
       <div className="" style={{ color }}>
@@ -257,8 +263,8 @@ class VideoChat extends Component {
     return (
       <div className={`focussedStream ${noVideo ? 'empty' : ''}`}>
         {
-          (focussedStream.video || focussedStream.screen) && !focussedStream.mutedVideo ?
-          (<VideoStream streamSource={focussedStream.streamSource} muted='muted' autoPlay />) : null
+          noVideo ?
+          null : (<VideoStream streamSource={focussedStream.streamSource} muted='muted' autoPlay />)
         }
         <div className={userInfoCardClasses}>
           <Avatar user={user}></Avatar>
@@ -284,7 +290,7 @@ class VideoChat extends Component {
               <div className="text">
                 When users join their video will appear here.
               </div>
-              <button onClick = {this.goToInfoTab}
+              <button onClick={this.goToInfoTab}
                 type="button" className="pt-button pt-intent-success">
                 Invite People <span className="hand">👋</span>
               </button>
