@@ -18,24 +18,24 @@ const Landing = props =>
         <div className="pill"></div>
       </div>
       <section className="kickstart">
-        <div className="tagline">
-          Connect and collaborate quickly and privately
-        </div>
+        <h1 className="tagline">
+          Connect and collaborate effortlessly and privately
+        </h1>
         <div className="minimalDescription">
           with video, voice chat and <strong>much more! </strong>
         </div>
         <RoomSetup history={props.history} />
       </section>
       <section className="about">
-        <div className="status-text">
-          <h2>About 👇</h2>
-          With oorja you can quickly connect and collaborate with people
-          effortlessly and privately.
-          Simply create a room and share the link to invite others,
-          then you can communicate peer to peer using video/audio and collaborate using
-          mini-apps in the room (called tabs). Each tab adds a new capability to the
-          room, you can add them to your room whenever needed. <br/>
-          Below are some examples of tabs.
+          <div className="title">How it works ? 👇</div>
+          <div className="step"> Simply create a room and share the link to invite others,
+          then you can communicate privately using video/audio and collaborate using
+          mini-apps called tabs. </div>
+
+          <div className="step">
+            Each tab adds a new capability to the room,
+            you can add them to your room whenever needed 🚀
+          </div>
           <ul className="previewReel">
             <li>
               <div className="preview"><img src="https://d1laijbq9p776p.cloudfront.net/screenshare.png" alt=""/></div>
@@ -89,31 +89,18 @@ const Landing = props =>
           <br/>
           Got some feedback or something to say?
           <br/>send a
-          mail: <a href="mailto:oorja.akshay@gmail.com?Subject=Hello%20Akshay">
-          oorja.akshay@gmail.com </a>
-          or find me on twitter <a href="https://twitter.com/uberakshay" target="_blank" rel="noopener noreferrer">@uberakshay</a>
+          mail: <a href="mailto:akshay.kmr4321@gmail.com?Subject=Hello%20Akshay">
+          akshay.kmr4321@gmail.com </a>
+          <br />or find me on twitter <a href="https://twitter.com/uberakshay" target="_blank" rel="noopener noreferrer">@uberakshay</a>
 
           <br/><br/>
           <br/> <hr/>
           <div className="extraInfo">
-            oorja is built upon some of the latest technologies in modern
-            web browsers namely webrtc, (it may not be supported
-            in your browser eg. safari, chrome on iOS. It is <b>recommended to use Chrome
-            on Desktop</b>)
-            <br/>
-            <br/>
-            <b>Note:</b> If you are using chrome you will need to install the
-            <a
-              target="_blank" rel="noopener noreferrer"
-              href="https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff?hl=en-US"> screensharing
-              extension
-            </a> to be able to share your screen.
             <br/><br/>
             If you experience connectivity issues, well, remember that the app is
             still alpha version. Also, It may be because of firewalls or some
             corporate network configuration.
           </div>
-        </div>
       </section>
       <div className="donateButton">
       <a href="#donate" id="link">Donate <br/> <i className="ion ion-ios-heart"></i> </a>
