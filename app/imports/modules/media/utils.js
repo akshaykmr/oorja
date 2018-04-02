@@ -35,8 +35,7 @@ export const unmuteVideoTracks = mediaStream =>
 /* eslint-enable no-param-reassign */
 
 export const destroyMediaStream = (mediaStream) => {
-  mediaStream.getAudioTracks().forEach(track => track.stop());
-  mediaStream.getVideoTracks().forEach(track => track.stop());
+  mediaStream.getTracks().forEach(track => track.stop());
 };
 
 export const getSavedConstraints = () => {

@@ -22,7 +22,7 @@ import sessionUtils from 'imports/modules/room/sessionUtils';
 import MessageSwitch from 'imports/modules/MessageSwitch';
 
 import { Intent } from '@blueprintjs/core';
-import { Maximize as MaximizeIcon} from 'imports/ui/components/icons';
+import { Maximize as MaximizeIcon } from 'imports/ui/components/icons';
 
 import mapDispatchToProps from './dispatch';
 // TODO: move stream handling related functions to streamManager.js
@@ -43,7 +43,7 @@ import StreamManager from './StreamManager';
 
 import './room.scss';
 
-const { beamConfig } = Meteor.settings.public;
+const { beamConfig, screenShareExtensionId } = Meteor.settings.public;
 
 class Room extends Component {
   constructor(props) {
@@ -68,6 +68,9 @@ class Room extends Component {
     // Forms the interface to interact with the room. To be passed down to tabs.
     this.roomAPI = new RoomAPI(this);
 
+    this.primaryMediaStream = null;
+    this.screenSharingStream = null;
+
     this.messageHandler = this.createMessageHandler();
     this.onWindowResize = _.throttle(this.onWindowResize, 100);
 
@@ -85,6 +88,7 @@ class Room extends Component {
     this.createPeer = this.createPeer.bind(this);
     this.handleJoin = this.handleJoin.bind(this);
     this.handleLeave = this.handleLeave.bind(this);
+    this.initializeScreenSharing = this.initializeScreenSharing.bind(this);
 
     this.state = {
       roomConnectionStatus: status.INITIALIZING,
@@ -342,16 +346,25 @@ class Room extends Component {
     });
   }
 
-  cleanupPrimaryMediaStream() {
-    if (this.primaryMediaStream) {
+  // to be only used with local mediaStreams
+  cleanupMediaStream(mediaStream) {
+    if (this.mediaStream) {
       this.getPeerList()
-        .forEach(peer => this.unpublishMediaStream(peer, this.primaryMediaStream));
-      mediaUtils.destroyMediaStream(this.primaryMediaStream);
-      this.removeSpeechTracker(this.primaryMediaStream.id);
-      this.primaryMediaStream = null;
+        .forEach(peer => this.unpublishMediaStream(peer, mediaStream));
+      mediaUtils.destroyMediaStream(mediaStream);
+      this.removeSpeechTracker(mediaStream.id);
     }
   }
 
+  cleanupPrimaryMediaStream() {
+    if (this.primaryMediaStream) {
+      this.props.updateMediaStreams({
+        $unset: [this.primaryMediaStream.id],
+      });
+      this.cleanupMediaStream(this.primaryMediaStream);
+      this.primaryMediaStream = null;
+    }
+  }
   initializePrimaryMediaStream() {
     this.cleanupPrimaryMediaStream();
     // create a stream with saved preferences
@@ -396,7 +409,7 @@ class Room extends Component {
       });
       this.addSpeechTracker(mediaStream);
       this.getPeerList()
-        .forEach(peer => this.publishMediaStream(peer, this.primaryMediaStream));
+        .forEach(peer => this.publishMediaStream(peer, mediaStream));
     };
 
     const onFailure = () => {
@@ -420,6 +433,137 @@ class Room extends Component {
 
     navigator.mediaDevices.getUserMedia(constraints)
       .then(onSuccess, onFailure);
+  }
+
+  cleanupScreenSharingStream() {
+    if (this.screenSharingStream) {
+      if (!this.unmountInProgress) {
+        this.props.updateMediaStreams({
+          $unset: [this.screenSharingStream.id],
+        });
+        this.updateState({
+          screenSharingStreamState: {
+            status: { $set: status.DISCONNECTED },
+          },
+        });
+      }
+      this.cleanupMediaStream(this.screenSharingStream);
+      this.screenSharingStream = null;
+    }
+  }
+
+  initializeScreenSharing() {
+    this.cleanupScreenSharingStream();
+
+    const onSuccess = (mediaStream) => {
+      /* eslint-disable no-param-reassign */
+      mediaStream.getTracks().forEach((track) => {
+        track.onended = () => {
+          // remove callbacks for other tracks.
+          mediaStream.getTracks().forEach((otherTrack) => {
+            otherTrack.onended = null;
+          });
+          this.cleanupScreenSharingStream();
+        };
+      });
+      /* eslint-enable no-param-reassign */
+      this.screenSharingStream = mediaStream;
+      this.props.updateMediaStreams({
+        [mediaStream.id]: {
+          $set: this.streamManager.formMediaStreamState({
+            userId: this.props.roomUserId,
+            mediaStream,
+            isLocal: true,
+          }),
+        },
+      });
+      this.updateState({
+        screenSharingStreamState: {
+          status: { $set: status.CONNECTED },
+        },
+      });
+      this.getPeerList()
+        .forEach(peer => this.publishMediaStream(peer, mediaStream));
+    };
+
+    const onFailure = () => {
+      this.props.toaster.show({
+        message: 'Could not share your screen 😕',
+        intent: Intent.WARNING,
+      });
+      this.updateState({
+        screenSharingStreamState: {
+          status: { $set: status.ERROR },
+        },
+      });
+      this.screenSharingStream = null;
+    };
+
+    this.updateState({
+      screenSharingStreamState: {
+        status: { $set: status.INITIALIZING },
+      },
+    });
+
+
+    const toastFeatureNotAvailable = () => {
+      this.props.toaster.show({
+        message: `Your browser does not support this feature at the moment 😕.
+          You can however, share you screen with Chrome using a browser extension`,
+        intent: Intent.WARNING,
+      });
+    };
+
+    switch (browserUtils.getBrowser()) {
+      case 'chrome-stable':
+        window.chrome.runtime.sendMessage(
+          screenShareExtensionId,
+          { getVersion: true },
+          (response) => {
+            if (!response) {
+              this.props.toaster.show({
+                message: (
+                  <span>
+                    You need to install a browser plugin to share your screen.
+                    <br />
+                    <a style={{ color: 'white', textDecoration: 'underline' }}
+                      target="_blank" rel="noopener noreferrer"
+                      href="https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff">
+                      Click here to go to the plugin page on chrome web store
+                    </a>
+                  </span>
+                ),
+                intent: Intent.WARNING,
+              });
+              return
+            }
+
+            window.chrome.runtime.sendMessage(
+              screenShareExtensionId,
+              { getStream: true },
+              (result) => {
+                if (result === undefined) {
+                  onFailure(); // Access to screen denied
+                  return;
+                }
+                const { streamId } = result;
+                const constraints = {
+                  video: {
+                    mandatory: {
+                      chromeMediaSource: 'desktop',
+                      chromeMediaSourceId: streamId,
+                    },
+                  },
+                };
+                navigator.mediaDevices.getUserMedia(constraints)
+                  .then(onSuccess, onFailure);
+              },
+            );
+          },
+        );
+        break;
+      default: toastFeatureNotAvailable();
+    }
   }
 
   connectUser(userId, session) {
@@ -553,7 +697,8 @@ class Room extends Component {
     this.getPeerList()
       .forEach(peer => peer.destroy());
 
-    this.cleanupPrimaryMediaStream();
+    this.cleanupMediaStream(this.primaryMediaStream);
+    this.cleanupMediaStream(this.screenSharingStream);
 
     this.beamClient.leaveRoomChannel();
     window.removeEventListener('resize', this.onWindowResize);
