@@ -754,6 +754,7 @@ class Room extends Component {
         <StreamsContainer
           uiSize={uiSize}
           streamContainerSize={streamContainerSize}
+          roomConnectionStatus={this.state.roomConnectionStatus}
           roomInfo={this.props.roomInfo}
           roomAPI={this.roomAPI}
           dispatchRoomActivity={this.activityListener.dispatch}

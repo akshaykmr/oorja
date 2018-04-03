@@ -143,7 +143,7 @@ class StreamsContainer extends Component {
     };
 
     const streamContainerStyle = this.streamContainerStyle[streamContainerSize];
-    const tryingToConnect = this.props.connectedUsers.length === 0;
+    const tryingToConnect = this.props.roomConnectionStatus === status.TRYING_TO_CONNECT;
     return (
       <div
         className={classNames(streamContainerClassNames)}
@@ -178,6 +178,7 @@ StreamsContainer.propTypes = {
   connectedUsers: PropTypes.array.isRequired,
   uiSize: PropTypes.string.isRequired,
   streamContainerSize: PropTypes.string.isRequired,
+  roomConnectionStatus: PropTypes.string.isRequired,
 };
 
 export default connect(mapStateToProps, {})(StreamsContainer);
