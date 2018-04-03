@@ -20,6 +20,7 @@ import ActivityListener from 'imports/modules/ActivityListener';
 import BeamClient from 'imports/modules/BeamClient';
 import sessionUtils from 'imports/modules/room/sessionUtils';
 import MessageSwitch from 'imports/modules/MessageSwitch';
+import { generateUUID } from 'imports/modules/misc';
 
 import { Intent } from '@blueprintjs/core';
 import { Maximize as MaximizeIcon } from 'imports/ui/components/icons';
@@ -52,7 +53,7 @@ class Room extends Component {
     this.erizoToken = props.roomStorage.getErizoToken();
 
     this.tabMessageHandlers = {}; // tabId -> messageHandler map
-    this.peers = {}; // sessionId -> Peer
+    this.peers = {}; // sessionId -> { peer, ref: uuid }
 
     this.streams = {}; // streamId -> mediaStream
     // note: erizoStream.stream would be of type MediaStream(the browser's MediaStream object)
@@ -81,6 +82,7 @@ class Room extends Component {
     this.updateState = this.updateState.bind(this);
     this.connect = this.connect.bind(this);
     this.connectUser = this.connectUser.bind(this);
+    this.connectSession = this.connectSession.bind(this);
     this.disconnectUser = this.disconnectUser.bind(this);
     this.determineStreamContainerSize = this.determineStreamContainerSize.bind(this);
     this.setCustomStreamContainerSize = this.setCustomStreamContainerSize.bind(this);
@@ -211,15 +213,14 @@ class Room extends Component {
       });
   }
 
-  handleSignalingMessage({ from, content }) {
+  handleSignalingMessage({ from, content: { ref, data } }) {
     const { session } = from;
-    if (this.peers[session]) {
-      this.peers[session].signal(content);
+    if (this.peers[session] && this.peers[session].ref === ref) {
+      this.peers[session].peer.signal(data);
       return;
     }
-    const peer = this.createPeer({ session, initiator: false });
-    peer.signal(content);
-    this.peers[session] = peer;
+    this.peers[session] = this.createPeer({ session, initiator: false, reference: ref });
+    this.peers[session].peer.signal(data);
   }
 
   publishMediaStream(peer, mediaStream) {
@@ -234,7 +235,7 @@ class Room extends Component {
 
   getPeerList() {
     return Object.entries(this.peers)
-      .map(([_sessionId, peer]) => peer);
+      .map(([_sessionId, { peer }]) => peer);
   }
 
   unpublishMediaStream(peer, mediaStream) {
@@ -247,14 +248,18 @@ class Room extends Component {
     }
   }
 
-  createPeer({ session, initiator }) {
+  createPeer({ session, initiator, reference }) {
+    const ref = initiator ? generateUUID() : reference;
     const { userId } = sessionUtils.unpack(session);
-    const peer = new Peer({ initiator, reconnectTimer: 200 });
+    const peer = new Peer({ initiator });
     peer.on('signal', (data) => {
       this.sendMessage({
         type: messageType.SIGNAL,
         to: [{ session }],
-        content: data,
+        content: {
+          ref,
+          data,
+        },
       });
     });
     peer.on('stream', (mediaStream) => {
@@ -277,33 +282,40 @@ class Room extends Component {
         $unset: [mediaStream.id],
       });
     });
+
+    peer.on('error', () => {
+      peer.destroy();
+      if (initiator) {
+        this.peers[session] = this.createPeer({ session, initiator: true });
+      }
+    });
+
     peer.on('connect', () => {
-      this.connectUser(userId, session);
       this.sessionStreams[session] = [];
       this.publishMediaStream(peer, this.primaryMediaStream);
+      this.publishMediaStream(peer, this.screenSharingStream);
     });
-    return peer;
+    return {
+      ref,
+      peer,
+    };
+  }
+
+  connectSession(session) {
+    const { userId } = sessionUtils.unpack(session);
+    this.connectUser(userId, session);
   }
 
   handleJoin(session) {
-    if (session === this.session) {
-      const { userId } = sessionUtils.unpack(session);
-      this.connectUser(userId, session);
-      return;
+    this.connectSession(session);
+    if (session !== this.session) {
+      this.peers[session] = this.createPeer({ session, initiator: true });
     }
-    if (this.peers[session]) {
-      console.error('peer exists');
-      // WIP
-      // this.peers[session].destroy();
-      // delete this.peers[session];
-    }
-    const peer = this.createPeer({ session, initiator: true });
-    this.peers[session] = peer;
   }
 
   handleLeave(session) {
     if (this.peers[session]) {
-      this.peers[session].destroy();
+      this.peers[session].peer.destroy();
       delete this.peers[session];
       this.sessionStreams[session].forEach((streamId) => {
         this.props.updateMediaStreams({
@@ -319,6 +331,7 @@ class Room extends Component {
     const handlePresenceState = (initialPresence) => {
       const syncedPresence = Presence.syncState(this.stateBuffer.presence, initialPresence);
       this.updateState({ presence: { $set: syncedPresence } });
+      Object.keys(syncedPresence).forEach(session => this.connectSession(session));
     };
 
     const handlePresenceDiff = (diff) => {
