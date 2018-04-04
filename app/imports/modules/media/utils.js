@@ -53,16 +53,3 @@ export const getSavedConstraints = () => {
   };
   return Object.assign(audioConstraints, videoConstraints);
 };
-
-export default {
-  hasVideo,
-  hasAudio,
-  isVideoMuted,
-  isAudioMuted,
-  destroyMediaStream,
-  getSavedConstraints,
-  muteAudioTracks,
-  unmuteAudioTracks,
-  muteVideoTracks,
-  unmuteVideoTracks,
-};

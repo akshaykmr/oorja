@@ -14,7 +14,7 @@ import Peer from 'simple-peer/simplepeer.min.js';
 import hark from 'hark';
 
 import mediaPreferences from 'imports/modules/media/storage';
-import mediaUtils from 'imports/modules/media/utils';
+import * as mediaUtils from 'imports/modules/media/utils';
 import browserUtils from 'imports/modules/browser/utils';
 import ActivityListener from 'imports/modules/ActivityListener';
 import BeamClient from 'imports/modules/BeamClient';
@@ -52,7 +52,9 @@ class Room extends Component {
     this.erizoToken = props.roomStorage.getErizoToken();
 
     this.tabMessageHandlers = {}; // tabId -> messageHandler map
-    this.peers = {}; // sessionId -> { peer, ref: uuid }
+
+    this.inbound = {}; // sessionId -> { peer, ref: uuid }
+    this.outbound = {}; // sessionId -> { peer, ref: uuid }
 
     this.streams = {}; // streamId -> mediaStream
     // note: erizoStream.stream would be of type MediaStream(the browser's MediaStream object)
@@ -199,27 +201,33 @@ class Room extends Component {
             this.props.streamSpeakingStopped(streamId);
           }
         },
-        [messageType.STREAM_UPDATE]: ({ content: { streamId, mutedAudio, mutedVideo } }) => {
-          if (this.props.mediaStreams[streamId]) {
-            this.props.updateMediaStreams({
-              [streamId]: {
-                mutedAudio: { $set: mutedAudio },
-                mutedVideo: { $set: mutedVideo },
-              },
-            });
-          }
+        [messageType.STREAM_UPDATE]: ({ content }) => {
+          this.streamManager.handleStreamUpdate(content);
         },
       });
   }
 
-  handleSignalingMessage({ from, content: { ref, data } }) {
+  handleSignalingMessage({ from, content: { ref, data, initiator } }) {
     const { session } = from;
-    if (this.peers[session] && this.peers[session].ref === ref) {
-      this.peers[session].peer.signal(data);
-      return;
+    const fetchPeer = (source) => {
+      if (source[session] && source[session].ref === ref) {
+        return source[session].peer;
+      }
+      return null;
+    };
+
+    if (initiator) {
+      const peer = fetchPeer(this.inbound);
+      if (peer) {
+        peer.signal(data);
+        return;
+      }
+      this.inbound[session] = this.createPeer({ session, initiator: false, reference: ref });
+      this.inbound[session].peer.signal(data);
+    } else {
+      const peer = fetchPeer(this.outbound);
+      if (peer) peer.signal(data);
     }
-    this.peers[session] = this.createPeer({ session, initiator: false, reference: ref });
-    this.peers[session].peer.signal(data);
   }
 
   publishMediaStream(peer, mediaStream) {
@@ -232,8 +240,8 @@ class Room extends Component {
     }
   }
 
-  getPeerList() {
-    return Object.entries(this.peers)
+  getPeerList(source) {
+    return Object.entries(source)
       .map(([_sessionId, { peer }]) => peer);
   }
 
@@ -256,6 +264,7 @@ class Room extends Component {
         type: messageType.SIGNAL,
         to: [{ session }],
         content: {
+          initiator,
           ref,
           data,
         },
@@ -282,17 +291,23 @@ class Room extends Component {
       });
     });
 
-    peer.on('error', () => {
+    peer.on('error', (e) => {
+      // FIXME
+      const errorIgnoreList = [
+        'Cannot remove track that was never added.',
+      ];
+      if (errorIgnoreList.includes(e.message)) return;
       peer.destroy();
       if (initiator) {
-        this.peers[session] = this.createPeer({ session, initiator: true });
+        this.outbound[session] = this.createPeer({ session, initiator: true });
       }
     });
 
     peer.on('connect', () => {
-      this.sessionStreams[session] = [];
-      this.publishMediaStream(peer, this.primaryMediaStream);
-      this.publishMediaStream(peer, this.screenSharingStream);
+      if (initiator) {
+        this.publishMediaStream(peer, this.primaryMediaStream);
+        this.publishMediaStream(peer, this.screenSharingStream);
+      }
     });
     return {
       ref,
@@ -308,20 +323,30 @@ class Room extends Component {
   handleJoin(session) {
     this.connectSession(session);
     if (session !== this.session) {
-      this.peers[session] = this.createPeer({ session, initiator: true });
+      this.sessionStreams[session] = [];
+      this.outbound[session] = this.createPeer({ session, initiator: true });
     }
   }
 
   handleLeave(session) {
-    if (this.peers[session]) {
-      this.peers[session].peer.destroy();
-      delete this.peers[session];
+    const removePeer = (source) => {
+      if (source[session]) {
+        source[session].peer.destroy();
+        /* eslint-disable no-param-reassign */
+        delete source[session];
+        /* eslint-enable no-param-reassign */
+      }
+    };
+    if (this.sessionStreams[session]) {
       this.sessionStreams[session].forEach((streamId) => {
         this.props.updateMediaStreams({
           $unset: [streamId],
         });
       });
     }
+    removePeer(this.inbound);
+    removePeer(this.outbound);
+
     const { userId } = sessionUtils.unpack(session);
     this.disconnectUser(userId, session);
   }
@@ -330,7 +355,7 @@ class Room extends Component {
     const handlePresenceState = (initialPresence) => {
       const syncedPresence = Presence.syncState(this.stateBuffer.presence, initialPresence);
       this.updateState({ presence: { $set: syncedPresence } });
-      Object.keys(syncedPresence).forEach(session => this.connectSession(session));
+      Object.keys(syncedPresence).forEach(this.handleJoin);
     };
 
     const handlePresenceDiff = (diff) => {
@@ -361,7 +386,7 @@ class Room extends Component {
   // to be only used with local mediaStreams
   cleanupMediaStream(mediaStream) {
     if (mediaStream) {
-      this.getPeerList()
+      this.getPeerList(this.outbound)
         .forEach(peer => this.unpublishMediaStream(peer, mediaStream));
       mediaUtils.destroyMediaStream(mediaStream);
       this.removeSpeechTracker(mediaStream.id);
@@ -377,6 +402,7 @@ class Room extends Component {
       this.primaryMediaStream = null;
     }
   }
+
   initializePrimaryMediaStream() {
     this.cleanupPrimaryMediaStream();
     // create a stream with saved preferences
@@ -420,7 +446,7 @@ class Room extends Component {
         },
       });
       this.addSpeechTracker(mediaStream);
-      this.getPeerList()
+      this.getPeerList(this.outbound)
         .forEach(peer => this.publishMediaStream(peer, mediaStream));
     };
 
@@ -494,7 +520,7 @@ class Room extends Component {
           status: { $set: status.CONNECTED },
         },
       });
-      this.getPeerList()
+      this.getPeerList(this.outbound)
         .forEach(peer => this.publishMediaStream(peer, mediaStream));
     };
 
@@ -706,7 +732,7 @@ class Room extends Component {
   componentWillUnmount() {
     this.props.resetMediaStreams();
     this.unmountInProgress = true;
-    this.getPeerList()
+    this.getPeerList(this.outbound).concat(this.getPeerList(this.inbound))
       .forEach(peer => peer.destroy());
 
     this.cleanupMediaStream(this.primaryMediaStream);

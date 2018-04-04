@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import update from 'immutability-helper';
-import mediaUtils from 'imports/modules/media/utils';
+import * as mediaUtils from 'imports/modules/media/utils';
 import messageType from '../../components/Room/constants/messageType';
 import status from './constants/status';
 
@@ -18,6 +18,19 @@ class StreamManager {
         ...state,
       },
     });
+  }
+
+  handleStreamUpdate({
+    streamId, mutedAudio, mutedVideo,
+  }) {
+    if (this.room.props.mediaStreams[streamId]) {
+      this.room.props.updateMediaStreams({
+        [streamId]: {
+          mutedAudio: { $set: mutedAudio },
+          mutedVideo: { $set: mutedVideo },
+        },
+      });
+    }
   }
 
   getStreamList() {
