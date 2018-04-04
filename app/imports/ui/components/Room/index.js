@@ -92,6 +92,7 @@ class Room extends Component {
     this.handleJoin = this.handleJoin.bind(this);
     this.handleLeave = this.handleLeave.bind(this);
     this.initializeScreenSharing = this.initializeScreenSharing.bind(this);
+    this.requestStreamUpdate = this.requestStreamUpdate.bind(this);
 
     this.state = {
       roomConnectionStatus: status.INITIALIZING,
@@ -175,6 +176,16 @@ class Room extends Component {
     return ratio < breakRatio ? uiConfig.COMPACT : uiConfig.LARGE;
   }
 
+  requestStreamUpdate(session, streamId) {
+    this.sendMessage({
+      type: messageType.STREAM_UPDATE_REQUEST,
+      to: [{ session }],
+      content: {
+        streamId,
+      },
+    });
+  }
+
   createMessageHandler() { // TODO: refactor. use messageSwitch to organize and break it down.
     return new MessageSwitch()
       .registerHandlers({
@@ -203,6 +214,18 @@ class Room extends Component {
         },
         [messageType.STREAM_UPDATE]: ({ content }) => {
           this.streamManager.handleStreamUpdate(content);
+        },
+        [messageType.STREAM_UPDATE_REQUEST]: ({ from, content: { streamId } }) => {
+          const streamState = this.props.mediaStreams[streamId];
+          this.sendMessage({
+            type: messageType.STREAM_UPDATE,
+            to: [from],
+            content: {
+              streamId,
+              mutedAudio: streamState.mutedAudio,
+              mutedVideo: streamState.mutedVideo,
+            },
+          });
         },
       });
   }
@@ -281,6 +304,7 @@ class Room extends Component {
             }),
           },
         });
+        this.requestStreamUpdate(session, mediaStream.id);
         this.sessionStreams[session].push(mediaStream.id);
       }
     });
