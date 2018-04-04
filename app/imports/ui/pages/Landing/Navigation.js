@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Close, EyeOff, Github, LifeBuoy } from 'imports/ui/components/icons';
+import { Menu, Close, EyeOff, Github, LifeBuoy, MessageCircle } from 'imports/ui/components/icons';
 
 class Navigation extends React.Component {
   constructor(props) {
@@ -20,6 +20,10 @@ class Navigation extends React.Component {
       {
         href: '#help',
         Icon: LifeBuoy,
+      },
+      {
+        href: '#contact',
+        Icon: MessageCircle,
       },
     ];
 
@@ -44,10 +48,10 @@ class Navigation extends React.Component {
   render() {
     const { navOpen } = this.state;
     return (
-      <nav className={`stretchyNav ${ navOpen ? 'visible' : ''}`}>
+      <nav className={`stretchyNav ${navOpen ? 'visible' : ''}`}>
         <ul>
           <li className="trigger" onClick={this.toggleNav}>
-            <a href="#"> { navOpen ? <Close /> : <Menu/>} </a>
+            <a> { navOpen ? <Close /> : <Menu/>} </a>
           </li>
           {
             this.links

@@ -70,7 +70,13 @@ $landing-primary : white;
     .header {
       font-size: 1.4em;
       line-height: 2.0em;
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      svg {
+        margin-left: 5px;
+        color: cadetblue;
+      }
     }
 
     .step {
@@ -89,6 +95,13 @@ $landing-primary : white;
 
     .extraInfo {
       color: #666666;
+      ul {
+        margin: 0;
+        padding: 0;
+        li {
+          padding-bottom: 10px;
+        }
+      }
     }
 
     .previewReel {
@@ -123,7 +136,36 @@ $landing-primary : white;
     #about {
       font-size: 1.4em;
     }
+
+    .iconAnchor {
+      display: flex;
+      align-items: center;
+      svg {
+        margin-right: 5px;
+      }
+    }
+
+    #paypalIcon {
+      height: 85px;
+    }
   }
+
+  .navSection {
+    padding-bottom: 40px;
+    .navTarget {
+      padding-top: 20px;
+      text-align: center;
+      margin-bottom: 10px;
+      .label {
+        font-size: 1.2em;
+      }
+      svg {
+        height: 40px;
+        width: 40px;
+      }
+    }
+  }
+
 }
 
 .stretchyNav {
@@ -140,7 +182,7 @@ $landing-primary : white;
     right: 0;
     width: 46px;
     height: 46px;
-    transition: height 0.2s;
+    transition: height 0.1s;
     border: 2px solid #2f343b;
     border-radius: 14px;
     background-color: white;
@@ -149,7 +191,7 @@ $landing-primary : white;
 
   &.visible {
     .navbg {
-      height: 184px;
+      height: 230px;
     }
 
     ul {
@@ -208,9 +250,10 @@ $landing-primary : white;
       }
 
       .navItem {
+        opacity: 0;
         transform: scale(0);
-        transition-delay: 0.4s;
-        transition: transform 0.2s ease;
+        transition-delay: 0.2s;
+        transition: transform 0.2s ease, opacity 0.2s ease;
       }
     }
 
