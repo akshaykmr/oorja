@@ -28,8 +28,6 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
       position: absolute;
       width: 42px;
       height: 42px;
-      text-align: center;
-      line-height: 100%;
       color: cornflowerblue;
       background-color: floralwhite;
       cursor: pointer;
@@ -109,15 +107,15 @@ $chat-thread-offset : #{$chat-thread-avatar-size + 30px};
     border-radius: 50%;
     background-size:     cover;
     background-repeat:   no-repeat;
-    background-position: center center;   
-  } 
+    background-position: center center;
+  }
 
   &.begining {
     margin-top: 10px;
 
     .avatar {
       display: initial;
-    } 
+    }
     &:after {
       position: absolute;
       top: $chat-thread-msg-arrow-size;

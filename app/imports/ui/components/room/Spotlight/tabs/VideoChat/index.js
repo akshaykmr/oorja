@@ -33,13 +33,10 @@ class VideoChat extends Component {
     };
 
     this.resetTimer = this.resetTimer.bind(this);
-
     this.idleTimeout = 5; // seconds
     this.idleSecondsCounter = 0;
     window.addEventListener('click', this.resetTimer);
-
     window.addEventListener('mousemove', this.resetTimer);
-
     window.addEventListener('keypress', this.resetTimer);
 
     const checkIdleTime = () => {
@@ -54,36 +51,31 @@ class VideoChat extends Component {
     };
 
 
-    this.windowIntervalId = setInterval(checkIdleTime, 1000); // tick every second
+    this.idleIntervalId = setInterval(checkIdleTime, 1000); // tick every second
 
     this.services = {
       Google: {
         icon: 'ion-googly',
-        color: '#dd4b39',
       },
       Facebook: {
         icon: 'ion-book-of-faces',
-        color: '#3b5998',
       },
       Twitter: {
         icon: 'ion-blue-birdy',
-        color: '#1da1f2',
       },
       LinkedIn: {
         icon: 'ion-spam-central',
-        color: '#0077b5',
       },
       Github: {
         icon: 'ion-git-hub',
-        color: '#24292e',
       },
       Twitch: {
         icon: 'ion-twitchy',
-        color: '#6441a4',
       },
     };
 
     this.goToInfoTab = this.goToInfoTab.bind(this);
+
     this.handleScreenShareClick = this.handleScreenShareClick.bind(this);
     this.updateFocussedMediaStream = _.throttle(this.updateFocussedMediaStream, 2000).bind(this);
 
@@ -95,7 +87,7 @@ class VideoChat extends Component {
         pin: true,
         pinnedStreamId: streamId,
       });
-      this.pinTimeoutId = setTimeout(() => this.setState({ ...this.state, pin: false }), 30000);
+      this.pinTimeoutId = setTimeout(() => this.setState({ ...this.state, pin: false }), 20000);
     });
     this.props.roomAPI
       .addActivityListener(roomActivities.STREAM_SPEAKING_START, ({ streamId, remote }) => {
@@ -113,6 +105,7 @@ class VideoChat extends Component {
   }
 
   resetTimer() {
+    if (!this.props.onTop) return;
     if (this.state.idle) {
       this.setState({
         ...this.state,
@@ -123,7 +116,8 @@ class VideoChat extends Component {
   }
 
   componentWillUnmount() {
-    clearInterval(this.windowIntervalId);
+    clearInterval(this.idleIntervalId);
+    clearTimeout(this.pinTimeoutId);
     window.removeEventListener('onclick', this.resetTimer);
     window.removeEventListener('onmousemove', this.resetTimer);
     window.removeEventListener('onkeypress', this.resetTimer);
@@ -235,9 +229,9 @@ class VideoChat extends Component {
       console.warn(`service not found: ${service}`);
       return null;
     }
-    const { color, icon } = service;
+    const { icon } = service;
     return (
-      <div className="" style={{ color }}>
+      <div className="" style={{ color: 'white' }}>
         <i className={`icon custom-ion ${icon}`}></i>
       </div>
     );

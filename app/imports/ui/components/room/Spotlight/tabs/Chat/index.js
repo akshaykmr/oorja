@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import update from 'immutability-helper';
 import Remarkable from 'remarkable';
+import { Send } from 'imports/ui/components/icons';
 
 import Y from 'imports/modules/Yjs';
 import Avatar from '../../../Avatar';
@@ -23,6 +24,7 @@ class Chat extends Component {
     this.chatInput = null; // dom element for chatInput
     this.md = new Remarkable({
       linkify: true,
+      linkTarget: '_blank',
     });
 
     this.history = 50;
@@ -91,10 +93,13 @@ class Chat extends Component {
     }).then((y) => {
       this.y = y;
 
+      y.share.chat.toArray().forEach(this.appendMessage);
+      this.cleanupChat();
+
       y.share.chat.observe((event) => {
         if (event.type === 'insert') {
           for (let i = 0; i < event.length; i++) {
-            this.appendMessage(event.values[i], event.index);
+            this.appendMessage(event.values[i], event.index + 1);
           }
         } else if (event.type === 'delete') {
           for (let i = 0; i < event.length; i++) {
@@ -109,9 +114,6 @@ class Chat extends Component {
         this.updateState({ initialSyncComplete: { $set: true } });
         console.info(tabInfo.name, 'synced');
       });
-
-      y.share.chat.toArray().forEach(this.appendMessage);
-      this.cleanupChat();
 
       roomAPI.addActivityListener(roomActivities.TAB_SWITCH, (payload) => {
         if (payload.to === tabInfo.tabId) {
@@ -136,13 +138,11 @@ class Chat extends Component {
   }
 
   appendMessage(message, position) {
-    console.info(this.props.tabInfo.name, 'appending message', position, message);
     const user = this.props.roomAPI.getUserInfo(message.userId);
     if (!user) throw new Meteor.Error('chat sender not found');
 
     const chatMessage = {
       user,
-      key: message.key,
       text: message.text,
     };
 
@@ -207,9 +207,13 @@ class Chat extends Component {
     if (!chatInputValue || !this.y) return;
     const message = {
       userId: this.props.roomAPI.getUserId(),
-      key: _.uniqueId(this.prefixString),
+      // key: _.uniqueId(this.prefixString),
       text: chatInputValue.trim(),
     };
+
+    if (this.y.share.chat.length > this.history) {
+      this.y.share.chat.delete(0);
+    }
 
     this.updateState({
       chatInputValue: { $set: '' },
@@ -234,11 +238,11 @@ class Chat extends Component {
       recepient: !sender,
       begining: !inContinuation,
     };
-    const { user, key } = chatMessage;
+    const { user } = chatMessage;
     return (
       <li
         className={classNames(bubbleClassNames)}
-        key={key}>
+        key={index}>
         <Avatar user={user}/>
         <div
           dangerouslySetInnerHTML={{ __html: this.md.render(chatMessage.text) }}>
@@ -291,7 +295,7 @@ class Chat extends Component {
                  ref = { (input) => { this.chatInput = input; } }
           />
           <div className="sendButton" onClick={this.handleSubmit}>
-            <i className="icon ion-ios-paperplane"></i>
+            <Send/>
           </div>
         </form>
       </div>
