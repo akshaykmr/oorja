@@ -7,24 +7,22 @@ $landing-primary : white;
   min-height: 100vh;
   position: relative;
 
-  > .navbar {
-    > .logo {
-      display: none;
-      position: absolute;
-      height: 40px;
-      width: 40px;
-      top: 10px;
-      left: calc(5%);
+  > .logo {
+    display: none;
+    position: absolute;
+    height: 40px;
+    width: 40px;
+    top: 10px;
+    left: 5%;
 
-      @media only screen and (min-width: 700px) {
-        display: initial;
-      }
+    @media only screen and (min-width: 700px) {
+      display: initial;
+    }
 
-      .oorjaTitle {
-        text-align: center;
-        font-size: 1.3em;
-        font-weight: 300;
-      }
+    .oorjaTitle {
+      text-align: center;
+      font-size: 1.3em;
+      font-weight: 300;
     }
   }
 
@@ -125,5 +123,97 @@ $landing-primary : white;
     #about {
       font-size: 1.4em;
     }
+  }
+}
+
+.stretchyNav {
+  position: fixed;
+  z-index: 2;
+  top: 15px;
+  right: 5%;
+  width: 46px;
+
+  .navbg {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    width: 46px;
+    height: 46px;
+    transition: height 0.2s;
+    border: 2px solid #2f343b;
+    border-radius: 14px;
+    background-color: white;
+    box-shadow: 0 13px 30px -14px grey;
+  }
+
+  &.visible {
+    .navbg {
+      height: 184px;
+    }
+
+    ul {
+      li {
+        visibility: visible;
+
+        &:first-child a {
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
+        }
+      }
+      .navItem {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  }
+
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    position: relative;
+    z-index: 2;
+
+    li {
+      padding: 0;
+      margin: 0;
+      visibility: hidden;
+      transition: visibility 0.3s;
+
+      &:first-child a {
+        border-radius: 14px;
+      }
+
+      &:last-child a {
+        border-bottom-left-radius: 14px;
+        border-bottom-right-radius: 14px;
+      }
+
+      &.trigger {
+        visibility: visible;
+      }
+
+      a {
+        display: flex;
+        height: 46px;
+        width: 46px;
+        justify-content: center;
+        align-items: center;
+
+        &:hover {
+          background-color: #282c34;
+          color: white;
+        }
+      }
+
+      .navItem {
+        transform: scale(0);
+        transition-delay: 0.4s;
+        transition: transform 0.2s ease;
+      }
+    }
+
+
   }
 }

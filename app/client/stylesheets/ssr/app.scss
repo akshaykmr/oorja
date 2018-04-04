@@ -1,14 +1,14 @@
 .versionTag {
-  position: absolute;
+  position: fixed;
   right: 3px;
-  top: 3px;
+  bottom: 3px;
   z-index: 99999;
   background-color: purple;
   border-radius: 6px;
   padding: 4px;
   font-size: 0.8em;
 
-  a {
+  a, a:hover {
     color: white;
     text-decoration: initial;
   }

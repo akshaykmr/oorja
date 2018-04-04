@@ -1,21 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import scrollToElement from 'scroll-to-element';
 
 import RoomSetup from 'imports/ui/components/RoomSetup';
 import MinimalLogo from 'imports/ui/components/MinimalLogo';
+import Navigation from './Navigation';
 
 const Landing = props =>
   (
     <div className="landing page">
-      <div className="navbar">
-        <div className="logo">
-          <MinimalLogo />
-          <div className="oorjaTitle">
-            <span className="logo-title">oorja</span>
-          </div>
+      <Navigation />
+      <div className="logo">
+        <MinimalLogo />
+        <div className="oorjaTitle">
+          <span className="logo-title">oorja</span>
         </div>
-        <div className="pill"></div>
       </div>
       <section className="kickstart">
         <h1 className="tagline">
