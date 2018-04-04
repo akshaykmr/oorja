@@ -26,7 +26,6 @@ import { Intent } from '@blueprintjs/core';
 import { Maximize as MaximizeIcon } from 'imports/ui/components/icons';
 
 import mapDispatchToProps from './dispatch';
-// TODO: move stream handling related functions to streamManager.js
 
 // constants
 import uiConfig from './constants/uiConfig';

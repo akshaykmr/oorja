@@ -20,6 +20,11 @@ class StreamManager {
     });
   }
 
+  getStreamList() {
+    return Object.entries(this.room.props.mediaStreams)
+      .map(([_streamId, streamState]) => streamState);
+  }
+
   formMediaStreamState({ userId, mediaStream, isLocal = false }) {
     return {
       userId,

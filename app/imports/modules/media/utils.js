@@ -6,11 +6,11 @@ export const hasAudio = mediaStream => mediaStream.getAudioTracks().length > 0;
 
 export const isVideoMuted = mediaStream =>
   mediaStream.getVideoTracks()
-    .every(track => track.muted);
+    .every(track => !track.enabled);
 
 export const isAudioMuted = mediaStream =>
   mediaStream.getAudioTracks()
-    .every(track => track.muted);
+    .every(track => !track.enabled);
 
 /* eslint-disable no-param-reassign */
 export const muteAudioTracks = mediaStream =>

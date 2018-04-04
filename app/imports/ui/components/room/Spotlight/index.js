@@ -221,7 +221,7 @@ class Spotlight extends Component {
           </div>
         </div>
       );
-      // FIXME: tooltip is broken
+
       return (
         <div key={tab.tabId} className={classNames(switchClassNames)}>
           {renderBox()}

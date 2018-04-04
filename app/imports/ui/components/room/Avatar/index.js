@@ -5,7 +5,6 @@ import { extractInitialsFromName } from 'imports/modules/user/utilities';
 import './avatar.scss';
 
 class Avatar extends Component {
-// TODO: fix images for fb, twitter. google image works occasionally?
   constructor(props) {
     super(props);
     this.imageCurtainColor = 'floralwhite'; // bg color when Avatarimage is loading. should not be bright imo.
