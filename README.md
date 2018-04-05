@@ -44,10 +44,11 @@ Copyright © 2018 Akshay Kumar akshay.kmr4321@gmail.com
 
 
 ### How to contribute ?
-You are welcome to contribute! In order to do so please go through the following docs in the given order.
+You are welcome to contribute! In order to do so please go through the following docs **in the given order.**
 Also, It's quite easy to make tabs (you only need to know some react, which can itself be picked up in a weekend).
- 1. [Project Setup](docs/project-setup.md)
- 2. [Making a Tab](docs/make-a-tab.md)
+ 1. [Project Overview](docs/project-overview.md)
+ 2. [Project Setup](docs/project-setup.md)
+ 3. [Making a Tab](docs/make-a-tab.md)
 
 ### Contact
 [![Join the chat at https://gitter.im/oorja-io/Lobby](https://badges.gitter.im/oorja-io/Lobby.svg)](https://gitter.im/oorja-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
