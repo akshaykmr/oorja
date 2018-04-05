@@ -137,12 +137,6 @@ const Landing = props =>
               </div>
             </div>
           </div>
-          {/* <a target="_blank" rel="noopener noreferrer" href="https://paypal.me/akshaykmr"><Paypal/></a>
-              Got some feedback or something to say?
-              <br/>send a
-              mail: <a href="mailto:akshay.kmr4321@gmail.com?Subject=Hello%20Akshay">
-              akshay.kmr4321@gmail.com </a>
-              <br />or find me on twitter <a href="https://twitter.com/uberakshay" target="_blank" rel="noopener noreferrer">@uberakshay</a> */}
 
           <hr/>
 

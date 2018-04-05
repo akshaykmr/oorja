@@ -4,8 +4,23 @@
   display: flex;
   justify-content: center;
 
-  .joinUs {
+  .fork {
     max-width: 400px;
+
+    .develop {
+      text-align: center;
+      font-size: 1.3em;
+      padding-bottom: 10px;
+      .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        .svg {
+          height: 50px;
+          width: 50px;
+        }
+      }
+    }
 
     a {
       font-size: 1.2em;
