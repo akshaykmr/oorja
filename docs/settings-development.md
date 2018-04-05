@@ -5,93 +5,83 @@ I will use comments for explanation alongside each value, but remember that this
 
 ```
 {
-  "public": { // public settings are available for use on the client
+  "public": {
+    // chrome extension id for screensharing
+    // only works over https
+    "screenShareExtensionId": "abc",
 
-
-    // chrome extension Id for screensharing
-    "screenShareExtensionId": "kobkjhijljmjkobadoknmhakgfpkhiff",
-
-    // bandwidth settings for video streams
+    // licode related stream config
     "defaultMaxVideoBW": 300,
     "defaultMaxAudioBW": 300,
 
-    // Whether to refresh the webpage when waking up from sleep.
-    // recommended disabled for development and debugging.
-    "refreshOnWake": false
+    // refresh the browser if waking from sleep.
+    "refreshOnWake": false,
+
+    // cdn url for javascript bundle
+    "cdnURL": "https://d21e9wyielwbyq.cloudfront.net",
+
+    // beam micorservice location
+    "beamConfig": {
+      "socketProtocolPrefix": "ws://",   # "wss://" in production
+      "httpProtocolPrefix": "http://",   
+      "host": "127.0.0.1:5000"
+    }
   },
+  "private": {
 
-  "private": { // settings only available on the server
-               // use them for apikeys etc.
+    "JWTsecret": "super-secret",
+    "JWTalgo": "HS512",
 
-    "roomConfig": { // deprecated
-      "defaultComms": "video"
-    },
+    // salt rounds for password hashing
+    "saltRounds": 11,
 
-    "JWTsecret": "super-secret", // jwt secret string
-    "JWTalgo": "HS512",          // jwt algo
-    "tokenVersion": 1,           // token version, used to reject previously
-                                 // issued tokens if changed.
-    "saltRounds": 11,            // salt rounds for hashed password
-    "enableBugsnag": false,      // error logging, not implemented properly yet 
-    "bugsnagKey": "123",         // key
+    "enableBugsnag": false,
+    "bugsnagKey": "",
 
+    // credentials for interacting with licode
     "Nuve": {
-      "serviceName": "ss1",      // just a name for identifying nuve service
-      "serviceId": "1",          // service Id from licode_config.js
-      "serviceKey": "2",         // service key
-      "host": "https://10.20.23.14:3000/" // host address for nuve
+      "serviceName": "ss1",
+      "serviceId": "5a890e9e17e75122514b0a41",
+      "serviceKey": "25694",
+      "host": "http://localhost:3010/"
     },
 
-    // see: https://github.com/cult-of-coders/redis-oplog
-    "redisOplog": {
-      "redis": {
-        "port": 6379,
-        "host": "127.0.0.1"
-      },
-      "mutationDefaults": {
-        "optimistic": false,
-        "pushToRedis": true
-      },
-      "debug": true,
-      "overridePublishFunction": true
-    },
+    // used for authorizing internal backend calls. This value and the once in
+    // beam microservice must match.
+    "privateAPISecret": "abcd",
 
-    // below are appId and secret pairs for OAuth for various services
-    // you need to make you own appId from their interface and substitute
-    // them here. Not mandatory as you can simply join the room anonymously.
-    
     "github": {
-      "clientId": "id",
-      "secret": "secret"
+      "clientId": "",
+      "secret": ""
     },
 
     "google": {
-      "clientId": "id",
-      "secret": "secret"
+      "clientId": "",
+      "secret": ""
     },
 
     "facebook": {
-      "clientId": "id",
-      "secret": "secret"
+      "clientId": "",
+      "secret": ""
     },
 
     "twitter": {
-      "consumerKey": "id",
-      "secret": "secret"
+      "consumerKey": "",
+      "secret": ""
     },
     "linkedin": {
-      "clientId": "id",
-      "secret": "secret"
+      "clientId": "",
+      "secret": ""
     },
 
     "reddit": {
-      "clientId": "id",
-      "secret": "secret"
+      "clientId": "",
+      "secret": ""
     },
 
     "twitch": {
-      "clientId": "id",
-      "secret": "secret"
+      "clientId": "",
+      "secret": ""
     },
 
     "weibo": {

@@ -15,23 +15,23 @@ Lets have a look at the Room below, and narrow down to the tab components.
     <p align="center">
       <img src="http://imgur.com/wadJCIB.png" alt="" height="500px">
     </p>
-  Now open your editor and navigate to `app/imports/ui/components/Room/Spotlight`.
-In this directory you can see all the tabs and their code. Each of them exports react component. The spotlight component loads the desired tabs (dynamically if need be) and renders their content on top of each other in the red box area marked as `tab content`. Depending on which tab is in focus (or active as in code), the z-index property is changed to bring it `onTop`.
+  Now open your editor and navigate to `app/imports/ui/components/Room/Spotlight/`.
+Open `tabs` directory to view all the tabs and their code. Each of them exports react component. The spotlight component loads the desired tabs when needed.
 Writing only a tab component is not enough, it needs to be registered in the app. For this checkout `tabRegistry.js` which registers the tab and specifies its icon, description and other details described in that file.
 
 For boilerplate or quickly testing something, use the already made tab `BlankSlate` you can start off immediately by tinkering with this minimal registered tab.
 
 </p>
 
+##### Tab badge
+Each tab has a badge that can be used for some minimal content and added ux. This is not a part of the tab component just some content that can be changed by calling a prop function in your tab (in this case `updateBadge`). For example the following picture shows unread message count in chat tab  and new content in code-editor tab when they are not in focus.
+
+<img src="http://imgur.com/dZEEkGO.png" alt="badge example" height="160px">
+
 ### Props and RoomAPI
 
 Now that we know how tabs are rendered lets see what we can do with them.
 The idea is simple, using the provided props and event listeners to your tab component add a simple functionality to the room.
-
-##### Tab badge
-I should introduce the badge first. Each tab has a badge that can be used for some minimal content and added ux. This is not a part of the tab component just some content that can be changed by calling a prop function in your tab (in this case `updateBadge`). For example the following picture shows unread message count in chat tab  and new content in code-editor tab when they are not in focus.
-
-<img src="http://imgur.com/dZEEkGO.png" alt="badge example" height="160px">
 
 The props passed to your tab are in `tabPropTypes.js`. Below I will try to describe each props purpose. It may not be immediately clear how they are used so I will try and give an examples from where its been used and why. Though it would be best to read the code of existing tabs. 
 Use the React developer tools extension to browse these props in detail.
@@ -66,13 +66,12 @@ example of using uiSize and added css rules:
 <img src="http://imgur.com/8TyopNG.png" alt="" height="400px"> <img src="http://imgur.com/vejg67C.png" alt="" height="400px">
 </p>
 
-  - **setTabReady**: Tabs can be dynamically added to the room. before messaging can take place a tab must mark itself ready so that it can be discovered by others(tabs, local or remote) in the room. To be only called once. Used in collaborative tabs such as codepad, chat etc. Kind of wonky at the moment.
   - **switchToTab(tabId)**: switches to the tab with given id. eg. Video Chat tab uses a click handler for *inviting users to the room* and switches to Room Info tab where user can copy the room link. Also Discover tab also switches to newly loaded tab when its added.
   - **addTabToRoom(tabId)**: used to add a tab to the room. If the tab is not `local` then its loaded for all room participants. Used in Discover tab to dynamically add tabs to the room.
   - **tabStatusRegistry**: information of other tabs in the room and their state[initializing, loading, loaded ].
   - **roomAPI**: An object to interact with the room. properties are described below
     + getUserId(): gives own userId
-    + getSession(): gives own sessionId. **minor detour** - A user can have multiple sessions active thus sessionId identifies the unique user. This is purely for ux reasons and has some effects on activityListeners which will be described shortly.
+    + getSession(): gives own session. **minor detour** - A user can have multiple sessions active thus sessionId identifies the unique app session.
     + getUserInfo(userId): gives user information for the given userId 
     + shareScreen(): start screen sharing
     + stopScreenShare(): stop screen sharing
@@ -82,7 +81,7 @@ example of using uiSize and added css rules:
     + unmutePrimaryMediaStreamAudio()
     + togglePrimaryMediaStreamAudio()
     + togglePrimaryMediaStreamVideo()
-    + **sendMessage(message)**: each tab can send and receive json serializable messages. To see the message format see `Messenger.js`. With this you can send messages to any tabs local or remote(loaded by another room participant). In the message you need to specify the recipient users, and the recipient tabs. When a message is received the handler registered by the recipient tab will be called with the message contents.
+    + **sendMessage(message)**: each tab can send and receive json serializable messages. To see the message format see `Messenger.js`. With this you can send messages to any tabs local or remote(loaded by another room participant). In the message you need to specify the recipient session or users, and the recipient tabs. When a message is received the handler registered by the recipient tab will be called with the message contents.
     + **addMessageHandler(tabId, handler)**: The tab must register a message handler to process messages. Use the message handler to change state, trigger actions in your tab etc. just search the project for `roomAPI.addMessageHandler` for use cases. 
     + removeMessageHandler(tabId, handler): removes previously registered handler.
     + **addActivityListener(activityName, listener)**: add listeners for various events happening in the room. check out `roomActivities.js` for list of roomActivities. eg. `roomAPI.addActivityListener(roomActivities.TAB_SWITCH, myfunction);` List of room activities is given below. Their payload can be found in `roomActivities.js` (the payload is the data passed to your handler and contains details of the activity)
@@ -94,7 +93,7 @@ example of using uiSize and added css rules:
         * USER_SESSION_ADDED: another session of the user has become active. different device or maybe a new browser tab.
         * USER_SESSION_REMOVED
         * REMOTE_TAB_READY: a remote tab is now ready for receiving messages.
-        * STREAM_SPEAKING_START: indicates start of speech in media stream. eg. used in videoChat tab to focus the current speaker.
+        * STREAM_SPEAKING_START: indicates start of speech in media stream. eg. used in streamContainer to show a colored border around the speakers video.
         * STREAM_SPEAKING_END
         * STREAM_CLICKED: a click registered on the stream in the top stream container. eg. used by videoChat tab to temporarily pin the clicked stream into focus.
         * USER_CLICKED: user avatar clicked in streams container. not used anywhere as of yet. There for added interactivity in future work. eg. consider a step which involves selecting a user in your tab, clicking on his avatar in the above stream container would be quite easy.
@@ -127,9 +126,7 @@ Since no data stored on the server for tabs (such as chat, or codePad etc.) you 
 
 
 #### Regarding messaging
-For properly receiving/sending messages you need to take care that the recipient remote tab is ready. When initializing your tab iterate through `connectedUsers` and their `sessions`, get the list of their active tabs through `getActiveRemoteTabs(sessionId)` then *connect* them in your logic if they are ready. For tabs that get loaded later, listen for `roomActivities.REMOTE_TAB_READY` and *connect* accordingly. Also do not forget to call `tabReady` after the setup to indicate that your tab is now ready.
-
-For sending messages a licode data stream is used by each participant. However I found out later that it is not p2p and uses erizoController(a socket.io server) instead for delivering messages. So it is advisable to use it judiciously, in future an RTCDataChannel will be established between peers for streaming data transfer.
+The messaging api is not rigid at the moment. Your suggestions are most welcome.
 
 
 #### Some additional props
@@ -165,6 +162,6 @@ I'd recommend reading the code of existing tabs to have better understanding. Al
 Well remember the tab component is just a blank slate you can make anything possible in the web browser to render in it (you may use canvas, http calls to external api's etc.) The room api and props are just there for the tab to interact with the room if need be.
 If you wish to make external api calls use [the http module](https://docs.meteor.com/api/http.html). 
 A tab may be local as well as specified in `tabRegistry.js`, when local it is only loaded locally for the user that adds it to the room. eg. Reacteroids game tab must be added individually by users choice. It doesn't use messaging at all and is just a simple game.
-Design the tab well and keep it minimal. Personally I've got 2 tabs on my mind right now. one is a settings tab for configuring webcam, room etc. the other is a helpcenter which will keep help articles for reference(each tab will be able to register its own articles and switch to them with a function call).
+Design the tab well and keep it minimal. Personally I've got 2 tabs on my mind right now. one is a settings tab for configuring webcam, room etc.
 
 That's it for now. Go give it a spin.

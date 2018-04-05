@@ -1,9 +1,15 @@
 {
   "public": {
-    "screenShareExtensionId": "kobkjhijljmjkobadoknmhakgfpkhiff",
+    "screenShareExtensionId": "cbihbpgofmdfhnjbkkhbmmnpmofggacd",
     "defaultMaxVideoBW": 300,
     "defaultMaxAudioBW": 300,
-    "refreshOnWake": false
+    "refreshOnWake": false,
+    "cdnURL": "https://d21e9wyielwbyq.cloudfront.net",
+    "beamConfig": {
+      "socketProtocolPrefix": "ws://",
+      "httpProtocolPrefix": "http://",
+      "host": "127.0.0.1:5000"
+    }
   },
   "private": {
 
@@ -13,30 +19,19 @@
 
     "JWTsecret": "super-secret",
     "JWTalgo": "HS512",
-    "tokenVersion": 1,
+
     "saltRounds": 11,
     "enableBugsnag": false,
-    "bugsnagKey": "123",
+    "bugsnagKey": "test",
 
     "Nuve": {
       "serviceName": "ss1",
-      "serviceId": "1",
-      "serviceKey": "2",
-      "host": "https://10.20.23.14:3000/"
+      "serviceId": "service id from docker",
+      "serviceKey": "service key from docker",
+      "host": "http://localhost:3010/"
     },
 
-    "redisOplog": {
-      "redis": {
-        "port": 6379,
-        "host": "127.0.0.1"
-      },
-      "mutationDefaults": {
-        "optimistic": false,
-        "pushToRedis": true
-      },
-      "debug": true,
-      "overridePublishFunction": true
-    },
+    "privateAPISecret": "abcd",
 
     "github": {
       "clientId": "id",
@@ -48,13 +43,8 @@
       "secret": "secret"
     },
 
-    "facebook": {
-      "clientId": "id",
-      "secret": "secret"
-    },
-
     "twitter": {
-      "consumerKey": "id",
+      "consumerKey": "key",
       "secret": "secret"
     },
     "linkedin": {
@@ -62,14 +52,9 @@
       "secret": "secret"
     },
 
-    "reddit": {
-      "clientId": "id",
-      "secret": "secret"
-    },
-
     "twitch": {
-      "clientId": "id",
-      "secret": "secret"
+      "clientId": "g0w0x392m38vdchqre3edm88dcrutx",
+      "secret": "r0rya7zcaufptmwe4rq51c5tp0mdv9"
     },
 
     "weibo": {

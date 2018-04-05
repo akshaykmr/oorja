@@ -169,7 +169,7 @@ const Landing = props =>
             </div>
             <div className="content">
               {`Hi, My name is Akshay Kumar and I am a product engineer. oorja is
-              a personal project of mine that I started in my final year in college.`}
+              a personal project of mine that I started during my final year in college.`}
               <br/> <br/>
               <div className="iconAnchor">
                 <Globe/><a href="https://akshay.oorja.io" target="_blank" rel="noopener noreferrer"> Visit my website: akshay.oorja.io </a>
