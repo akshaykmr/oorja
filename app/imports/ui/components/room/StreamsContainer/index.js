@@ -132,7 +132,7 @@ class StreamsContainer extends Component {
   }
 
   render() {
-    const { streamContainerSize } = this.props;
+    const { streamContainerSize, roomConnectionStatus } = this.props;
     const { COMPACT, MEDIUM, LARGE } = uiConfig;
     const streamContainerClassNames = {
       streamContainer: true,
@@ -143,7 +143,9 @@ class StreamsContainer extends Component {
     };
 
     const streamContainerStyle = this.streamContainerStyle[streamContainerSize];
-    const tryingToConnect = this.props.roomConnectionStatus === status.TRYING_TO_CONNECT;
+    /* eslint-disable max-len */
+    const tryingToConnect = roomConnectionStatus === status.TRYING_TO_CONNECT || roomConnectionStatus === status.INITIALIZING;
+    /* eslint-enable max-len */
     return (
       <div
         className={classNames(streamContainerClassNames)}
