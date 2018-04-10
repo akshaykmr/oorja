@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import React from 'react';
 import { Menu, Close, EyeOff, Github, LifeBuoy, MessageCircle } from 'imports/ui/components/icons';
 
@@ -5,6 +6,7 @@ class Navigation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isServer: Meteor.isServer,
       navOpen: false,
     };
 
@@ -46,9 +48,10 @@ class Navigation extends React.Component {
   }
 
   render() {
-    const { navOpen } = this.state;
+    const { navOpen, isServer } = this.state;
+    if (isServer) return null;
     return (
-      <nav className={`stretchyNav ${navOpen ? 'visible' : ''}`}>
+      <nav className={`animate fade-in stretchyNav ${navOpen ? 'visible' : ''}`}>
         <ul>
           <li className="trigger" onClick={this.toggleNav}>
             <a> { navOpen ? <Close /> : <Menu/>} </a>

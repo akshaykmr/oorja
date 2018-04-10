@@ -112,7 +112,7 @@ const Landing = props =>
               server and development costs.
               <br/>
               <div className="iconAnchor">
-                <a href="https://github.com/akshayKMR/oorja" target="_blank" rel="noopener noreferrer"> <Paypal/> </a>
+                <a href="https://www.paypal.me/akshaykmr/" target="_blank" rel="noopener noreferrer"> <Paypal/> </a>
               </div>
             </div>
           </div>
