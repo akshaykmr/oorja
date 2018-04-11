@@ -160,11 +160,10 @@ export default class GettingReady extends Component {
 
   socialLogin() {
     const {
-      name, loggedIn, loginService, goAnon,
+      loggedIn, loginService, goAnon,
     } = this.state;
     if (goAnon) return null;
     const loginContainerClasses = classNames({
-      blur: !loggedIn && name,
       hidden: this.existingUser,
     });
     return <LoginWithService

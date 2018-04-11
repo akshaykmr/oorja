@@ -40,7 +40,7 @@ class VideoChat extends Component {
     window.addEventListener('keypress', this.resetTimer);
 
     const checkIdleTime = () => {
-      if (this.state.idle) return;
+      if (this.state.idle || this.unmountInProgress) return;
       this.idleSecondsCounter += 1;
       if (this.idleSecondsCounter > this.idleTimeout) {
         this.setState({
@@ -81,6 +81,7 @@ class VideoChat extends Component {
 
     this.pinTimeoutId = null;
     this.props.roomAPI.addActivityListener(roomActivities.STREAM_CLICKED, (streamId) => {
+      if (this.unmountInProgress) return;
       if (this.pinTimeoutId) clearTimeout(this.pinTimeoutId);
       this.setState({
         ...this.state,
@@ -98,6 +99,7 @@ class VideoChat extends Component {
   }
 
   updateFocussedMediaStream(streamId) {
+    if (this.unmountInProgress) return;
     this.setState({
       ...this.state,
       focussedStreamId: streamId,
@@ -105,7 +107,7 @@ class VideoChat extends Component {
   }
 
   resetTimer() {
-    if (!this.props.onTop) return;
+    if (!this.props.onTop || this.unmountInProgress) return;
     if (this.state.idle) {
       this.setState({
         ...this.state,
@@ -116,6 +118,7 @@ class VideoChat extends Component {
   }
 
   componentWillUnmount() {
+    this.unmountInProgress = true;
     clearInterval(this.idleIntervalId);
     clearTimeout(this.pinTimeoutId);
     window.removeEventListener('onclick', this.resetTimer);

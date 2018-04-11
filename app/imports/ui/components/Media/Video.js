@@ -1,32 +1,10 @@
-/* global window */
-
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 class VideoStream extends Component {
-  constructor(props) {
-    super(props);
-    this.usingSrcObject = false;
-  }
+
   componentDidMount() {
-    try {
-      this.videoElement.src = window.URL.createObjectURL(this.props.streamSource);
-    } catch (e) {
-      this.usingSrcObject = true;
-      this.videoElement.srcObject = this.props.streamSource;
-    }
-  }
-
-  componentDidUpdate() {
-    if (this.usingSrcObject) {
-      this.videoElement.srcObject = this.props.streamSource;
-    }
-  }
-
-  componentWillUnmount() {
-    if (!this.usingSrcObject) {
-      URL.revokeObjectURL(this.videoElement.src);
-    }
+    this.videoElement.srcObject = this.props.streamSource;
   }
 
   render() {

@@ -22,6 +22,8 @@ class WebcamPreview extends Component {
     this.speechTracker = null;
 
     this.state = {
+      audio: false,
+      video: false,
       videoResolution: savedVideoResolution || this.defaultVideoResolution,
       initialized: false,
       audioInputDevices: [],
@@ -200,30 +202,33 @@ class WebcamPreview extends Component {
   }
 
   renderMicrophoneTest() {
-    // return (
-    //   <div className={`pt-callout pt-intent-${this.state.spokenOnce ? 'success' : 'primary'}`}>
-    //     <h5>
-    //       <span className="status">Test your microphone</span>
-    //       <i className="icon ion-ios-mic"></i>
-    //     </h5>
-    //     <span className={`status ${!this.state.speaking ? 'animate blink' : ''}`}>
-    //       {
-    //         this.state.speaking ? 'All good. You are audible 👍' : 'Say something...'
-    //       }
-    //     </span>
-    //   </div>
-    // );
+    return (
+      <div className={`audioPreview pt-callout pt-intent-${this.state.spokenOnce ? 'success' : 'primary'}`}>
+        <div>
+          { this.state.videoInputDevices.length > 0 ? 'Hmm.. we could only detect your microphone.' : '' }
+        </div>
+        <h5>
+          <span className="status">Test your microphone</span>
+          <i className="icon ion-ios-mic"></i>
+        </h5>
+        <span className={`status ${!this.state.speaking ? 'animate blink' : ''}`}>
+          {
+            this.state.speaking ? 'All good. You are audible 👍' : 'Say something...'
+          }
+        </span>
+      </div>
+    );
   }
 
   renderMediaPreview() {
     if (this.state.video) {
       return (
-        <div className="videoStream">
+        <div className={`videoStream ${this.state.speaking ? 'speaking' : ''}`}>
           <VideoStream streamSource={this.stream} muted='muted' autoPlay />
         </div>
       );
     } else if (this.state.audio) {
-      return null; // TODO: UX
+      return this.renderMicrophoneTest();
     }
     // access accepted but no video or audio
     return this.renderRetryCallout();
