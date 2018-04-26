@@ -69,7 +69,7 @@ class SettingsTab extends Component {
       <label className="pt-label pt-dark">
         Language
         <div className="pt-select">
-          <select className=".pt-minimal"
+          <select className="pt-minimal"
             value={this.state.activeSyntax.mode}
             onChange={this.handleSyntaxChange}>
             {syntaxList.map(this.renderLanguageOptions)}
@@ -80,7 +80,7 @@ class SettingsTab extends Component {
       <label className="pt-label pt-dark">
         Theme
         <div className="pt-select">
-          <select className=".pt-minimal"
+          <select className="pt-minimal"
             value={this.state.activeColorScheme.theme}
             onChange={this.handleColorSchemeChange}>
             {colorSchemes.map(this.renderColorSchemeOptions)}

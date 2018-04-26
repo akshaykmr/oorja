@@ -626,7 +626,7 @@ class Room extends Component {
         break;
       case 'mozilla':
         navigator.mediaDevices.getUserMedia({
-          video: { mediaSource: 'window' || 'screen' },
+          video: { mediaSource: 'window' },
         }).then(onSuccess, onFailure);
         break;
       default: toastFeatureNotAvailable();

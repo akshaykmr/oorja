@@ -1,0 +1,33 @@
+
+.content.Draw {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+
+  #drawingCanvas {
+    cursor: crosshair;
+    flex-shrink: 0;
+    height: 500px;
+    width: 500px;
+    border: 2px solid gray;
+    border-style: dashed;
+  }
+
+  #drawingCanvas path {
+    fill: none;
+    stroke: #1690cd;
+    stroke-width: 3px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .clearButtonContainer {
+    position: absolute;
+    z-index: 2;
+    bottom: 20px;
+    .clearButtonContent {
+      vertical-align: super;
+    }
+  }
+}

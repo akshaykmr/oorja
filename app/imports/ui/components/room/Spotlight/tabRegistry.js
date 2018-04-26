@@ -1,5 +1,6 @@
 // need to fix linting in this file. (support dynamic import)
 import React from 'react';
+import { Edit } from 'imports/ui/components/icons/';
 
 export default {
   1: {
@@ -70,6 +71,16 @@ export default {
     description: 'Shared Code editor',
     streamContainerSize: '',
     load: () => import('./tabs/CodePad')
+  },
+  42: {
+    tabId: 42,
+    name: 'Draw',
+    displayName: 'Draw',
+    bgColor: 'white',
+    icon: Edit,
+    description: 'Simple board for drawing and visualizing ideas.',
+    streamContainerSize: '',
+    load: () => import('./tabs/Draw')
   },
   31: {
     tabId: 31,
