@@ -81,7 +81,7 @@ class Sidebar extends Component {
           className={classNames(switchClassNames)}
           style={switchStyle}
           id={tab.name}>
-          <i className={`icon ${tab.icon}`}></i>
+          <tab.icon />
         </div>
       );
     };

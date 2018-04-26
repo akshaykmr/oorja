@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import update from 'immutability-helper';
+import { Menu } from 'imports/ui/components/icons';
 // man monaco editor is awesome imo
 // I should replace ace with it. https://microsoft.github.io/monaco-editor/
 
@@ -66,7 +67,7 @@ class CodePad extends Component {
           },
           bgColor: '#2e3136',
           iconColor: '#45b29d',
-          icon: 'ion-ios-toggle-outline',
+          icon: Menu,
         },
       ],
     };
