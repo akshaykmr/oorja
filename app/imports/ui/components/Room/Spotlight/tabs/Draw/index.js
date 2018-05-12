@@ -142,6 +142,10 @@ class Draw extends Component {
     });
   }
 
+  componentWillUnmount() {
+    this.y.close();
+  }
+
   clearBoard() {
     if (!this.y) return;
     const { drawing } = this.y.share;
