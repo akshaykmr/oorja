@@ -11,6 +11,7 @@ class VideoStream extends Component {
       <div className={this.props.videoClassNames} style={this.state} onClick={this.props.onClick}>
         <video
           autoPlay
+          playsInline
           muted={this.props.muted}
           ref={(videoElement) => {
             this.videoElement = videoElement;

@@ -125,7 +125,7 @@ const Landing = props =>
               <div className="label"> Contribute with code </div>
             </div>
             <div className="content">
-              oorja is open source and free for personal use. It is built with React, WebRTC,
+              oorja source code is public and free for personal use. It is built with React, WebRTC,
               Meteor and Elixir. <br/>
               It is extensible by design. The tabs are react components which utilize a simple but
               powerful mini-api (using props and some event listeners) to add more capabilities

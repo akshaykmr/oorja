@@ -75,10 +75,10 @@ export default {
   42: {
     tabId: 42,
     name: 'Draw',
-    displayName: 'Draw',
+    displayName: 'Whiteboard',
     bgColor: 'white',
     icon: Edit,
-    description: 'Simple board for drawing and visualizing ideas.',
+    description: '[Experimental] Whiteboard for drawing and visualizing ideas.',
     streamContainerSize: '',
     load: () => import('./tabs/Draw')
   },

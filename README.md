@@ -36,10 +36,10 @@
  -  If you are using chrome you will need to install the [screensharing extension](https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff?hl=en-US) to be able to share your screen.
 
 ### Donate
-oorja is a personal project. It would be splendid if you could contribute towards financing its server and development costs. **[Donate with paypal](https://github.com/akshayKMR/oorja)**
+oorja is a personal project. It would be splendid if you could contribute towards financing its server and development costs.
 
 ### License
-oorja is open source and free for personal use.
+oorja source code is public and free for personal use.
 Copyright © 2018 Akshay Kumar akshay.kmr4321@gmail.com
 
 
@@ -54,6 +54,7 @@ Also, It's quite easy to make tabs (you only need to know some react, which can 
 [![Join the chat at https://gitter.im/oorja-io/Lobby](https://badges.gitter.im/oorja-io/Lobby.svg)](https://gitter.im/oorja-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 You can reach me at akshay.kmr4321@gmail.com or <a href="https://twitter.com/uberakshay/">Twitter</a> 
+
 ### About me
-Hi, My name is Akshay Kumar and I am a product engineer. oorja is a personal project of mine that I started during my final year in college. [Visit my website to know more](http://akshay.oorja.io/)
+Hi, My name is Akshay Kumar and I am a product engineer. [Visit my website to know more](http://akshay.oorja.io/)
 
