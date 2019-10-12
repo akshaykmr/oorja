@@ -1,7 +1,12 @@
-# <span><img src="http://svgshare.com/i/1pX.svg" alt="" height="40px" width="40px"/> oorja </span> 
-<span>Alpha version</span>
+### <span><img src="http://svgshare.com/i/1pX.svg" alt="" height="20px" width="20px"/> oorja (alpha version) </span> 
 
-[![CircleCI](https://circleci.com/gh/akshayKMR/oorja/tree/master.svg?style=svg&circle-token=4a0bb88da10bed1c0242fbd0a050f1dab2986e2b)](https://circleci.com/gh/akshayKMR/oorja/tree/master) [![Join the chat at https://gitter.im/oorja-io/Lobby](https://badges.gitter.im/oorja-io/Lobby.svg)](https://gitter.im/oorja-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+##### Project status
+This repository contains an alpha version, with minimal components to make things work.
+It was made while I was in college(2017), I'd do a lot of things differently now, particularly in terms of code organization and overall architecture. Never the less, it was super fun to make back then. I'm still keeping this repo up, up because it feels good to look back at how far you've come.
+
+With the next iteration I plan to develop a more fine tuned and robust experience, with some new tools - Elixir ❤️ and Typescript. Cheers!
+
+----
 
 > oorja is a quick to use video/voice chat application with realtime collaborative features. [Visit oorja.io](https://oorja.io) to see it in action.
 
@@ -35,11 +40,6 @@
  -  This project uses some of the latest technologies in modern web browsers namely WebRTC that enables p2p communication (It may not be supported in your browser eg. safari). Use Chrome or Firefox
  -  If you are using chrome you will need to install the [screensharing extension](https://chrome.google.com/webstore/detail/oorja-screensharing/kobkjhijljmjkobadoknmhakgfpkhiff?hl=en-US) to be able to share your screen.
 
-
-##### Project status
-This is repository contains an alpha version, with minimal components to make things work. So far it has served its purpose for providing the essential feedback loop from the initial users. With the next iteration I plan to develop a more fine tuned and robust experience, with some new tools - Elixir and Typescript.
-However, it is unlikely it will be open source as there isn't much benefit in doing so.
-
 ### License
 oorja (alpha version) is free for personal non commercial use.
 Copyright © 2019 Akshay Kumar akshay.kmr4321@gmail.com
@@ -53,7 +53,6 @@ Also, It's quite easy to make tabs (you only need to know some react, which can 
  3. [Making a Tab](docs/make-a-tab.md)
 
 ### Contact
-[![Join the chat at https://gitter.im/oorja-io/Lobby](https://badges.gitter.im/oorja-io/Lobby.svg)](https://gitter.im/oorja-io/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 You can reach me at akshay.kmr4321@gmail.com or <a href="https://twitter.com/uberakshay/">Twitter</a> 
 
