@@ -1,10 +1,14 @@
 ### <span><img src="http://svgshare.com/i/1pX.svg" alt="" height="20px" width="20px"/> oorja (alpha version) </span> 
 
+
+
 ##### Project status
 This repository contains an alpha version, with minimal components to make things work.
-It was made while I was in college(2017), I'd do a lot of things differently now, particularly in terms of code organization and overall architecture. Never the less, it was super fun to make back then. I'm still keeping this repo up, up because it feels good to look back at how far you've come.
+It was made while I was in university(2017), I'd do a lot of things differently now, particularly in terms of code organization and overall architecture. Never the less, it was super fun to make back then. I'm still keeping this repo up, up because it feels good to look back at how far you've come.
 
-With the next iteration I plan to develop a more fine tuned and robust experience, with some new tools - Elixir ❤️ and Typescript. Cheers!
+With the next iteration I'm building a more fine tuned and robust experience, with some new tools - Elixir ❤️ and Typescript. Cheers!
+
+**UPDATE 24 Aug 2020**: check out [the new version! (incremental updates)](https://teletype.oorja.io) 🚀
 
 ----
 
