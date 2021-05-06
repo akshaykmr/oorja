@@ -100,7 +100,7 @@
     "http-status-codes": "^1.3.0",
     "immutability-helper": "^2.7.1",
     "jwt-simple": "^0.5.1",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.21",
     "meteor-node-stubs": "^0.3.3",
     "moment": "^2.22.2",
     "phoenix": "^1.3.4",
