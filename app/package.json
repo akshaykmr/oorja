@@ -121,7 +121,7 @@
     "remarkable": "^1.7.1",
     "sentencer": "^0.1.5",
     "simple-peer": "^9.1.2",
-    "socket.io-client": "^2.1.1",
+    "socket.io-client": "^2.5.0",
     "utf-8-validate": "^4.0.2",
     "y-array": "^10.1.4",
     "y-indexeddb": "^8.1.9",
